@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+</head>
+<body>
+  <p>Hi <?= opponentClubName ?> Match Secretary,</p>
+  <p>Due to an unforeseen issue on our end, we must unfortunately <b>cancel our attendance</b> at the following confirmed home match for you.</p>
+  <p><b>Cancelled Match Details:</b></p>
+  <table border="0" cellpadding="0" cellspacing="0" style="font-family: monospace; line-height: 1.6;">
+    <tbody>
+      <tr>
+        <td style="padding-right: 10px; vertical-align: top;">- <b>Your Team (Home):</b></td>
+        <td style="vertical-align: top;"><?= opponentClubName ?> <?= opponentTeamName ?></td>
+      </tr>
+      <tr>
+        <td style="padding-right: 10px; vertical-align: top;">- <b>Opponent (Away):</b></td>
+        <td style="vertical-align: top;"><?= ourClubName ?> <?= ourTeamNumber ?></td>
+      </tr>
+      <tr>
+        <td style="padding-right: 10px; vertical-align: top;">- <b>Original Date:</b></td>
+        <td style="vertical-align: top;"><?= formattedDate ?></td>
+      </tr>
+      <tr>
+        <td style="padding-right: 10px; vertical-align: top;">- <b>Original Time:</b></td>
+        <td style="vertical-align: top;"><?= formattedTime ?></td>
+      </tr>
+      <tr>
+        <td style="padding-right: 10px; vertical-align: top;">- <b>Your Venue:</b></td>
+        <td style="vertical-align: top;"><?= venueName ?></td>
+      </tr>
+    </tbody>
+  </table>
+  <p>This match has been reset to "Not confirmed" in our system. We would be grateful if you would use our booking portal again to find a new date we are available and submit a new proposal:</p>
+  <p style="text-align: center; margin: 20px 0;">
+    <a href="<?= webAppUrl ?>" style="background-color: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">Find a New Date</a>
+  </p>
+  <p>We sincerely apologize for this cancellation.</p>
+  <p>Best regards,<br><?= ourClubName ?> Match Secretary</p>
+</body>
+</html>
