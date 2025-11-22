@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 10px; }
+        select, button { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        div { margin-bottom: 15px; }
+        label { font-weight: bold; }
+        #results { margin-top: 15px; }
+        .date-item { padding: 5px; background-color: #f4f4f4; border-radius: 3px; margin-bottom: 3px; font-family: monospace; }
+        .loading { color: #888; }
+    </style>
+</head>
+<body>
+    <h3>Away Match Date Finder</h3>
+    
+    <div>
+        <label for="your-team">Select Your Team</label>
+        <select id="your-team" disabled>
+            <option value="">Loading teams...</option>
+        </select>
+    </div>
+    
+    <div>
+        <label for="month-select">Select Month</label>
+        <select id="month-select" disabled>
+            <option value="">Loading months...</option>
+        </select>
+    </div>
+    
+    <button type="button" onclick="findDates()" id="find-btn">Find Dates</button>
+    
+    <div id="results"></div>
+
+    <script>
+        // Load initial data
+        window.addEventListener('load', function() {
+            google.script.run
+                .withSuccessHandler(onTeamLoad)
+                .getOurTeams(); // Reuse existing function
+                
+            google.script.run
+                .withSuccessHandler(onMonthLoad)
+                .getValidSeasonMonths(); // Reuse existing function
+        });
+
+        function onTeamLoad(teams) {
+            var teamSelect = document.getElementById('your-team');
+            teamSelect.innerHTML = "<option value=''>-- Select a team --</option>";
+            teams.forEach(function(team) {
+                teamSelect.innerHTML += `<option value="${team.name}">${team.name} (${team.division})</option>`;
+            });
+            teamSelect.disabled = false;
+        }
+
+        function onMonthLoad(months) {
+            var monthSelect = document.getElementById('month-select');
+            monthSelect.innerHTML = "<option value=''>-- Select a Month --</option>";
+            months.forEach(function(month) {
+                monthSelect.innerHTML += `<option value="${month.value}">${month.name}</option>`;
+            });
+            monthSelect.disabled = false;
+        }
+
+        function findDates() {
+            var team = document.getElementById('your-team').value;
+            var monthYear = document.getElementById('month-select').value;
+            var resultsDiv = document.getElementById('results');
+            
+            if (!team || !monthYear) {
+                resultsDiv.innerHTML = "Please select a team and a month.";
+                return;
+            }
+
+            resultsDiv.innerHTML = "<div class='loading'>Checking...</div>";
+            document.getElementById('find-btn').disabled = true;
+
+            var parts = monthYear.split('-');
+            var year = parseInt(parts[0]);
+            var month = parseInt(parts[1]);
+
+            google.script.run
+                .withSuccessHandler(onFindSuccess)
+                .withFailureHandler(onFindFailure)
+                .findAvailableDatesForAwayMatch(team, month, year); // <-- CALL YOUR NEW FUNCTION
+        }
+
+        function onFindSuccess(dates) {
+            document.getElementById('find-btn').disabled = false;
+            var resultsDiv = document.getElementById('results');
+
+            if (dates.length === 0) {
+                resultsDiv.innerHTML = "<p>No 100% available dates found for this team in this month.</p>";
+                return;
+            }
+
+            let html = "<p>Found " + dates.length + " available dates:</p>";
+            dates.forEach(function(date) {
+                var displayDate = new Date(date + 'T00:00:00');
+                var options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' };
+                var displayString = displayDate.toLocaleDateString('en-IE', options);
+                html += `<div class="date-item">${displayString}</div>`;
+            });
+            resultsDiv.innerHTML = html;
+        }
+
+        function onFindFailure(error) {
+            document.getElementById('find-btn').disabled = false;
+            document.getElementById('results').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+        }
+    </script>
+</body>
+</html>
