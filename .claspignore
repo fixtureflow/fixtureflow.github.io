@@ -1,0 +1,18 @@
+# Ignore Git files
+.git/
+.gitignore
+
+# Ignore CLASP settings
+.clasp.json
+.claspignore
+
+# Ignore Editor/AI settings
+.vscode/
+.jetskirules
+*.md
+package.json
+package-lock.json
+node_modules/
+
+# Ignore Type Definitions
+*.d.ts

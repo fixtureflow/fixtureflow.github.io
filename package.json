@@ -1,0 +1,24 @@
+{
+  "name": "ddlc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "0_Config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fixtureflow/ddlc.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/fixtureflow/ddlc/issues"
+  },
+  "homepage": "https://github.com/fixtureflow/ddlc#readme",
+  "devDependencies": {
+    "@types/google-apps-script": "^2.0.7"
+  }
+}
