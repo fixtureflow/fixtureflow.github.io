@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Local Config
+.vscode/
+*.log
+
+# CLASP - It is generally safe to commit .clasp.json if the repo is private,
+# but if you want to be extra safe or open source it, uncomment the line below.
+# .clasp.json

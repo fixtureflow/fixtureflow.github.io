@@ -182,7 +182,6 @@ function processConfirmedBooking(e, ui) {
 
     // --- Use the Centralized Test Mode Helper ---
     const originalSubject = `Match Confirmed: ${opponentClubName} ${opponentTeamName} (Your AWAY Match) vs ${ourClubName} on ${dateStr}`;
-    const emailInfo = _getRecipientAndSubject(opponentEmail, originalSubject, settings);
     
     const emailTemplate = HtmlService.createTemplateFromFile('ConfirmationEmail.html');
     emailTemplate.opponentClubName = opponentClubName;
@@ -201,13 +200,8 @@ function processConfirmedBooking(e, ui) {
     const htmlBody = emailTemplate.evaluate().getContent();
     const plainBody = htmlBody.replace(/<[^>]+>/g, '');
     
-    MailApp.sendEmail({
-      to: emailInfo.recipient,
-      subject: emailInfo.subject,
-      body: plainBody,
-      htmlBody: htmlBody,
-      replyTo: settings['Match Secretary Email']
-    });
+    // Use centralized helper
+    const emailInfo = _sendClubEmail(opponentEmail, originalSubject, htmlBody, settings, plainBody);
 
     // --- 5. SYNC AVAILABILITY ---
     const fillResult = fillAvailabilityX();
@@ -315,8 +309,7 @@ function processCancelledBooking(e, ui) {
       
     // --- 3. SEND CANCELLATION EMAIL ---
       // --- Use the Centralized Test Mode Helper ---
-      const originalSubject = `Match CANCELLED: ${opponentClubName} ${opponentTeamName} (Your AWAY Match) vs ${ourClubName} on ${formatDateForSheet(matchDate)}`;
-      const emailInfo = _getRecipientAndSubject(opponentEmail, originalSubject, settings);
+    const originalSubject = `Match CANCELLED: ${opponentClubName} ${opponentTeamName} (Your AWAY Match) vs ${ourClubName} on ${formatDateForSheet(matchDate)}`;
       
       const webAppUrl = settings['Web App URL'];
       const formattedTime = formatTimeFromSheet(proposedTime);
@@ -332,13 +325,9 @@ function processCancelledBooking(e, ui) {
       emailTemplate.formattedTime = formattedTime;
       const htmlBody = emailTemplate.evaluate().getContent();
       const plainBody = htmlBody.replace(/<[^>]+>/g, '');
-      MailApp.sendEmail({
-        to: emailInfo.recipient,
-        subject: emailInfo.subject,
-        body: plainBody,
-        htmlBody: htmlBody,
-        replyTo: settings['Match Secretary Email']
-      });
+
+    // Use centralized helper
+    const emailInfo = _sendClubEmail(opponentEmail, originalSubject, htmlBody, settings, plainBody);
   
     // --- 4. SYNC AVAILABILITY ---
     const fillResult = fillAvailabilityX();
@@ -527,15 +516,9 @@ function processConfirmedAwayBooking(e, ui) {
     
     // --- Use the Centralized Test Mode Helper ---
     const originalSubject = `Match Confirmed: ${opponentClubName} ${opponentTeamName} (Your HOME Match) vs ${ourClubName} ${ourTeamNumber} on ${formatDateForSheet(matchDate)}`;
-    const emailInfo = _getRecipientAndSubject(opponentEmail, originalSubject, settings);
     
-    MailApp.sendEmail({
-      to: emailInfo.recipient,
-      subject: emailInfo.subject,
-      body: plainBody,
-      htmlBody: htmlBody,
-      replyTo: settings['Match Secretary Email']
-    });
+    // Use centralized helper
+    const emailInfo = _sendClubEmail(opponentEmail, originalSubject, htmlBody, settings, plainBody);
 
     // --- 4. SYNC AVAILABILITY ---
     const fillResult = fillAvailabilityX();
@@ -650,15 +633,9 @@ function processCancelledAwayBooking(e, ui) {
 
       // --- Use the Centralized Test Mode Helper ---
       const originalSubject = `Match CANCELLED: ${opponentClubName} ${opponentTeamName} (Your HOME Match) vs ${ourClubName} ${ourTeamNumber} on ${formatDateForSheet(matchDate)}`;
-      emailInfo = _getRecipientAndSubject(opponentEmail, originalSubject, settings);
       
-      MailApp.sendEmail({
-        to: emailInfo.recipient,
-        subject: emailInfo.subject,
-        body: plainBody,
-        htmlBody: htmlBody,
-        replyTo: settings['Match Secretary Email']
-      });
+      // Use centralized helper
+      emailInfo = _sendClubEmail(opponentEmail, originalSubject, htmlBody, settings, plainBody);
       Logger.log(`Away cancellation email sent to ${emailInfo.recipient}.`);
 
     } catch (emailError) {
