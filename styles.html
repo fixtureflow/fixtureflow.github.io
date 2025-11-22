@@ -1,0 +1,138 @@
+<style>
+  html {
+    font-size: 16px;
+  }
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0 auto;
+    padding: 10px;
+    max-width: 600px;
+    background-color: #f4f4f4;
+  }
+  input,
+  select,
+  button {
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+    font-size: 1rem;
+  }
+  fieldset {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    background-color: #ffffff;
+    margin-top: 20px;
+  }
+  legend {
+    font-weight: bold;
+    padding: 0 5px;
+    margin-left: 10px;
+    font-size: 1.1rem;
+  }
+  .step-subtitle {
+    font-size: 0.9rem;
+    color: #555;
+    font-weight: normal;
+    margin-top: -10px;
+    margin-bottom: 20px;
+  }
+  div {
+    margin-bottom: 15px;
+  }
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  button {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    margin-top: 10px;
+  }
+  #home-submit-btn,
+  #away-submit-btn {
+    background-color: #28a745;
+  }
+  button:disabled {
+    background-color: #888888;  /* A darker, more obvious gray */
+    color: #cccccc;            /* Lighter text to look inactive */
+    cursor: not-allowed;       /* The "no entry" cursor */
+    border-color: #888888;      /* Match the border to the background */
+  }
+  input[type="radio"] {
+    width: auto;
+    margin-right: 10px;
+  }
+  label[for^="booking-type-"] {
+    display: inline-block;
+    font-weight: normal;
+  }
+  #home-results-list div,
+  #away-results-list div {
+    padding: 0;
+  }
+  #home-results-list label,
+  #away-results-list label {
+    display: block;
+    padding: 12px;
+    background-color: #f7f7f7;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: normal;
+  }
+  #home-results-list label:hover,
+  #away-results-list label:hover {
+    background-color: #eef;
+  }
+  #home-results-list input[type="radio"],
+  #away-results-list input[type="radio"] {
+    vertical-align: middle;
+  }
+  #home-loading,
+  #away-loading {
+    display: none;
+  }
+  #home-no-matches-message,
+  #away-no-matches-message,
+  #success-message,
+  #error-message {
+    display: none;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 15px;
+  }
+  #home-no-matches-message,
+  #away-no-matches-message {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+  }
+  #success-message {
+    text-align: center;
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+  }
+  #error-message {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+  }
+  @media (min-width: 600px) {
+    input,
+    select {
+      width: 350px;
+    }
+    button {
+      width: auto;
+    }
+  }
+</style>
