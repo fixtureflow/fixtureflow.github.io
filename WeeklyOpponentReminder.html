@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body { font-family: sans-serif; color: #333; line-height: 1.6; }
+    .header { margin-bottom: 20px; }
+    .match-table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      margin-top: 15px; 
+      font-size: 14px;
+    }
+    .match-table th { 
+      background-color: #f2f2f2; 
+      text-align: left; 
+      padding: 10px; 
+      border-bottom: 2px solid #ddd;
+    }
+    .match-table td { 
+      padding: 10px; 
+      border-bottom: 1px solid #eee; 
+    }
+    /* Style for the Location column to make it distinct */
+    .location-cell { font-weight: bold; font-size: 0.9em; letter-spacing: 0.5px; }
+    .footer { margin-top: 30px; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <p>Hi <?= secretaryName ?>,</p>
+    <p>
+      This is an automated courtesy reminder of the match(es) scheduled between <b><?= opponentClubName ?></b> and <b><?= ourClubName ?></b> for the upcoming week.
+    </p>
+    <p>Please review the details below to ensure they match your records.</p>
+  </div>
+
+  <table class="match-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Location</th> <!-- New Explicit Column -->
+        <th>Your Team</th>
+        <th>Our Team</th>
+        <th>Venue</th>
+      </tr>
+    </thead>
+    <tbody>
+      <? for (var i = 0; i < matches.length; i++) { ?>
+        <tr>
+          <td><?= matches[i].date ?></td>
+          <td><?= matches[i].time ?></td>
+          
+          <!-- The Location Column: Shows HOME or AWAY from THEIR perspective -->
+          <td class="location-cell" style="color: <?= matches[i].location === 'HOME' ? '#27ae60' : '#c0392b' ?>;">
+            <?= matches[i].location ?>
+          </td>
+          
+          <td><?= matches[i].theirTeam ?></td>
+          <td><?= matches[i].ourTeam ?></td>
+          <td><?= matches[i].venue ?></td>
+        </tr>
+      <? } ?>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <p>
+      If you spot any discrepancies, please reply to this email or contact our Match Secretary immediately.
+    </p>
+    <p>
+      Best regards,<br>
+      Match Secretary<br>
+      <?= ourClubName ?>
+    </p>
+  </div>
+</body>
+</html>
