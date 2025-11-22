@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 10px; }
+        select, button { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        div { margin-bottom: 15px; }
+        label { font-weight: bold; }
+        #status { margin-top: 15px; padding: 10px; border-radius: 3px; display: none; }
+        .loading { color: #888; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+    </style>
+  </head>
+  <body>
+    <h3>Clear Player 'U' Marks</h3>
+
+    <div>
+      <label for="player-select">Select a Player</label>
+      <select id="player-select" disabled>
+        <option value="">Loading players...</option>
+      </select>
+    </div>
+
+    <button type="button" onclick="onClearClick()" id="clear-btn">Clear 'U' Marks</button>
+
+    <div id="status"></div>
+
+    <script>
+      // --- 1. Load players when the sidebar opens ---
+      window.addEventListener('load', function() {
+        google.script.run
+          .withSuccessHandler(onPlayersLoaded)
+          .withFailureHandler(onFailure)
+          .getClearablePlayerList(); // Our new backend function
+      });
+
+      function onPlayersLoaded(players) {
+        var playerSelect = document.getElementById('player-select');
+        playerSelect.innerHTML = "<option value=''>-- Select a Player --</option>";
+        players.forEach(function(player) {
+          playerSelect.innerHTML += `<option value="${player}">${player}</option>`;
+        });
+        playerSelect.disabled = false;
+      }
+
+      // --- 2. Handle the button click ---
+      function onClearClick() {
+        var playerName = document.getElementById('player-select').value;
+        if (!playerName) {
+          alert('Please select a player first.');
+          return;
+        }
+
+        // Disable UI and show loading message
+        document.getElementById('clear-btn').disabled = true;
+        var statusDiv = document.getElementById('status');
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'loading';
+        statusDiv.textContent = 'Clearing...';
+
+        // Call the core logic function (the one we already built!)
+        google.script.run
+          .withSuccessHandler(onClearSuccess)
+          .withFailureHandler(onFailure)
+          ._clearPlayerUnavailability(playerName);
+      }
+
+      // --- 3. Handle success and failure ---
+      function onClearSuccess(removedCount) {
+        var playerName = document.getElementById('player-select').value;
+        var statusDiv = document.getElementById('status');
+        statusDiv.className = 'success';
+        statusDiv.textContent = `Success! Removed ${removedCount} 'U' mark(s) for ${playerName}.`;
+        
+        // Re-enable the button for another operation
+        document.getElementById('clear-btn').disabled = false;
+      }
+
+      function onFailure(error) {
+        var statusDiv = document.getElementById('status');
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'error';
+        statusDiv.textContent = `Error: ${error.message}`;
+
+        // Re-enable the button
+        document.getElementById('clear-btn').disabled = false;
+      }
+    </script>
+  </body>
+</html>
