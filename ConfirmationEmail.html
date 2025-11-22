@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    /* This style block ensures the copy-paste table looks right */
+    .fixture-table {
+      border-collapse: collapse;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      border: 1px solid #ccc;
+    }
+    .fixture-table th, .fixture-table td {
+      border: 1px solid #ccc;
+      padding: 4px 8px;
+      text-align: left;
+    }
+    .fixture-table th {
+      background-color: #f4f4f4;
+    }
+  </style>
+</head>
+<body>
+  <p>Hi <?= opponentClubName ?> Match Secretary,</p>
+  <p>This is an automated confirmation for your upcoming match.</p>
+  <p><b>Match Details:</b></p>
+  <table border="0" cellpadding="0" cellspacing="0" style="font-family: monospace; line-height: 1.6;">
+    <tbody>
+      <tr>
+        <td style="padding-right: 10px; vertical-align: top;">- <b>Your Team (Away):</b></td>
+        <td style="vertical-align: top;"><?= opponentClubName ?> <?= opponentTeamName ?></td>
+      </tr>
+      <tr>
+        <td style="padding-right: 10px; vertical-align: top;">- <b>Opponent (Home):</b></td>
+        <td style="vertical-align: top;"><?= ourClubName ?> <?= ourTeamNumber ?></td>
+      </tr>
+      <tr>
+        <td style="padding-right: 10px; vertical-align: top;">- <b>Date:</b></td>
+        <td style="vertical-align: top;"><?= formattedDate ?></td>
+      </tr>
+      <tr>
+        <td style="padding-right: 10px; vertical-align: top;">- <b>Time:</b></td>
+        <td style="vertical-align: top;"><?= formattedTime ?></td>
+      </tr>
+      <tr>
+        <td style="padding-right: 10px; vertical-align: top;">- <b>Venue:</b></td>
+        <td style="vertical-align: top;"><?= venueName ?></td>
+      </tr>
+    </tbody>
+  </table>
+  <p>We look forward to seeing you then.</p>
+  <p>Best regards,<br><?= ourClubName ?> Match Secretary</p>
+  <hr style="border:none; border-top:1px solid #eee; margin: 20px 0;">
+  <p><b>For easy copy/paste into your spreadsheet:</b></p>
+  <table class="fixture-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Day</th>
+        <th>Time</th>
+        <th>Event</th>
+        <th>Div</th>
+        <th>Sctn</th>
+        <th>League / Cup</th>
+        <th>Your Club</th>
+        <th>Team No.</th>
+        <th>v</th>
+        <th>Home / Away</th>
+        <th>Opposition Club</th>
+        <th>Opp Team No.</th>
+        <th>Venue / Hall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><?= formattedShortDate ?></td>
+        <td><?= formattedDay ?></td>
+        <td><?= formattedTime ?></td>
+        <td><?= event ?></td>
+        <td><?= division ?></td>
+        <td><?= sctn ?></td>
+        <td><?= matchType ?></td>
+        <!-- Standardized perspective for the opponent -->
+        <td><?= opponentClubName ?></td>  <!-- Your Club -->
+        <td><?= opponentTeamName ?></td>  <!-- Your Team No. -->
+        <td>v</td>
+        <td>Away</td>
+        <td><?= ourClubName ?></td>       <!-- The Opposition Club is us -->
+        <td><?= ourTeamNumber ?></td>     <!-- The Opp Team No. is ours -->
+        <td><?= venueName ?></td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>
