@@ -226,12 +226,11 @@ function getOpponentClubs_() {
  * Public function to get pending home fixtures for the web app.
  * Caches for 1 hour.
  */
+/**
+ * Public function to get pending home fixtures for the web app.
+ * NO LONGER CACHED (Real-time).
+ */
 function getPendingHomeFixtures() {
-  return getCachedData('PENDING_FIXTURES', getPendingHomeFixtures_, 3600);
-}
-
-// --- Internal "fetch" function for pending fixtures ---
-function getPendingHomeFixtures_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const fixturesSheet = ss.getSheetByName(CONFIG.SHEETS.FIXTURES);
   if (!fixturesSheet) {
@@ -284,20 +283,17 @@ function getPendingHomeFixtures_() {
  * Public function for the web app to get pending AWAY fixtures.
  * Caches for 1 hour.
  */
-function getPendingAwayFixtures() {
-  return getCachedData('PENDING_AWAY_FIXTURES', getPendingAwayFixtures_, 3600);
-}
-
 /**
- * [HELPER] Gets a map of "Not confirmed" AWAY fixtures.
+ * Public function for the web app to get pending AWAY fixtures.
+ * NO LONGER CACHED (Real-time).
  * This is used to populate the opponent dropdown in the away booking flow.
  * @returns {Object} A map of pending away fixtures.
  */
-function getPendingAwayFixtures_() {
+function getPendingAwayFixtures() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const fixturesSheet = ss.getSheetByName(CONFIG.SHEETS.FIXTURES);
   if (!fixturesSheet) {
-    Logger.log("getPendingAwayFixtures_: 'Fixtures' sheet not found.");
+    Logger.log("getPendingAwayFixtures: 'Fixtures' sheet not found.");
     return {};
   }
 
