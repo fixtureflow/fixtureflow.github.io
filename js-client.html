@@ -233,6 +233,10 @@
       step2.style.display = 'none';
       noMatchesMsg.style.display = 'none';
     }
+
+    // Reset Month & Find Button when team changes
+    document.getElementById('month-select').value = "";
+    document.getElementById('find-dates-btn').disabled = true;
   }
 
   function onOpponentSelect() {
