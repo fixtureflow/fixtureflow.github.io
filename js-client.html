@@ -238,6 +238,7 @@
     if (document.getElementById('time-slot-select').value) {
       const btn = document.getElementById('submit-btn');
       btn.style.display = 'block';
+      btn.disabled = false;
       btn.textContent = "Submit Request";
     }
   }
