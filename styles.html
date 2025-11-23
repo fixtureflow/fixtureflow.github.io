@@ -27,10 +27,27 @@
     margin: 0 auto;
   }
   
-  h1 {
-    text-align: center;
-    color: #2c3e50;
+  /* Header & Logo */
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 30px;
+    gap: 15px;
+  }
+
+  .club-logo {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+  }
+  
+  h1 {
+    text-align: left; /* Reset from center since it's now flexed */
+    color: #2c3e50;
+    margin: 0; /* Remove margin to align with logo */
+    font-size: 1.8rem;
+    line-height: 1.2;
   }
 
   /* Form Elements */
@@ -196,5 +213,26 @@
     input, select {
       max-width: 100%;
     }
+  }
+
+  /* Footer */
+  .app-footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+  
+  .app-footer a {
+    color: #6c757d;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .app-footer a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
   }
 </style>
