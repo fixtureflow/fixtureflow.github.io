@@ -4,451 +4,120 @@
   <base target="_top">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <?!= HtmlService.createHtmlOutputFromFile('styles').getContent(); ?>
+  <style>
+    /* Mode-specific visibility */
+    .mode-home .away-only {
+      display: none !important;
+    }
+  
+    .mode-away .home-only {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
-  <h1><?= clubName ?> Match Booking Portal</h1>
-  <!-- The NEW main container that holds everything -->
-  <main id="booking-container">
-
-  <!-- This entire block conditionally shows the booking type choice -->
-  <? if (awayBookingEnabled) { ?>
+  <h1>
+    <?= clubName ?> Match Booking Portal
+  </h1>
+  
+  <main id="main-container">
+  
+    <!-- Step 0: Choose Booking Type (Only if Away enabled) -->
+    <? if (awayBookingEnabled) { ?>
     <fieldset id="step-0-fieldset">
       <legend>Step 0: Choose Booking Type</legend>
-      <div><input type="radio" name="booking-type" id="booking-type-home" value="home" onchange="showBookingFlow('home')"><label for="booking-type-home">Book a match AT OUR venue</label></div>
-      <div><input type="radio" name="booking-type" id="booking-type-away" value="away" onchange="showBookingFlow('away')"><label for="booking-type-away">Propose a match AT YOUR venue</label></div>
-    </fieldset>
-  <? } ?>
-
-  <!-- ======================== HOME BOOKING FLOW ======================== -->
-  <div id="home-booking-flow" style="display:<?= awayBookingEnabled ? 'none' : 'block' ?>;">
-    <fieldset><legend>Step 1: Select Our Team</legend>
-      <div><label for="home-our-team">Which of our teams do you need to play?</label><select id="home-our-team" onchange="onOurTeamSelect('home')" disabled><option value="">Loading teams...</option></select></div>
-    </fieldset>
-    <div id="home-no-matches-message" style="display:none;">No pending home matches were found for this team.</div>
-    <div id="home-booking-form" style="display:none;">
-      <fieldset><legend>Step 2: Confirm Your Details & Find a Date</legend>
-        <div id="home-opponent-select-div" style="display:none;"><label for="home-opponent-select">Select Your Team</label><select id="home-opponent-select" onchange="onOpponentSelect('home')"></select></div>
-        <div><label for="home-club">Your Club Name</label><input type="text" id="home-club" readonly></div>
-        <div><label for="home-their-team">Your Team Name</label><input type="text" id="home-their-team" readonly></div>
-        <div><label for="home-match-type">Match Type</label><input type="text" id="home-match-type" readonly></div>
-        <div><label for="home-email">Your Contact Email</label><input type="email" id="home-email" required></div><hr>
-
-        <div><label for="home-month-select">Select Month to Find Our Availability</label><select id="home-month-select" onchange="onMonthSelect('home')"></select></div>
-        <button type="button" onclick="findDates('home')" id="home-find-dates-btn" disabled>Find Available Dates</button>
-      </fieldset>
-    </div>
-    <fieldset id="home-results-fieldset" style="display:none;"><legend>Step 3: Select an Available Date & Time</legend>
-      <div id="home-loading" style="display:none;">Checking...</div><div id="home-results-list"></div>
-      <div id="home-time-slot-div" style="display:none;"><label for="home-time">Select a Time Slot</label><select id="home-time" required onchange="onTimeSelect()"></select></div>
-      <button type="button" onclick="submitBooking('home')" id="home-submit-btn" style="display:none;">Submit Request</button>
-    </fieldset>
-  </div>
-
-  <!-- ======================== AWAY BOOKING FLOW ======================== -->
-  <? if (awayBookingEnabled) { ?>
-    <div id="away-booking-flow" style="display:none;">
-      <fieldset><legend>Step 1: Select Our Team</legend>
-        <div><label for="away-our-team">Which of our teams do you need to play?</label><select id="away-our-team" onchange="onOurTeamSelect('away')" disabled><option value="">Loading teams...</option></select></div>
-      </fieldset>
-      <div id="away-no-matches-message" style="display:none;">No pending away matches were found for this team.</div>
-      <div id="away-booking-form" style="display:none;">
-        <fieldset><legend>Step 2: Confirm Your Details & Find a Date</legend>
-          <div id="away-opponent-select-div" style="display:none;"><label for="away-opponent-select">Select Your Team</label><select id="away-opponent-select" onchange="onOpponentSelect('away')"></select></div>
-          <div><label for="away-club">Your Club Name</label><input type="text" id="away-club" readonly></div>
-          <div><label for="away-their-team">Your Team Name</label><input type="text" id="away-their-team" readonly></div>
-          <div><label for="away-match-type">Match Type</label><input type="text" id="away-match-type" readonly></div>
-          <div><label for="away-email">Your Contact Email</label><input type="email" id="away-email" required></div><hr>
-          <div><label for="away-month-select">Select Month to Find Our Availability</label><select id="away-month-select" onchange="onMonthSelect('away')"></select></div>
-          <button type="button" onclick="findDates('away')" id="away-find-dates-btn" disabled>Find Our Available Dates</button>
+        <div>
+          <input type="radio" name="booking-type" id="type-home" value="home" onchange="showBookingFlow('home')">
+          <label for="type-home">Book a match AT OUR venue</label>
+        </div>
+        <div>
+          <input type="radio" name="booking-type" id="type-away" value="away" onchange="showBookingFlow('away')">
+          <label for="type-away">Propose a match AT YOUR venue</label>
+        </div>
         </fieldset>
-      </div>
-      <fieldset id="away-results-fieldset" style="display:none;"><legend>Step 3: Propose Date, Time & Venue</legend>
-        <div id="away-loading" style="display:none;">Checking...</div><div id="away-results-list"></div>
-        <div id="away-proposal-div" style="display:none;"><hr>
-          <div><label for="away-time">Proposed Time</label><input type="time" id="away-time" required></div>
-          <div><label for="away-venue">Your Venue Location</label><input type="text" id="away-venue" required></div>
-          <button type="button" onclick="submitBooking('away')" id="away-submit-btn">Submit Proposal</button>
+        <? } ?>
+
+    <!-- UNIFIED BOOKING FLOW CONTAINER -->
+    <!-- Default to hidden until loaded/selected -->
+    <div id="booking-flow" style="display:none;">
+      <!-- Step 1: Select Our Team -->
+      <fieldset id="step-1-fieldset">
+        <legend>Step 1: Select Our Team</legend>
+        <div>
+          <label for="our-team-select">Which of our teams do you need to play?</label>
+          <select id="our-team-select" onchange="onOurTeamSelect()" disabled>
+            <option value="">Loading teams...</option>
+          </select>
         </div>
       </fieldset>
-    </div>
-  <? } ?>
- </main> <!-- The container CLOSES here -->
 
-  <!-- ======================== SHARED MESSAGES ======================== -->
+      <div id="no-matches-message" style="display:none;"></div>
+
+      <!-- Step 2: Details & Month -->
+      <div id="step-2-fieldset" style="display:none;">
+        <fieldset>
+          <legend>Step 2: Confirm Details & Find Date</legend>
+      
+          <div id="opponent-select-div" style="display:none;">
+            <label for="opponent-select">Select Your Team</label>
+            <select id="opponent-select" onchange="onOpponentSelect()"></select>
+          </div>
+
+          <div><label for="club-input">Your Club Name</label><input type="text" id="club-input" readonly></div>
+          <div><label for="their-team-input">Your Team Name</label><input type="text" id="their-team-input" readonly></div>
+          <div><label for="match-type-input">Match Type</label><input type="text" id="match-type-input" readonly></div>
+          <div><label for="email-input">Your Contact Email</label><input type="email" id="email-input" required></div>
+          <hr>
+
+          <div>
+            <label for="month-select">Select Month to Find Availability</label>
+            <select id="month-select" onchange="onMonthSelect()"></select>
+          </div>
+          <button type="button" onclick="findDates()" id="find-dates-btn" disabled>Find Available Dates</button>
+          </fieldset>
+          </div>
+
+      <!-- Step 3: Date, Time & Venue -->
+      <fieldset id="step-3-fieldset" style="display:none;">
+        <legend>Step 3: Finalize Booking</legend>
+        <div id="loading-indicator" style="display:none;">Checking...</div>
+        <div id="results-list"></div>
+
+        <!-- HOME ONLY: Time Slot Dropdown -->
+        <div id="time-slot-div" class="home-only" style="display:none;">
+          <label for="time-slot-select">Select a Time Slot</label>
+          <select id="time-slot-select" onchange="onTimeSelect()"></select>
+        </div>
+
+        <!-- AWAY ONLY: Proposed Time & Venue -->
+        <div id="away-proposal-div" class="away-only" style="display:none;">
+          <hr>
+          <div>
+            <label for="proposed-time-input">Proposed Time</label>
+            <input type="time" id="proposed-time-input">
+          </div>
+          <div>
+            <label for="venue-input">Your Venue Location</label>
+            <input type="text" id="venue-input">
+          </div>
+        </div>
+
+        <button type="button" onclick="submitBooking()" id="submit-btn" style="display:none;">Submit Request</button>
+        </fieldset>
+
+    </div> <!-- End booking-flow -->
+
+  </main>
+
+  <!-- SHARED MESSAGES -->
   <div id="success-message" style="display:none;">
     <h2>Thank you!</h2>
     <p>Your request has been submitted. You will receive a confirmation email once it is approved.</p>
     <button type="button" onclick="resetApp()" id="reset-btn">Book Another Match</button>
   </div>
-  <div id="error-message"></div>
+  <div id="error-message" style="display:none;"></div>
 
-  <script>
-    // --- 1. GLOBAL STATE & INITIALIZATION ---
-    // ============================================
-
-      const awayBookingEnabled = "<?= awayBookingEnabled ?>" === 'true';
-    let homeSelectedDate = null, awaySelectedDate = null, clubEmailMap = {}, homeFixtureMap = {}, awayFixtureMap = {}, dataLoadCounter = 0, loadedTeams = [];
-    const TOTAL_DATA_STREAMS = awayBookingEnabled ? 5 : 4;
-
-    window.addEventListener('load', loadInitialData);
-
-    function loadInitialData() {
-      const errorDiv = document.getElementById('error-message');
-      function onDataLoadFailure(error) {
-        console.error("Failed to load initial data:", error.message);
-        errorDiv.style.display = 'block';
-        errorDiv.textContent = "Error loading page data: " + error.message + ". Please refresh the page.";
-      }
-      google.script.run.withSuccessHandler(onMonthLoadSuccess).withFailureHandler(onDataLoadFailure).getValidSeasonMonths();
-      google.script.run.withSuccessHandler(onOpponentClubLoadSuccess).withFailureHandler(onDataLoadFailure).getOpponentClubs();
-      google.script.run.withSuccessHandler(onTeamLoadSuccess).withFailureHandler(onDataLoadFailure).getOurTeams();
-      google.script.run.withSuccessHandler(onHomeFixtureLoadSuccess).withFailureHandler(onDataLoadFailure).getPendingHomeFixtures();
-      if (awayBookingEnabled) {
-        google.script.run.withSuccessHandler(onAwayFixtureLoadSuccess).withFailureHandler(onDataLoadFailure).getPendingAwayFixtures();
-      }
-    }
-
-    // --- 2. DATA HANDLERS & SUCCESS CALLBACKS ---
-    // ============================================
-
-    function onDataLoadSuccess() {
-      dataLoadCounter++;
-      if (dataLoadCounter === TOTAL_DATA_STREAMS) {
-        const homeSelect = document.getElementById('home-our-team');
-        homeSelect.innerHTML = "<option value=''>-- Select a team --</option>";
-
-        // Filter for Home Dropdown: Only show teams with pending HOME matches
-        const homeTeams = loadedTeams.filter(t => t.hasHome);
-        homeTeams.forEach(team => {
-          homeSelect.innerHTML += `<option value="${team.name}">${team.name} (${team.division})</option>`;
-        });
-        homeSelect.disabled = false;
-
-        if (awayBookingEnabled) {
-          const awaySelect = document.getElementById('away-our-team');
-          if (awaySelect) {
-            awaySelect.innerHTML = "<option value=''>-- Select a team --</option>";
-
-            // Filter for Away Dropdown: Only show teams with pending AWAY matches
-            const awayTeams = loadedTeams.filter(t => t.hasAway);
-            awayTeams.forEach(team => {
-              awaySelect.innerHTML += `<option value="${team.name}">${team.name} (${team.division})</option>`;
-            });
-            awaySelect.disabled = false;
-          }
-        }
-      }
-    }
-
-    function onHomeFixtureLoadSuccess(map) { homeFixtureMap = map; onDataLoadSuccess(); }
-    function onAwayFixtureLoadSuccess(map) { awayFixtureMap = map; onDataLoadSuccess(); }
-    function onOpponentClubLoadSuccess(clubsData) { clubEmailMap = {}; clubsData.forEach(clubInfo => { clubEmailMap[clubInfo.name] = clubInfo.email; }); onDataLoadSuccess(); }
-    function onTeamLoadSuccess(teams) { loadedTeams = teams; onDataLoadSuccess(); }
-    function onMonthLoadSuccess(months) {
-      const homeSelect = document.getElementById('home-month-select');
-      homeSelect.innerHTML = "<option value=''>-- Select a Month --</option>";
-      months.forEach(month => {
-        homeSelect.innerHTML += `<option value="${month.value}">${month.name}</option>`;
-      });
-      if (awayBookingEnabled) {
-        const awaySelect = document.getElementById('away-month-select');
-        if (awaySelect) {
-          awaySelect.innerHTML = "<option value=''>-- Select a Month --</option>";
-          months.forEach(month => {
-            awaySelect.innerHTML += `<option value="${month.value}">${month.name}</option>`;
-          });
-        }
-      }
-      onDataLoadSuccess();
-    }
-
-    function onFindSuccess(dates, flowType) {
-        document.getElementById(`${flowType}-loading`).style.display = 'none';
-        const list = document.getElementById(`${flowType}-results-list`);
-        let html = "";
-        if (dates.length === 0) {
-          html = `<p>No 100% available dates were found for this team in the selected month. Please try a different month.</p>`;
-        } else {
-          html = "<p>Please select one of the available dates:</p>";
-          dates.forEach(date => {
-            const displayDate = new Date(date + 'T00:00:00');
-            const displayString = displayDate.toLocaleDateString('en-IE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            html += `<div><input type="radio" name="${flowType}_selected_date" id="${flowType}-${date}" value="${date}" onchange="onDateSelected('${flowType}', this.value)"> <label for="${flowType}-${date}">${displayString}</label></div>`;
-          });
-        }
-        list.innerHTML = html;
-        setTimeout(() => { document.getElementById(`${flowType}-results-fieldset`).scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 10);
-    }
-
-    function onTimeSuccess(timeSlots) {
-      const timeSelect = document.getElementById('home-time');
-      timeSelect.innerHTML = "<option value=''>--Select a time--</option>";
-      timeSlots.forEach(time => { timeSelect.innerHTML += `<option value="${time}">${time}</option>`; });
-    }
-
-    function onSubmitSuccess(result) {
-      if (result === "Success") {
-        document.getElementById('booking-container').style.display = 'none';
-        document.getElementById('success-message').style.display = 'block';
-        document.getElementById('success-message').scrollIntoView({ behavior: 'smooth' });
-      } else {
-        onSubmitFailure(new Error(result));
-      }
-    }
-
-    function onSubmitFailure(error) {
-      const homeBtn = document.getElementById('home-submit-btn');
-      if (homeBtn) { homeBtn.disabled = false; homeBtn.textContent = "Submit Request"; }
-      if (awayBookingEnabled) {
-        const awayBtn = document.getElementById('away-submit-btn');
-        if (awayBtn) { awayBtn.disabled = false; awayBtn.textContent = "Submit Proposal"; }
-      }
-      const errorMsg = error.message.startsWith("Error: ") ? error.message.substring(7) : error.message;
-      alert(errorMsg);
-    }
-
-    function onTimeFailure(error) {
-      console.error("Error fetching time slots:", error.message);
-      const timeSelect = document.getElementById('home-time');
-      timeSelect.innerHTML = "<option value=''>Error. Try again.</option>";
-      alert("An error occurred while loading the time slots for the selected date.\\n\\nPlease try selecting the date again. If the problem persists, please refresh the page.");
-    }
-
-    function onFindFailure(error, flowType) {
-      document.getElementById(`${flowType}-loading`).style.display = 'none';
-      document.getElementById(`${flowType}-results-list`).innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
-    }
-
-    // --- 3. UI FLOW & NAVIGATION ---
-    // ============================================
-
-    function showBookingFlow(flowToShow) {
-      const flowToHide = (flowToShow === 'home') ? 'away' : 'home';
-      const flowToHideDiv = document.getElementById(`${flowToHide}-booking-flow`);
-      if (flowToHideDiv) {
-        flowToHideDiv.style.display = 'none';
-        _resetSingleFlow(flowToHide);
-      }
-      const flowToShowDiv = document.getElementById(`${flowToShow}-booking-flow`);
-      if (flowToShowDiv) {
-        flowToShowDiv.style.display = 'block';
-        setTimeout(() => { flowToShowDiv.scrollIntoView({ behavior: 'smooth' }); }, 10);
-      }
-    }
-
-    function resetApp() {
-      document.getElementById('success-message').style.display = 'none';
-      document.getElementById('booking-container').style.display = 'block';
-      _resetSingleFlow('home');
-      if (awayBookingEnabled) {
-        _resetSingleFlow('away');
-      }
-      if (awayBookingEnabled) {
-        const step0 = document.getElementById('step-0-fieldset');
-        if (step0) step0.style.display = 'block';
-        const checkedRadio = document.querySelector('input[name="booking-type"]:checked');
-        if (checkedRadio) checkedRadio.checked = false;
-        document.getElementById('home-booking-flow').style.display = 'none';
-        document.getElementById('away-booking-flow').style.display = 'none';
-      } else {
-        document.getElementById('home-booking-flow').style.display = 'block';
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // --- 4. EVENT HANDLERS (User Actions) ---
-    // ============================================
-
-    function onOurTeamSelect(flowType) {
-      const team = document.getElementById(`${flowType}-our-team`).value;
-      const bookingForm = document.getElementById(`${flowType}-booking-form`);
-      const noMatchesMsg = document.getElementById(`${flowType}-no-matches-message`);
-      const opponentDiv = document.getElementById(`${flowType}-opponent-select-div`);
-      const opponentSelect = document.getElementById(`${flowType}-opponent-select`);
-      const opponents = (flowType === 'home') ? homeFixtureMap[team] : awayFixtureMap[team];
-      clearOpponentFields(flowType);
-      document.getElementById(`${flowType}-results-fieldset`).style.display = 'none';
-      if (team && opponents && opponents.length > 0) {
-        bookingForm.style.display = 'block';
-        noMatchesMsg.style.display = 'none';
-        if (opponents.length === 1) {
-          opponentDiv.style.display = 'none';
-          populateOpponentFields(flowType, opponents[0]);
-        } else {
-          opponentDiv.style.display = 'block';
-          opponentSelect.innerHTML = '<option value="">-- Select your team --</option>';
-          opponents.forEach(opp => {
-            const value = JSON.stringify(opp);
-            const text = `${opp.club} ${opp.team} (${opp.type})`;
-            opponentSelect.innerHTML += `<option value='${value}'>${text}</option>`;
-          });
-        }
-      } else if (team) {
-        bookingForm.style.display = 'none';
-        noMatchesMsg.style.display = 'block';
-      } else {
-        bookingForm.style.display = 'none';
-        noMatchesMsg.style.display = 'none';
-      }
-    }
-
-    function onOpponentSelect(flowType) {
-      const opponentSelect = document.getElementById(`${flowType}-opponent-select`);
-      const opponent = JSON.parse(opponentSelect.value || 'null');
-      opponent ? populateOpponentFields(flowType, opponent) : clearOpponentFields(flowType);
-    }
-
-    function onMonthSelect(flowType) {
-      const monthValue = document.getElementById(`${flowType}-month-select`).value;
-      document.getElementById(`${flowType}-find-dates-btn`).disabled = !monthValue;
-    }
-
-    function onDateSelected(flowType, date) {
-      if (flowType === 'home') {
-        homeSelectedDate = date;
-        const timeDiv = document.getElementById('home-time-slot-div');
-        timeDiv.style.display = 'block';
-        setTimeout(() => { timeDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 10);
-        document.getElementById('home-submit-btn').style.display = 'none';
-        document.getElementById('home-time').innerHTML = "<option value=''>Loading times...</option>";
-        google.script.run.withSuccessHandler(onTimeSuccess).withFailureHandler(onTimeFailure).getTimeSlotsForDate(homeSelectedDate);
-      } else if (awayBookingEnabled) {
-        awaySelectedDate = date;
-        const proposalDiv = document.getElementById('away-proposal-div');
-        proposalDiv.style.display = 'block';
-        setTimeout(() => { proposalDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 10);
-      }
-    }
-
-    function onTimeSelect() {
-      if (document.getElementById('home-time').value) {
-        document.getElementById('home-submit-btn').style.display = 'block';
-      }
-    }
-
-    function findDates(flowType) {
-      const bookingData = getBookingData(flowType);
-      if (!bookingData.ourTeam || !bookingData.monthYear || !bookingData.club || !bookingData.theirTeam) {
-        alert("Please ensure all team and month details are selected.");
-        return;
-      }
-      const resultsFieldset = document.getElementById(`${flowType}-results-fieldset`);
-      resultsFieldset.style.display = 'block';
-      document.getElementById(`${flowType}-loading`).style.display = 'block';
-      document.getElementById(`${flowType}-results-list`).innerHTML = "";
-      if (flowType === 'home') {
-        document.getElementById('home-time-slot-div').style.display = 'none';
-        document.getElementById('home-submit-btn').style.display = 'none';
-      } else if (awayBookingEnabled) {
-        document.getElementById('away-proposal-div').style.display = 'none';
-      }
-      setTimeout(() => { resultsFieldset.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 10);
-      const [year, month] = bookingData.monthYear.split('-');
-      const backendFunction = (flowType === 'home') ? 'findAvailableDatesForTeam' : 'findAvailableDatesForAwayMatch';
-      google.script.run
-        .withSuccessHandler(function(dates) { onFindSuccess(dates, flowType); })
-        .withFailureHandler(function(err) { onFindFailure(err, flowType); })
-        [backendFunction](bookingData.ourTeam, parseInt(month), parseInt(year));
-    }
-
-    function submitBooking(flowType) {
-      const data = getBookingData(flowType);
-      const backendFunction = (flowType === 'home') ? 'submitBookingRequest' : 'submitAwayBookingRequest';
-      const requiredFields = ['club', 'theirTeam', 'ourTeam', 'date', 'time', 'email'];
-      if (flowType === 'away' && awayBookingEnabled) {
-        requiredFields.push('venue');
-      }
-      for (const field of requiredFields) {
-        if (!data[field]) {
-          alert('Please ensure all fields are filled in before submitting.');
-          return;
-        }
-      }
-      const btn = document.getElementById(`${flowType}-submit-btn`);
-      btn.disabled = true;
-      btn.textContent = "Submitting...";
-      google.script.run
-        .withSuccessHandler(onSubmitSuccess)
-        .withFailureHandler(onSubmitFailure)
-        [backendFunction](data);
-    }
-
-    // --- 5. UI HELPER FUNCTIONS ---
-    // ============================================
-
-    function populateOpponentFields(flowType, opponent) {
-      document.getElementById(`${flowType}-club`).value = opponent.club;
-      document.getElementById(`${flowType}-their-team`).value = opponent.team;
-      document.getElementById(`${flowType}-match-type`).value = opponent.type;
-      document.getElementById(`${flowType}-email`).value = clubEmailMap[opponent.club] || "";
-    }
-
-    function clearOpponentFields(flowType) {
-      populateOpponentFields(flowType, { club: '', team: '', type: '' });
-      document.getElementById(`${flowType}-opponent-select`).value = "";
-      document.getElementById(`${flowType}-month-select`).value = "";
-    }
-
-    function getBookingData(flowType) {
-      const selectedDate = (flowType === 'home') ? homeSelectedDate : awaySelectedDate;
-      const data = {
-        ourTeam: document.getElementById(`${flowType}-our-team`).value,
-        club: document.getElementById(`${flowType}-club`).value,
-        theirTeam: document.getElementById(`${flowType}-their-team`).value,
-        matchType: document.getElementById(`${flowType}-match-type`).value,
-        email: document.getElementById(`${flowType}-email`).value,
-        monthYear: document.getElementById(`${flowType}-month-select`).value,
-        date: selectedDate
-      };
-      if (flowType === 'home') {
-        data.time = document.getElementById('home-time').value;
-      } else if (awayBookingEnabled) {
-        data.time = document.getElementById('away-time').value;
-        data.venue = document.getElementById('away-venue').value;
-      }
-      return data;
-    }
-
-    /**
-     * [HELPER] Resets all form fields and UI states for a single booking flow.
-     * @param {string} flowType - 'home' or 'away'.
-     */
-    function _resetSingleFlow(flowType) {
-      // Reset form fields
-      document.getElementById(`${flowType}-our-team`).value = '';
-      const bookingForm = document.getElementById(`${flowType}-booking-form`);
-      if (bookingForm) {
-        bookingForm.style.display = 'none';
-        bookingForm.querySelectorAll('input, select').forEach(el => {
-          if (el.type !== 'radio' && el.type !== 'checkbox' && !el.readOnly) {
-            el.value = '';
-          }
-        });
-      }
-
-      // Hide conditional messages and results
-      const noMatchesMsg = document.getElementById(`${flowType}-no-matches-message`);
-      if (noMatchesMsg) noMatchesMsg.style.display = 'none';
-      const resultsFieldset = document.getElementById(`${flowType}-results-fieldset`);
-      if (resultsFieldset) resultsFieldset.style.display = 'none';
-
-      // Reset the submit button
-      const submitBtn = document.getElementById(`${flowType}-submit-btn`);
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = (flowType === 'home') ? 'Submit Request' : 'Submit Proposal';
-        
-        // The submit button should ONLY be hidden for the home flow,
-        // as the away flow button appears by default with its container.
-        if (flowType === 'home') {
-          submitBtn.style.display = 'none';
-        }
-      }
-
-      // Reset date variables
-      if (flowType === 'home') { homeSelectedDate = null; }
-      else { awaySelectedDate = null; }
-    }
-  </script>
+  <!-- CLIENT-SIDE JS -->
+  <?!= HtmlService.createHtmlOutputFromFile('js-client').getContent(); ?>
 </body>
 </html>
