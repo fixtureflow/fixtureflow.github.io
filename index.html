@@ -118,6 +118,9 @@
   <div id="error-message" style="display:none;"></div>
 
   <!-- CLIENT-SIDE JS -->
+  <script>
+    const awayBookingEnabled = "<?= awayBookingEnabled ?>" === 'true';
+  </script>
   <?!= HtmlService.createHtmlOutputFromFile('js-client').getContent(); ?>
 </body>
 </html>
