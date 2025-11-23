@@ -81,24 +81,43 @@ function _validateProposal(ourTeamName, matchDate, isHomeMatch, settings) {
 
 /**
  * [HELPER] Checks for existing 'Pending' or 'Confirmed' requests for the same match.
+ * Works for both Home (Booking Requests) and Away (Away Match Proposals) sheets.
  * 
- * @param {Array[]} requestData The data from the 'Booking Requests' sheet.
+ * @param {Array[]} sheetData The data from the sheet (Booking Requests or Away Proposals).
  * @param {Object} booking The new booking object being submitted.
+ * @param {boolean} isHomeMatch True if checking Booking Requests, False for Away Proposals.
  */
-function _validateNoDuplicateRequest(requestData, booking) {
-  const headers = requestData[0];
-  const reqClubCol = headers.indexOf('Requesting Club');
-  const reqTheirTeamCol = headers.indexOf('Their Team');
-  const reqYourTeamCol = headers.indexOf('Your Team');
+function _validateNoDuplicateRequest(sheetData, booking, isHomeMatch) {
+  const headers = sheetData[0];
   const reqStatusCol = headers.indexOf(CONFIG.HEADERS.STATUS);
+
+  // Define column names based on the sheet type
+  const colNames = isHomeMatch ? {
+    club: 'Requesting Club',
+    theirTeam: 'Their Team',
+    ourTeam: 'Your Team'
+  } : {
+    club: 'Opponent Club',
+    theirTeam: 'Their Team',
+    ourTeam: 'Our Team'
+  };
+
+  const reqClubCol = headers.indexOf(colNames.club);
+  const reqTheirTeamCol = headers.indexOf(colNames.theirTeam);
+  const reqYourTeamCol = headers.indexOf(colNames.ourTeam);
+
+  if (reqClubCol === -1 || reqTheirTeamCol === -1 || reqYourTeamCol === -1 || reqStatusCol === -1) {
+    throw new Error("Internal Error: Could not find required headers for duplicate check.");
+  }
 
   const ourTeamUpper = booking.ourTeam.trim().toUpperCase();
   const clubUpper = booking.club.trim().toUpperCase();
   const theirTeamUpper = booking.theirTeam.trim().toUpperCase();
 
-  for (let i = 1; i < requestData.length; i++) {
-    const row = requestData[i];
+  for (let i = 1; i < sheetData.length; i++) {
+    const row = sheetData[i];
     const status = row[reqStatusCol];
+
     if (
       row[reqYourTeamCol].trim().toUpperCase() === ourTeamUpper &&
       row[reqClubCol].trim().toUpperCase() === clubUpper &&

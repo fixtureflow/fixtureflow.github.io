@@ -182,7 +182,7 @@ function submitBookingRequest(booking) {
     // *** Run All Validation Checks ***
     // Each function will throw an error if it fails.
 
-    _validateNoDuplicateRequest(requestData, booking);
+    _validateNoDuplicateRequest(requestData, booking, true);
     _validateCourtCapacity(fixturesData, fixturesHeaders, dateStr, maxMatches);
     _validateTeamBuffer(requestData, booking, bufferDays, dateObj);
     _validatePlayerAvailability(ss, booking, dateStr);
@@ -240,6 +240,10 @@ function submitAwayBookingRequest(proposal) {
     if (isNaN(dateObj.getTime())) {
       throw new Error(`Invalid date format provided: ${proposal.date}`);
     }
+
+    // --- Duplicate Check ---
+    const awayProposalData = awayProposalSheet.getDataRange().getValues();
+    _validateNoDuplicateRequest(awayProposalData, proposal, false);
 
     // --- Write to the Sheet ---
     // The order must match the column order in your sheet
