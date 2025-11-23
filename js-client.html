@@ -105,14 +105,22 @@
     btn.textContent = (currentMode === 'home') ? "Submit Request" : "Submit Proposal";
     
     const errorMsg = error.message.startsWith("Error: ") ? error.message.substring(7) : error.message;
-    alert(errorMsg);
+
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = errorMsg;
+    errorDiv.style.display = 'block';
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   function onTimeFailure(error) {
     console.error("Error fetching time slots:", error.message);
     const timeSelect = document.getElementById('time-slot-select');
     timeSelect.innerHTML = "<option value=''>Error. Try again.</option>";
-    alert("An error occurred while loading the time slots for the selected date.\\n\\nPlease try selecting the date again. If the problem persists, please refresh the page.");
+
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = "An error occurred while loading time slots. Please try selecting the date again.";
+    errorDiv.style.display = 'block';
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   function onFindFailure(error) {
@@ -260,7 +268,10 @@
   function findDates() {
     const bookingData = getBookingData();
     if (!bookingData.ourTeam || !bookingData.monthYear || !bookingData.club || !bookingData.theirTeam) {
-      alert("Please ensure all team and month details are selected.");
+      const errorDiv = document.getElementById('error-message');
+      errorDiv.textContent = "Please ensure all team and month details are selected.";
+      errorDiv.style.display = 'block';
+      errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
     
@@ -286,6 +297,10 @@
   }
 
   function submitBooking() {
+    // Clear previous errors
+    document.getElementById('error-message').style.display = 'none';
+    document.getElementById('error-message').textContent = '';
+
     const data = getBookingData();
     const backendFunction = (currentMode === 'home') ? 'submitBookingRequest' : 'submitAwayBookingRequest';
     
