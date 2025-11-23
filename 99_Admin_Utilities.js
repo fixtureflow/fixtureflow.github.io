@@ -10,8 +10,9 @@
 //==============================================================
 
 /**
- * Core logic to clear ALL 'U' marks from the entire grid.
+ * [ADMIN] Core logic to clear ALL 'U' marks from the entire grid.
  * This function is intentionally designed to ONLY run if it receives the exact confirmation phrase from the dialog function.
+ * 
  * @param {string} confirmation The text the user typed into the confirmation dialog.
  */
 function _resetAllPlayerAvailability(confirmation) {
@@ -72,7 +73,9 @@ function _resetAllPlayerAvailability(confirmation) {
   }
 }
 
-/** [MENU ITEM] Shows a confirmation dialog before resetting all availability. */
+/**
+ * [MENU ITEM] Shows a confirmation dialog before resetting all availability.
+ */
 function showResetAllDialog() {
   const ui = SpreadsheetApp.getUi();
   const title = 'WARNING: EXTREMELY DESTRUCTIVE ACTION';
@@ -92,7 +95,7 @@ function showResetAllDialog() {
 }
 
 /**
- * V2: "Smarter" Cache Clearing.
+ * [ADMIN] V2: "Smarter" Cache Clearing.
  * This version intelligently checks the "Enable Away Booking" setting
  * and only attempts to clear the away fixtures cache if the feature is active.
  * It also provides a clear reminder to the user about the manual cache-clearing step.
@@ -127,7 +130,7 @@ function clearCache() {
 }
 
 /**
- * Installs the onEdit trigger needed for the 'Booking Requests' sheet.
+ * [ADMIN] Installs the onEdit trigger needed for the 'Booking Requests' sheet.
  * This is safe to run multiple times.
  */
 function setupTrigger() {
@@ -159,7 +162,7 @@ function setupTrigger() {
 }
 
 /**
- * Installs the time-driven trigger for the weekly match summary email.
+ * [ADMIN] Installs the time-driven trigger for the weekly match summary email.
  * This is safe to run multiple times. If the trigger already exists,
  * it will not create a duplicate.
  * Scheduled the trigger for Friday afternoon.
@@ -248,7 +251,7 @@ function updateWebAppUrl() {
 }
 
 /**
- * [ADMIN UTILITY] Prompts the developer to enter a setting name (key)
+ * [ADMIN] Prompts the developer to enter a setting name (key)
  * and displays the current value stored in the secure PropertiesService.
  * This is a debugging tool and should be hidden from the end-user menu.
  */
@@ -290,7 +293,7 @@ function _admin_checkSingleProperty() {
 }
 
 /**
- * [HELPER] Applies all necessary sheet and range protections for a production
+ * [ADMIN] Applies all necessary sheet and range protections for a production
  * environment. It protects core data sheets while leaving specific columns/cells editable.
  * This is called by the main saveSettingsToProperties() function.
  */
@@ -387,7 +390,7 @@ function _applyProductionProtections() {
 }
 
 /**
- * [ADMIN UTILITY] Reads settings from the 'Settings' sheet, saves them securely,
+ * [ADMIN] Reads settings from the 'Settings' sheet, saves them securely,
  * programmatically disables Test Mode, protects the sheet, and then hides it.
  * This is the complete, one-click "lock-down" and deployment function.
  */

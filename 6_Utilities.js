@@ -46,7 +46,10 @@ function formatDate(date) {
 }
 
 /**
- * Formats a date object into "yyyy-MM-dd".
+ * [HELPER] Formats a Date object into the standard sheet format "yyyy-MM-dd".
+ * 
+ * @param {Date} date The date to format.
+ * @returns {string} The formatted date string.
  */
 function formatDateForSheet(date) {
   try {
@@ -56,8 +59,10 @@ function formatDateForSheet(date) {
 }
 
 /**
- * Parses a date string from "d/m/y" or "y-m-d" into a Date object.
- * V2: Now accepts an optional referenceDate to infer missing year/month on range end-dates.
+ * [HELPER] Parses a "dd/MM/yyyy" string into a Date object.
+ * 
+ * @param {string} dateString The date string to parse.
+ * @returns {Date} The parsed Date object.
  */
 function parseDMY(dateString, referenceDate = null) {
   try {
@@ -91,11 +96,10 @@ function parseDMY(dateString, referenceDate = null) {
 }
 
 /**
- * Takes a value from a sheet that is supposed to be a time and correctly
- * formats it as a "HH:mm" string, regardless of whether the sheet provides
- * a Date object, a number (fraction of a day), or a pre-formatted string.
- * @param {*} timeValue The value from the sheet's time column.
- * @returns {string} The time formatted as "HH:mm", or "N/A" if input is invalid.
+ * [HELPER] Formats a time value (Date or String) into "HH:mm".
+ * 
+ * @param {Date|string} timeValue The time value to format.
+ * @returns {string} The formatted time string (e.g., "19:30") or "N/A" if input is invalid.
  */
 function formatTimeFromSheet(timeValue) {
   if (timeValue instanceof Date) {
@@ -247,11 +251,12 @@ function getDayOfWeekNumber(dayName) {
 }
 
 /**
- * [HELPER] Gets the correct settings key for a given day of the week.
+ * [HELPER] Constructs the correct setting key for a given day of the week.
+ * e.g., Day 1 (Monday) -> "Mon" -> "Mon - Time Slot"
  * 
- * @param {number} dayOfWeek The day number (0=Sun, 6=Sat).
- * @param {string} settingType The setting suffix (e.g., "Venue", "Time Slot", "Max Matches").
- * @returns {string} The key for the Settings sheet (e.g., "Day 2 (Tue) Venue").
+ * @param {number} dayOfWeek The day index (0-6).
+ * @param {string} settingType The setting suffix (e.g., "Time Slot").
+ * @returns {string} The full setting key.
  */
 function _getDaySettingKey(dayOfWeek, settingType) {
   const dayNames = [

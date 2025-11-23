@@ -14,6 +14,7 @@
  * [HELPER] A centralized validation engine for all booking confirmations.
  * Checks for Admin Locks, Player Availability, and (optionally) Court Capacity.
  * Throws a user-friendly error if any validation check fails.
+ * 
  * @param {string} ourTeamName The name of our team being booked (e.g., "M1").
  * @param {Date} matchDate The JavaScript Date object for the match.
  * @param {boolean} isHomeMatch TRUE if this is a home match (will check court capacity), FALSE otherwise.

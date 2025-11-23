@@ -90,7 +90,11 @@ function getOurTeams() {
   return getCachedData('OUR_TEAMS', getOurTeams_, 3600);
 }
 
-// --- Internal "fetch" function for our teams ---
+/**
+ * [HELPER] Fetches the list of "Our Teams" from the spreadsheet.
+ * 
+ * @returns {Object[]} Array of team objects {division: "Div 1", name: "L1"}.
+ */
 function getOurTeams_() {
   try {
     const teamsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.TEAMS);
@@ -130,8 +134,9 @@ function getValidSeasonMonths() {
 }
 
 /**
- * [HELPER] Gets valid season months, filtering out any past months.
- * This is the internal "fetch" function.
+ * [HELPER] Fetches the list of valid season months from the Availability sheet, filtering out any past months.
+ * 
+ * @returns {Object[]} Array of month objects {value: "YYYY-MM", name: "Month YYYY"}.
  */
 function getValidSeasonMonths_() {
   try {
@@ -189,7 +194,11 @@ function getOpponentClubs() {
   return getCachedData('OPPONENT_CLUBS', getOpponentClubs_, 3600);
 }
 
-// --- Internal "fetch" function for opponent clubs ---
+/**
+ * [HELPER] Fetches the list of Opponent Clubs from the Opponent Info sheet.
+ * 
+ * @returns {Object[]} Array of club objects {name: "Club Name", email: "email@example.com"}.
+ */
 function getOpponentClubs_() {
   try {
     const oppSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.OPPONENTS);
@@ -222,10 +231,6 @@ function getOpponentClubs_() {
   }
 }
 
-/**
- * Public function to get pending home fixtures for the web app.
- * Caches for 1 hour.
- */
 /**
  * Public function to get pending home fixtures for the web app.
  * NO LONGER CACHED (Real-time).
@@ -279,10 +284,6 @@ function getPendingHomeFixtures() {
   return fixtureMap;
 }
 
-/**
- * Public function for the web app to get pending AWAY fixtures.
- * Caches for 1 hour.
- */
 /**
  * Public function for the web app to get pending AWAY fixtures.
  * NO LONGER CACHED (Real-time).
@@ -350,9 +351,12 @@ function getPendingAwayFixtures() {
 }
 
 /**
- * Gets the available time slots for a given date, based on 'Settings'.
+ * [WEB APP] Gets the available time slots for a given date, based on 'Settings'.
  * This function is simple and does not need caching.
  * UPDATED: Now uses the _getDaySettingKey helper.
+ * 
+ * @param {string} dateStr The date string ("yyyy-MM-dd").
+ * @returns {string[]} Array of time strings (e.g., ["19:00", "20:00"]).
  */
 function getTimeSlotsForDate(dateStr) {
   try {

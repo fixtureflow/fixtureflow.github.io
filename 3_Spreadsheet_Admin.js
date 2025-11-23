@@ -14,9 +14,12 @@
 //==============================================================
 
 /**
- * Main onEdit trigger function. Acts as a "router" for all status changes
- * on the 'Booking Requests' and 'Away Match Proposals' sheets.
- * Only shows the "Processing" dialog for actionable statuses.
+ * [TRIGGER] The main onEdit trigger handler.
+ * Listens for changes in the "Booking Requests" and "Away Match Proposals" sheets.
+ * If the "Status" column is changed to "Confirmed", "Cancelled", or "Rejected",
+ * it triggers the appropriate processing function.
+ * 
+ * @param {Object} e The event object from the onEdit trigger.
  */
 function handleConfirmationEdit(e) {
   const ss = e.source;
@@ -67,8 +70,11 @@ function handleConfirmationEdit(e) {
 //==============================================================
 
 /**
- * Processes a "Confirmed" status for a HOME booking request.
+ * [CORE] Processes a "Confirmed" status for a HOME booking request.
  * (Called by handleConfirmationEdit)
+ * 
+ * @param {Object} e The event object.
+ * @param {Object} ui The Spreadsheet UI object.
  */
 function processConfirmedBooking(e, ui) {
   const range = e.range;
@@ -230,8 +236,11 @@ function processConfirmedBooking(e, ui) {
 }
 
 /**
- * Processes a "Cancelled" status for a HOME booking request.
+ * [CORE] Processes a "Cancelled" status for a HOME booking request.
  * (Called by handleConfirmationEdit)
+ * 
+ * @param {Object} e The event object.
+ * @param {Object} ui The Spreadsheet UI object.
  */
 function processCancelledBooking(e, ui) {
   const range = e.range;
@@ -356,8 +365,11 @@ function processCancelledBooking(e, ui) {
 }
 
 /**
- * Processes a "Rejected" status for a HOME booking request.
+ * [CORE] Processes a "Rejected" status for a HOME booking request.
  * (Called by handleConfirmationEdit)
+ * 
+ * @param {Object} e The event object.
+ * @param {Object} ui The Spreadsheet UI object.
  */
 function processRejectedBooking(e, ui) {
   const range = e.range;
@@ -419,8 +431,11 @@ function processRejectedBooking(e, ui) {
 //==============================================================
 
 /**
- * Processes a "Confirmed" status for an AWAY match proposal.
+ * [CORE] Processes a "Confirmed" status for an AWAY match proposal.
  * (Called by handleConfirmationEdit)
+ * 
+ * @param {Object} e The event object.
+ * @param {Object} ui The Spreadsheet UI object.
  */
 function processConfirmedAwayBooking(e, ui) {
   const range = e.range;
@@ -546,8 +561,11 @@ function processConfirmedAwayBooking(e, ui) {
 }
 
 /**
- * Processes a "Cancelled" status for an AWAY match proposal.
+ * [CORE] Processes a "Cancelled" status for an AWAY match proposal.
  * (Called by handleConfirmationEdit)
+ * 
+ * @param {Object} e The event object.
+ * @param {Object} ui The Spreadsheet UI object.
  */
 function processCancelledAwayBooking(e, ui) {
   const range = e.range;
@@ -669,9 +687,12 @@ function processCancelledAwayBooking(e, ui) {
 }
 
 /**
- * Processes a "Rejected" status for an AWAY match proposal.
+ * [CORE] Processes a "Rejected" status for an AWAY match proposal.
  * Its sole job is to send a polite rejection email.
  * (Called by handleConfirmationEdit)
+ * 
+ * @param {Object} e The event object.
+ * @param {Object} ui The Spreadsheet UI object.
  */
 function processRejectedAwayBooking(e, ui) {
   const range = e.range;
@@ -735,8 +756,10 @@ function processRejectedAwayBooking(e, ui) {
 //==============================================================
 
 /**
- * Syncs all confirmed fixtures from 'Fixtures' to 'Availability'.
+ * [CORE] Syncs all confirmed fixtures from 'Fixtures' to 'Availability'.
  * This function is now a "manager" that delegates tasks to helper functions.
+ * 
+ * @returns {Object|null} A summary object of changes, or null if failed.
  */
 function fillAvailabilityX() {
   const ui = SpreadsheetApp.getUi(); 
@@ -816,7 +839,8 @@ function fillAvailabilityX() {
 }
 
 /**
- * Processes new 'U' (Unavailable) submissions from 'Form Responses 1'.
+ * [CORE] Processes new 'U' (Unavailable) submissions from 'Form Responses 1'.
+ * Reads the form responses, parses dates, and updates the Availability sheet.
  */
 function processSubmissions() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -971,8 +995,9 @@ function processSubmissions() {
 }
 
 /**
- * Core logic to clear all 'U' marks for a specific player.
+ * [HELPER] Core logic to clear all 'U' marks for a specific player.
  * Ignores 'X' (match) and 'R' (rest) marks.
+ * 
  * @param {string} playerName The exact name of the player.
  * @returns {number} The count of 'U' marks removed.
  */
@@ -1027,8 +1052,9 @@ function _clearPlayerUnavailability(playerName) {
 }
 
 /**
- * [TIME-DRIVEN] Generic Version.
+ * [TRIGGER] Generic Version.
  * Sends internal summary (Matches + Detailed Shuttle Report) AND courtesy reminders to Opponents.
+ * Scheduled to run weekly (e.g., Friday afternoon).
  */
 function sendWeeklyMatchSummary() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1212,8 +1238,9 @@ function showOpponentSummaryDialog() {
 }
 
 /**
- * The core "engine" that finds all matches for a given opponent,
+ * [CORE] The core "engine" that finds all matches for a given opponent,
  * constructs a summary email using an HTML template, and sends it.
+ * 
  * @param {string} opponentName The exact name of the opponent club to summarize.
  */
 function sendOpponentSummaryEmail(opponentName) {
@@ -1358,6 +1385,15 @@ function clearPlayerUnavailability_menu() {
  * -1: Conflict (Admin Lock)
  * -2: Conflict (Match 'X') // We'll add this for future use, but won't use it yet
  * -3: Date Not Found in Grid
+ * 
+ * @param {Date} date The date object.
+ * @param {number} col The column index.
+ * @param {string} player The player name.
+ * @param {string[]} conflictNotes Array to push notes to.
+ * @param {Array[]} availData The availability data.
+ * @param {Object} dateMap Map of dates to row indices.
+ * @param {number} adminLockCol The admin lock column index.
+ * @returns {number} Status code.
  */
 function processDate(date, col, player, conflictNotes, availData, dateMap, adminLockCol) {
   const dStr = formatDateForSheet(date);
@@ -1393,6 +1429,7 @@ function processDate(date, col, player, conflictNotes, availData, dateMap, admin
  * 1. Removes parenthetical notes.
  * 2. Standardizes all separators (comma, semicolon, newline) to a single newline.
  * 3. Splits the string into an array and filters out any empty entries.
+ * 
  * @param {string} rawInput The messy input string from the form.
  * @returns {string[]} A clean array of date fragments to be processed.
  */

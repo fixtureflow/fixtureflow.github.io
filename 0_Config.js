@@ -10,8 +10,9 @@
 //==============================================================
 
 /**
- * This CONFIG object holds all "magic strings" like sheet names
- * and headers. If you ever rename a sheet or header, update it here.
+ * [CORE] The Global Configuration Object.
+ * Holds all "magic strings" like sheet names, header names, and column indices.
+ * If you ever rename a sheet or header in the spreadsheet, you MUST update it here.
  */
 const CONFIG = {
   SHEETS: {
@@ -40,13 +41,16 @@ const CONFIG = {
 };
 
 /**
- * Creates the main "Match Admin" menu when the spreadsheet is opened.
+ * [CORE] The Developer Email Address.
+ * Used to grant access to Tier 2 Admin Tools in the menu.
+ * IMPORTANT: Set this to the email address of the developer/admin.
  */
-// Put this at the top of your script file for easy access.
-const DEVELOPER_EMAIL = 'fixtureflow.ddlc@gmail.com'; // <--- IMPORTANT: SET THIS!
+const DEVELOPER_EMAIL = 'fixtureflow.ddlc@gmail.com'; 
 
 /**
+ * [TRIGGER] The onOpen Trigger.
  * Creates the main "Match Admin" menu when the spreadsheet is opened.
+ * 
  * V3: Implements a three-tiered access system.
  * - Tier 1: General user functions.
  * - Tier 2: Hidden admin tools for the developer.

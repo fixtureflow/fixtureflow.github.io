@@ -47,12 +47,11 @@ function _buildTeamPlayerMap(ss) {
  * This is a highly efficient way to avoid searching the grid repeatedly.
  * 
  * @param {Spreadsheet} ss The active spreadsheet object.
- * @returns {{availData: Array<Array<string>>, playerColMap: Object.<string, number>, dateRowMap: Object.<string, number>}}:
- *                   { 
- *                     availData: Array[][], // The entire 2D array of grid data
- *                     playerColMap: Object, // e.g., { "PLAYER A": 3, "PLAYER B": 4 }
- *                     dateRowMap: Object    // e.g., { "2025-10-31": 15, "2025-11-01": 16 }
- *                   }
+ * @returns {{availData: Array<Array<string>>, playerColMap: Object.<string, number>, dateRowMap: Object.<string, number>}}
+ *          An object containing:
+ *          - availData: The entire 2D array of grid data
+ *          - playerColMap: Map of player names to column indices (e.g., { "PLAYER A": 3 })
+ *          - dateRowMap: Map of date strings to row indices (e.g., { "2025-10-31": 15 })
  */
 function _buildAvailabilityGridMaps(ss) {
   const availabilitySheet = ss.getSheetByName(CONFIG.SHEETS.AVAILABILITY);
@@ -274,6 +273,7 @@ function _getAvailabilityMaps(ss, players) {
 /**
  * [HELPER] Reads the 'Teams' sheet and builds a map of team names to their captain.
  * This is an efficient way to look up captain names.
+ * 
  * @param {Spreadsheet} ss The active spreadsheet object.
  * @returns {Object.<string, string>} A map where keys are uppercase team names 
  *                                     and values are the captain's name.
@@ -299,6 +299,9 @@ function _buildTeamCaptainMap(ss) {
 
 /**
  * [HELPER] Builds a map of Opponent Club Names to their Contact Info.
+ * 
+ * @param {Spreadsheet} ss The active spreadsheet object.
+ * @returns {Object} A map of opponent contact info.
  */
 function _buildOpponentContactMap(ss) {
   // 1. Try to get sheet using Config, fallback to direct string if Config fails

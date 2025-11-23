@@ -10,21 +10,31 @@
 //==============================================================
 
 /**
- * Public-facing function for the web app to find HOME match dates.
+ * [WEB APP] Public-facing function for the web app to find HOME match dates.
+ * 
+ * @param {string} teamName The team name.
+ * @param {number} month The month (1-12).
+ * @param {number} year The year.
+ * @returns {string[]} Array of available date strings.
  */
 function findAvailableDatesForTeam(teamName, month, year) {
   return findAvailableDates_(teamName, month, year, true); // isHomeMatch = true
 }
 
 /**
- * Public-facing function for the sidebar to find AWAY match dates.
+ * [WEB APP] Public-facing function for the sidebar to find AWAY match dates.
+ * 
+ * @param {string} teamName The team name.
+ * @param {number} month The month (1-12).
+ * @param {number} year The year.
+ * @returns {string[]} Array of available date strings.
  */
 function findAvailableDatesForAwayMatch(teamName, month, year) {
   return findAvailableDates_(teamName, month, year, false); // isHomeMatch = false
 }
 
 /**
- * Finds available dates for a team.
+ * [HELPER] Finds available dates for a team.
  * This is the core validation logic for the web app.
  * REFACTORED: Now delegates data-gathering to private helpers.
  *
@@ -130,9 +140,12 @@ function findAvailableDates_(teamName, month, year, isHomeMatch) {
 }
 
 /**
- * Submits a new booking request. Runs all validation checks again
+ * [WEB APP] Submits a new booking request. Runs all validation checks again
  * inside a lock to prevent double-bookings.
  * REFACTORED: Now delegates validation logic to private helpers.
+ * 
+ * @param {Object} booking The booking object.
+ * @returns {string} "Success" or error message.
  */
 function submitBookingRequest(booking) {
   const lock = LockService.getScriptLock();
