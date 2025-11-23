@@ -154,6 +154,7 @@
   // ============================================
 
   function showBookingFlow(mode) {
+    hideError();
     currentMode = mode;
     
     // Update UI classes for mode-specific visibility
@@ -399,6 +400,10 @@
         el.value = '';
       }
     });
+
+    // Reset specific buttons
+    const findBtn = document.getElementById('find-dates-btn');
+    if (findBtn) findBtn.disabled = true;
 
     // Hide steps
     document.getElementById('step-2-fieldset').style.display = 'none';
