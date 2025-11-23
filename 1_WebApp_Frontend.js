@@ -265,7 +265,7 @@ function getOpponentClubs_() {
     const clubSet = new Set();
 
     for (const row of data) {
-      const clubName = row[0];
+      const clubName = String(row[0]).trim();
       const clubEmail = row[5]; // Column F
       if (clubName && !clubSet.has(clubName)) {
         clubSet.add(clubName);
@@ -308,7 +308,7 @@ function getPendingHomeFixtures() {
     const ourTeam = row[h['Team No.']];
     const homeAway = row[h['Home / Away']];
     const status = row[h['Match Status']];
-    const oppClub = row[h['Opposition Club']];
+    const oppClub = String(row[h['Opposition Club']]).trim();
     const oppTeam = row[h['Opp Team No.']];
     const matchType = row[h['League / Cup']];
 
@@ -370,7 +370,7 @@ function getPendingAwayFixtures() {
       continue;
     }
     
-    const oppClub = row[h['Opposition Club']];
+    const oppClub = String(row[h['Opposition Club']]).trim();
     const oppTeam = row[h['Opp Team No.']];
     const matchType = row[h['League / Cup']];
     

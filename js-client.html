@@ -37,13 +37,15 @@
     dataLoadCounter++;
     if (dataLoadCounter === TOTAL_DATA_STREAMS) {
       // Initial setup is done.
+
       // If away booking is disabled, we default to home and hide the switcher.
       if (!awayBookingEnabled) {
         document.getElementById('step-0-fieldset').style.display = 'none';
         showBookingFlow('home');
       } else {
-        // If enabled, we wait for user to pick a mode.
-        // But we can populate the team dropdown now (it will be filtered when mode is selected).
+        // If enabled, show the options now that data is ready
+        document.getElementById('step-0-loading').style.display = 'none';
+        document.getElementById('step-0-options').style.display = 'block';
       }
     }
   }

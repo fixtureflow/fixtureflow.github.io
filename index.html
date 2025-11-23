@@ -26,16 +26,19 @@
     <? if (awayBookingEnabled) { ?>
     <fieldset id="step-0-fieldset">
       <legend>Step 0: Choose Booking Type</legend>
-        <div>
-          <input type="radio" name="booking-type" id="type-home" value="home" onchange="showBookingFlow('home')">
-          <label for="type-home">Book a match AT OUR venue</label>
+        <div id="step-0-loading">Loading data...</div>
+        <div id="step-0-options" style="display:none;">
+          <div>
+            <input type="radio" name="booking-type" id="type-home" value="home" onchange="showBookingFlow('home')">
+            <label for="type-home">Book a match AT OUR venue</label>
+          </div>
+          <div>
+            <input type="radio" name="booking-type" id="type-away" value="away" onchange="showBookingFlow('away')">
+            <label for="type-away">Propose a match AT YOUR venue</label>
+          </div>
         </div>
-        <div>
-          <input type="radio" name="booking-type" id="type-away" value="away" onchange="showBookingFlow('away')">
-          <label for="type-away">Propose a match AT YOUR venue</label>
-        </div>
-        </fieldset>
-        <? } ?>
+    </fieldset>
+    <? } ?>
 
     <!-- UNIFIED BOOKING FLOW CONTAINER -->
     <!-- Default to hidden until loaded/selected -->
