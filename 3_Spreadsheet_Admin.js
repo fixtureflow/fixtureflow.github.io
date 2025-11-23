@@ -49,709 +49,20 @@ function handleConfirmationEdit(e) {
     ui.showModalDialog(htmlOutput, 'Processing...');
     SpreadsheetApp.flush();
 
-    // 3. And finally, route to the correct processing function.
+    // 3. And finally, route to the unified processor.
     const sheetName = sheet.getName();
-    if (sheetName === CONFIG.SHEETS.BOOKING_REQUESTS) {
-      if (newValue === 'confirmed') { processConfirmedBooking(e, ui); } 
-      else if (newValue === 'cancelled') { processCancelledBooking(e, ui); } 
-      else if (newValue === 'rejected') { processRejectedBooking(e, ui); }
-    } 
-    else if (sheetName === CONFIG.SHEETS.AWAY_MATCH_PROPOSALS) {
-      if (newValue === 'confirmed') { processConfirmedAwayBooking(e, ui); } 
-      else if (newValue === 'cancelled') { processCancelledAwayBooking(e, ui); } 
-      else if (newValue === 'rejected') { processRejectedAwayBooking(e, ui); }
+    const isHome = (sheetName === CONFIG.SHEETS.BOOKING_REQUESTS);
+
+    if (isHome || sheetName === CONFIG.SHEETS.AWAY_MATCH_PROPOSALS) {
+      _processBookingChange(e, newValue, isHome);
     }
   }
   // If the newValue is 'pending' or anything else, the function simply ends here.
 }
 
-//==============================================================
-//--- HOME BOOKING HANDLERS ---//
-//==============================================================
 
-/**
- * [CORE] Processes a "Confirmed" status for a HOME booking request.
- * (Called by handleConfirmationEdit)
- * 
- * @param {Object} e The event object.
- * @param {Object} ui The Spreadsheet UI object.
- */
-function processConfirmedBooking(e, ui) {
-  const range = e.range;
-  const oldValue = e.oldValue;
-  try {
-    // --- 1. GET INITIAL DATA ---
-    const sheet = range.getSheet();
-    const ss = sheet.getParent();
-    const row = range.getRow();
-    const allData = sheet.getDataRange().getValues();
-    const headers = allData[0].map(h => h.trim());
-    const rowData = allData[row - 1];
-    const h = {};
-    headers.forEach((header, i) => { h[header] = i; });
 
-    const opponentClubName = rowData[h['Requesting Club']];
-    const opponentTeamName = rowData[h['Their Team']];
-    const ourTeamNumber = rowData[h['Your Team']];
-    const opponentEmail = rowData[h['Contact Email']];
-    const matchType = rowData[h['Match Type']];
-    const proposedDate = rowData[h['Proposed Date']];
-    const proposedTime = rowData[h['Proposed Time']];
-    const matchDate = new Date(proposedDate);
 
-    if (isNaN(matchDate.getTime())) {
-      throw new Error("Invalid Date. Please correct the date and try again.");
-    }
-    
-    // --- 2. VALIDATE THE PROPOSAL ---
-    const settings = getClubSettings(); // Fetch settings FIRST
-    // Correctly set to 'true' for a HOME match.
-    _validateProposal(ourTeamNumber, matchDate, true, settings); 
-
-    // --- 3. GET VENUE AND TEAM INFO & UPDATE FIXTURES ---
-    // const settings = getClubSettings(); // Removed (fetched above)
-    const ourClubName = settings['Club Name'] || 'Match Secretary';
-    const formattedTime = formatTimeFromSheet(proposedTime);
-    const formattedDay = Utilities.formatDate(matchDate, Session.getScriptTimeZone(), 'EEEE');
-    const venueKey = _getDaySettingKey(matchDate.getDay(), 'Venue');
-    const venueName = settings[venueKey] || ourClubName;
-
-    const fixturesSheet = ss.getSheetByName(CONFIG.SHEETS.FIXTURES);
-    if (!fixturesSheet) throw new Error("'Fixtures' sheet not found.");
-    const fixturesData = fixturesSheet.getDataRange().getValues();
-    const fx_h = findFixtureHeaders(fixturesData);
-    if (!fx_h) throw new Error("Could not find headers in 'Fixtures' sheet.");
-
-    let fixtureUpdated = false;
-    let sctn = '', division = '', event = '';
-    let foundRowIndex = -1;
-
-    // Correctly searching for a 'Home' match.
-    for (let i = fx_h.headerRowIndex + 1; i < fixturesData.length; i++) {
-        const fRow = fixturesData[i];
-        if (fRow[fx_h['Home / Away']] === 'Home' && fRow[fx_h['Team No.']] === ourTeamNumber && fRow[fx_h['Opposition Club']] === opponentClubName && fRow[fx_h['Opp Team No.']] === opponentTeamName && fRow[fx_h['Match Status']] === 'Not confirmed') {
-            foundRowIndex = i;
-            sctn = fRow[fx_h['Sctn']];
-            division = fRow[fx_h['Div']];
-            event = fRow[fx_h['Event']] || _getEventFromTeamName(ourTeamNumber);
-            break;
-        }
-    }
-
-    if (foundRowIndex !== -1) {
-        // --- Scenario 1: Update an existing "Not confirmed" fixture ---
-        const sheetRow = foundRowIndex + 1;
-        const rowRange = fixturesSheet.getRange(sheetRow, 1, 1, fixturesSheet.getLastColumn());
-        const existing_fx_rowData = rowRange.getValues()[0];
-        
-        existing_fx_rowData[fx_h['Date']] = matchDate;
-        existing_fx_rowData[fx_h['Day']] = formattedDay;
-        existing_fx_rowData[fx_h['Time']] = formattedTime;
-        existing_fx_rowData[fx_h['Match Status']] = 'Confirmed';
-        existing_fx_rowData[fx_h['Venue / Hall']] = venueName;
-        existing_fx_rowData[fx_h['Event']] = event;
-        existing_fx_rowData[fx_h['Div']] = division;
-        existing_fx_rowData[fx_h['League / Cup']] = matchType;
-        
-        rowRange.setValues([existing_fx_rowData]);
-        Logger.log(`Updated existing Fixtures row: ${sheetRow}`);
-        fixtureUpdated = true;
-
-    } else {
-        // --- Scenario 2: Append a new fixture row ---
-        Logger.log(`No existing "Not confirmed" match found. Appending new row.`);
-        let newRow = new Array(fx_h.headerRowIndex > -1 ? fixturesData[fx_h.headerRowIndex].length : 15).fill('');
-        
-        // Ensure we have the division and event, looking it up if necessary
-        division = division || _getDivisionFromTeamName(ss, ourTeamNumber);
-        event = event || _getEventFromTeamName(ourTeamNumber);
-        
-        newRow[fx_h['Date']] = matchDate;
-        newRow[fx_h['Day']] = formattedDay;
-        newRow[fx_h['Time']] = formattedTime;
-        newRow[fx_h['Event']] = event;
-        newRow[fx_h['Div']] = division;
-        newRow[fx_h['League / Cup']] = matchType;
-        newRow[fx_h['Your Club']] = ourClubName;
-        newRow[fx_h['Team No.']] = ourTeamNumber;
-        newRow[fx_h['Home / Away']] = 'Home';
-        newRow[fx_h['Opposition Club']] = opponentClubName;
-        newRow[fx_h['Opp Team No.']] = opponentTeamName;
-        newRow[fx_h['Venue / Hall']] = venueName;
-        newRow[fx_h['Match Status']] = 'Confirmed';
-        
-        fixturesSheet.appendRow(newRow);
-        fixtureUpdated = true;
-    }
-
-    // --- 4. SEND CONFIRMATION EMAIL ---
-    const dateStr = formatDateForSheet(matchDate);
-
-    // --- Use the Centralized Test Mode Helper ---
-    const originalSubject = `Match Confirmed: ${opponentClubName} ${opponentTeamName} (Your AWAY Match) vs ${ourClubName} on ${dateStr}`;
-    
-    const emailTemplate = HtmlService.createTemplateFromFile('ConfirmationEmail.html');
-    emailTemplate.opponentClubName = opponentClubName;
-    emailTemplate.opponentTeamName = opponentTeamName;
-    emailTemplate.ourClubName = ourClubName;
-    emailTemplate.ourTeamNumber = ourTeamNumber;
-    emailTemplate.event = event || '';
-    emailTemplate.division = division || '';
-    emailTemplate.sctn = sctn || '';
-    emailTemplate.matchType = matchType;
-    emailTemplate.formattedDate = formatDate(matchDate);
-    emailTemplate.formattedTime = formattedTime;
-    emailTemplate.venueName = venueName;
-    emailTemplate.formattedShortDate = Utilities.formatDate(matchDate, Session.getScriptTimeZone(), 'd MMM yyyy');
-    emailTemplate.formattedDay = formattedDay;
-    const htmlBody = emailTemplate.evaluate().getContent();
-    const plainBody = htmlBody.replace(/<[^>]+>/g, '');
-    
-    // Use centralized helper
-    const emailInfo = _sendClubEmail(opponentEmail, originalSubject, htmlBody, settings, plainBody);
-
-    // --- 5. SYNC AVAILABILITY ---
-    const fillResult = fillAvailabilityX(true); // Silent mode: No double dialogs
-    const addedX = fillResult ? fillResult.addedX : 0;
-    const addedR = fillResult ? fillResult.addedR : 0;
-
-    // --- 6. COMMIT THE FINAL STATUS CHANGE ---
-    range.setValue('Confirmed');
-    
-    // --- 7. SHOW THE FINAL SUCCESS DIALOG ---
-    const successTitle = "HOME Match Confirmed!";
-    const matchInfo = `${ourClubName} ${ourTeamNumber} vs ${opponentClubName} ${opponentTeamName}`;
-    const actions = [
-      fixtureUpdated ? `✔ Fixture sheet updated.` : `⚠ Fixture not found/updated.`,
-      `✔ Email sent to ${emailInfo.recipient}.`,
-      `✔ Availability synced (Added ${addedX} 'X' & ${addedR} 'R').`
-    ];
-    showFinalDialog(successTitle, matchInfo, actions.join('\n'));
-
-  } catch (err) {
-    // If any error occurs (e.g., email fails), it's caught here.
-    ui.alert(`A critical error occurred: ${err.message}`);
-    Logger.log(`CRITICAL ERROR in processConfirmedBooking: ${err.message}\nStack: ${err.stack}`);
-    if(range) range.setValue(oldValue || "Error");
-  }
-}
-
-/**
- * [CORE] Processes a "Cancelled" status for a HOME booking request.
- * (Called by handleConfirmationEdit)
- * 
- * @param {Object} e The event object.
- * @param {Object} ui The Spreadsheet UI object.
- */
-function processCancelledBooking(e, ui) {
-  const range = e.range;
-  const oldValue = e.oldValue;
-  try {
-    // --- 1. GET INITIAL DATA ---
-    const sheet = range.getSheet();
-    const ss = sheet.getParent();
-    const row = range.getRow();
-    const allData = sheet.getDataRange().getValues();
-    const headers = allData[0].map(h => h.trim());
-    const rowData = allData[row - 1];
-    const h = {};
-    headers.forEach((header, i) => { h[header] = i; });
-
-    const opponentClubName = rowData[h['Requesting Club']];
-    const opponentTeamName = rowData[h['Their Team']];
-    const ourTeamNumber = rowData[h['Your Team']];
-    const opponentEmail = rowData[h['Contact Email']];
-    const matchType = rowData[h['Match Type']];
-    const proposedDate = rowData[h['Proposed Date']];
-    const proposedTime = rowData[h['Proposed Time']];
-    const matchDate = new Date(proposedDate);
-
-    if (isNaN(matchDate.getTime())) {
-      throw new Error("Invalid Date. Please correct the date and try again.");
-    }
-    
-    // --- 2. FIND & REVERT FIXTURE ---
-    let fixtureUpdated = false;
-    const settings = getClubSettings();
-    const ourClubName = settings['Club Name'] || 'Match Secretary';
-    const fixturesSheet = ss.getSheetByName(CONFIG.SHEETS.FIXTURES);
-    if (!fixturesSheet) throw new Error("'Fixtures' sheet not found.");
-    
-    const fixturesData = fixturesSheet.getDataRange().getValues();
-    const fx_h = findFixtureHeaders(fixturesData);
-    if (!fx_h) throw new Error("Could not find headers in 'Fixtures' sheet.");
-
-    const isInternalMatch = (ourClubName === opponentClubName);
-    for (let i = fx_h.headerRowIndex + 1; i < fixturesData.length; i++) {
-      const fRow = fixturesData[i];
-      const fRowDateStr = fRow[fx_h['Date']] ? formatDateForSheet(new Date(fRow[fx_h['Date']])) : null;
-
-      let isTheMatch = false;
-      if (fRow[fx_h['Home / Away']] === 'Home' && fRow[fx_h['Team No.']] === ourTeamNumber && fRowDateStr === formatDateForSheet(matchDate) && fRow[fx_h['Match Status']] === 'Confirmed') {
-          if (isInternalMatch) {
-              // For an internal match, just check the opponent's team number.
-              if (fRow[fx_h['Opp Team No.']] === opponentTeamName) {
-                  isTheMatch = true;
-              }
-          } else {
-              // For a normal external match, check the opponent's club name.
-              if (fRow[fx_h['Opposition Club']] === opponentClubName) {
-                  isTheMatch = true;
-              }
-          }
-      }
-
-        if (isTheMatch) {
-          // We found it. Revert it.
-          const sheetRow = i + 1;
-          const rowRange = fixturesSheet.getRange(sheetRow, 1, 1, fixturesSheet.getLastColumn());
-          const existing_fx_rowData = rowRange.getValues()[0];
-          existing_fx_rowData[fx_h['Match Status']] = 'Not confirmed';
-          existing_fx_rowData[fx_h['Date']] = '';
-          existing_fx_rowData[fx_h['Day']] = '';
-          existing_fx_rowData[fx_h['Time']] = '';
-          rowRange.setValues([existing_fx_rowData]);
-          Logger.log(`Reverted Fixtures row ${sheetRow} to "Not confirmed".`);
-          fixtureUpdated = true;
-          break;
-        }
-    }
-      
-    // --- 3. SEND CANCELLATION EMAIL ---
-      // --- Use the Centralized Test Mode Helper ---
-    const originalSubject = `Match CANCELLED: ${opponentClubName} ${opponentTeamName} (Your AWAY Match) vs ${ourClubName} on ${formatDateForSheet(matchDate)}`;
-      
-      const webAppUrl = settings['Web App URL'];
-      const formattedTime = formatTimeFromSheet(proposedTime);
-      const emailTemplate = HtmlService.createTemplateFromFile('CancellationEmail.html');
-      // Pass standardized variables
-      emailTemplate.webAppUrl = webAppUrl;
-      emailTemplate.opponentClubName = opponentClubName; 
-      emailTemplate.opponentTeamName = opponentTeamName; 
-      emailTemplate.matchType = matchType;
-      emailTemplate.ourClubName = ourClubName;           
-      emailTemplate.ourTeamNumber = ourTeamNumber;  
-      emailTemplate.formattedDate = formatDate(matchDate);
-      emailTemplate.formattedTime = formattedTime;
-      const htmlBody = emailTemplate.evaluate().getContent();
-      const plainBody = htmlBody.replace(/<[^>]+>/g, '');
-
-    // Use centralized helper
-    const emailInfo = _sendClubEmail(opponentEmail, originalSubject, htmlBody, settings, plainBody);
-  
-    // --- 4. SYNC AVAILABILITY ---
-    const fillResult = fillAvailabilityX(true); // Silent mode
-    const removedX = fillResult ? fillResult.removedX : 0;
-    const removedR = fillResult ? fillResult.removedR : 0;
-
-    // --- 5. COMMIT THE FINAL STATUS CHANGE ---
-    range.setValue('Cancelled');
-    
-    // --- 6. SHOW THE FINAL SUCCESS DIALOG ---
-    const successTitle = "HOME Match Cancelled!";
-    const matchInfo = `${ourClubName} ${ourTeamNumber} vs ${opponentClubName} ${opponentTeamName}`;
-    const actions = [
-      fixtureUpdated ? `✔ Fixture status reset.` : `⚠ Fixture not found/reset.`,
-      `✔ Email sent to ${emailInfo.recipient}.`,
-      `✔ Availability synced (Removed ${removedX} 'X' & ${removedR} 'R').`
-    ];
-    showFinalDialog(successTitle, matchInfo, actions.join('\n'));
-
-  } catch (err) {
-    // If any error occurs (e.g., email fails), it's caught here.
-    ui.alert(`A critical error occurred: ${err.message}`);
-    Logger.log(`CRITICAL ERROR in processCancelledBooking: ${err.message}\nStack: ${err.stack}`);
-    if(range) range.setValue(oldValue || "Error");
-  }
-}
-
-/**
- * [CORE] Processes a "Rejected" status for a HOME booking request.
- * (Called by handleConfirmationEdit)
- * 
- * @param {Object} e The event object.
- * @param {Object} ui The Spreadsheet UI object.
- */
-function processRejectedBooking(e, ui) {
-  const range = e.range;
-  const oldValue = e.oldValue;
-
-  try {
-    // --- 1. GET INITIAL DATA (Standardized) ---
-    const sheet = range.getSheet();
-    const row = range.getRow();
-    const allData = sheet.getDataRange().getValues();
-    const headers = allData[0].map(h => h.trim());
-    const rowData = allData[row - 1];
-    const h = {};
-    headers.forEach((header, i) => { h[header] = i; });
-
-    // Standardized variable names
-    const opponentClubName = rowData[h['Requesting Club']];
-    const opponentTeamName = rowData[h['Their Team']];
-    const ourTeamNumber = rowData[h['Your Team']];
-    const opponentEmail = rowData[h['Contact Email']];
-    const proposedDate = rowData[h['Proposed Date']];
-    const proposedTime = rowData[h['Proposed Time']];
-
-    // --- 2. SEND REJECTION EMAIL ---
-    const settings = getClubSettings();
-    const ourClubName = settings['Club Name'] || 'Match Secretary';
-
-    // Call the helper function. It will throw an error if it fails.
-    const emailInfo = _sendRejectionEmail(
-      true,                  // isHomeRejection
-      opponentClubName,
-      opponentTeamName,      
-      ourTeamNumber,         
-      opponentEmail,
-      new Date(proposedDate),
-      proposedTime
-    );
-
-    // --- 3. COMMIT THE FINAL STATUS CHANGE ---
-    range.setValue('Rejected');
-    
-    // --- 4. SHOW THE FINAL SUCCESS DIALOG ---
-    const successTitle = "HOME Request Rejected!";
-    const matchInfo = `${ourClubName} ${ourTeamNumber} vs ${opponentClubName} ${opponentTeamName}`;
-    const actions = `✔ Rejection email sent to ${emailInfo.recipient}.`;
-    
-    showFinalDialog(successTitle, matchInfo, actions);
-
-  } catch (err) {
-    // If any error occurs (e.g., email fails), it's caught here.
-    ui.alert(`A critical error occurred: ${err.message}`);
-    Logger.log(`CRITICAL ERROR in processRejectedBooking: ${err.message}\nStack: ${err.stack}`);
-    if(range) range.setValue(oldValue || "Error");
-  }
-}
-
-//==============================================================
-//--- AWAY BOOKING HANDLERS ---//
-//==============================================================
-
-/**
- * [CORE] Processes a "Confirmed" status for an AWAY match proposal.
- * (Called by handleConfirmationEdit)
- * 
- * @param {Object} e The event object.
- * @param {Object} ui The Spreadsheet UI object.
- */
-function processConfirmedAwayBooking(e, ui) {
-  const range = e.range;
-  const oldValue = e.oldValue;
-
-  try {
-    // --- 1. GET INITIAL DATA ---
-    const sheet = range.getSheet();
-    const row = range.getRow();
-    const allData = sheet.getDataRange().getValues();
-    const headers = allData[0].map(h => h.trim());
-    const rowData = allData[row - 1];
-    const h = {};
-    headers.forEach((header, i) => { h[header] = i; });
-
-    const opponentClubName = rowData[h['Opponent Club']];
-    const opponentTeamName = rowData[h['Their Team']];
-    const ourTeamNumber = rowData[h['Our Team']];
-    const matchType = rowData[h['Match Type']];
-    const proposedDate = rowData[h['Proposed Date']];
-    const proposedTime = rowData[h['Proposed Time']];
-    const opponentEmail = rowData[h['Contact Email']];
-    const venueName = rowData[h['Venue']];
-    const matchDate = new Date(proposedDate);
-
-    if (isNaN(matchDate.getTime())) {
-      throw new Error("Invalid Date. Please fix and reset status.");
-    }
-    
-    // --- 2. VALIDATE & FIND FIXTURE ---
-    const settings = getClubSettings(); // Fetch settings FIRST
-    _validateProposal(ourTeamNumber, matchDate, false, settings); // isHomeMatch = false
-
-    // const settings = getClubSettings(); // Removed (fetched above)
-    const ourClubName = settings['Club Name'] || 'Match Secretary';
-    const fixturesSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.FIXTURES);
-    if (!fixturesSheet) throw new Error("'Fixtures' sheet not found.");
-    
-    const fixturesData = fixturesSheet.getDataRange().getValues();
-    const fx_h = findFixtureHeaders(fixturesData);
-    if (!fx_h) throw new Error("Could not find headers in 'Fixtures' sheet.");
-
-    let foundRowIndex = -1;
-    for (let i = fx_h.headerRowIndex + 1; i < fixturesData.length; i++) {
-        const fRow = fixturesData[i];
-        if (fRow[fx_h['Home / Away']] === 'Away' && fRow[fx_h['Team No.']] === ourTeamNumber && fRow[fx_h['Opposition Club']] === opponentClubName && fRow[fx_h['Opp Team No.']] === opponentTeamName && fRow[fx_h['Match Status']] === 'Not confirmed') {
-            foundRowIndex = i;
-            break;
-        }
-    }
-    
-    if (foundRowIndex === -1) {
-      throw new Error('Could not find a corresponding "Not confirmed" AWAY fixture to update.');
-    }
-
-    // --- 3. UPDATE FIXTURE & SEND EMAIL ---
-    const sheetRow = foundRowIndex + 1;
-    const rowRange = fixturesSheet.getRange(sheetRow, 1, 1, fixturesSheet.getLastColumn());
-    const fx_rowData = rowRange.getValues()[0];
-    
-    const division = fx_rowData[fx_h['Div']];
-    const event = fx_rowData[fx_h['Event']];
-    const sctn = fx_rowData[fx_h['Sctn']];
-    const formattedTime = formatTimeFromSheet(proposedTime);
-    
-    fx_rowData[fx_h['League / Cup']] = matchType;
-    fx_rowData[fx_h['Date']] = matchDate;
-    fx_rowData[fx_h['Day']] = Utilities.formatDate(matchDate, Session.getScriptTimeZone(), 'EEEE');
-    fx_rowData[fx_h['Time']] = formattedTime;
-    fx_rowData[fx_h['Venue / Hall']] = venueName;
-    fx_rowData[fx_h['Match Status']] = 'Confirmed';
-    rowRange.setValues([fx_rowData]);
-    Logger.log(`Updated Fixtures row ${sheetRow} for confirmed away match.`);
-
-    // --- Email Logic ---
-    const emailTemplate = HtmlService.createTemplateFromFile('AwayConfirmationEmail.html');
-    // Pass standardized variables
-    emailTemplate.opponentClubName = opponentClubName;
-    emailTemplate.ourClubName = ourClubName;
-    emailTemplate.event = event || '';
-    emailTemplate.division = division || '';
-    emailTemplate.sctn = sctn || '';
-    emailTemplate.matchType = matchType || '';
-    emailTemplate.opponentTeamName = opponentTeamName;
-    emailTemplate.ourTeamNumber = ourTeamNumber;
-    emailTemplate.formattedDate = formatDate(matchDate);
-    emailTemplate.formattedTime = formattedTime;
-    emailTemplate.venueName = venueName;
-    emailTemplate.formattedShortDate = Utilities.formatDate(matchDate, Session.getScriptTimeZone(), 'd MMM yyyy');
-    emailTemplate.formattedDay = Utilities.formatDate(matchDate, Session.getScriptTimeZone(), 'EEEE');
-
-    const htmlBody = emailTemplate.evaluate().getContent();
-    const plainBody = htmlBody.replace(/<[^>]+>/g, '');
-    
-    // --- Use the Centralized Test Mode Helper ---
-    const originalSubject = `Match Confirmed: ${opponentClubName} ${opponentTeamName} (Your HOME Match) vs ${ourClubName} ${ourTeamNumber} on ${formatDateForSheet(matchDate)}`;
-    
-    // Use centralized helper
-    const emailInfo = _sendClubEmail(opponentEmail, originalSubject, htmlBody, settings, plainBody);
-
-    // --- 4. SYNC AVAILABILITY ---
-    const fillResult = fillAvailabilityX(true); // Silent mode
-    const addedX = fillResult ? fillResult.addedX : 0;
-    const addedR = fillResult ? fillResult.addedR : 0;
-
-    // --- 5. COMMIT THE FINAL STATUS CHANGE ---
-    range.setValue('Confirmed');
-    
-    // --- 6. SHOW THE FINAL SUCCESS DIALOG ---
-    const alertTitle = "AWAY Match Confirmed!";
-    const matchInfo = `${ourClubName} ${ourTeamNumber} vs ${opponentClubName} ${opponentTeamName}`;
-    const actions = [
-      `✔ Fixture sheet updated.`,
-      `✔ Email sent to ${emailInfo.recipient}.`,
-      `✔ Availability synced (${addedX} 'X' & ${addedR} 'R' marks).`
-    ];
-    showFinalDialog(alertTitle, matchInfo, actions.join('\n'));
-
-  } catch (err) {
-    ui.alert(`A critical error occurred: ${err.message}`);
-    Logger.log(`CRITICAL ERROR in processConfirmedAwayBooking for row ${e.range.getRow()}: ${err.message}\nStack: ${err.stack}`);
-    if(range) range.setValue(oldValue || "Error");
-  }
-}
-
-/**
- * [CORE] Processes a "Cancelled" status for an AWAY match proposal.
- * (Called by handleConfirmationEdit)
- * 
- * @param {Object} e The event object.
- * @param {Object} ui The Spreadsheet UI object.
- */
-function processCancelledAwayBooking(e, ui) {
-  const range = e.range;
-  const oldValue = e.oldValue;
-
-  try {
-    // --- 1. GET INITIAL DATA ---
-    const sheet = range.getSheet();
-    const row = range.getRow();
-    const allData = sheet.getDataRange().getValues();
-    const headers = allData[0].map(h => h.trim());
-    const rowData = allData[row - 1];
-    const h = {};
-    headers.forEach((header, i) => { h[header] = i; });
-
-    const opponentClubName = rowData[h['Opponent Club']];
-    const opponentTeamName = rowData[h['Their Team']];
-    const ourTeamNumber = rowData[h['Our Team']];
-    const proposedDate = rowData[h['Proposed Date']];
-    const proposedTime = rowData[h['Proposed Time']];
-    const opponentEmail = rowData[h['Contact Email']];
-    const venueName = rowData[h['Venue']];
-    const matchDate = new Date(proposedDate);
-
-    if (isNaN(matchDate.getTime())) {
-      throw new Error("The date for this proposal is invalid. Please manually check the sheet.");
-    }
-
-    // --- 2. FIND & REVERT FIXTURE ---
-    const settings = getClubSettings();
-    const ourClubName = settings['Club Name'] || 'Match Secretary';
-    const fixturesSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.FIXTURES);
-    if (!fixturesSheet) throw new Error("'Fixtures' sheet not found.");
-    
-    const fixturesData = fixturesSheet.getDataRange().getValues();
-    const fx_h = findFixtureHeaders(fixturesData);
-    if (!fx_h) throw new Error("Could not find headers in 'Fixtures' sheet.");
-
-    let fixtureUpdated = false;
-    let foundRowIndex = -1;
-    for (let i = fx_h.headerRowIndex + 1; i < fixturesData.length; i++) {
-      const fRow = fixturesData[i];
-      const fRowDateStr = fRow[fx_h['Date']] ? formatDateForSheet(new Date(fRow[fx_h['Date']])) : null;
-      if (fRow[fx_h['Home / Away']] === 'Away' && fRow[fx_h['Team No.']] === ourTeamNumber && fRow[fx_h['Opposition Club']] === opponentClubName && fRow[fx_h['Opp Team No.']] === opponentTeamName && fRow[fx_h['Match Status']] === 'Confirmed' && fRowDateStr === formatDateForSheet(matchDate)) {
-        foundRowIndex = i;
-        break;
-      }
-    }
-
-    if (foundRowIndex !== -1) {
-      const sheetRow = foundRowIndex + 1;
-      const rowRange = fixturesSheet.getRange(sheetRow, 1, 1, fixturesSheet.getLastColumn());
-      const fx_rowData = rowRange.getValues()[0];
-      fx_rowData[fx_h['Match Status']] = 'Not confirmed';
-      fx_rowData[fx_h['Date']] = '';
-      fx_rowData[fx_h['Day']] = '';
-      fx_rowData[fx_h['Time']] = '';
-      fx_rowData[fx_h['Venue / Hall']] = '';
-      rowRange.setValues([fx_rowData]);
-      Logger.log(`Reverted AWAY Fixture row ${sheetRow} to "Not confirmed".`);
-      fixtureUpdated = true;
-    } else {
-      Logger.log(`Could not find a "Confirmed" AWAY fixture to cancel for ${ourTeamNumber} on ${formatDateForSheet(matchDate)}. A re-sync will still be run.`);
-    }
-
-    let emailInfo; // Define here to use in the final dialog
-    try {
-      const webAppUrl = settings['Web App URL'];
-      const formattedTime = formatTimeFromSheet(proposedTime);
-      
-      const emailTemplate = HtmlService.createTemplateFromFile('AwayCancellationEmail.html');
-      emailTemplate.webAppUrl = webAppUrl;
-      emailTemplate.opponentClubName = opponentClubName;
-      emailTemplate.opponentTeamName = opponentTeamName;
-      emailTemplate.ourClubName = ourClubName;
-      emailTemplate.ourTeamNumber = ourTeamNumber;
-      emailTemplate.formattedDate = formatDate(matchDate);
-      emailTemplate.formattedTime = formattedTime;
-      emailTemplate.venueName = venueName;
-      
-      const htmlBody = emailTemplate.evaluate().getContent();
-      const plainBody = htmlBody.replace(/<[^>]+>/g, '');
-
-      // --- Use the Centralized Test Mode Helper ---
-      const originalSubject = `Match CANCELLED: ${opponentClubName} ${opponentTeamName} (Your HOME Match) vs ${ourClubName} ${ourTeamNumber} on ${formatDateForSheet(matchDate)}`;
-      
-      // Use centralized helper
-      emailInfo = _sendClubEmail(opponentEmail, originalSubject, htmlBody, settings, plainBody);
-      Logger.log(`Away cancellation email sent to ${emailInfo.recipient}.`);
-
-    } catch (emailError) {
-      // If the email fails, THROW a new, user-friendly error to be caught by the main catch block.
-      throw new Error(`Failed to send email. Original error: ${emailError.message}`);
-    }
-
-    // --- 4. SYNC AVAILABILITY ---
-    const fillResult = fillAvailabilityX(true); // Silent mode
-    const removedX = fillResult ? fillResult.removedX : 0;
-    const removedR = fillResult ? fillResult.removedR : 0;
-
-    // --- 5. COMMIT THE FINAL STATUS CHANGE ---
-    range.setValue('Cancelled');
-
-    // --- 6. SHOW THE FINAL SUCCESS DIALOG ---
-    const alertTitle = "AWAY Match Cancelled!";
-    const matchInfo = `${ourClubName} ${ourTeamNumber} vs ${opponentClubName} ${opponentTeamName}`;
-    const actions = [
-      fixtureUpdated ? `✔ Fixture status reset.` : `⚠ Confirmed fixture was not found to reset.`,
-      `✔ Cancellation email sent to ${emailInfo.recipient}.`,
-      `✔ Availability synced (Removed ${removedX} 'X' & ${removedR} 'R').`
-    ];
-    showFinalDialog(alertTitle, matchInfo, actions.join('\n'));
-
-  } catch (err) {
-    ui.alert(`A critical error occurred: ${err.message}`);
-    Logger.log(`CRITICAL ERROR in processCancelledAwayBooking for row ${e.range.getRow()}: ${err.message}\nStack: ${err.stack}`);
-    if (range) range.setValue(oldValue || "Error");
-  }
-}
-
-/**
- * [CORE] Processes a "Rejected" status for an AWAY match proposal.
- * Its sole job is to send a polite rejection email.
- * (Called by handleConfirmationEdit)
- * 
- * @param {Object} e The event object.
- * @param {Object} ui The Spreadsheet UI object.
- */
-function processRejectedAwayBooking(e, ui) {
-  const range = e.range;
-  const oldValue = e.oldValue;
-  
-  try {
-    // --- 1. GET INITIAL DATA ---
-    const sheet = range.getSheet();
-    const row = range.getRow();
-    const allData = sheet.getDataRange().getValues();
-    const headers = allData[0].map(h => h.trim());
-    const rowData = allData[row - 1];
-    const h = {};
-    headers.forEach((header, i) => { h[header] = i; });
-
-    // Standardized variable names
-    const opponentClubName = rowData[h['Opponent Club']];
-    const opponentTeamName = rowData[h['Their Team']];
-    const ourTeamNumber = rowData[h['Our Team']];
-    const proposedDate = rowData[h['Proposed Date']];
-    const proposedTime = rowData[h['Proposed Time']];
-    const opponentEmail = rowData[h['Contact Email']];
-    const venueName = rowData[h['Venue']];
-
-    const settings = getClubSettings_(); // Use backend getter
-    const ourClubName = settings['Club Name'] || 'Match Secretary';
-
-    // --- 2. SEND REJECTION EMAIL (Using Helper) ---
-    // We simply call the helper. It handles templates, branding, and safety.
-    
-    const emailInfo = _sendRejectionEmail(
-      false,                  // isHomeRejection (FALSE for Away)
-      opponentClubName,
-      opponentTeamName,
-      ourTeamNumber,
-      opponentEmail,
-      new Date(proposedDate),
-      proposedTime,
-      venueName               // Pass venue for Away matches
-    );
-
-    // --- 3. COMMIT THE FINAL STATUS CHANGE ---
-    range.setValue('Rejected');
-
-    // --- 4. SHOW THE FINAL SUCCESS DIALOG ---
-    const successTitle = "AWAY Proposal Rejected!";
-    const matchInfo = `${ourClubName} ${ourTeamNumber} vs ${opponentClubName} ${opponentTeamName}`;
-    const actions = `✔ Rejection email sent to ${emailInfo.recipient}.`;
-    
-    showFinalDialog(successTitle, matchInfo, actions);
-
-  } catch (err) {
-    ui.alert(`A critical error occurred: ${err.message}`);
-    Logger.log(`CRITICAL ERROR in processRejectedAwayBooking: ${err.message}\nStack: ${err.stack}`);
-    if (range) range.setValue(oldValue || "Error");
-  }
-}
 
 //==============================================================
 //--- CORE ADMIN TOOLS ---//
@@ -1648,4 +959,310 @@ function showFinalDialog(title, matchInfo, actions) {
     .setHeight(230); // Slightly taller
     
   SpreadsheetApp.getUi().showModalDialog(htmlOutput, title);
+}
+
+/**
+ * [HELPER] Normalizes booking data from either the Home or Away sheet.
+ * This abstracts away the header differences between the two sheets.
+ * 
+ * @param {Sheet} sheet The sheet object (Booking Requests or Away Match Proposals).
+ * @param {Array} rowData The array of values for the specific row.
+ * @param {boolean} isHome True if this is a Home booking request.
+ * @returns {Object} Normalized data object.
+ */
+function _extractBookingData(sheet, rowData, isHome) {
+  const allData = sheet.getDataRange().getValues();
+  const headers = allData[0].map(h => h.trim());
+  const h = {};
+  headers.forEach((header, i) => { h[header] = i; });
+
+  // Common fields with potentially different header names
+  const data = {
+    opponentClub: isHome ? rowData[h['Requesting Club']] : rowData[h['Opponent Club']],
+    opponentTeam: rowData[h['Their Team']],
+    ourTeam: isHome ? rowData[h['Your Team']] : rowData[h['Our Team']],
+    email: rowData[h['Contact Email']],
+    matchType: rowData[h['Match Type']],
+    proposedDate: rowData[h['Proposed Date']],
+    proposedTime: rowData[h['Proposed Time']],
+    venue: isHome ? null : rowData[h['Venue']] // Venue only explicitly in Away sheet
+  };
+
+  // Derived fields
+  data.matchDate = new Date(data.proposedDate);
+  if (isNaN(data.matchDate.getTime())) {
+    throw new Error("Invalid Date. Please correct the date and try again.");
+  }
+  data.formattedTime = formatTimeFromSheet(data.proposedTime);
+  data.formattedDay = Utilities.formatDate(data.matchDate, Session.getScriptTimeZone(), 'EEEE');
+  data.dateStr = formatDateForSheet(data.matchDate);
+
+  return data;
+}
+
+/**
+ * [CORE] Unified processor for all booking status changes.
+ * Handles Confirm, Cancel, and Reject for both Home and Away matches.
+ * 
+ * @param {Object} e The event object from onEdit.
+ * @param {string} action The action to perform ('confirmed', 'cancelled', 'rejected').
+ * @param {boolean} isHome True if this is a Home booking request.
+ */
+function _processBookingChange(e, action, isHome) {
+  const ui = SpreadsheetApp.getUi();
+  const range = e.range;
+  const oldValue = e.oldValue;
+  const sheet = range.getSheet();
+  const row = range.getRow();
+
+  try {
+    // --- 1. GET & NORMALIZE DATA ---
+    const allData = sheet.getDataRange().getValues();
+    const rowData = allData[row - 1];
+    const data = _extractBookingData(sheet, rowData, isHome);
+
+    // --- 2. GET SETTINGS ---
+    const settings = getClubSettings_();
+    const ourClubName = settings['Club Name'] || 'Match Secretary';
+
+    // --- 3. EXECUTE ACTION ---
+    let emailInfo = {};
+    let fixtureUpdated = false;
+    let availabilityStats = { addedX: 0, addedR: 0, removedX: 0, removedR: 0 };
+    let successTitle = "";
+    let successActions = [];
+
+    if (action === 'confirmed') {
+      // --- VALIDATE ---
+      _validateProposal(data.ourTeam, data.matchDate, isHome, settings);
+
+      // --- UPDATE FIXTURE ---
+      const fixturesSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.FIXTURES);
+      if (!fixturesSheet) throw new Error("'Fixtures' sheet not found.");
+      const fixturesData = fixturesSheet.getDataRange().getValues();
+      const fx_h = findFixtureHeaders(fixturesData);
+      if (!fx_h) throw new Error("Could not find headers in 'Fixtures' sheet.");
+
+      let foundRowIndex = -1;
+      let division = '', event = '', sctn = '';
+
+      // Find the matching fixture
+      for (let i = fx_h.headerRowIndex + 1; i < fixturesData.length; i++) {
+        const fRow = fixturesData[i];
+        // Common checks
+        if (fRow[fx_h['Team No.']] !== data.ourTeam) continue;
+        if (fRow[fx_h['Match Status']] !== 'Not confirmed') continue;
+
+        // Home/Away specific checks
+        if (isHome) {
+          if (fRow[fx_h['Home / Away']] === 'Home' &&
+            fRow[fx_h['Opposition Club']] === data.opponentClub &&
+            fRow[fx_h['Opp Team No.']] === data.opponentTeam) {
+            foundRowIndex = i;
+            sctn = fRow[fx_h['Sctn']];
+            division = fRow[fx_h['Div']];
+            event = fRow[fx_h['Event']] || _getEventFromTeamName(data.ourTeam);
+            break;
+          }
+        } else {
+          if (fRow[fx_h['Home / Away']] === 'Away' &&
+            fRow[fx_h['Opposition Club']] === data.opponentClub &&
+            fRow[fx_h['Opp Team No.']] === data.opponentTeam) {
+            foundRowIndex = i;
+            // For Away matches, we grab existing details from the sheet
+            sctn = fRow[fx_h['Sctn']];
+            division = fRow[fx_h['Div']];
+            event = fRow[fx_h['Event']];
+            break;
+          }
+        }
+      }
+
+      if (foundRowIndex !== -1) {
+        // Update existing row
+        const sheetRow = foundRowIndex + 1;
+        const rowRange = fixturesSheet.getRange(sheetRow, 1, 1, fixturesSheet.getLastColumn());
+        const existing_fx_rowData = rowRange.getValues()[0];
+
+        existing_fx_rowData[fx_h['Date']] = data.matchDate;
+        existing_fx_rowData[fx_h['Day']] = data.formattedDay;
+        existing_fx_rowData[fx_h['Time']] = data.formattedTime;
+        existing_fx_rowData[fx_h['Match Status']] = 'Confirmed';
+        existing_fx_rowData[fx_h['Venue / Hall']] = isHome ? (settings[_getDaySettingKey(data.matchDate.getDay(), 'Venue')] || ourClubName) : data.venue;
+        existing_fx_rowData[fx_h['League / Cup']] = data.matchType;
+
+        // Only update these if we found them (Home flow might need to look them up if creating new)
+        if (event) existing_fx_rowData[fx_h['Event']] = event;
+        if (division) existing_fx_rowData[fx_h['Div']] = division;
+
+        rowRange.setValues([existing_fx_rowData]);
+        fixtureUpdated = true;
+      } else if (isHome) {
+        // Create NEW row (Only for Home matches)
+        division = division || _getDivisionFromTeamName(sheet.getParent(), data.ourTeam);
+        event = event || _getEventFromTeamName(data.ourTeam);
+        const venueName = settings[_getDaySettingKey(data.matchDate.getDay(), 'Venue')] || ourClubName;
+
+        let newRow = new Array(fx_h.headerRowIndex > -1 ? fixturesData[fx_h.headerRowIndex].length : 15).fill('');
+        newRow[fx_h['Date']] = data.matchDate;
+        newRow[fx_h['Day']] = data.formattedDay;
+        newRow[fx_h['Time']] = data.formattedTime;
+        newRow[fx_h['Event']] = event;
+        newRow[fx_h['Div']] = division;
+        newRow[fx_h['League / Cup']] = data.matchType;
+        newRow[fx_h['Your Club']] = ourClubName;
+        newRow[fx_h['Team No.']] = data.ourTeam;
+        newRow[fx_h['Home / Away']] = 'Home';
+        newRow[fx_h['Opposition Club']] = data.opponentClub;
+        newRow[fx_h['Opp Team No.']] = data.opponentTeam;
+        newRow[fx_h['Venue / Hall']] = venueName;
+        newRow[fx_h['Match Status']] = 'Confirmed';
+
+        fixturesSheet.appendRow(newRow);
+        fixtureUpdated = true;
+      } else {
+        throw new Error('Could not find a corresponding "Not confirmed" AWAY fixture to update.');
+      }
+
+      // --- SEND EMAIL ---
+      const templateName = isHome ? 'ConfirmationEmail.html' : 'AwayConfirmationEmail.html';
+      const emailTemplate = HtmlService.createTemplateFromFile(templateName);
+      emailTemplate.opponentClubName = data.opponentClub;
+      emailTemplate.opponentTeamName = data.opponentTeam;
+      emailTemplate.ourClubName = ourClubName;
+      emailTemplate.ourTeamNumber = data.ourTeam;
+      emailTemplate.event = event || '';
+      emailTemplate.division = division || '';
+      emailTemplate.sctn = sctn || '';
+      emailTemplate.matchType = data.matchType;
+      emailTemplate.formattedDate = formatDate(data.matchDate);
+      emailTemplate.formattedTime = data.formattedTime;
+      emailTemplate.venueName = isHome ? (settings[_getDaySettingKey(data.matchDate.getDay(), 'Venue')] || ourClubName) : data.venue;
+      emailTemplate.formattedShortDate = Utilities.formatDate(data.matchDate, Session.getScriptTimeZone(), 'd MMM yyyy');
+      emailTemplate.formattedDay = data.formattedDay;
+
+      const htmlBody = emailTemplate.evaluate().getContent();
+      const plainBody = htmlBody.replace(/<[^>]+>/g, '');
+
+      const subject = `Match Confirmed: ${data.opponentClub} ${data.opponentTeam} (${isHome ? 'Your AWAY' : 'Your HOME'} Match) vs ${ourClubName} ${data.ourTeam} on ${data.dateStr}`;
+      emailInfo = _sendClubEmail(data.email, subject, htmlBody, settings, plainBody);
+
+      successTitle = `${isHome ? 'HOME' : 'AWAY'} Match Confirmed!`;
+      successActions.push(fixtureUpdated ? `✔ Fixture sheet updated.` : `⚠ Fixture not found/updated.`);
+      successActions.push(`✔ Email sent to ${emailInfo.recipient}.`);
+
+    } else if (action === 'cancelled') {
+      // --- REVERT FIXTURE ---
+      const fixturesSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.FIXTURES);
+      if (!fixturesSheet) throw new Error("'Fixtures' sheet not found.");
+      const fixturesData = fixturesSheet.getDataRange().getValues();
+      const fx_h = findFixtureHeaders(fixturesData);
+      if (!fx_h) throw new Error("Could not find headers in 'Fixtures' sheet.");
+
+      let foundRowIndex = -1;
+      const isInternalMatch = (ourClubName === data.opponentClub);
+
+      for (let i = fx_h.headerRowIndex + 1; i < fixturesData.length; i++) {
+        const fRow = fixturesData[i];
+        const fRowDateStr = fRow[fx_h['Date']] ? formatDateForSheet(new Date(fRow[fx_h['Date']])) : null;
+
+        if (fRow[fx_h['Team No.']] === data.ourTeam &&
+          fRowDateStr === data.dateStr &&
+          fRow[fx_h['Match Status']] === 'Confirmed') {
+
+          if (isHome) {
+            if (fRow[fx_h['Home / Away']] === 'Home') {
+              if (isInternalMatch) {
+                if (fRow[fx_h['Opp Team No.']] === data.opponentTeam) foundRowIndex = i;
+              } else {
+                if (fRow[fx_h['Opposition Club']] === data.opponentClub) foundRowIndex = i;
+              }
+            }
+          } else {
+            // Away Logic
+            if (fRow[fx_h['Home / Away']] === 'Away' &&
+              fRow[fx_h['Opposition Club']] === data.opponentClub &&
+              fRow[fx_h['Opp Team No.']] === data.opponentTeam) {
+              foundRowIndex = i;
+            }
+          }
+        }
+        if (foundRowIndex !== -1) break;
+      }
+
+      if (foundRowIndex !== -1) {
+        const sheetRow = foundRowIndex + 1;
+        const rowRange = fixturesSheet.getRange(sheetRow, 1, 1, fixturesSheet.getLastColumn());
+        const existing_fx_rowData = rowRange.getValues()[0];
+        existing_fx_rowData[fx_h['Match Status']] = 'Not confirmed';
+        existing_fx_rowData[fx_h['Date']] = '';
+        existing_fx_rowData[fx_h['Day']] = '';
+        existing_fx_rowData[fx_h['Time']] = '';
+        existing_fx_rowData[fx_h['Venue / Hall']] = '';
+        rowRange.setValues([existing_fx_rowData]);
+        fixtureUpdated = true;
+      }
+
+      // --- SEND EMAIL ---
+      const templateName = isHome ? 'CancellationEmail.html' : 'AwayCancellationEmail.html';
+      const emailTemplate = HtmlService.createTemplateFromFile(templateName);
+      emailTemplate.webAppUrl = settings['Web App URL'];
+      emailTemplate.opponentClubName = data.opponentClub;
+      emailTemplate.opponentTeamName = data.opponentTeam;
+      emailTemplate.ourClubName = ourClubName;
+      emailTemplate.ourTeamNumber = data.ourTeam;
+      emailTemplate.matchType = data.matchType;
+      emailTemplate.formattedDate = formatDate(data.matchDate);
+      emailTemplate.formattedTime = data.formattedTime;
+      emailTemplate.venueName = isHome ? (settings[_getDaySettingKey(data.matchDate.getDay(), 'Venue')] || ourClubName) : data.venue;
+
+      const htmlBody = emailTemplate.evaluate().getContent();
+      const plainBody = htmlBody.replace(/<[^>]+>/g, '');
+
+      const subject = `Match CANCELLED: ${data.opponentClub} ${data.opponentTeam} (${isHome ? 'Your AWAY' : 'Your HOME'} Match) vs ${ourClubName} ${data.ourTeam} on ${data.dateStr}`;
+      emailInfo = _sendClubEmail(data.email, subject, htmlBody, settings, plainBody);
+
+      successTitle = `${isHome ? 'HOME' : 'AWAY'} Match Cancelled!`;
+      successActions.push(fixtureUpdated ? `✔ Fixture status reset.` : `⚠ Fixture not found/reset.`);
+      successActions.push(`✔ Email sent to ${emailInfo.recipient}.`);
+
+    } else if (action === 'rejected') {
+      // --- SEND REJECTION EMAIL ---
+      emailInfo = _sendRejectionEmail(
+        isHome,
+        data.opponentClub,
+        data.opponentTeam,
+        data.ourTeam,
+        data.email,
+        data.matchDate,
+        data.proposedTime,
+        data.venue
+      );
+      successTitle = `${isHome ? 'HOME' : 'AWAY'} Request Rejected!`;
+      successActions.push(`✔ Rejection email sent to ${emailInfo.recipient}.`);
+    }
+
+    // --- 4. SYNC AVAILABILITY (If not rejected) ---
+    if (action !== 'rejected') {
+      const fillResult = fillAvailabilityX(true); // Silent mode
+      if (fillResult) {
+        availabilityStats = fillResult;
+        const xCount = action === 'confirmed' ? fillResult.addedX : fillResult.removedX;
+        const rCount = action === 'confirmed' ? fillResult.addedR : fillResult.removedR;
+        const actionVerb = action === 'confirmed' ? 'Added' : 'Removed';
+        successActions.push(`✔ Availability synced (${actionVerb} ${xCount} 'X' & ${rCount} 'R').`);
+      }
+    }
+
+    // --- 5. COMMIT STATUS & SHOW DIALOG ---
+    range.setValue(action.charAt(0).toUpperCase() + action.slice(1)); // Capitalize
+
+    const matchInfo = `${ourClubName} ${data.ourTeam} vs ${data.opponentClub} ${data.opponentTeam}`;
+    showFinalDialog(successTitle, matchInfo, successActions.join('\n'));
+
+  } catch (err) {
+    ui.alert(`A critical error occurred: ${err.message}`);
+    Logger.log(`CRITICAL ERROR in _processBookingChange: ${err.message}\nStack: ${err.stack}`);
+    if (range) range.setValue(oldValue || "Error");
+  }
 }
