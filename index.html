@@ -111,15 +111,15 @@
 
     </div> <!-- End booking-flow -->
 
-  </main>
+    <!-- SHARED MESSAGES -->
+    <div id="success-message" style="display:none;">
+      <h2>Thank you!</h2>
+      <p>Your request has been submitted. You will receive a confirmation email once it is approved.</p>
+      <button type="button" onclick="resetApp()" id="reset-btn">Book Another Match</button>
+    </div>
+    <div id="error-message" style="display:none;"></div>
 
-  <!-- SHARED MESSAGES -->
-  <div id="success-message" style="display:none;">
-    <h2>Thank you!</h2>
-    <p>Your request has been submitted. You will receive a confirmation email once it is approved.</p>
-    <button type="button" onclick="resetApp()" id="reset-btn">Book Another Match</button>
-  </div>
-  <div id="error-message" style="display:none;"></div>
+  </main>
 
   <!-- CLIENT-SIDE JS -->
   <script>
