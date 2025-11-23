@@ -32,11 +32,11 @@
       <legend>Step 0: Choose Booking Type</legend>
         <div id="step-0-loading">Loading data...</div>
         <div id="step-0-options" style="display:none;">
-          <div>
+          <div onclick="selectBookingType(event, 'type-home', 'home')">
             <input type="radio" name="booking-type" id="type-home" value="home" onchange="showBookingFlow('home')">
             <label for="type-home">Book a match AT OUR venue</label>
           </div>
-          <div>
+          <div onclick="selectBookingType(event, 'type-away', 'away')">
             <input type="radio" name="booking-type" id="type-away" value="away" onchange="showBookingFlow('away')">
             <label for="type-away">Propose a match AT YOUR venue</label>
           </div>

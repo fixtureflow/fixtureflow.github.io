@@ -75,7 +75,7 @@
         dates.forEach(date => {
           const displayDate = new Date(date + 'T00:00:00');
           const displayString = displayDate.toLocaleDateString('en-IE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-          html += `<div><input type="radio" name="selected_date" id="date-${date}" value="${date}" onchange="onDateSelected(this.value)"> <label for="date-${date}">${displayString}</label></div>`;
+          html += `<div onclick="selectDateCard(event, '${date}')"><input type="radio" name="selected_date" id="date-${date}" value="${date}" onchange="onDateSelected(this.value)"> <label for="date-${date}">${displayString}</label></div>`;
         });
       }
       list.innerHTML = html;
@@ -149,6 +149,27 @@
           errorDiv.innerHTML = '';
         }
       }
+
+          function selectBookingType(event, radioId, mode) {
+            // If the user clicked the radio or label directly, let default behavior happen
+            if (event.target.type === 'radio' || event.target.tagName === 'LABEL') return;
+
+            const radio = document.getElementById(radioId);
+            if (radio) {
+              radio.checked = true;
+              showBookingFlow(mode);
+            }
+          }
+
+          function selectDateCard(event, dateValue) {
+            if (event.target.type === 'radio' || event.target.tagName === 'LABEL') return;
+
+            const radio = document.getElementById('date-' + dateValue);
+            if (radio) {
+              radio.checked = true;
+              onDateSelected(dateValue);
+            }
+          }
 
   // --- 3. UI FLOW & NAVIGATION ---
   // ============================================
@@ -237,6 +258,10 @@
     // Reset Month & Find Button when team changes
     document.getElementById('month-select').value = "";
     document.getElementById('find-dates-btn').disabled = true;
+
+    // Reset Away Flow Inputs
+    document.getElementById('proposed-time-input').value = '';
+    document.getElementById('venue-input').value = '';
   }
 
   function onOpponentSelect() {
@@ -250,6 +275,12 @@
     hideError();
     const monthValue = document.getElementById('month-select').value;
     document.getElementById('find-dates-btn').disabled = !monthValue;
+
+    // Reset Away Flow Inputs (invalidate previous search)
+    document.getElementById('proposed-time-input').value = '';
+    document.getElementById('venue-input').value = '';
+    document.getElementById('step-3-fieldset').style.display = 'none';
+    document.getElementById('results-list').innerHTML = "";
   }
 
   function onDateSelected(date) {
