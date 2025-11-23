@@ -128,6 +128,14 @@
     document.getElementById('results-list').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
   }
 
+      function hideError() {
+        const errorDiv = document.getElementById('error-message');
+        if (errorDiv.style.display !== 'none') {
+          errorDiv.style.display = 'none';
+          errorDiv.textContent = '';
+        }
+      }
+
   // --- 3. UI FLOW & NAVIGATION ---
   // ============================================
 
@@ -174,6 +182,7 @@
   // ============================================
 
   function onOurTeamSelect() {
+    hideError();
     const team = document.getElementById('our-team-select').value;
     const step2 = document.getElementById('step-2-fieldset');
     const noMatchesMsg = document.getElementById('no-matches-message');
@@ -212,17 +221,20 @@
   }
 
   function onOpponentSelect() {
+    hideError();
     const opponentSelect = document.getElementById('opponent-select');
     const opponent = JSON.parse(opponentSelect.value || 'null');
     opponent ? populateOpponentFields(opponent) : clearOpponentFields();
   }
 
   function onMonthSelect() {
+    hideError();
     const monthValue = document.getElementById('month-select').value;
     document.getElementById('find-dates-btn').disabled = !monthValue;
   }
 
   function onDateSelected(date) {
+    hideError();
     selectedDate = date;
     
     if (currentMode === 'home') {
@@ -243,6 +255,7 @@
   }
 
   function onTimeSelect() {
+    hideError();
     if (document.getElementById('time-slot-select').value) {
       const btn = document.getElementById('submit-btn');
       btn.style.display = 'block';
@@ -252,6 +265,7 @@
   }
 
     function onAwayProposalChange() {
+      hideError();
       const time = document.getElementById('proposed-time-input').value;
       const venue = document.getElementById('venue-input').value;
       const btn = document.getElementById('submit-btn');
