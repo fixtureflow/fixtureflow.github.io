@@ -211,7 +211,7 @@ function processConfirmedBooking(e, ui) {
     const emailInfo = _sendClubEmail(opponentEmail, originalSubject, htmlBody, settings, plainBody);
 
     // --- 5. SYNC AVAILABILITY ---
-    const fillResult = fillAvailabilityX();
+    const fillResult = fillAvailabilityX(true); // Silent mode: No double dialogs
     const addedX = fillResult ? fillResult.addedX : 0;
     const addedR = fillResult ? fillResult.addedR : 0;
 
@@ -340,7 +340,7 @@ function processCancelledBooking(e, ui) {
     const emailInfo = _sendClubEmail(opponentEmail, originalSubject, htmlBody, settings, plainBody);
   
     // --- 4. SYNC AVAILABILITY ---
-    const fillResult = fillAvailabilityX();
+    const fillResult = fillAvailabilityX(true); // Silent mode
     const removedX = fillResult ? fillResult.removedX : 0;
     const removedR = fillResult ? fillResult.removedR : 0;
 
@@ -538,7 +538,7 @@ function processConfirmedAwayBooking(e, ui) {
     const emailInfo = _sendClubEmail(opponentEmail, originalSubject, htmlBody, settings, plainBody);
 
     // --- 4. SYNC AVAILABILITY ---
-    const fillResult = fillAvailabilityX();
+    const fillResult = fillAvailabilityX(true); // Silent mode
     const addedX = fillResult ? fillResult.addedX : 0;
     const addedR = fillResult ? fillResult.addedR : 0;
 
@@ -664,7 +664,7 @@ function processCancelledAwayBooking(e, ui) {
     }
 
     // --- 4. SYNC AVAILABILITY ---
-    const fillResult = fillAvailabilityX();
+    const fillResult = fillAvailabilityX(true); // Silent mode
     const removedX = fillResult ? fillResult.removedX : 0;
     const removedR = fillResult ? fillResult.removedR : 0;
 
@@ -761,9 +761,10 @@ function processRejectedAwayBooking(e, ui) {
  * [CORE] Syncs all confirmed fixtures from 'Fixtures' to 'Availability'.
  * This function is now a "manager" that delegates tasks to helper functions.
  * 
+ * @param {boolean} silent If true, suppresses the final UI alert (for automated calls).
  * @returns {Object|null} A summary object of changes, or null if failed.
  */
-function fillAvailabilityX() {
+function fillAvailabilityX(silent = false) {
   const ui = SpreadsheetApp.getUi(); 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -819,7 +820,9 @@ function fillAvailabilityX() {
       finalAlert += `\n\nPlease check the 'Processing_Log' for details.`;
     }
     
-    ui.alert('Sync Fixtures to Availability', finalAlert, ui.ButtonSet.OK);
+    if (!silent) {
+      ui.alert('Sync Fixtures to Availability', finalAlert, ui.ButtonSet.OK);
+    }
     // Log the high-level summary of the action to the Event_Log.
     logAction('fillAvailabilityX', 'Synced Fixtures to Availability', { addedX, addedR, removedX, removedR });
 
@@ -835,7 +838,9 @@ function fillAvailabilityX() {
 
   } catch (e) {
     Logger.log(`Error during fillAvailabilityX: ${e.message}\nStack: ${e.stack}`);
-    ui.alert(`Sync failed: ${e.message}`);
+    if (!silent) {
+      ui.alert(`Sync failed: ${e.message}`);
+    }
     return null;
   }
 }
