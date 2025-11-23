@@ -197,7 +197,7 @@ function submitBookingRequest(booking) {
       booking.time,         // Proposed Time
       booking.email,
       booking.matchType,
-      'Pending'             // Status
+      CONFIG.STATUSES.PENDING             // Status
     ]);
 
     return "Success";
@@ -258,7 +258,7 @@ function submitAwayBookingRequest(proposal) {
       proposal.email,         // G: Contact Email
       proposal.matchType,     // H: Match Type   
       proposal.venue,         // I: Venue
-      'Pending'               // J: Status
+      CONFIG.STATUSES.PENDING               // J: Status
     ]);
 
     // If we get here, everything worked.

@@ -94,13 +94,13 @@ function _validateNoDuplicateRequest(sheetData, booking, isHomeMatch, settings) 
 
   // Define column names based on the sheet type
   const colNames = isHomeMatch ? {
-    club: 'Requesting Club',
-    theirTeam: 'Their Team',
-    ourTeam: 'Your Team'
+    club: CONFIG.HEADERS.REQ_CLUB,
+    theirTeam: CONFIG.HEADERS.REQ_THEIR_TEAM,
+    ourTeam: CONFIG.HEADERS.REQ_YOUR_TEAM
   } : {
-    club: 'Opponent Club',
-    theirTeam: 'Their Team',
-    ourTeam: 'Our Team'
+      club: CONFIG.HEADERS.OPP_CLUB,
+      theirTeam: CONFIG.HEADERS.OPP_TEAM,
+      ourTeam: CONFIG.HEADERS.OPP_OUR_TEAM
   };
 
   const reqClubCol = headers.indexOf(colNames.club);
@@ -123,7 +123,7 @@ function _validateNoDuplicateRequest(sheetData, booking, isHomeMatch, settings) 
       row[reqYourTeamCol].trim().toUpperCase() === ourTeamUpper &&
       row[reqClubCol].trim().toUpperCase() === clubUpper &&
       row[reqTheirTeamCol].trim().toUpperCase() === theirTeamUpper &&
-      (status === 'Pending' || status === 'Confirmed')
+      (status === CONFIG.STATUSES.PENDING || status === CONFIG.STATUSES.CONFIRMED)
     ) {
       const email = settings['Match Secretary Email'] || 'the match secretary';
       throw new Error(`A '${status}' request for this exact match already exists. Please contact the match secretary at ${email}.`);
@@ -147,10 +147,10 @@ function _validateCourtCapacity(fixturesData, h, dateStr, maxMatches) {
   for (let i = h.headerRowIndex + 1; i < fixturesData.length; i++) {
     const row = fixturesData[i];
     if (
-      row[h['Date']] &&
-      formatDateForSheet(new Date(row[h['Date']])) === dateStr &&
-      row[h['Home / Away']] === 'Home' &&
-      row[h['Match Status']] === 'Confirmed'
+      row[h[CONFIG.HEADERS.FIXTURE_DATE]] &&
+      formatDateForSheet(new Date(row[h[CONFIG.HEADERS.FIXTURE_DATE]])) === dateStr &&
+      row[h[CONFIG.HEADERS.FIXTURE_HOME_AWAY]] === 'Home' &&
+      row[h[CONFIG.HEADERS.FIXTURE_STATUS]] === CONFIG.STATUSES.CONFIRMED
     ) {
       homeBookingCount++;
     }
@@ -171,15 +171,15 @@ function _validateCourtCapacity(fixturesData, h, dateStr, maxMatches) {
  */
 function _validateTeamBuffer(requestData, booking, bufferDays, dateObj) {
   const headers = requestData[0];
-  const reqYourTeamCol = headers.indexOf('Your Team');
-  const reqDateCol = headers.indexOf('Proposed Date');
+  const reqYourTeamCol = headers.indexOf(CONFIG.HEADERS.REQ_YOUR_TEAM);
+  const reqDateCol = headers.indexOf(CONFIG.HEADERS.REQ_DATE);
   const reqStatusCol = headers.indexOf(CONFIG.HEADERS.STATUS);
 
   const ourTeamUpper = booking.ourTeam.trim().toUpperCase();
   for (let i = 1; i < requestData.length; i++) {
     if (
       requestData[i][reqYourTeamCol].trim().toUpperCase() === ourTeamUpper &&
-      (requestData[i][reqStatusCol] === 'Pending' || requestData[i][reqStatusCol] === 'Confirmed')
+      (requestData[i][reqStatusCol] === CONFIG.STATUSES.PENDING || requestData[i][reqStatusCol] === CONFIG.STATUSES.CONFIRMED)
     ) {
       const existingDate = new Date(requestData[i][reqDateCol]);
       if (isNaN(existingDate.getTime())) continue;

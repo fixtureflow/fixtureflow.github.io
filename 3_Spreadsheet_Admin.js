@@ -36,14 +36,18 @@ function handleConfirmationEdit(e) {
   }
 
   const newValue = e.value.toLowerCase();
-  const actionableStatuses = ['confirmed', 'cancelled', 'rejected'];
+  const actionableStatuses = [
+    CONFIG.STATUSES.CONFIRMED.toLowerCase(),
+    CONFIG.STATUSES.CANCELLED.toLowerCase(),
+    CONFIG.STATUSES.REJECTED.toLowerCase()
+  ];
 
   // 1. First, check if the new status is one we actually care about.
   if (actionableStatuses.includes(newValue)) {
     
     // 2. If it is, NOW we lock the UI.
     const ui = SpreadsheetApp.getUi();
-    const htmlOutput = HtmlService.createHtmlOutputFromFile('LoadingSpinner')
+    const htmlOutput = HtmlService.createHtmlOutputFromFile(CONFIG.TEMPLATES.LOADING_SPINNER)
       .setWidth(250)
       .setHeight(150);
     ui.showModalDialog(htmlOutput, 'Processing...');
@@ -412,18 +416,18 @@ function sendWeeklyMatchSummary() {
     // --- 3. Process Fixtures ---
     for (let i = h.headerRowIndex + 1; i < fixturesData.length; i++) {
       const row = fixturesData[i];
-      if (row[h['Match Status']] === 'Confirmed' && row[h['Date']]) {
-        const matchDate = new Date(row[h['Date']]);
+      if (row[h[CONFIG.HEADERS.FIXTURE_STATUS]] === CONFIG.STATUSES.CONFIRMED && row[h[CONFIG.HEADERS.FIXTURE_DATE]]) {
+        const matchDate = new Date(row[h[CONFIG.HEADERS.FIXTURE_DATE]]);
         
         if (matchDate >= startOfNextWeek && matchDate <= endOfNextWeek) {
           const dateStr = formatDateForSheet(matchDate);
-          const timeStr = row[h['Time']] ? Utilities.formatDate(new Date(row[h['Time']]), Session.getScriptTimeZone(), 'HH:mm') : 'TBC';
-          const ourTeam = row[h['Team No.']];
-          const homeAway = row[h['Home / Away']];
-          const leagueCup = row[h['League / Cup']];
-          const oppClub = row[h['Opposition Club']];
-          const oppTeam = row[h['Opp Team No.']];
-          const venueRaw = row[h['Venue / Hall']];
+          const timeStr = row[h[CONFIG.HEADERS.FIXTURE_TIME]] ? Utilities.formatDate(new Date(row[h[CONFIG.HEADERS.FIXTURE_TIME]]), Session.getScriptTimeZone(), 'HH:mm') : 'TBC';
+          const ourTeam = row[h[CONFIG.HEADERS.FIXTURE_OUR_TEAM]];
+          const homeAway = row[h[CONFIG.HEADERS.FIXTURE_HOME_AWAY]];
+          const leagueCup = row[h[CONFIG.HEADERS.FIXTURE_LEAGUE_CUP]];
+          const oppClub = row[h[CONFIG.HEADERS.FIXTURE_OPP_CLUB]];
+          const oppTeam = row[h[CONFIG.HEADERS.FIXTURE_OPP_TEAM]];
+          const venueRaw = row[h[CONFIG.HEADERS.FIXTURE_VENUE]];
           const dateDisplay = Utilities.formatDate(matchDate, Session.getScriptTimeZone(), 'd MMM (EEE)');
 
           // A. Internal List
@@ -466,7 +470,7 @@ function sendWeeklyMatchSummary() {
     const subjectDate = Utilities.formatDate(startOfNextWeek, Session.getScriptTimeZone(), 'd MMM');
     const rawSubject = `${clubName} Weekly Match Summary: Week of ${subjectDate}`;
     
-    const internalTemplate = HtmlService.createTemplateFromFile('WeeklySummaryEmail.html');
+    const internalTemplate = HtmlService.createTemplateFromFile(CONFIG.TEMPLATES.WEEKLY_SUMMARY);
     internalTemplate.clubName = clubName;
     internalTemplate.startDate = formatDate(startOfNextWeek);
     internalTemplate.endDate = formatDate(endOfNextWeek);
@@ -490,7 +494,7 @@ function sendWeeklyMatchSummary() {
       if (!contactInfo || !contactInfo.email) continue;
 
       const matches = matchesByOpponent[oppClub];
-      const oppTemplate = HtmlService.createTemplateFromFile('WeeklyOpponentReminder.html');
+      const oppTemplate = HtmlService.createTemplateFromFile(CONFIG.TEMPLATES.OPPONENT_REMINDER);
       oppTemplate.secretaryName = contactInfo.name;
       oppTemplate.opponentClubName = oppClub;
       oppTemplate.ourClubName = clubName;
@@ -540,7 +544,7 @@ function showOpponentSummaryDialog() {
                                   .sort();
 
     // 2. Create the HTML template from our new file.
-    const template = HtmlService.createTemplateFromFile('OpponentSelectDialog.html');
+    const template = HtmlService.createTemplateFromFile(CONFIG.TEMPLATES.OPPONENT_SELECT_DIALOG);
     
     // 3. Pass the list of names to the template.
     template.opponentNames = opponentNames;
@@ -590,10 +594,10 @@ function sendOpponentSummaryEmail(opponentName) {
     for (let i = h.headerRowIndex + 1; i < fixturesData.length; i++) {
       const row = fixturesData[i];
       // We only care about rows where the opponent's name matches.
-      if (row[h['Opposition Club']] === opponentName) {
+      if (row[h[CONFIG.HEADERS.FIXTURE_OPP_CLUB]] === opponentName) {
 
         // --- Definitive Resilient Date Handling Logic ---
-        const rawDateString = row[h['Date']];
+        const rawDateString = row[h[CONFIG.HEADERS.FIXTURE_DATE]];
         let displayDate = 'TBC';
         let displayDay = 'TBC';
         let sortableDate = new Date('9999-12-31'); 
@@ -611,22 +615,22 @@ function sendOpponentSummaryEmail(opponentName) {
             sortableDate = matchDateObj; 
           }
         }
-        const matchTime = row[h['Time']] ? Utilities.formatDate(new Date(row[h['Time']]), Session.getScriptTimeZone(), 'HH:mm') : 'TBC';
+        const matchTime = row[h[CONFIG.HEADERS.FIXTURE_TIME]] ? Utilities.formatDate(new Date(row[h[CONFIG.HEADERS.FIXTURE_TIME]]), Session.getScriptTimeZone(), 'HH:mm') : 'TBC';
 
         relevantMatches.push({
           date: displayDate,
           day: displayDay,
           sortableDate: sortableDate,
           time: matchTime,
-          ourTeamNumber: row[h['Team No.']] || '',
-          theirTeamNumber: row[h['Opp Team No.']] || '',
-          homeAway: row[h['Home / Away']] || '',
-          venue: row[h['Venue / Hall']] || '',
-          status: row[h['Match Status']] || '',
-          event: row[h['Event']] || '',
-          div: row[h['Div']] || '',
-          sctn: row[h['Sctn']] || '',
-          leagueCup: row[h['League / Cup']] || ''
+          ourTeamNumber: row[h[CONFIG.HEADERS.FIXTURE_OUR_TEAM]] || '',
+          theirTeamNumber: row[h[CONFIG.HEADERS.FIXTURE_OPP_TEAM]] || '',
+          homeAway: row[h[CONFIG.HEADERS.FIXTURE_HOME_AWAY]] || '',
+          venue: row[h[CONFIG.HEADERS.FIXTURE_VENUE]] || '',
+          status: row[h[CONFIG.HEADERS.FIXTURE_STATUS]] || '',
+          event: row[h[CONFIG.HEADERS.FIXTURE_EVENT]] || '',
+          div: row[h[CONFIG.HEADERS.FIXTURE_DIV]] || '',
+          sctn: row[h[CONFIG.HEADERS.FIXTURE_SCTN]] || '',
+          leagueCup: row[h[CONFIG.HEADERS.FIXTURE_LEAGUE_CUP]] || ''
         });
       }
     }
@@ -650,7 +654,7 @@ function sendOpponentSummaryEmail(opponentName) {
     const originalSubject = `Match Summary: ${ourClubName} vs. ${opponentName}`;
 
     // Create HTML Body
-    const emailTemplate = HtmlService.createTemplateFromFile('OpponentSummaryEmail.html');
+    const emailTemplate = HtmlService.createTemplateFromFile(CONFIG.TEMPLATES.OPPONENT_SUMMARY);
     emailTemplate.ourClubName = ourClubName;
     emailTemplate.opponentClubName = opponentName;
     emailTemplate.secretaryName = secretaryName;
@@ -681,13 +685,13 @@ function fillAvailabilityX_menu() {
 
 /** [MENU ITEM] Shows the sidebar UI for finding away match dates. */
 function showAwayFinderSidebar() {
-  const html = HtmlService.createHtmlOutputFromFile('AwayFinder.html').setTitle('Away Match Finder');
+  const html = HtmlService.createHtmlOutputFromFile(CONFIG.TEMPLATES.AWAY_FINDER).setTitle('Away Match Finder');
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
 /** [MENU ITEM] Shows the sidebar UI for clearing a player's unavailability. */
 function clearPlayerUnavailability_menu() {
-  const html = HtmlService.createHtmlOutputFromFile('PlayerClearer').setTitle("Clear Player 'U's");
+  const html = HtmlService.createHtmlOutputFromFile(CONFIG.TEMPLATES.PLAYER_CLEARER).setTitle("Clear Player 'U's");
   SpreadsheetApp.getUi().showSidebar(html);
 }
 

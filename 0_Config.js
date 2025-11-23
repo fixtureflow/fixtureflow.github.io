@@ -31,7 +31,48 @@ const CONFIG = {
     ADMIN_LOCK: 'ADMIN_LOCK',
     STATUS: 'Status',
     PLAYER_NAME: 'Player Name',
-    UNAVAILABLE_DATES: 'Unavailable Dates'
+    UNAVAILABLE_DATES: 'Unavailable Dates',
+    // Expanded Headers for Validation & Emailing
+    REQ_CLUB: 'Requesting Club',
+    REQ_THEIR_TEAM: 'Their Team',
+    REQ_YOUR_TEAM: 'Your Team',
+    REQ_DATE: 'Proposed Date',
+    OPP_CLUB: 'Opponent Club',
+    OPP_TEAM: 'Their Team', // Note: In Away Proposals, it's "Their Team" vs "Our Team"
+    OPP_OUR_TEAM: 'Our Team',
+    FIXTURE_DATE: 'Date',
+    FIXTURE_TIME: 'Time',
+    FIXTURE_HOME_AWAY: 'Home / Away',
+    FIXTURE_STATUS: 'Match Status',
+    FIXTURE_OPP_CLUB: 'Opposition Club',
+    FIXTURE_OPP_TEAM: 'Opp Team No.',
+    FIXTURE_OUR_TEAM: 'Team No.',
+    FIXTURE_VENUE: 'Venue / Hall',
+    FIXTURE_LEAGUE_CUP: 'League / Cup',
+    FIXTURE_EVENT: 'Event',
+    FIXTURE_DIV: 'Div',
+    FIXTURE_SCTN: 'Sctn'
+  },
+  STATUSES: {
+    PENDING: 'Pending',
+    CONFIRMED: 'Confirmed',
+    REJECTED: 'Rejected',
+    CANCELLED: 'Cancelled'
+  },
+  TEMPLATES: {
+    WEEKLY_SUMMARY: 'WeeklySummaryEmail',
+    OPPONENT_REMINDER: 'WeeklyOpponentReminder',
+    OPPONENT_SUMMARY: 'OpponentSummaryEmail',
+    CONFIRMATION: 'ConfirmationEmail',
+    REJECTION: 'RejectionEmail',
+    CANCELLATION: 'CancellationEmail',
+    AWAY_CONFIRMATION: 'AwayConfirmationEmail',
+    AWAY_REJECTION: 'AwayRejectionEmail',
+    AWAY_CANCELLATION: 'AwayCancellationEmail',
+    OPPONENT_SELECT_DIALOG: 'OpponentSelectDialog',
+    AWAY_FINDER: 'AwayFinder',
+    PLAYER_CLEARER: 'PlayerClearer',
+    LOADING_SPINNER: 'LoadingSpinner'
   },
   TEAM_SHEET: {
     ALLOWED_DAYS_COL: 2, // Column C (NEW)
