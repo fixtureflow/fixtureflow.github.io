@@ -104,11 +104,12 @@ function processConfirmedBooking(e, ui) {
     }
     
     // --- 2. VALIDATE THE PROPOSAL ---
+    const settings = getClubSettings(); // Fetch settings FIRST
     // Correctly set to 'true' for a HOME match.
-    _validateProposal(ourTeamNumber, matchDate, true); 
+    _validateProposal(ourTeamNumber, matchDate, true, settings); 
 
     // --- 3. GET VENUE AND TEAM INFO & UPDATE FIXTURES ---
-    const settings = getClubSettings();
+    // const settings = getClubSettings(); // Removed (fetched above)
     const ourClubName = settings['Club Name'] || 'Match Secretary';
     const formattedTime = formatTimeFromSheet(proposedTime);
     const formattedDay = Utilities.formatDate(matchDate, Session.getScriptTimeZone(), 'EEEE');
@@ -466,9 +467,10 @@ function processConfirmedAwayBooking(e, ui) {
     }
     
     // --- 2. VALIDATE & FIND FIXTURE ---
-    _validateProposal(ourTeamNumber, matchDate, false); // isHomeMatch = false
-    
-    const settings = getClubSettings();
+    const settings = getClubSettings(); // Fetch settings FIRST
+    _validateProposal(ourTeamNumber, matchDate, false, settings); // isHomeMatch = false
+
+    // const settings = getClubSettings(); // Removed (fetched above)
     const ourClubName = settings['Club Name'] || 'Match Secretary';
     const fixturesSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.FIXTURES);
     if (!fixturesSheet) throw new Error("'Fixtures' sheet not found.");

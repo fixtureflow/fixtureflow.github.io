@@ -18,7 +18,8 @@
  * @returns {string[]} Array of available date strings.
  */
 function findAvailableDatesForTeam(teamName, month, year) {
-  return findAvailableDates_(teamName, month, year, true); // isHomeMatch = true
+  const settings = getClubSettings();
+  return findAvailableDates_(teamName, month, year, true, settings); // isHomeMatch = true
 }
 
 /**
@@ -30,7 +31,8 @@ function findAvailableDatesForTeam(teamName, month, year) {
  * @returns {string[]} Array of available date strings.
  */
 function findAvailableDatesForAwayMatch(teamName, month, year) {
-  return findAvailableDates_(teamName, month, year, false); // isHomeMatch = false
+  const settings = getClubSettings();
+  return findAvailableDates_(teamName, month, year, false, settings); // isHomeMatch = false
 }
 
 /**
@@ -43,14 +45,15 @@ function findAvailableDatesForAwayMatch(teamName, month, year) {
  * @param {number} year The full year (e.g., 2025).
  * @param {boolean} isHomeMatch True if checking for a home match (checks court capacity),
  * False if for an away match (skips capacity check).
+ * @param {Object} settings The club settings object.
  * @returns {string[]} An array of available date strings ("yyyy-MM-dd").
  */
-function findAvailableDates_(teamName, month, year, isHomeMatch) {
+function findAvailableDates_(teamName, month, year, isHomeMatch, settings) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 
     // --- Get settings first ---
-    const settings = getClubSettings();
+    // const settings = getClubSettings(); // Removed (passed in)
     const blockedDays = (settings['Blocked Weekdays (0=Sun, 6=Sat)'] || "").split(',');
     const bufferDays = parseInt(settings['Team Buffer Days (each side)'], 10) || 2;
 

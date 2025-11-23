@@ -18,8 +18,9 @@
  * @param {string} ourTeamName The name of our team being booked (e.g., "M1").
  * @param {Date} matchDate The JavaScript Date object for the match.
  * @param {boolean} isHomeMatch TRUE if this is a home match (will check court capacity), FALSE otherwise.
+ * @param {Object} settings The club settings object.
  */
-function _validateProposal(ourTeamName, matchDate, isHomeMatch) {
+function _validateProposal(ourTeamName, matchDate, isHomeMatch, settings) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const dateStr = formatDateForSheet(matchDate);
 
@@ -57,7 +58,7 @@ function _validateProposal(ourTeamName, matchDate, isHomeMatch) {
   // --- Validation 2: Court Capacity (Only runs for Home Matches) ---
   if (isHomeMatch) {
     try {
-      const settings = getClubSettings();
+      // settings is now passed in
       const dayOfWeek = matchDate.getDay();
       const maxKey = _getDaySettingKey(dayOfWeek, 'Max Matches');
       const maxMatches = parseInt(settings[maxKey], 10) || 0;
