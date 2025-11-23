@@ -86,7 +86,7 @@
     // --- 1. GLOBAL STATE & INITIALIZATION ---
     // ============================================
 
-    const awayBookingEnabled = <?= awayBookingEnabled ?>;
+      const awayBookingEnabled = "<?= awayBookingEnabled ?>" === 'true';
     let homeSelectedDate = null, awaySelectedDate = null, clubEmailMap = {}, homeFixtureMap = {}, awayFixtureMap = {}, dataLoadCounter = 0, loadedTeams = [];
     const TOTAL_DATA_STREAMS = awayBookingEnabled ? 5 : 4;
 
@@ -116,7 +116,10 @@
       if (dataLoadCounter === TOTAL_DATA_STREAMS) {
         const homeSelect = document.getElementById('home-our-team');
         homeSelect.innerHTML = "<option value=''>-- Select a team --</option>";
-        loadedTeams.forEach(team => {
+
+        // Filter for Home Dropdown: Only show teams with pending HOME matches
+        const homeTeams = loadedTeams.filter(t => t.hasHome);
+        homeTeams.forEach(team => {
           homeSelect.innerHTML += `<option value="${team.name}">${team.name} (${team.division})</option>`;
         });
         homeSelect.disabled = false;
@@ -125,7 +128,10 @@
           const awaySelect = document.getElementById('away-our-team');
           if (awaySelect) {
             awaySelect.innerHTML = "<option value=''>-- Select a team --</option>";
-            loadedTeams.forEach(team => {
+
+            // Filter for Away Dropdown: Only show teams with pending AWAY matches
+            const awayTeams = loadedTeams.filter(t => t.hasAway);
+            awayTeams.forEach(team => {
               awaySelect.innerHTML += `<option value="${team.name}">${team.name} (${team.division})</option>`;
             });
             awaySelect.disabled = false;

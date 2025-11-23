@@ -87,17 +87,21 @@ function getClubSettings_() {
  * Caches for 1 hour.
  */
 function getOurTeams() {
-  return getCachedData('OUR_TEAMS', getOurTeams_, 3600);
+  // Reduced cache to 10 minutes (600 seconds) so the list updates reasonably fast
+  // when a team finishes their last match.
+  return getCachedData('OUR_TEAMS', getOurTeams_, 600);
 }
 
 /**
  * [HELPER] Fetches the list of "Our Teams" from the spreadsheet.
+ * UPDATED: Returns metadata (hasHome, hasAway) to allow contextual filtering on the frontend.
  * 
- * @returns {Object[]} Array of team objects {division: "Div 1", name: "L1"}.
+ * @returns {Object[]} Array of team objects {division: "Div 1", name: "L1", hasHome: true, hasAway: false}.
  */
 function getOurTeams_() {
   try {
-    const teamsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.TEAMS);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const teamsSheet = ss.getSheetByName(CONFIG.SHEETS.TEAMS);
     const lastRow = teamsSheet.getLastRow();
 
     if (lastRow < 2) {
@@ -105,19 +109,65 @@ function getOurTeams_() {
       return [];
     }
 
+    // 1. Get the base list of teams
     const data = teamsSheet.getRange(2, 1, teamsSheet.getLastRow() - 1, 2).getValues();
-
-    const teams = [];
+    const allTeams = [];
     for (const row of data) {
-      if (row[0] && row[1]) { // If Division (col A) and Team (col B) exist
-        teams.push({
-          division: "Div " + row[0], // "Div 1"
-          name: row[1] // "L1"
+      if (row[0] && row[1]) {
+        allTeams.push({
+          division: "Div " + row[0],
+          name: row[1],
+          hasHome: false, // Default to false
+          hasAway: false  // Default to false
         });
       }
     }
-    teams.sort((a, b) => a.name.localeCompare(b.name));
-    return teams;
+
+    // 2. Get Fixture Counts to populate flags
+    const fixturesSheet = ss.getSheetByName(CONFIG.SHEETS.FIXTURES);
+    if (!fixturesSheet) {
+      // Fallback: Return all teams with flags set to true so they are visible
+      return allTeams.map(t => ({ ...t, hasHome: true, hasAway: true })).sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    const fixturesData = fixturesSheet.getDataRange().getValues();
+    const h = findFixtureHeaders(fixturesData);
+    if (!h) {
+      return allTeams.map(t => ({ ...t, hasHome: true, hasAway: true })).sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    const settings = getClubSettings();
+    const enableAway = String(settings['Enable Away Booking'] || '').trim().toUpperCase() === 'TRUE';
+
+    // Create a map for quick lookup
+    const teamMap = {};
+    allTeams.forEach(t => teamMap[t.name] = t);
+
+    for (let i = h.headerRowIndex + 1; i < fixturesData.length; i++) {
+      const row = fixturesData[i];
+      const teamName = row[h['Team No.']];
+      const homeAway = row[h['Home / Away']];
+      const status = row[h['Match Status']];
+
+      if (!teamName || !teamMap[teamName]) continue;
+
+      // Check for Pending Home Match
+      if (homeAway === 'Home' && status === 'Not confirmed') {
+        teamMap[teamName].hasHome = true;
+      }
+      // Check for Pending Away Match (Only if enabled)
+      else if (enableAway && homeAway === 'Away' && status === 'Not confirmed') {
+        teamMap[teamName].hasAway = true;
+      }
+    }
+
+    // 3. Filter the list: Keep team if it has EITHER home OR away pending matches
+    const filteredTeams = allTeams.filter(t => t.hasHome || t.hasAway);
+
+    Logger.log(`getOurTeams_: Filtered ${allTeams.length} teams down to ${filteredTeams.length} active teams.`);
+
+    filteredTeams.sort((a, b) => a.name.localeCompare(b.name));
+    return filteredTeams;
 
   } catch (e) {
     Logger.log(`Error in getOurTeams_: ${e.message}\nStack: ${e.stack}`);
