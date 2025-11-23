@@ -90,6 +90,7 @@
 
   function onSubmitSuccess(result) {
     if (result === "Success") {
+      document.getElementById('step-0-fieldset').style.display = 'none';
       document.getElementById('booking-flow').style.display = 'none';
       document.getElementById('success-message').style.display = 'block';
       document.getElementById('success-message').scrollIntoView({ behavior: 'smooth' });
@@ -240,6 +241,19 @@
       btn.textContent = "Submit Request";
     }
   }
+
+    function onAwayProposalChange() {
+      const time = document.getElementById('proposed-time-input').value;
+      const venue = document.getElementById('venue-input').value;
+      const btn = document.getElementById('submit-btn');
+
+      if (time && venue) {
+        btn.style.display = 'block';
+        btn.textContent = "Submit Proposal";
+      } else {
+        btn.style.display = 'none';
+      }
+    }
 
   function findDates() {
     const bookingData = getBookingData();
