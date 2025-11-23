@@ -106,8 +106,22 @@
     
     const errorMsg = error.message.startsWith("Error: ") ? error.message.substring(7) : error.message;
 
+    // Escape HTML to prevent XSS
+    const safeMsg = errorMsg
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+    // Auto-link emails
+    const linkedMsg = safeMsg.replace(
+      /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi,
+      '<a href="mailto:$1" style="color: inherit; text-decoration: underline;">$1</a>'
+    );
+
     const errorDiv = document.getElementById('error-message');
-    errorDiv.textContent = errorMsg;
+    errorDiv.innerHTML = linkedMsg;
     errorDiv.style.display = 'block';
     errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
