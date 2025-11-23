@@ -44,120 +44,157 @@
     border: 1px solid var(--border-color);
     margin-top: 6px;
     font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
+  
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+  }
+
   fieldset {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 20px;
-    background-color: #ffffff;
-    margin-top: 20px;
+    border: none;
+    border-radius: 12px;
+    padding: 25px;
+    background-color: var(--card-bg);
+    margin-bottom: 25px;
+    box-shadow: var(--shadow-sm);
   }
+  
   legend {
-    font-weight: bold;
-    padding: 0 5px;
-    margin-left: 10px;
-    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 0 10px;
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
   }
-  .step-subtitle {
-    font-size: 0.9rem;
-    color: #555;
-    font-weight: normal;
-    margin-top: -10px;
-    margin-bottom: 20px;
-  }
-  div {
-    margin-bottom: 15px;
-  }
+
   label {
     display: block;
     margin-bottom: 5px;
-    font-weight: bold;
+    font-weight: 600;
+    color: #495057;
   }
+  
+  div {
+    margin-bottom: 20px;
+  }
+
+  /* Buttons */
   button {
-    background-color: #007bff;
+    background-color: var(--primary-color);
     color: white;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
     border: none;
-    margin-top: 10px;
+    margin-top: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
-  #home-submit-btn,
-  #away-submit-btn {
-    background-color: #28a745;
+  
+  button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
   }
+  
+  button:active {
+    transform: translateY(0);
+  }
+
   button:disabled {
-    background-color: #888888;  /* A darker, more obvious gray */
-    color: #cccccc;            /* Lighter text to look inactive */
-    cursor: not-allowed;       /* The "no entry" cursor */
-    border-color: #888888;      /* Match the border to the background */
+    background-color: #adb5bd;
+    color: #e9ecef;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
-  input[type="radio"] {
-    width: auto;
-    margin-right: 10px;
-  }
-  label[for^="booking-type-"] {
-    display: inline-block;
-    font-weight: normal;
-  }
-  #home-results-list div,
-  #away-results-list div {
-    padding: 0;
-  }
-  #home-results-list label,
-  #away-results-list label {
-    display: block;
-    padding: 12px;
-    background-color: #f7f7f7;
-    margin-bottom: 5px;
-    border-radius: 5px;
+
+  /* Radio Buttons & Results List */
+  #step-0-options div,
+  #results-list div {
+    display: flex;
+    align-items: center;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
     cursor: pointer;
+  }
+  
+  #step-0-options div:hover,
+  #results-list div:hover {
+    border-color: var(--primary-color);
+    background-color: #f0f7ff;
+  }
+
+  input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin: 0 15px 0 0;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+  }
+
+  #step-0-options label,
+  #results-list label {
+    margin-bottom: 0;
     font-weight: normal;
+    cursor: pointer;
+    flex-grow: 1;
   }
-  #home-results-list label:hover,
-  #away-results-list label:hover {
-    background-color: #eef;
-  }
-  #home-results-list input[type="radio"],
-  #away-results-list input[type="radio"] {
-    vertical-align: middle;
-  }
-  #home-loading,
-  #away-loading {
-    display: none;
-  }
+
+  /* Messages */
   #home-no-matches-message,
   #away-no-matches-message,
   #success-message,
   #error-message {
     display: none;
-    padding: 15px;
-    border-radius: 5px;
-    margin-top: 15px;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    animation: fadeIn 0.3s ease-in-out;
   }
+
   #home-no-matches-message,
   #away-no-matches-message {
     color: #856404;
     background-color: #fff3cd;
     border: 1px solid #ffeeba;
   }
+
   #success-message {
     text-align: center;
     color: #155724;
     background-color: #d4edda;
     border: 1px solid #c3e6cb;
   }
+  
   #error-message {
     color: #721c24;
     background-color: #f8d7da;
     border: 1px solid #f5c6cb;
   }
+
+  #loading-indicator, #step-0-loading {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 10px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   @media (min-width: 600px) {
-    input,
-    select {
-      width: 350px;
-    }
-    button {
-      width: auto;
+    input, select {
+      max-width: 100%;
     }
   }
 </style>
