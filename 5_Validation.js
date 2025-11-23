@@ -86,8 +86,9 @@ function _validateProposal(ourTeamName, matchDate, isHomeMatch, settings) {
  * @param {Array[]} sheetData The data from the sheet (Booking Requests or Away Proposals).
  * @param {Object} booking The new booking object being submitted.
  * @param {boolean} isHomeMatch True if checking Booking Requests, False for Away Proposals.
+ * @param {Object} settings The club settings object (for Match Secretary email).
  */
-function _validateNoDuplicateRequest(sheetData, booking, isHomeMatch) {
+function _validateNoDuplicateRequest(sheetData, booking, isHomeMatch, settings) {
   const headers = sheetData[0];
   const reqStatusCol = headers.indexOf(CONFIG.HEADERS.STATUS);
 
@@ -124,7 +125,8 @@ function _validateNoDuplicateRequest(sheetData, booking, isHomeMatch) {
       row[reqTheirTeamCol].trim().toUpperCase() === theirTeamUpper &&
       (status === 'Pending' || status === 'Confirmed')
     ) {
-      throw new Error(`A '${status}' request for this exact match already exists. Please contact the match secretary.`);
+      const email = settings['Match Secretary Email'] || 'the match secretary';
+      throw new Error(`A '${status}' request for this exact match already exists. Please contact the match secretary at ${email}.`);
     }
   }
   // No error thrown = check passed
