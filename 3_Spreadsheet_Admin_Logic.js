@@ -990,6 +990,14 @@ function _processBookingChange_(e, action, isHome, settings = null) {
         if (division) existing_fx_rowData[fx_h['Div']] = division;
 
         rowRange.setValues([existing_fx_rowData]);
+
+        // FIX: Also copy formatting from the row above when UPDATING, to reset any "Pending" styling (e.g. gray/red backgrounds)
+        if (sheetRow > 2) { // Ensure there is a data row above
+          fixturesSheet.getRange(sheetRow - 1, 1, 1, fixturesSheet.getLastColumn())
+            .copyTo(rowRange, SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
+          SpreadsheetApp.flush();
+        }
+
         fixtureUpdated = true;
       } else if (isHome) {
         // Create NEW row (Only for Home matches)
