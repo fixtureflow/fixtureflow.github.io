@@ -74,3 +74,12 @@ Your goal is to build a **robust, scalable, and maintainable** system for a Spor
   - Web App functions (`doGet`, `doPost`) should only handle parsing requests and returning HTML/JSON. 
   - Business logic should be in separate functions that the Web App *calls*.
 - **Variable Naming:** Use descriptive camelCase names.
+
+## 11. SaaS Architecture (Library vs. Host)
+- **Library Purity:** The Library (`BadmintonLib`) contains 95% of the logic and MUST remain generic. It should NEVER contain client-specific logic (e.g., "If Mount Pleasant...").
+- **Host Script as Controller:** The Host Script (attached to the Sheet) is the "Glue". It calls the Library and handles client-specific customizations.
+- **The Hook Pattern:** To implement custom logic (e.g., extra emails), use the Host Script to "hook" into the process:
+  1. Call the Library function (e.g., `const result = BadmintonLib.processBooking(...)`).
+  2. Check the `result`.
+  3. Execute custom local functions if needed.
+- **Return Values:** Public API functions in the Library MUST return structured result objects (e.g., `{ success: true, data: {...}, action: 'confirmed' }`) to enable these hooks.

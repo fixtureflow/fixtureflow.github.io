@@ -1011,7 +1011,17 @@ function _processBookingChange_(e, action, isHome, settings = null) {
         newRow[fx_h['Venue / Hall']] = venueName;
         newRow[fx_h['Match Status']] = 'Confirmed';
 
-        fixturesSheet.appendRow(newRow);
+        // fixturesSheet.appendRow(newRow); // Replaced with setValues + Copy Format
+        const lastRow = fixturesSheet.getLastRow();
+        const insertRow = lastRow + 1;
+        const range = fixturesSheet.getRange(insertRow, 1, 1, newRow.length);
+        range.setValues([newRow]);
+
+        // Copy formatting from the row above to ensure consistency (borders, font, etc.)
+        if (lastRow > 1) {
+          fixturesSheet.getRange(lastRow, 1, 1, newRow.length).copyTo(range, SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
+        }
+
         fixtureUpdated = true;
       } else {
         throw new Error('Could not find a corresponding "Not confirmed" AWAY fixture to update.');
