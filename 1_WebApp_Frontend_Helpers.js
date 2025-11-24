@@ -105,35 +105,19 @@ function getOurTeams_(settings) {
     // settings is passed in now
     const enableAway = String(settings['Enable Away Booking'] || '').trim().toUpperCase() === 'TRUE';
 
-    // Create a map for quick lookup
-    const teamMap = {};
-    allTeams.forEach(t => teamMap[t.name] = t);
+    // 2. Set flags for all teams
+    // All teams can book Home matches.
+    // All teams can book Away matches IF the feature is enabled.
+    const finalTeams = allTeams.map(t => ({
+      ...t,
+      hasHome: true,
+      hasAway: enableAway
+    }));
 
-    for (let i = h.headerRowIndex + 1; i < fixturesData.length; i++) {
-      const row = fixturesData[i];
-      const teamName = row[h['Team No.']];
-      const homeAway = row[h['Home / Away']];
-      const status = row[h['Match Status']];
+    Logger.log(`getOurTeams_: Returning ${finalTeams.length} teams. Away Enabled: ${enableAway}`);
 
-      if (!teamName || !teamMap[teamName]) continue;
-
-      // Check for Pending Home Match
-      if (homeAway === 'Home' && status === CONFIG.STATUSES.NOT_CONFIRMED) {
-        teamMap[teamName].hasHome = true;
-      }
-      // Check for Pending Away Match (Only if enabled)
-      else if (enableAway && homeAway === 'Away' && status === CONFIG.STATUSES.NOT_CONFIRMED) {
-        teamMap[teamName].hasAway = true;
-      }
-    }
-
-    // 3. Filter the list: Keep team if it has EITHER home OR away pending matches
-    const filteredTeams = allTeams.filter(t => t.hasHome || t.hasAway);
-
-    Logger.log(`getOurTeams_: Filtered ${allTeams.length} teams down to ${filteredTeams.length} active teams.`);
-
-    filteredTeams.sort((a, b) => a.name.localeCompare(b.name));
-    return filteredTeams;
+    finalTeams.sort((a, b) => a.name.localeCompare(b.name));
+    return finalTeams;
 
   } catch (e) {
     Logger.log(`Error in getOurTeams_: ${e.message}\nStack: ${e.stack}`);
