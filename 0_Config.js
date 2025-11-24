@@ -55,6 +55,7 @@ const CONFIG = {
   },
   STATUSES: {
     PENDING: 'Pending',
+    NOT_CONFIRMED: 'Not confirmed',
     CONFIRMED: 'Confirmed',
     REJECTED: 'Rejected',
     CANCELLED: 'Cancelled'

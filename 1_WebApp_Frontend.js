@@ -152,11 +152,11 @@ function getOurTeams_() {
       if (!teamName || !teamMap[teamName]) continue;
 
       // Check for Pending Home Match
-      if (homeAway === 'Home' && status === 'Not confirmed') {
+      if (homeAway === 'Home' && status === CONFIG.STATUSES.NOT_CONFIRMED) {
         teamMap[teamName].hasHome = true;
       }
       // Check for Pending Away Match (Only if enabled)
-      else if (enableAway && homeAway === 'Away' && status === 'Not confirmed') {
+      else if (enableAway && homeAway === 'Away' && status === CONFIG.STATUSES.NOT_CONFIRMED) {
         teamMap[teamName].hasAway = true;
       }
     }
@@ -314,7 +314,7 @@ function getPendingHomeFixtures() {
 
     if (!ourTeam && !oppClub) continue; // Skip empty rows
 
-    if (ourTeam && homeAway === 'Home' && status === 'Not confirmed') {
+    if (ourTeam && homeAway === 'Home' && status === CONFIG.STATUSES.NOT_CONFIRMED) {
       const opponent = { club: oppClub, team: oppTeam, type: matchType };
       if (!fixtureMap[ourTeam]) {
         fixtureMap[ourTeam] = [opponent];
@@ -366,7 +366,7 @@ function getPendingAwayFixtures() {
     const homeAway = row[h['Home / Away']];
     const status = row[h['Match Status']];
 
-    if (yourClubName !== getClubSettings()['Club Name'] || homeAway !== 'Away' || status !== 'Not confirmed') {
+    if (yourClubName !== getClubSettings()['Club Name'] || homeAway !== 'Away' || status !== CONFIG.STATUSES.NOT_CONFIRMED) {
       continue;
     }
     

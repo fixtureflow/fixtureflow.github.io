@@ -135,7 +135,7 @@ function _buildTeamBufferBlocklist(ss, teamName, bufferDays) {
     const statusOnSheet = row[reqStatusCol];
 
     // Check if THIS row matches the team we're looking for
-    if (teamOnSheet === teamNameUpper && (statusOnSheet === 'Pending' || statusOnSheet === 'Confirmed')) {
+    if (teamOnSheet === teamNameUpper && (statusOnSheet === CONFIG.STATUSES.PENDING || statusOnSheet === CONFIG.STATUSES.CONFIRMED)) {
       const date = new Date(row[reqDateCol]);
       if (isNaN(date.getTime())) continue;
 
