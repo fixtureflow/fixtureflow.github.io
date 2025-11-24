@@ -47,7 +47,7 @@ function getClubSettings_() {
  * Public function to get the list of "Our Teams" for the web app.
  * Caches for 1 hour.
  */
-function getOurTeams() {
+function getOurTeams_Public_() {
   // Reduced cache to 10 minutes (600 seconds) so the list updates reasonably fast
   // when a team finishes their last match.
   const settings = getClubSettings();
@@ -145,7 +145,7 @@ function getOurTeams_(settings) {
  * Public function to get valid season months for the web app.
  * Caches for 1 hour.
  */
-function getValidSeasonMonths() {
+function getValidSeasonMonths_Public_() {
   return getCachedData('SEASON_MONTHS', getValidSeasonMonths_, 3600);
 }
 
@@ -206,7 +206,7 @@ function getValidSeasonMonths_() {
  * Public function to get opponent clubs for the web app.
  * Caches for 1 hour.
  */
-function getOpponentClubs() {
+function getOpponentClubs_Public_() {
   return getCachedData('OPPONENT_CLUBS', getOpponentClubs_, 3600);
 }
 
@@ -251,7 +251,7 @@ function getOpponentClubs_() {
  * Public function to get pending home fixtures for the web app.
  * NO LONGER CACHED (Real-time).
  */
-function getPendingHomeFixtures() {
+function getPendingHomeFixtures_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const fixturesSheet = ss.getSheetByName(CONFIG.SHEETS.FIXTURES);
   if (!fixturesSheet) {
@@ -306,7 +306,7 @@ function getPendingHomeFixtures() {
  * This is used to populate the opponent dropdown in the away booking flow.
  * @returns {Object} A map of pending away fixtures.
  */
-function getPendingAwayFixtures(settings = null) {
+function getPendingAwayFixtures_(settings = null) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const fixturesSheet = ss.getSheetByName(CONFIG.SHEETS.FIXTURES);
   if (!fixturesSheet) {
@@ -376,7 +376,7 @@ function getPendingAwayFixtures(settings = null) {
  * @param {string} dateStr The date string ("yyyy-MM-dd").
  * @returns {string[]} Array of time strings (e.g., ["19:00", "20:00"]).
  */
-function getTimeSlotsForDate(dateStr, settings = null) {
+function getTimeSlotsForDate_(dateStr, settings = null) {
   try {
     settings = settings || getClubSettings();
     const dateObj = parseDMY(dateStr);

@@ -58,10 +58,10 @@ function handleConfirmationEdit(e) {
     // 3. And finally, route to the unified processor.
     const sheetName = sheet.getName();
     const isHome = (sheetName === CONFIG.SHEETS.BOOKING_REQUESTS);
-    const settings = getClubSettings_(); // Fetch settings once
+    // const settings = getClubSettings_(); // REMOVED: API wrapper handles this
 
     if (isHome || sheetName === CONFIG.SHEETS.AWAY_MATCH_PROPOSALS) {
-      _processBookingChange(e, newValue, isHome, settings);
+      _processBookingChange(e, newValue, isHome); // Call wrapper (which calls _Internal)
     }
   }
   // If the newValue is 'pending' or anything else, the function simply ends here.
@@ -72,8 +72,7 @@ function handleConfirmationEdit(e) {
 //==============================================================
 
 function fillAvailabilityX_menu() {
-  const settings = getClubSettings_();
-  fillAvailabilityX(false, settings);
+  fillAvailabilityX(); // Call wrapper
 }
 
 /** [MENU ITEM] Shows the sidebar UI for finding away match dates. */

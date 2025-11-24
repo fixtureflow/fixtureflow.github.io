@@ -17,7 +17,7 @@
  * @param {boolean} silent If true, suppresses the final UI alert (for automated calls).
  * @returns {Object|null} A summary object of changes, or null if failed.
  */
-function fillAvailabilityX(silent = false, settings = null) {
+function fillAvailabilityX_(silent = false, settings = null) {
   const ui = SpreadsheetApp.getUi(); 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -102,7 +102,7 @@ function fillAvailabilityX(silent = false, settings = null) {
  * [CORE] Processes new 'U' (Unavailable) submissions from 'Form Responses 1'.
  * Reads the form responses, parses dates, and updates the Availability sheet.
  */
-function processSubmissions(settings = null) {
+function processSubmissions_(settings = null) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const ui = SpreadsheetApp.getUi();
   const form = ss.getSheetByName(CONFIG.SHEETS.FORM_RESPONSES);
@@ -321,7 +321,7 @@ function _clearPlayerUnavailability(playerName) {
  * Sends internal summary (Matches + Detailed Shuttle Report) AND courtesy reminders to Opponents.
  * Scheduled to run weekly (e.g., Friday afternoon).
  */
-function sendWeeklyMatchSummary(settings = null) {
+function sendWeeklyMatchSummary_(settings = null) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   
   try {
@@ -474,7 +474,7 @@ function sendWeeklyMatchSummary(settings = null) {
  * 
  * @param {string} opponentName The exact name of the opponent club to summarize.
  */
-function sendOpponentSummaryEmail(opponentName, settings = null) {
+function sendOpponentSummaryEmail_(opponentName, settings = null) {
   const ui = SpreadsheetApp.getUi();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -901,7 +901,7 @@ function _extractBookingData(sheet, rowData, isHome) {
  * @param {string} action The action to perform ('confirmed', 'cancelled', 'rejected').
  * @param {boolean} isHome True if this is a Home booking request.
  */
-function _processBookingChange(e, action, isHome, settings = null) {
+function _processBookingChange_(e, action, isHome, settings = null) {
   const ui = SpreadsheetApp.getUi();
   const range = e.range;
   const oldValue = e.oldValue;
@@ -1137,7 +1137,7 @@ function _processBookingChange(e, action, isHome, settings = null) {
 
     // --- 4. SYNC AVAILABILITY (If not rejected) ---
     if (action !== 'rejected') {
-      const fillResult = fillAvailabilityX(true, settings); // Silent mode, pass settings
+      const fillResult = fillAvailabilityX_(true, settings); // Silent mode, pass settings
       if (fillResult) {
         availabilityStats = fillResult;
         const xCount = action === 'confirmed' ? fillResult.addedX : fillResult.removedX;
