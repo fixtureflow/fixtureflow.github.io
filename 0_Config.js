@@ -60,6 +60,10 @@ const CONFIG = {
     REJECTED: 'Rejected',
     CANCELLED: 'Cancelled'
   },
+  HOME_AWAY_OPTIONS: {
+    HOME: 'HOME',
+    AWAY: 'AWAY'
+  },
   TEMPLATES: {
     WEEKLY_SUMMARY: 'WeeklySummaryEmail',
     OPPONENT_REMINDER: 'WeeklyOpponentReminder',
