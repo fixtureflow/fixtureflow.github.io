@@ -171,3 +171,101 @@ function _processBookingChange(e, action, isHome) {
   const settings = getClubSettings_();
   return _processBookingChange_(e, action, isHome, settings);
 }
+
+//==============================================================
+// 3. HTML SERVING API (Called by Host Script UI)
+//==============================================================
+
+/**
+ * [WEB APP] Handles the doGet request for the Web App.
+ * Returns the evaluated HTML for the app.
+ * 
+ * @param {Object} e The event object from doGet.
+ * @returns {HtmlOutput|TextOutput} The evaluated HTML or text output.
+ */
+function handleDoGet(e) {
+  // 1. Save URL (Library context, but works if deployed as Web App)
+  try {
+    PropertiesService.getScriptProperties().setProperty('LAST_KNOWN_URL', ScriptApp.getService().getUrl());
+  } catch (propError) {
+    Logger.log(`Minor error: Could not save web app URL to properties. ${propError.message}`);
+  }
+
+  // 2. Handle Cache Clear Action
+  if (e && e.parameter && e.parameter.action === 'clear') {
+    try {
+      const keysToClear = [
+        'CLUB_SETTINGS', 'OUR_TEAMS', 'SEASON_MONTHS',
+        'OPPONENT_CLUBS', 'PENDING_FIXTURES', 'PENDING_AWAY_FIXTURES'
+      ];
+      CacheService.getScriptCache().removeAll(keysToClear);
+      return ContentService.createTextOutput("SUCCESS: The web application cache has been cleared. You can now close this tab.");
+    } catch (err) {
+      return ContentService.createTextOutput(`ERROR: Could not clear cache. ${err.message}`);
+    }
+  }
+
+  // 3. Serve the Web App HTML
+  const settings = getClubSettings_();
+  const template = HtmlService.createTemplateFromFile('index');
+
+  template.clubName = settings[CONFIG.SETTINGS_KEYS.CLUB_NAME] || 'Match Booking Portal';
+  template.email = settings[CONFIG.SETTINGS_KEYS.MATCH_SECRETARY_EMAIL] || '';
+
+  const enableAway = String(settings[CONFIG.SETTINGS_KEYS.ENABLE_AWAY_BOOKING] || '').trim().toUpperCase();
+  template.awayBookingEnabled = (enableAway === 'TRUE');
+
+  // Process Club Logo Link
+  const logoLink = settings[CONFIG.SETTINGS_KEYS.CLUB_LOGO_LINK] || '';
+  let logoUrl = '';
+  const idMatch = logoLink.match(/[-\w]{25,}/);
+  if (idMatch) {
+    logoUrl = `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w200`;
+  }
+  template.clubLogoUrl = logoUrl;
+
+  return template.evaluate()
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
+}
+
+/**
+ * [SIDEBAR] Returns the HTML for the Away Match Finder sidebar.
+ * @returns {HtmlOutput}
+ */
+function getAwayFinderHtml() {
+  return HtmlService.createHtmlOutputFromFile(CONFIG.TEMPLATES.AWAY_FINDER).setTitle('Away Match Finder');
+}
+
+/**
+ * [SIDEBAR] Returns the HTML for the Player Clearer sidebar.
+ * @returns {HtmlOutput}
+ */
+function getPlayerClearerHtml() {
+  return HtmlService.createHtmlOutputFromFile(CONFIG.TEMPLATES.PLAYER_CLEARER).setTitle("Clear Player 'U's");
+}
+
+/**
+ * [DIALOG] Returns the HTML for the Opponent Select Dialog.
+ * Fetches opponent names internally.
+ * @returns {HtmlOutput}
+ */
+function getOpponentSelectDialogHtml() {
+  // Fetch opponents using internal helper
+  const clubs = getOpponentClubs_(); // Returns {name, email} objects
+  const opponentNames = clubs.map(c => c.name).sort();
+
+  const template = HtmlService.createTemplateFromFile(CONFIG.TEMPLATES.OPPONENT_SELECT_DIALOG);
+  template.opponentNames = opponentNames;
+
+  return template.evaluate().setWidth(350).setHeight(180);
+}
+
+/**
+ * [DIALOG] Returns the HTML for the Loading Spinner.
+ * @returns {HtmlOutput}
+ */
+function getLoadingSpinnerHtml() {
+  return HtmlService.createHtmlOutputFromFile(CONFIG.TEMPLATES.LOADING_SPINNER)
+    .setWidth(250)
+    .setHeight(150);
+}
