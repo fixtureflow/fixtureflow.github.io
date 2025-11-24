@@ -105,19 +105,39 @@ function getOurTeams_(settings) {
     // settings is passed in now
     const enableAway = String(settings['Enable Away Booking'] || '').trim().toUpperCase() === 'TRUE';
 
-    // 2. Set flags for all teams
-    // All teams can book Home matches.
-    // All teams can book Away matches IF the feature is enabled.
-    const finalTeams = allTeams.map(t => ({
-      ...t,
-      hasHome: true,
-      hasAway: enableAway
-    }));
+    // Create a map for quick lookup
+    const teamMap = {};
+    allTeams.forEach(t => teamMap[t.name] = t);
 
-    Logger.log(`getOurTeams_: Returning ${finalTeams.length} teams. Away Enabled: ${enableAway}`);
+    for (let i = h.headerRowIndex + 1; i < fixturesData.length; i++) {
+      const row = fixturesData[i];
+      const teamName = row[h['Team No.']];
+      const homeAway = row[h['Home / Away']];
+      const status = row[h['Match Status']];
 
-    finalTeams.sort((a, b) => a.name.localeCompare(b.name));
-    return finalTeams;
+      if (!teamName || !teamMap[teamName]) continue;
+
+      const homeAwayUpper = String(homeAway).trim().toUpperCase();
+      const statusUpper = String(status).trim().toUpperCase();
+      const targetStatus = CONFIG.STATUSES.NOT_CONFIRMED.toUpperCase();
+
+      // Check for Pending Home Match
+      if (homeAwayUpper === 'HOME' && statusUpper === targetStatus) {
+        teamMap[teamName].hasHome = true;
+      }
+      // Check for Pending Away Match (Only if enabled)
+      else if (enableAway && homeAwayUpper === 'AWAY' && statusUpper === targetStatus) {
+        teamMap[teamName].hasAway = true;
+      }
+    }
+
+    // 3. Filter the list: Keep team if it has EITHER home OR away pending matches
+    const filteredTeams = allTeams.filter(t => t.hasHome || t.hasAway);
+
+    Logger.log(`getOurTeams_: Filtered ${allTeams.length} teams down to ${filteredTeams.length} active teams.`);
+
+    filteredTeams.sort((a, b) => a.name.localeCompare(b.name));
+    return filteredTeams;
 
   } catch (e) {
     Logger.log(`Error in getOurTeams_: ${e.message}\nStack: ${e.stack}`);
@@ -264,7 +284,11 @@ function getPendingHomeFixtures_() {
 
     if (!ourTeam && !oppClub) continue; // Skip empty rows
 
-    if (ourTeam && homeAway === 'Home' && status === CONFIG.STATUSES.NOT_CONFIRMED) {
+    const homeAwayUpper = String(homeAway).trim().toUpperCase();
+    const statusUpper = String(status).trim().toUpperCase();
+    const targetStatus = CONFIG.STATUSES.NOT_CONFIRMED.toUpperCase();
+
+    if (ourTeam && homeAwayUpper === 'HOME' && statusUpper === targetStatus) {
       const opponent = { club: oppClub, team: oppTeam, type: matchType };
       if (!fixtureMap[ourTeam]) {
         fixtureMap[ourTeam] = [opponent];
@@ -318,7 +342,13 @@ function getPendingAwayFixtures_(settings = null) {
     const homeAway = row[h['Home / Away']];
     const status = row[h['Match Status']];
 
-    if (yourClubName !== settings['Club Name'] || homeAway !== 'Away' || status !== CONFIG.STATUSES.NOT_CONFIRMED) {
+    const yourClubNameUpper = String(yourClubName).trim().toUpperCase();
+    const myClubNameUpper = String(settings['Club Name']).trim().toUpperCase();
+    const homeAwayUpper = String(homeAway).trim().toUpperCase();
+    const statusUpper = String(status).trim().toUpperCase();
+    const targetStatus = CONFIG.STATUSES.NOT_CONFIRMED.toUpperCase();
+
+    if (yourClubNameUpper !== myClubNameUpper || homeAwayUpper !== 'AWAY' || statusUpper !== targetStatus) {
       continue;
     }
     

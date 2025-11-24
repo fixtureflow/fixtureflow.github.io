@@ -35,8 +35,10 @@
 
   function onDataLoadSuccess() {
     dataLoadCounter++;
+    console.log(`Data loaded: ${dataLoadCounter} / ${TOTAL_DATA_STREAMS}`);
     if (dataLoadCounter === TOTAL_DATA_STREAMS) {
       // Initial setup is done.
+      console.log("All data loaded. Away enabled:", awayBookingEnabled);
 
       // If away booking is disabled, we default to home and hide the switcher.
       if (!awayBookingEnabled) {
@@ -50,10 +52,10 @@
     }
   }
 
-  function onHomeFixtureLoadSuccess(map) { homeFixtureMap = map; onDataLoadSuccess(); }
-  function onAwayFixtureLoadSuccess(map) { awayFixtureMap = map; onDataLoadSuccess(); }
-  function onOpponentClubLoadSuccess(clubsData) { clubEmailMap = {}; clubsData.forEach(clubInfo => { clubEmailMap[clubInfo.name] = clubInfo.email; }); onDataLoadSuccess(); }
-  function onTeamLoadSuccess(teams) { loadedTeams = teams; onDataLoadSuccess(); }
+    function onHomeFixtureLoadSuccess(map) { console.log("Home fixtures loaded"); homeFixtureMap = map; onDataLoadSuccess(); }
+    function onAwayFixtureLoadSuccess(map) { console.log("Away fixtures loaded"); awayFixtureMap = map; onDataLoadSuccess(); }
+    function onOpponentClubLoadSuccess(clubsData) { console.log("Clubs loaded"); clubEmailMap = {}; clubsData.forEach(clubInfo => { clubEmailMap[clubInfo.name] = clubInfo.email; }); onDataLoadSuccess(); }
+    function onTeamLoadSuccess(teams) { console.log("Teams loaded", teams); loadedTeams = teams; onDataLoadSuccess(); }
   
   function onMonthLoadSuccess(months) {
     const monthSelect = document.getElementById('month-select');
