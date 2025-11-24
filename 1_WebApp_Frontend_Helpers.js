@@ -50,7 +50,8 @@ function getClubSettings_() {
 function getOurTeams() {
   // Reduced cache to 10 minutes (600 seconds) so the list updates reasonably fast
   // when a team finishes their last match.
-  return getCachedData('OUR_TEAMS', getOurTeams_, 600);
+  const settings = getClubSettings();
+  return getCachedData('OUR_TEAMS', () => getOurTeams_(settings), 600);
 }
 
 /**
@@ -59,7 +60,7 @@ function getOurTeams() {
  * 
  * @returns {Object[]} Array of team objects {division: "Div 1", name: "L1", hasHome: true, hasAway: false}.
  */
-function getOurTeams_() {
+function getOurTeams_(settings) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const teamsSheet = ss.getSheetByName(CONFIG.SHEETS.TEAMS);
@@ -97,7 +98,11 @@ function getOurTeams_() {
       return allTeams.map(t => ({ ...t, hasHome: true, hasAway: true })).sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    const settings = getClubSettings();
+    if (!h) {
+      return allTeams.map(t => ({ ...t, hasHome: true, hasAway: true })).sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    // settings is passed in now
     const enableAway = String(settings['Enable Away Booking'] || '').trim().toUpperCase() === 'TRUE';
 
     // Create a map for quick lookup
@@ -301,7 +306,7 @@ function getPendingHomeFixtures() {
  * This is used to populate the opponent dropdown in the away booking flow.
  * @returns {Object} A map of pending away fixtures.
  */
-function getPendingAwayFixtures() {
+function getPendingAwayFixtures(settings = null) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const fixturesSheet = ss.getSheetByName(CONFIG.SHEETS.FIXTURES);
   if (!fixturesSheet) {
@@ -317,6 +322,8 @@ function getPendingAwayFixtures() {
     return {};
   }
 
+  settings = settings || getClubSettings(); // Ensure settings are available
+
   const fixtureMap = {};
 
   for (let i = h.headerRowIndex + 1; i < fixturesData.length; i++) {
@@ -327,7 +334,7 @@ function getPendingAwayFixtures() {
     const homeAway = row[h['Home / Away']];
     const status = row[h['Match Status']];
 
-    if (yourClubName !== getClubSettings()['Club Name'] || homeAway !== 'Away' || status !== CONFIG.STATUSES.NOT_CONFIRMED) {
+    if (yourClubName !== settings['Club Name'] || homeAway !== 'Away' || status !== CONFIG.STATUSES.NOT_CONFIRMED) {
       continue;
     }
     
@@ -369,9 +376,9 @@ function getPendingAwayFixtures() {
  * @param {string} dateStr The date string ("yyyy-MM-dd").
  * @returns {string[]} Array of time strings (e.g., ["19:00", "20:00"]).
  */
-function getTimeSlotsForDate(dateStr) {
+function getTimeSlotsForDate(dateStr, settings = null) {
   try {
-    const settings = getClubSettings();
+    settings = settings || getClubSettings();
     const dateObj = parseDMY(dateStr);
     const dayOfWeek = dateObj.getDay();
 

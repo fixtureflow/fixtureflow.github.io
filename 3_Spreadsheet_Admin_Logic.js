@@ -17,13 +17,13 @@
  * @param {boolean} silent If true, suppresses the final UI alert (for automated calls).
  * @returns {Object|null} A summary object of changes, or null if failed.
  */
-function fillAvailabilityX(silent = false) {
+function fillAvailabilityX(silent = false, settings = null) {
   const ui = SpreadsheetApp.getUi(); 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
   try {
     // --- 1. GET SETTINGS & INITIAL DATA ---
-    const settings = getClubSettings_();
+    settings = settings || getClubSettings_();
     const clubName = settings['Club Name'];
     const bufferDays = parseInt(settings['Team Buffer Days (each side)'], 10) || 2;
     const fixturesSheet = ss.getSheetByName(CONFIG.SHEETS.FIXTURES);
@@ -102,7 +102,7 @@ function fillAvailabilityX(silent = false) {
  * [CORE] Processes new 'U' (Unavailable) submissions from 'Form Responses 1'.
  * Reads the form responses, parses dates, and updates the Availability sheet.
  */
-function processSubmissions() {
+function processSubmissions(settings = null) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const ui = SpreadsheetApp.getUi();
   const form = ss.getSheetByName(CONFIG.SHEETS.FORM_RESPONSES);
@@ -112,6 +112,11 @@ function processSubmissions() {
     ui.alert('Error: Missing required sheets.');
     return;
   }
+
+  // Ensure settings are available if needed (though this function mainly uses hardcoded headers/logic, 
+  // it might need settings for future extensibility or logging).
+  // For now, we just accept it to match the pattern.
+  settings = settings || getClubSettings_();
 
   const formData = form.getDataRange().getValues();
   const availRange = availSheet.getDataRange();
@@ -316,7 +321,7 @@ function _clearPlayerUnavailability(playerName) {
  * Sends internal summary (Matches + Detailed Shuttle Report) AND courtesy reminders to Opponents.
  * Scheduled to run weekly (e.g., Friday afternoon).
  */
-function sendWeeklyMatchSummary() {
+function sendWeeklyMatchSummary(settings = null) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   
   try {
@@ -338,7 +343,7 @@ function sendWeeklyMatchSummary() {
     const h = findFixtureHeaders(fixturesData);
     if (!h) throw new Error("Could not find headers in Fixtures sheet.");
 
-    const settings = getClubSettings_();
+    settings = settings || getClubSettings_();
     const clubEmail = settings['Match Secretary Email'];
     const clubName = settings['Club Name'];
     const opponentContactMap = _buildOpponentContactMap(ss);
@@ -469,7 +474,7 @@ function sendWeeklyMatchSummary() {
  * 
  * @param {string} opponentName The exact name of the opponent club to summarize.
  */
-function sendOpponentSummaryEmail(opponentName) {
+function sendOpponentSummaryEmail(opponentName, settings = null) {
   const ui = SpreadsheetApp.getUi();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -553,7 +558,7 @@ function sendOpponentSummaryEmail(opponentName) {
     });
 
     // --- 3. Prepare and Send the Email (UPDATED) ---
-    const settings = getClubSettings_(); // Ensure we use the backend getter
+    settings = settings || getClubSettings_(); // Ensure we use the backend getter
     const ourClubName = settings['Club Name'] || 'Our Club';
     const originalSubject = `Match Summary: ${ourClubName} vs. ${opponentName}`;
 
@@ -896,7 +901,7 @@ function _extractBookingData(sheet, rowData, isHome) {
  * @param {string} action The action to perform ('confirmed', 'cancelled', 'rejected').
  * @param {boolean} isHome True if this is a Home booking request.
  */
-function _processBookingChange(e, action, isHome) {
+function _processBookingChange(e, action, isHome, settings = null) {
   const ui = SpreadsheetApp.getUi();
   const range = e.range;
   const oldValue = e.oldValue;
@@ -910,7 +915,7 @@ function _processBookingChange(e, action, isHome) {
     const data = _extractBookingData(sheet, rowData, isHome);
 
     // --- 2. GET SETTINGS ---
-    const settings = getClubSettings_();
+    settings = settings || getClubSettings_();
     const ourClubName = settings['Club Name'] || 'Match Secretary';
 
     // --- 3. EXECUTE ACTION ---
@@ -1132,7 +1137,7 @@ function _processBookingChange(e, action, isHome) {
 
     // --- 4. SYNC AVAILABILITY (If not rejected) ---
     if (action !== 'rejected') {
-      const fillResult = fillAvailabilityX(true); // Silent mode
+      const fillResult = fillAvailabilityX(true, settings); // Silent mode, pass settings
       if (fillResult) {
         availabilityStats = fillResult;
         const xCount = action === 'confirmed' ? fillResult.addedX : fillResult.removedX;

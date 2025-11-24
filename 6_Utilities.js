@@ -339,10 +339,10 @@ function _getDivisionFromTeamName(ss, teamName) {
  * [HELPER] Sends a standardized rejection email for any booking type.
  * It intelligently chooses the correct email template based on the context.
  */
-function _sendRejectionEmail(isHomeRejection, opponentClubName, opponentTeamName, ourTeamNumber, opponentEmail, rejectedDate, rejectedTime, venue = '') {
+function _sendRejectionEmail(isHomeRejection, opponentClubName, opponentTeamName, ourTeamNumber, opponentEmail, rejectedDate, rejectedTime, venue = '', settings = null) {
   try {
     // 1. Get Settings
-    const settings = getClubSettings_(); // Use the backend getter
+    settings = settings || getClubSettings_(); // Use the backend getter
     const webAppUrl = settings['Web App URL'];
     const ourClubName = settings['Club Name'] || 'Match Secretary';
 

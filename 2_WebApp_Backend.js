@@ -17,8 +17,8 @@
  * @param {number} year The year.
  * @returns {string[]} Array of available date strings.
  */
-function findAvailableDatesForTeam(teamName, month, year) {
-  const settings = getClubSettings();
+function findAvailableDatesForTeam(teamName, month, year, settings = null) {
+  settings = settings || getClubSettings();
   return findAvailableDates_(teamName, month, year, true, settings); // isHomeMatch = true
 }
 
@@ -30,8 +30,8 @@ function findAvailableDatesForTeam(teamName, month, year) {
  * @param {number} year The year.
  * @returns {string[]} Array of available date strings.
  */
-function findAvailableDatesForAwayMatch(teamName, month, year) {
-  const settings = getClubSettings();
+function findAvailableDatesForAwayMatch(teamName, month, year, settings = null) {
+  settings = settings || getClubSettings();
   return findAvailableDates_(teamName, month, year, false, settings); // isHomeMatch = false
 }
 
@@ -150,13 +150,13 @@ function findAvailableDates_(teamName, month, year, isHomeMatch, settings) {
  * @param {Object} booking The booking object.
  * @returns {string} "Success" or error message.
  */
-function submitBookingRequest(booking) {
+function submitBookingRequest(booking, settings = null) {
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
 
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const settings = getClubSettings();
+    settings = settings || getClubSettings();
     const dateObj = parseDMY(booking.date);
     if (isNaN(dateObj.getTime())) {
       throw new Error(`Invalid date format provided: ${booking.date}`);
@@ -218,7 +218,7 @@ function submitBookingRequest(booking) {
  * @param {object} proposal - An object containing the away booking details.
  * @returns {string} "Success" or an error message.
  */
-function submitAwayBookingRequest(proposal) {
+function submitAwayBookingRequest(proposal, settings = null) {
   // Use a lock to prevent simultaneous submissions from causing issues.
   const lock = LockService.getScriptLock();
   lock.waitLock(30000); 
@@ -242,7 +242,7 @@ function submitAwayBookingRequest(proposal) {
     }
 
     // --- Duplicate Check ---
-    const settings = getClubSettings();
+    settings = settings || getClubSettings();
     const awayProposalData = awayProposalSheet.getDataRange().getValues();
     _validateNoDuplicateRequest(awayProposalData, proposal, false, settings);
 
