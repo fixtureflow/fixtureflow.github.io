@@ -35,14 +35,13 @@
 
   function onDataLoadSuccess() {
     dataLoadCounter++;
-    console.log(`Data loaded: ${dataLoadCounter} / ${TOTAL_DATA_STREAMS}`);
     if (dataLoadCounter === TOTAL_DATA_STREAMS) {
       // Initial setup is done.
-      console.log("All data loaded. Away enabled:", awayBookingEnabled);
 
       // If away booking is disabled, we default to home and hide the switcher.
       if (!awayBookingEnabled) {
-        document.getElementById('step-0-fieldset').style.display = 'none';
+        const step0 = document.getElementById('step-0-fieldset');
+        if (step0) step0.style.display = 'none';
         showBookingFlow('home');
       } else {
         // If enabled, show the options now that data is ready
@@ -52,11 +51,11 @@
     }
   }
 
-    function onHomeFixtureLoadSuccess(map) { console.log("Home fixtures loaded"); homeFixtureMap = map; onDataLoadSuccess(); }
-    function onAwayFixtureLoadSuccess(map) { console.log("Away fixtures loaded"); awayFixtureMap = map; onDataLoadSuccess(); }
-    function onOpponentClubLoadSuccess(clubsData) { console.log("Clubs loaded"); clubEmailMap = {}; clubsData.forEach(clubInfo => { clubEmailMap[clubInfo.name] = clubInfo.email; }); onDataLoadSuccess(); }
-    function onTeamLoadSuccess(teams) { console.log("Teams loaded", teams); loadedTeams = teams; onDataLoadSuccess(); }
-  
+  function onHomeFixtureLoadSuccess(map) { homeFixtureMap = map; onDataLoadSuccess(); }
+  function onAwayFixtureLoadSuccess(map) { awayFixtureMap = map; onDataLoadSuccess(); }
+  function onOpponentClubLoadSuccess(clubsData) { clubEmailMap = {}; clubsData.forEach(clubInfo => { clubEmailMap[clubInfo.name] = clubInfo.email; }); onDataLoadSuccess(); }
+  function onTeamLoadSuccess(teams) { loadedTeams = teams; onDataLoadSuccess(); }
+
   function onMonthLoadSuccess(months) {
     const monthSelect = document.getElementById('month-select');
     monthSelect.innerHTML = "<option value=''>-- Select a Month --</option>";
@@ -67,21 +66,21 @@
   }
 
   function onFindSuccess(dates) {
-      document.getElementById('loading-indicator').style.display = 'none';
-      const list = document.getElementById('results-list');
-      let html = "";
-      if (dates.length === 0) {
-        html = `<p>No 100% available dates were found for this team in the selected month. Please try a different month.</p>`;
-      } else {
-        html = "<p>Please select one of the available dates:</p>";
-        dates.forEach(date => {
-          const displayDate = new Date(date + 'T00:00:00');
-          const displayString = displayDate.toLocaleDateString('en-IE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-          html += `<div onclick="selectDateCard(event, '${date}')"><input type="radio" name="selected_date" id="date-${date}" value="${date}" onchange="onDateSelected(this.value)"> <label for="date-${date}">${displayString}</label></div>`;
-        });
-      }
-      list.innerHTML = html;
-      setTimeout(() => { document.getElementById('step-3-fieldset').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 10);
+    document.getElementById('loading-indicator').style.display = 'none';
+    const list = document.getElementById('results-list');
+    let html = "";
+    if (dates.length === 0) {
+      html = `<p>No 100% available dates were found for this team in the selected month. Please try a different month.</p>`;
+    } else {
+      html = "<p>Please select one of the available dates:</p>";
+      dates.forEach(date => {
+        const displayDate = new Date(date + 'T00:00:00');
+        const displayString = displayDate.toLocaleDateString('en-IE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        html += `<div onclick="selectDateCard(event, '${date}')"><input type="radio" name="selected_date" id="date-${date}" value="${date}" onchange="onDateSelected(this.value)"> <label for="date-${date}">${displayString}</label></div>`;
+      });
+    }
+    list.innerHTML = html;
+    setTimeout(() => { document.getElementById('step-3-fieldset').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 10);
   }
 
   function onTimeSuccess(timeSlots) {
@@ -103,9 +102,9 @@
 
   function onSubmitFailure(error) {
     const btn = document.getElementById('submit-btn');
-    btn.disabled = false; 
+    btn.disabled = false;
     btn.textContent = (currentMode === 'home') ? "Submit Request" : "Submit Proposal";
-    
+
     const errorMsg = error.message.startsWith("Error: ") ? error.message.substring(7) : error.message;
 
     // Escape HTML to prevent XSS
@@ -144,34 +143,34 @@
     document.getElementById('results-list').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
   }
 
-      function hideError() {
-        const errorDiv = document.getElementById('error-message');
-        if (errorDiv.style.display !== 'none') {
-          errorDiv.style.display = 'none';
-          errorDiv.innerHTML = '';
-        }
-      }
+  function hideError() {
+    const errorDiv = document.getElementById('error-message');
+    if (errorDiv.style.display !== 'none') {
+      errorDiv.style.display = 'none';
+      errorDiv.innerHTML = '';
+    }
+  }
 
-          function selectBookingType(event, radioId, mode) {
-            // If the user clicked the radio or label directly, let default behavior happen
-            if (event.target.type === 'radio' || event.target.tagName === 'LABEL') return;
+  function selectBookingType(event, radioId, mode) {
+    // If the user clicked the radio or label directly, let default behavior happen
+    if (event.target.type === 'radio' || event.target.tagName === 'LABEL') return;
 
-            const radio = document.getElementById(radioId);
-            if (radio) {
-              radio.checked = true;
-              showBookingFlow(mode);
-            }
-          }
+    const radio = document.getElementById(radioId);
+    if (radio) {
+      radio.checked = true;
+      showBookingFlow(mode);
+    }
+  }
 
-          function selectDateCard(event, dateValue) {
-            if (event.target.type === 'radio' || event.target.tagName === 'LABEL') return;
+  function selectDateCard(event, dateValue) {
+    if (event.target.type === 'radio' || event.target.tagName === 'LABEL') return;
 
-            const radio = document.getElementById('date-' + dateValue);
-            if (radio) {
-              radio.checked = true;
-              onDateSelected(dateValue);
-            }
-          }
+    const radio = document.getElementById('date-' + dateValue);
+    if (radio) {
+      radio.checked = true;
+      onDateSelected(dateValue);
+    }
+  }
 
   // --- 3. UI FLOW & NAVIGATION ---
   // ============================================
@@ -179,7 +178,7 @@
   function showBookingFlow(mode) {
     hideError();
     currentMode = mode;
-    
+
     // Update UI classes for mode-specific visibility
     const container = document.getElementById('booking-flow');
     container.className = `mode-${mode}`; // .mode-home or .mode-away
@@ -191,7 +190,7 @@
     // Populate Team Dropdown based on mode
     const teamSelect = document.getElementById('our-team-select');
     teamSelect.innerHTML = "<option value=''>-- Select a team --</option>";
-    
+
     const relevantTeams = loadedTeams.filter(t => (mode === 'home' ? t.hasHome : t.hasAway));
     relevantTeams.forEach(team => {
       teamSelect.innerHTML += `<option value="${team.name}">${team.name} (${team.division})</option>`;
@@ -204,7 +203,7 @@
 
   function resetApp() {
     document.getElementById('success-message').style.display = 'none';
-    
+
     if (awayBookingEnabled) {
       document.getElementById('step-0-fieldset').style.display = 'block';
       document.getElementById('booking-flow').style.display = 'none';
@@ -226,16 +225,16 @@
     const noMatchesMsg = document.getElementById('no-matches-message');
     const opponentDiv = document.getElementById('opponent-select-div');
     const opponentSelect = document.getElementById('opponent-select');
-    
+
     const opponents = (currentMode === 'home') ? homeFixtureMap[team] : awayFixtureMap[team];
-    
+
     clearOpponentFields();
     document.getElementById('step-3-fieldset').style.display = 'none';
 
     if (team && opponents && opponents.length > 0) {
       step2.style.display = 'block';
       noMatchesMsg.style.display = 'none';
-      
+
       if (opponents.length === 1) {
         opponentDiv.style.display = 'none';
         populateOpponentFields(opponents[0]);
@@ -288,15 +287,15 @@
   function onDateSelected(date) {
     hideError();
     selectedDate = date;
-    
+
     if (currentMode === 'home') {
       const timeDiv = document.getElementById('time-slot-div');
       timeDiv.style.display = 'block';
       setTimeout(() => { timeDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 10);
-      
+
       document.getElementById('submit-btn').style.display = 'none';
       document.getElementById('time-slot-select').innerHTML = "<option value=''>Loading times...</option>";
-      
+
       google.script.run.withSuccessHandler(onTimeSuccess).withFailureHandler(onTimeFailure).getTimeSlotsForDate(selectedDate);
     } else {
       // Away Mode
@@ -316,20 +315,20 @@
     }
   }
 
-    function onAwayProposalChange() {
-      hideError();
-      const time = document.getElementById('proposed-time-input').value;
-      const venue = document.getElementById('venue-input').value;
-      const btn = document.getElementById('submit-btn');
+  function onAwayProposalChange() {
+    hideError();
+    const time = document.getElementById('proposed-time-input').value;
+    const venue = document.getElementById('venue-input').value;
+    const btn = document.getElementById('submit-btn');
 
-      if (time && venue) {
-        btn.style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = "Submit Proposal";
-      } else {
-        btn.style.display = 'none';
-      }
+    if (time && venue) {
+      btn.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = "Submit Proposal";
+    } else {
+      btn.style.display = 'none';
     }
+  }
 
   function findDates() {
     const bookingData = getBookingData();
@@ -340,26 +339,26 @@
       errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
-    
+
     const step3 = document.getElementById('step-3-fieldset');
     step3.style.display = 'block';
     document.getElementById('loading-indicator').style.display = 'block';
     document.getElementById('results-list').innerHTML = "";
-    
+
     // Reset sub-sections
     document.getElementById('time-slot-div').style.display = 'none';
     document.getElementById('away-proposal-div').style.display = 'none';
     document.getElementById('submit-btn').style.display = 'none';
 
     setTimeout(() => { step3.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 10);
-    
+
     const [year, month] = bookingData.monthYear.split('-');
     const backendFunction = (currentMode === 'home') ? 'findAvailableDatesForTeam' : 'findAvailableDatesForAwayMatch';
-    
+
     google.script.run
       .withSuccessHandler(onFindSuccess)
       .withFailureHandler(onFindFailure)
-      [backendFunction](bookingData.ourTeam, parseInt(month), parseInt(year));
+    [backendFunction](bookingData.ourTeam, parseInt(month), parseInt(year));
   }
 
   function submitBooking() {
@@ -369,7 +368,7 @@
 
     const data = getBookingData();
     const backendFunction = (currentMode === 'home') ? 'submitBookingRequest' : 'submitAwayBookingRequest';
-    
+
     const requiredFields = ['club', 'theirTeam', 'ourTeam', 'date', 'email'];
     if (currentMode === 'home') {
       requiredFields.push('time');
@@ -387,11 +386,11 @@
     const btn = document.getElementById('submit-btn');
     btn.disabled = true;
     btn.textContent = "Submitting...";
-    
+
     google.script.run
       .withSuccessHandler(onSubmitSuccess)
       .withFailureHandler(onSubmitFailure)
-      [backendFunction](data);
+    [backendFunction](data);
   }
 
   // --- 5. UI HELPER FUNCTIONS ---
@@ -420,7 +419,7 @@
       monthYear: document.getElementById('month-select').value,
       date: selectedDate
     };
-    
+
     if (currentMode === 'home') {
       data.time = document.getElementById('time-slot-select').value;
     } else {
@@ -446,7 +445,7 @@
     document.getElementById('step-2-fieldset').style.display = 'none';
     document.getElementById('step-3-fieldset').style.display = 'none';
     document.getElementById('no-matches-message').style.display = 'none';
-    
+
     // Reset state
     selectedDate = null;
   }
