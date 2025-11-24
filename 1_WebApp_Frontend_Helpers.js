@@ -117,16 +117,12 @@ function getOurTeams_(settings) {
 
       if (!teamName || !teamMap[teamName]) continue;
 
-      const homeAwayUpper = String(homeAway).trim().toUpperCase();
-      const statusUpper = String(status).trim().toUpperCase();
-      const targetStatus = CONFIG.STATUSES.NOT_CONFIRMED.toUpperCase();
-
       // Check for Pending Home Match
-      if (homeAwayUpper === 'HOME' && statusUpper === targetStatus) {
+      if (homeAway === 'Home' && status === CONFIG.STATUSES.NOT_CONFIRMED) {
         teamMap[teamName].hasHome = true;
       }
       // Check for Pending Away Match (Only if enabled)
-      else if (enableAway && homeAwayUpper === 'AWAY' && statusUpper === targetStatus) {
+      else if (enableAway && homeAway === 'Away' && status === CONFIG.STATUSES.NOT_CONFIRMED) {
         teamMap[teamName].hasAway = true;
       }
     }
@@ -284,11 +280,7 @@ function getPendingHomeFixtures_() {
 
     if (!ourTeam && !oppClub) continue; // Skip empty rows
 
-    const homeAwayUpper = String(homeAway).trim().toUpperCase();
-    const statusUpper = String(status).trim().toUpperCase();
-    const targetStatus = CONFIG.STATUSES.NOT_CONFIRMED.toUpperCase();
-
-    if (ourTeam && homeAwayUpper === 'HOME' && statusUpper === targetStatus) {
+    if (ourTeam && homeAway === 'Home' && status === CONFIG.STATUSES.NOT_CONFIRMED) {
       const opponent = { club: oppClub, team: oppTeam, type: matchType };
       if (!fixtureMap[ourTeam]) {
         fixtureMap[ourTeam] = [opponent];
@@ -342,13 +334,7 @@ function getPendingAwayFixtures_(settings = null) {
     const homeAway = row[h['Home / Away']];
     const status = row[h['Match Status']];
 
-    const yourClubNameUpper = String(yourClubName).trim().toUpperCase();
-    const myClubNameUpper = String(settings['Club Name']).trim().toUpperCase();
-    const homeAwayUpper = String(homeAway).trim().toUpperCase();
-    const statusUpper = String(status).trim().toUpperCase();
-    const targetStatus = CONFIG.STATUSES.NOT_CONFIRMED.toUpperCase();
-
-    if (yourClubNameUpper !== myClubNameUpper || homeAwayUpper !== 'AWAY' || statusUpper !== targetStatus) {
+    if (yourClubName !== settings['Club Name'] || homeAway !== 'Away' || status !== CONFIG.STATUSES.NOT_CONFIRMED) {
       continue;
     }
     
