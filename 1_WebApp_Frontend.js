@@ -40,13 +40,24 @@ function doGet(e) {
 
   const settings = getClubSettings();
   const template = HtmlService.createTemplateFromFile('index');
-  template.clubName = settings['Club Name'] || 'Match Booking Portal';
-  template.email = settings['Match Secretary Email'] || '';
+  template.clubName = settings[CONFIG.SETTINGS_KEYS.CLUB_NAME] || 'Match Booking Portal';
+  template.email = settings[CONFIG.SETTINGS_KEYS.MATCH_SECRETARY_EMAIL] || '';
   
   // This line correctly passes the variable to the frontend.
-  const enableAway = String(settings['Enable Away Booking'] || '').trim().toUpperCase();
+  // This line correctly passes the variable to the frontend.
+  const enableAway = String(settings[CONFIG.SETTINGS_KEYS.ENABLE_AWAY_BOOKING] || '').trim().toUpperCase();
   template.awayBookingEnabled = (enableAway === 'TRUE');
-  
+
+  // Process Club Logo Link
+  const logoLink = settings[CONFIG.SETTINGS_KEYS.CLUB_LOGO_LINK] || '';
+  let logoUrl = '';
+  // Extract ID from Drive Link: https://drive.google.com/file/d/1IyVD7dNSM29nvo8JrnHZItrtMcSsObnC/view?usp=drive_link
+  const idMatch = logoLink.match(/[-\w]{25,}/);
+  if (idMatch) {
+    logoUrl = `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w200`;
+  }
+  template.clubLogoUrl = logoUrl;
+
   return template.evaluate()
     .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
 }

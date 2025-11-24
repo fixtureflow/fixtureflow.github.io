@@ -103,7 +103,8 @@ function getOurTeams_(settings) {
     }
 
     // settings is passed in now
-    const enableAway = String(settings['Enable Away Booking'] || '').trim().toUpperCase() === 'TRUE';
+    // settings is passed in now
+    const enableAway = String(settings[CONFIG.SETTINGS_KEYS.ENABLE_AWAY_BOOKING] || '').trim().toUpperCase() === 'TRUE';
 
     // Create a map for quick lookup
     const teamMap = {};
@@ -334,7 +335,11 @@ function getPendingAwayFixtures_(settings = null) {
     const homeAway = row[h['Home / Away']];
     const status = row[h['Match Status']];
 
-    if (yourClubName !== settings['Club Name'] || homeAway !== 'Away' || status !== CONFIG.STATUSES.NOT_CONFIRMED) {
+    const yourClubNameUpper = String(yourClubName).trim().toUpperCase();
+    const myClubNameUpper = String(settings[CONFIG.SETTINGS_KEYS.CLUB_NAME]).trim().toUpperCase();
+    const homeAwayUpper = String(homeAway).trim().toUpperCase();
+
+    if (yourClubNameUpper !== myClubNameUpper || homeAwayUpper !== CONFIG.HOME_AWAY_OPTIONS.AWAY || status !== CONFIG.STATUSES.NOT_CONFIRMED) {
       continue;
     }
     

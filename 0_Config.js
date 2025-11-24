@@ -80,6 +80,14 @@ const CONFIG = {
     PLAYER_START_COL: 3, // Column D (WAS 2)
     PLAYER_END_COL: 8    // Column H (WAS 7) (this is for slice(2, 7))
   },
+  SETTINGS_KEYS: {
+    CLUB_NAME: 'Club Name',
+    MATCH_SECRETARY_EMAIL: 'Match Secretary Email',
+    ENABLE_AWAY_BOOKING: 'Enable Away Booking',
+    CLUB_LOGO_LINK: 'Club Logo Link',
+    AUTO_CLEAR_CACHE: 'Auto-Clear Cache',
+    TEAM_BUFFER_DAYS: 'Team Buffer Days (each side)'
+  }
 };
 
 /**

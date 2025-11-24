@@ -37,6 +37,26 @@ function handleConfirmationEdit(e) {
     return;
   }
 
+  // --- NEW: Auto-Clear Cache on Settings Change ---
+  if (sheet.getName() === CONFIG.SHEETS.SETTINGS) {
+    // Read the settings directly from the sheet (fresh data)
+    const settings = getClubSettings_();
+
+    // Check if Auto-Clear is enabled (Default to TRUE if missing, for convenience)
+    // User can set "Auto-Clear Cache" to "FALSE" in the sheet to disable this during onboarding.
+    const autoClear = String(settings[CONFIG.SETTINGS_KEYS.AUTO_CLEAR_CACHE] || 'TRUE').trim().toUpperCase() === 'TRUE';
+
+    if (autoClear) {
+      const keysToClear = [
+        'CLUB_SETTINGS', 'OUR_TEAMS', 'SEASON_MONTHS',
+        'OPPONENT_CLUBS', 'PENDING_FIXTURES', 'PENDING_AWAY_FIXTURES'
+      ];
+      CacheService.getScriptCache().removeAll(keysToClear);
+      SpreadsheetApp.getActiveSpreadsheet().toast("Cache cleared! Web App will now reflect new settings.", "Settings Updated");
+    }
+    return;
+  }
+
   const newValue = e.value.toLowerCase();
   const actionableStatuses = [
     CONFIG.STATUSES.CONFIRMED.toLowerCase(),

@@ -17,8 +17,9 @@
 </head>
 <body>
   <header class="app-header">
-    <img src="https://drive.google.com/thumbnail?id=1IyVD7dNSM29nvo8JrnHZItrtMcSsObnC&sz=w200" alt="Club Logo"
-      class="club-logo">
+    <? if (clubLogoUrl) { ?>
+    <img src="<?= clubLogoUrl ?>" alt="Club Logo" class="club-logo">
+    <? } ?>
     <h1>
       <?= clubName ?> Match Booking Portal
     </h1>
