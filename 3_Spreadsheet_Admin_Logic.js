@@ -950,7 +950,8 @@ function _processBookingChange_(e, action, isHome, settings = null) {
         if (isHome) {
           if (fRow[fx_h['Home / Away']] === 'Home' &&
             fRow[fx_h['Opposition Club']] === data.opponentClub &&
-            fRow[fx_h['Opp Team No.']] === data.opponentTeam) {
+            fRow[fx_h['Opp Team No.']] === data.opponentTeam &&
+            String(fRow[fx_h['Match Status']]).toLowerCase() !== 'confirmed') { // Prevent overwriting confirmed matches
             foundRowIndex = i;
             sctn = fRow[fx_h['Sctn']];
             division = fRow[fx_h['Div']];
@@ -1020,6 +1021,7 @@ function _processBookingChange_(e, action, isHome, settings = null) {
         // Copy formatting from the row above to ensure consistency (borders, font, etc.)
         if (lastRow > 1) {
           fixturesSheet.getRange(lastRow, 1, 1, newRow.length).copyTo(range, SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
+          SpreadsheetApp.flush(); // Force apply formatting
         }
 
         fixtureUpdated = true;
