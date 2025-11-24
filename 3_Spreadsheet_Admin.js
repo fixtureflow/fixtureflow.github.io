@@ -27,18 +27,17 @@ function handleConfirmationEdit(e) {
   const ss = e.source;
   const sheet = ss.getActiveSheet();
 
-  // Ignore edits to the header row or non-status columns
+  // Ignore edits to the header row
   if (e.range.getRow() <= 1) return;
-  const headerName = sheet.getRange(1, e.range.getColumn()).getValue();
-  if (headerName !== CONFIG.HEADERS.STATUS) return;
-
-  // If the cell was cleared, do nothing.
-  if (!e.value) {
-    return;
-  }
 
   // --- NEW: Auto-Clear Cache on Settings Change ---
   if (sheet.getName() === CONFIG.SHEETS.SETTINGS) {
+    // Only trigger if editing the "Setting Value" column (Column 2)
+    // We check the header row (Row 1) to be safe, or just check column index.
+    // Checking header name is safer against column moves.
+    const header = sheet.getRange(1, e.range.getColumn()).getValue();
+    if (header !== CONFIG.HEADERS.SETTING_VALUE) return;
+
     // Read the settings directly from the sheet (fresh data)
     const settings = getClubSettings_();
 
@@ -56,6 +55,17 @@ function handleConfirmationEdit(e) {
     }
     return;
   }
+
+  // For other sheets, check if it's a Status column edit
+  const headerName = sheet.getRange(1, e.range.getColumn()).getValue();
+  if (headerName !== CONFIG.HEADERS.STATUS) return;
+
+  // If the cell was cleared, do nothing.
+  if (!e.value) {
+    return;
+  }
+
+
 
   const newValue = e.value.toLowerCase();
   const actionableStatuses = [

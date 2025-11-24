@@ -32,6 +32,8 @@ const CONFIG = {
     STATUS: 'Status',
     PLAYER_NAME: 'Player Name',
     UNAVAILABLE_DATES: 'Unavailable Dates',
+    SETTING_NAME: 'Setting Name',
+    SETTING_VALUE: 'Setting Value',
     // Expanded Headers for Validation & Emailing
     REQ_CLUB: 'Requesting Club',
     REQ_THEIR_TEAM: 'Their Team',
