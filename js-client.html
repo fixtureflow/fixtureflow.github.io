@@ -38,6 +38,10 @@
     if (dataLoadCounter === TOTAL_DATA_STREAMS) {
       // Initial setup is done.
 
+      // Hide global loading
+      const globalLoading = document.getElementById('global-loading');
+      if (globalLoading) globalLoading.style.display = 'none';
+
       // If away booking is disabled, we default to home and hide the switcher.
       if (!awayBookingEnabled) {
         const step0 = document.getElementById('step-0-fieldset');
@@ -45,8 +49,8 @@
         showBookingFlow('home');
       } else {
         // If enabled, show the options now that data is ready
-        document.getElementById('step-0-loading').style.display = 'none';
-        document.getElementById('step-0-options').style.display = 'block';
+        const step0 = document.getElementById('step-0-fieldset');
+        if (step0) step0.style.display = 'block';
       }
     }
   }
@@ -91,7 +95,9 @@
 
   function onSubmitSuccess(result) {
     if (result === "Success") {
-      document.getElementById('step-0-fieldset').style.display = 'none';
+      const step0 = document.getElementById('step-0-fieldset');
+      if (step0) step0.style.display = 'none';
+
       document.getElementById('booking-flow').style.display = 'none';
       document.getElementById('success-message').style.display = 'block';
       document.getElementById('success-message').scrollIntoView({ behavior: 'smooth' });

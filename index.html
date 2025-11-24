@@ -25,13 +25,15 @@
   </header>
   
   <main id="main-container">
+    <div id="global-loading" style="text-align: center; padding: 20px; font-size: 1.2em; color: #666;">
+      Loading data...
+    </div>
   
     <!-- Step 0: Choose Booking Type (Only if Away enabled) -->
     <? if (awayBookingEnabled) { ?>
-    <fieldset id="step-0-fieldset">
+    <fieldset id="step-0-fieldset" style="display:none;">
       <legend>Step 0: Choose Booking Type</legend>
-        <div id="step-0-loading">Loading data...</div>
-        <div id="step-0-options" style="display:none;">
+        <div id="step-0-options">
           <div onclick="selectBookingType(event, 'type-home', 'home')">
             <input type="radio" name="booking-type" id="type-home" value="home" onchange="showBookingFlow('home')">
             <label for="type-home">Book a match AT OUR venue</label>
