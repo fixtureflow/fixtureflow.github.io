@@ -165,14 +165,7 @@ function sendOpponentSummaryEmail(opponentName) {
  * Clears the script cache.
  */
 function clearCache() {
-  return clearCache_(); // Note: clearCache is in 99_Admin_Utilities.js, make sure it's available or rename it to clearCache_
-  // Actually, clearCache in 99_Admin_Utilities.js is named 'clearCache'.
-  // We should probably rename it to 'clearCache_' in 99_Admin_Utilities.js to follow convention, 
-  // OR just call it directly if it's global.
-  // But wait, if it's global, we can just call it.
-  // However, to be consistent with the wrapper pattern:
-  // We will call the existing function.
-  return clearCache();
+  return clearCache_();
 }
 
 /**

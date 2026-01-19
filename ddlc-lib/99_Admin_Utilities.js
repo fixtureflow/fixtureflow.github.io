@@ -100,7 +100,7 @@ function showResetAllDialog() {
  * and only attempts to clear the away fixtures cache if the feature is active.
  * It also provides a clear reminder to the user about the manual cache-clearing step.
  */
-function clearCache() {
+function clearCache_() {
   // 1. Start with the list of cache keys that are ALWAYS used.
   const keysToClear = [
     'CLUB_SETTINGS',
