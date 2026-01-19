@@ -122,21 +122,24 @@ function onOpen() {
   menu.addSeparator();
   menu.addItem('Find Away Match Dates', 'showAwayFinderSidebar');
   menu.addSeparator();
-  menu.addItem('Send Opponent Summary...', 'showOpponentSummaryDialog');    
+  menu.addItem('Send Opponent Summary...', 'showOpponentSummaryDialog');
   
+  // --- Tier 1.5: Setup & Maintenance (Visible to ALL, for initial setup) ---
+  menu.addSeparator();
+  const setupMenu = ui.createMenu('Setup & Config');
+  setupMenu.addItem('1. Install/Verify Booking Trigger', 'setupTrigger');
+  setupMenu.addItem('2. Install Weekly Summary Trigger', 'setupWeeklySummaryTrigger');
+  setupMenu.addItem('3. Sync Web App URL to Settings', 'updateWebAppUrl');
+  menu.addSubMenu(setupMenu);
+
   // --- Tier 2: Hidden Admin Tools (Visible only to Developer) ---
   if (Session.getEffectiveUser().getEmail() === DEVELOPER_EMAIL) {
     menu.addSeparator();
-    const adminMenu = ui.createMenu('Admin Tools');
+    const adminMenu = ui.createMenu('⚠️ Admin Tools (Dev Only)');
     adminMenu.addItem('Clear Player\'s Unavailability (U)', 'clearPlayerUnavailability_menu');
     adminMenu.addItem("!! Reset ALL Player Availability !!", 'showResetAllDialog')
     adminMenu.addSeparator();
     adminMenu.addItem('Clear Web App Cache', 'clearCache');
-    adminMenu.addItem('Update Web App URL in Settings', 'updateWebAppUrl');
-    adminMenu.addSeparator();
-    adminMenu.addItem('Install/Verify Booking Trigger', 'setupTrigger');
-    adminMenu.addItem('Install Weekly Summary Trigger', 'setupWeeklySummaryTrigger');
-    adminMenu.addSeparator();
     adminMenu.addItem('🔒 Lock Down Settings', 'lockDownSettings_menu');
     menu.addSubMenu(adminMenu);
   }
