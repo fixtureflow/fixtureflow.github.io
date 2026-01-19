@@ -16,5 +16,13 @@
  * Also has secret backdoor.
  */
 function doGet(e) {
+  // [HOST FIX] Save the URL to the HOST'S properties store, so the Host's "Sync" menu can find it.
+  try {
+    const url = ScriptApp.getService().getUrl();
+    PropertiesService.getScriptProperties().setProperty('LAST_KNOWN_URL', url);
+  } catch (err) {
+    Logger.log('Could not save Web App URL in Host: ' + err.message);
+  }
+
   return BadmintonLib.handleDoGet(e);
 }

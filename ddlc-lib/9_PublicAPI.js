@@ -198,12 +198,8 @@ function _processBookingChange(e, action, isHome) {
  * @returns {HtmlOutput|TextOutput} The evaluated HTML or text output.
  */
 function handleDoGet(e) {
-  // 1. Save URL (Library context, but works if deployed as Web App)
-  try {
-    PropertiesService.getScriptProperties().setProperty('LAST_KNOWN_URL', ScriptApp.getService().getUrl());
-  } catch (propError) {
-    Logger.log(`Minor error: Could not save web app URL to properties. ${propError.message}`);
-  }
+  // 1. [DEPRECATED] URL Saving is now handled by the Host Script (doGet wrapper).
+  // The Library cannot reliably save to the Host's ScriptProperties.
 
   // 2. Handle Cache Clear Action
   if (e && e.parameter && e.parameter.action === 'clear') {
