@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <?!= HtmlService.createHtmlOutputFromFile('styles').getContent(); ?>
+  <style>
+    /* Mode-specific visibility */
+    .mode-home .away-only {
+      display: none !important;
+    }
+  
+    .mode-away .home-only {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <? if (clubLogoUrl) { ?>
+    <img src="<?= clubLogoUrl ?>" alt="Club Logo" class="club-logo">
+    <? } ?>
+    <h1>
+      <?= clubName ?> Match Booking Portal
+    </h1>
+  </header>
+  
+  <main id="main-container">
+    <div id="global-loading" style="text-align: center; padding: 20px; font-size: 1.2em; color: #666;">
+      Loading data...
+    </div>
+  
+    <!-- Step 0: Choose Booking Type (Only if Away enabled) -->
+    <? if (awayBookingEnabled) { ?>
+    <fieldset id="step-0-fieldset" style="display:none;">
+      <legend>Step 0: Choose Booking Type</legend>
+        <div id="step-0-options">
+          <div onclick="selectBookingType(event, 'type-home', 'home')">
+            <input type="radio" name="booking-type" id="type-home" value="home" onchange="showBookingFlow('home')">
+            <label for="type-home">Book a match AT OUR venue</label>
+          </div>
+          <div onclick="selectBookingType(event, 'type-away', 'away')">
+            <input type="radio" name="booking-type" id="type-away" value="away" onchange="showBookingFlow('away')">
+            <label for="type-away">Propose a match AT YOUR venue</label>
+          </div>
+        </div>
+    </fieldset>
+    <? } ?>
+
+    <!-- UNIFIED BOOKING FLOW CONTAINER -->
+    <!-- Default to hidden until loaded/selected -->
+    <div id="booking-flow" style="display:none;">
+      <!-- Step 1: Select Our Team -->
+      <fieldset id="step-1-fieldset">
+        <legend>Step 1: Select Our Team</legend>
+        <div>
+          <label for="our-team-select">Which of our teams do you need to play?</label>
+          <select id="our-team-select" onchange="onOurTeamSelect()" disabled>
+            <option value="">Loading teams...</option>
+          </select>
+        </div>
+      </fieldset>
+
+      <div id="no-matches-message" style="display:none;"></div>
+
+      <!-- Step 2: Details & Month -->
+      <div id="step-2-fieldset" style="display:none;">
+        <fieldset>
+          <legend>Step 2: Confirm Details & Find Date</legend>
+      
+          <div id="opponent-select-div" style="display:none;">
+            <label for="opponent-select">Select Your Team</label>
+            <select id="opponent-select" onchange="onOpponentSelect()"></select>
+          </div>
+
+          <div><label for="club-input">Your Club Name</label><input type="text" id="club-input" readonly></div>
+          <div><label for="their-team-input">Your Team Name</label><input type="text" id="their-team-input" readonly></div>
+          <div><label for="match-type-input">Match Type</label><input type="text" id="match-type-input" readonly></div>
+          <div><label for="email-input">Your Contact Email</label><input type="email" id="email-input" required multiple
+              oninput="hideError()"></div>
+          <hr>
+
+          <div>
+            <label for="month-select">Select Month to Find Availability</label>
+            <select id="month-select" onchange="onMonthSelect()"></select>
+          </div>
+          <button type="button" onclick="findDates()" id="find-dates-btn" disabled>Find Available Dates</button>
+          </fieldset>
+          </div>
+
+      <!-- Step 3: Date, Time & Venue -->
+      <fieldset id="step-3-fieldset" style="display:none;">
+        <legend>Step 3: Finalize Booking</legend>
+        <div id="loading-indicator" style="display:none;">Checking...</div>
+        <div id="results-list"></div>
+
+        <!-- HOME ONLY: Time Slot Dropdown -->
+        <div id="time-slot-div" class="home-only" style="display:none;">
+          <label for="time-slot-select">Select a Time Slot</label>
+          <select id="time-slot-select" onchange="onTimeSelect()"></select>
+        </div>
+
+        <!-- AWAY ONLY: Proposed Time & Venue -->
+        <div id="away-proposal-div" class="away-only" style="display:none;">
+          <hr>
+          <div>
+            <label for="proposed-time-input">Proposed Time</label>
+            <input type="time" id="proposed-time-input" onchange="onAwayProposalChange()">
+          </div>
+          <div>
+            <label for="venue-input">Your Venue Location</label>
+            <input type="text" id="venue-input" oninput="onAwayProposalChange()">
+          </div>
+        </div>
+
+        <button type="button" onclick="submitBooking()" id="submit-btn" style="display:none;">Submit Request</button>
+        </fieldset>
+
+    </div> <!-- End booking-flow -->
+
+    <!-- SHARED MESSAGES -->
+    <div id="success-message" style="display:none;">
+      <h2>Thank you!</h2>
+      <p>Your request has been submitted. You will receive a confirmation email once it is approved.</p>
+      <button type="button" onclick="resetApp()" id="reset-btn">Book Another Match</button>
+    </div>
+    <div id="error-message" style="display:none;"></div>
+
+  </main>
+
+  <footer class="app-footer">
+    <p>Powered by <strong>Fixture Flow</strong> &bull; <a
+        href="mailto:fixtureflow.ddlc@gmail.com">fixtureflow.ddlc@gmail.com</a></p>
+  </footer>
+
+  <!-- CLIENT-SIDE JS -->
+  <script>
+    const awayBookingEnabled = "<?= awayBookingEnabled ?>" === 'true';
+  </script>
+  <?!= HtmlService.createHtmlOutputFromFile('js-client').getContent(); ?>
+</body>
+</html>

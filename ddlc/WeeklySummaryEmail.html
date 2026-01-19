@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<style>
+  body { font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.5; }
+  h2 { color: #2c3e50; margin-bottom: 10px; }
+  h3 { color: #2c3e50; margin-top: 20px; margin-bottom: 10px; }
+  h4 { margin-bottom: 5px; color: #555; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+  ul { margin-top: 5px; margin-bottom: 15px; padding-left: 20px; }
+  li { margin-bottom: 6px; } /* Added a little space between items for readability */
+  hr { border: none; border-top: 1px solid #ccc; margin: 25px 0; }
+  
+  .total-count { font-weight: bold; font-size: 15px; margin-bottom: 10px; color: #d35400; }
+</style>
+</head>
+<body>
+
+  <!-- SECTION 1: MATCH SUMMARY -->
+  <h2><?= clubName ?> Match Summary</h2>
+  <p>For the upcoming week of <b><?= startDate ?></b> to <b><?= endDate ?></b>.</p>
+
+  <? if (!sortedDays || sortedDays.length === 0) { ?>
+    <p><b>No confirmed matches scheduled for the upcoming week.</b></p>
+  <? } else { ?>
+    <? for (const dateStr of sortedDays) { ?>
+      <? const matches = matchesByDay[dateStr]; ?>
+      <? const dayHeader = matches[0].day.toUpperCase(); ?>
+      
+      <h4><?= dayHeader ?></h4>
+      <ul>
+        <? for (const match of matches) { ?>
+          <li><b><?= match.time ?></b>: <?= match.ourTeam ?> (<?= match.homeAway ?>) vs <?= match.opponent ?></li>
+        <? } ?>
+      </ul>
+    <? } ?>
+  <? } ?>
+
+  <hr>
+
+  <!-- SECTION 2: SHUTTLE ALLOCATION (List Format for WhatsApp) -->
+  <h3>🏸 Shuttle Allocation</h3>
+  
+  <? if (!shuttleAllocationDetails || shuttleAllocationDetails.length === 0) { ?>
+    <p><i>No shuttles need to be prepared for matches this week.</i></p>
+  <? } else { ?>
+    <div class="total-count">
+      Total Tubes to Prepare: <?= matchTubesNeeded ?> tube<?= matchTubesNeeded !== 1 ? 's' : '' ?>
+    </div>
+
+    <ul>
+      <? for (const item of shuttleAllocationDetails) { ?>
+        <li>
+          <b><?= item.date ?></b>: 1 tube for <b><?= item.team ?></b> (Capt: <?= item.captain ?>) - <?= item.reason ?>
+        </li>
+      <? } ?>
+    </ul>
+  <? } ?>
+
+  <br>
+  <p style="font-size: 12px; color: #777;"><i>This is an automated email.</i></p>
+
+</body>
+</html>

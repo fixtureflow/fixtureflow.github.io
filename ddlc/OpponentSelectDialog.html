@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  </head>
+  <body>
+    <div class="block">
+      <p>Select an opponent club to send the summary email to.</p>
+      
+      <div class="block">
+        <label for="opponent-select">Opponent Club:</label>
+        <select id="opponent-select" style="width: 100%;">
+          <!-- The script will populate these options -->
+          <? for (let i = 0; i < opponentNames.length; i++) { ?>
+            <option value="<?= opponentNames[i] ?>"><?= opponentNames[i] ?></option>
+          <? } ?>
+        </select>
+      </div>
+
+      <div class="block" style="margin-top: 20px;">
+        <button class="action" id="send-button">Send Summary</button>
+        <button onclick="google.script.host.close()">Cancel</button>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("send-button").addEventListener("click", function() {
+        // Disable the button to prevent double-clicks
+        this.disabled = true;
+        this.textContent = "Working...";
+        
+        var selectedOpponent = document.getElementById("opponent-select").value;
+        
+        // This is the magic line that calls your main Apps Script function
+        google.script.run
+            .withSuccessHandler(function() {
+              google.script.host.close(); // Close the dialog on success
+            })
+            .withFailureHandler(function(error) {
+              alert(error.message); // Show any errors
+              google.script.host.close();
+            })
+            .sendOpponentSummaryEmail(selectedOpponent); // Call the function and pass the value
+      });
+    </script>
+  </body>
+</html>

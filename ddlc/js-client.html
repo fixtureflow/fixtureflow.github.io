@@ -1,0 +1,458 @@
+<script>
+  // --- 1. GLOBAL STATE & INITIALIZATION ---
+  // ============================================
+
+  // awayBookingEnabled is defined in index.html
+  let currentMode = 'home'; // 'home' or 'away'
+  let selectedDate = null;
+  let clubEmailMap = {};
+  let homeFixtureMap = {};
+  let awayFixtureMap = {};
+  let dataLoadCounter = 0;
+  let loadedTeams = [];
+  const TOTAL_DATA_STREAMS = awayBookingEnabled ? 5 : 4;
+
+  window.addEventListener('load', loadInitialData);
+
+  function loadInitialData() {
+    const errorDiv = document.getElementById('error-message');
+    function onDataLoadFailure(error) {
+      console.error("Failed to load initial data:", error.message);
+      errorDiv.style.display = 'block';
+      errorDiv.textContent = "Error loading page data: " + error.message + ". Please refresh the page.";
+    }
+    google.script.run.withSuccessHandler(onMonthLoadSuccess).withFailureHandler(onDataLoadFailure).getValidSeasonMonths();
+    google.script.run.withSuccessHandler(onOpponentClubLoadSuccess).withFailureHandler(onDataLoadFailure).getOpponentClubs();
+    google.script.run.withSuccessHandler(onTeamLoadSuccess).withFailureHandler(onDataLoadFailure).getOurTeams();
+    google.script.run.withSuccessHandler(onHomeFixtureLoadSuccess).withFailureHandler(onDataLoadFailure).getPendingHomeFixtures();
+    if (awayBookingEnabled) {
+      google.script.run.withSuccessHandler(onAwayFixtureLoadSuccess).withFailureHandler(onDataLoadFailure).getPendingAwayFixtures();
+    }
+  }
+
+  // --- 2. DATA HANDLERS & SUCCESS CALLBACKS ---
+  // ============================================
+
+  function onDataLoadSuccess() {
+    dataLoadCounter++;
+    if (dataLoadCounter === TOTAL_DATA_STREAMS) {
+      // Initial setup is done.
+
+      // Hide global loading
+      const globalLoading = document.getElementById('global-loading');
+      if (globalLoading) globalLoading.style.display = 'none';
+
+      // If away booking is disabled, we default to home and hide the switcher.
+      if (!awayBookingEnabled) {
+        const step0 = document.getElementById('step-0-fieldset');
+        if (step0) step0.style.display = 'none';
+        showBookingFlow('home');
+      } else {
+        // If enabled, show the options now that data is ready
+        const step0 = document.getElementById('step-0-fieldset');
+        if (step0) step0.style.display = 'block';
+      }
+    }
+  }
+
+  function onHomeFixtureLoadSuccess(map) { homeFixtureMap = map; onDataLoadSuccess(); }
+  function onAwayFixtureLoadSuccess(map) { awayFixtureMap = map; onDataLoadSuccess(); }
+  function onOpponentClubLoadSuccess(clubsData) { clubEmailMap = {}; clubsData.forEach(clubInfo => { clubEmailMap[clubInfo.name] = clubInfo.email; }); onDataLoadSuccess(); }
+  function onTeamLoadSuccess(teams) { loadedTeams = teams; onDataLoadSuccess(); }
+
+  function onMonthLoadSuccess(months) {
+    const monthSelect = document.getElementById('month-select');
+    monthSelect.innerHTML = "<option value=''>-- Select a Month --</option>";
+    months.forEach(month => {
+      monthSelect.innerHTML += `<option value="${month.value}">${month.name}</option>`;
+    });
+    onDataLoadSuccess();
+  }
+
+  function onFindSuccess(dates) {
+    document.getElementById('loading-indicator').style.display = 'none';
+    const list = document.getElementById('results-list');
+    let html = "";
+    if (dates.length === 0) {
+      html = `<p>No 100% available dates were found for this team in the selected month. Please try a different month.</p>`;
+    } else {
+      html = "<p>Please select one of the available dates:</p>";
+      dates.forEach(date => {
+        const displayDate = new Date(date + 'T00:00:00');
+        const displayString = displayDate.toLocaleDateString('en-IE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        html += `<div onclick="selectDateCard(event, '${date}')"><input type="radio" name="selected_date" id="date-${date}" value="${date}" onchange="onDateSelected(this.value)"> <label for="date-${date}">${displayString}</label></div>`;
+      });
+    }
+    list.innerHTML = html;
+    setTimeout(() => { document.getElementById('step-3-fieldset').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 10);
+  }
+
+  function onTimeSuccess(timeSlots) {
+    const timeSelect = document.getElementById('time-slot-select');
+    timeSelect.innerHTML = "<option value=''>--Select a time--</option>";
+    timeSlots.forEach(time => { timeSelect.innerHTML += `<option value="${time}">${time}</option>`; });
+  }
+
+  function onSubmitSuccess(result) {
+    if (result === "Success") {
+      const step0 = document.getElementById('step-0-fieldset');
+      if (step0) step0.style.display = 'none';
+
+      document.getElementById('booking-flow').style.display = 'none';
+      document.getElementById('success-message').style.display = 'block';
+      document.getElementById('success-message').scrollIntoView({ behavior: 'smooth' });
+    } else {
+      onSubmitFailure(new Error(result));
+    }
+  }
+
+  function onSubmitFailure(error) {
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = false;
+    btn.textContent = (currentMode === 'home') ? "Submit Request" : "Submit Proposal";
+
+    const errorMsg = error.message.startsWith("Error: ") ? error.message.substring(7) : error.message;
+
+    // Escape HTML to prevent XSS
+    const safeMsg = errorMsg
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+    // Auto-link emails
+    const linkedMsg = safeMsg.replace(
+      /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi,
+      '<a href="mailto:$1" style="color: inherit; text-decoration: underline;">$1</a>'
+    );
+
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.innerHTML = linkedMsg;
+    errorDiv.style.display = 'block';
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function onTimeFailure(error) {
+    console.error("Error fetching time slots:", error.message);
+    const timeSelect = document.getElementById('time-slot-select');
+    timeSelect.innerHTML = "<option value=''>Error. Try again.</option>";
+
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = "An error occurred while loading time slots. Please try selecting the date again.";
+    errorDiv.style.display = 'block';
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function onFindFailure(error) {
+    document.getElementById('loading-indicator').style.display = 'none';
+    document.getElementById('results-list').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+  }
+
+  function hideError() {
+    const errorDiv = document.getElementById('error-message');
+    if (errorDiv.style.display !== 'none') {
+      errorDiv.style.display = 'none';
+      errorDiv.innerHTML = '';
+    }
+  }
+
+  function selectBookingType(event, radioId, mode) {
+    // If the user clicked the radio or label directly, let default behavior happen
+    if (event.target.type === 'radio' || event.target.tagName === 'LABEL') return;
+
+    const radio = document.getElementById(radioId);
+    if (radio) {
+      radio.checked = true;
+      showBookingFlow(mode);
+    }
+  }
+
+  function selectDateCard(event, dateValue) {
+    if (event.target.type === 'radio' || event.target.tagName === 'LABEL') return;
+
+    const radio = document.getElementById('date-' + dateValue);
+    if (radio) {
+      radio.checked = true;
+      onDateSelected(dateValue);
+    }
+  }
+
+  // --- 3. UI FLOW & NAVIGATION ---
+  // ============================================
+
+  function showBookingFlow(mode) {
+    hideError();
+    currentMode = mode;
+
+    // Update UI classes for mode-specific visibility
+    const container = document.getElementById('booking-flow');
+    container.className = `mode-${mode}`; // .mode-home or .mode-away
+    container.style.display = 'block';
+
+    // Reset the form for the new mode
+    _resetForm();
+
+    // Populate Team Dropdown based on mode
+    const teamSelect = document.getElementById('our-team-select');
+    teamSelect.innerHTML = "<option value=''>-- Select a team --</option>";
+
+    const relevantTeams = loadedTeams.filter(t => (mode === 'home' ? t.hasHome : t.hasAway));
+    relevantTeams.forEach(team => {
+      teamSelect.innerHTML += `<option value="${team.name}">${team.name} (${team.division})</option>`;
+    });
+    teamSelect.disabled = false;
+
+    // Scroll to start
+    setTimeout(() => { container.scrollIntoView({ behavior: 'smooth' }); }, 10);
+  }
+
+  function resetApp() {
+    document.getElementById('success-message').style.display = 'none';
+
+    if (awayBookingEnabled) {
+      document.getElementById('step-0-fieldset').style.display = 'block';
+      document.getElementById('booking-flow').style.display = 'none';
+      const checkedRadio = document.querySelector('input[name="booking-type"]:checked');
+      if (checkedRadio) checkedRadio.checked = false;
+    } else {
+      showBookingFlow('home');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // --- 4. EVENT HANDLERS (User Actions) ---
+  // ============================================
+
+  function onOurTeamSelect() {
+    hideError();
+    const team = document.getElementById('our-team-select').value;
+    const step2 = document.getElementById('step-2-fieldset');
+    const noMatchesMsg = document.getElementById('no-matches-message');
+    const opponentDiv = document.getElementById('opponent-select-div');
+    const opponentSelect = document.getElementById('opponent-select');
+
+    const opponents = (currentMode === 'home') ? homeFixtureMap[team] : awayFixtureMap[team];
+
+    clearOpponentFields();
+    document.getElementById('step-3-fieldset').style.display = 'none';
+
+    if (team && opponents && opponents.length > 0) {
+      step2.style.display = 'block';
+      noMatchesMsg.style.display = 'none';
+
+      if (opponents.length === 1) {
+        opponentDiv.style.display = 'none';
+        populateOpponentFields(opponents[0]);
+      } else {
+        opponentDiv.style.display = 'block';
+        opponentSelect.innerHTML = '<option value="">-- Select your team --</option>';
+        opponents.forEach(opp => {
+          const value = JSON.stringify(opp);
+          const text = `${opp.club} ${opp.team} (${opp.type})`;
+          opponentSelect.innerHTML += `<option value='${value}'>${text}</option>`;
+        });
+      }
+    } else if (team) {
+      step2.style.display = 'none';
+      noMatchesMsg.style.display = 'block';
+      noMatchesMsg.textContent = `No pending ${currentMode} matches were found for this team.`;
+    } else {
+      step2.style.display = 'none';
+      noMatchesMsg.style.display = 'none';
+    }
+
+    // Reset Month & Find Button when team changes
+    document.getElementById('month-select').value = "";
+    document.getElementById('find-dates-btn').disabled = true;
+
+    // Reset Away Flow Inputs
+    document.getElementById('proposed-time-input').value = '';
+    document.getElementById('venue-input').value = '';
+  }
+
+  function onOpponentSelect() {
+    hideError();
+    const opponentSelect = document.getElementById('opponent-select');
+    const opponent = JSON.parse(opponentSelect.value || 'null');
+    opponent ? populateOpponentFields(opponent) : clearOpponentFields();
+  }
+
+  function onMonthSelect() {
+    hideError();
+    const monthValue = document.getElementById('month-select').value;
+    document.getElementById('find-dates-btn').disabled = !monthValue;
+
+    // Reset Away Flow Inputs (invalidate previous search)
+    document.getElementById('proposed-time-input').value = '';
+    document.getElementById('venue-input').value = '';
+    document.getElementById('step-3-fieldset').style.display = 'none';
+    document.getElementById('results-list').innerHTML = "";
+  }
+
+  function onDateSelected(date) {
+    hideError();
+    selectedDate = date;
+
+    if (currentMode === 'home') {
+      const timeDiv = document.getElementById('time-slot-div');
+      timeDiv.style.display = 'block';
+      setTimeout(() => { timeDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 10);
+
+      document.getElementById('submit-btn').style.display = 'none';
+      document.getElementById('time-slot-select').innerHTML = "<option value=''>Loading times...</option>";
+
+      google.script.run.withSuccessHandler(onTimeSuccess).withFailureHandler(onTimeFailure).getTimeSlotsForDate(selectedDate);
+    } else {
+      // Away Mode
+      const proposalDiv = document.getElementById('away-proposal-div');
+      proposalDiv.style.display = 'block';
+      setTimeout(() => { proposalDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 10);
+    }
+  }
+
+  function onTimeSelect() {
+    hideError();
+    if (document.getElementById('time-slot-select').value) {
+      const btn = document.getElementById('submit-btn');
+      btn.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = "Submit Request";
+    }
+  }
+
+  function onAwayProposalChange() {
+    hideError();
+    const time = document.getElementById('proposed-time-input').value;
+    const venue = document.getElementById('venue-input').value;
+    const btn = document.getElementById('submit-btn');
+
+    if (time && venue) {
+      btn.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = "Submit Proposal";
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+
+  function findDates() {
+    const bookingData = getBookingData();
+    if (!bookingData.ourTeam || !bookingData.monthYear || !bookingData.club || !bookingData.theirTeam) {
+      const errorDiv = document.getElementById('error-message');
+      errorDiv.textContent = "Please ensure all team and month details are selected.";
+      errorDiv.style.display = 'block';
+      errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const step3 = document.getElementById('step-3-fieldset');
+    step3.style.display = 'block';
+    document.getElementById('loading-indicator').style.display = 'block';
+    document.getElementById('results-list').innerHTML = "";
+
+    // Reset sub-sections
+    document.getElementById('time-slot-div').style.display = 'none';
+    document.getElementById('away-proposal-div').style.display = 'none';
+    document.getElementById('submit-btn').style.display = 'none';
+
+    setTimeout(() => { step3.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 10);
+
+    const [year, month] = bookingData.monthYear.split('-');
+    const backendFunction = (currentMode === 'home') ? 'findAvailableDatesForTeam' : 'findAvailableDatesForAwayMatch';
+
+    google.script.run
+      .withSuccessHandler(onFindSuccess)
+      .withFailureHandler(onFindFailure)
+    [backendFunction](bookingData.ourTeam, parseInt(month), parseInt(year));
+  }
+
+  function submitBooking() {
+    // Clear previous errors
+    document.getElementById('error-message').style.display = 'none';
+    document.getElementById('error-message').textContent = '';
+
+    const data = getBookingData();
+    const backendFunction = (currentMode === 'home') ? 'submitBookingRequest' : 'submitAwayBookingRequest';
+
+    const requiredFields = ['club', 'theirTeam', 'ourTeam', 'date', 'email'];
+    if (currentMode === 'home') {
+      requiredFields.push('time');
+    } else {
+      requiredFields.push('time', 'venue');
+    }
+
+    for (const field of requiredFields) {
+      if (!data[field]) {
+        alert('Please ensure all fields are filled in before submitting.');
+        return;
+      }
+    }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = "Submitting...";
+
+    google.script.run
+      .withSuccessHandler(onSubmitSuccess)
+      .withFailureHandler(onSubmitFailure)
+    [backendFunction](data);
+  }
+
+  // --- 5. UI HELPER FUNCTIONS ---
+  // ============================================
+
+  function populateOpponentFields(opponent) {
+    document.getElementById('club-input').value = opponent.club;
+    document.getElementById('their-team-input').value = opponent.team;
+    document.getElementById('match-type-input').value = opponent.type;
+    document.getElementById('email-input').value = clubEmailMap[opponent.club] || "";
+  }
+
+  function clearOpponentFields() {
+    populateOpponentFields({ club: '', team: '', type: '' });
+    document.getElementById('opponent-select').value = "";
+    document.getElementById('month-select').value = "";
+  }
+
+  function getBookingData() {
+    const data = {
+      ourTeam: document.getElementById('our-team-select').value,
+      club: document.getElementById('club-input').value,
+      theirTeam: document.getElementById('their-team-input').value,
+      matchType: document.getElementById('match-type-input').value,
+      email: document.getElementById('email-input').value,
+      monthYear: document.getElementById('month-select').value,
+      date: selectedDate
+    };
+
+    if (currentMode === 'home') {
+      data.time = document.getElementById('time-slot-select').value;
+    } else {
+      data.time = document.getElementById('proposed-time-input').value;
+      data.venue = document.getElementById('venue-input').value;
+    }
+    return data;
+  }
+
+  function _resetForm() {
+    // Reset all inputs
+    document.querySelectorAll('#booking-flow input, #booking-flow select').forEach(el => {
+      if (el.type !== 'radio' && el.type !== 'checkbox' && !el.readOnly) {
+        el.value = '';
+      }
+    });
+
+    // Reset specific buttons
+    const findBtn = document.getElementById('find-dates-btn');
+    if (findBtn) findBtn.disabled = true;
+
+    // Hide steps
+    document.getElementById('step-2-fieldset').style.display = 'none';
+    document.getElementById('step-3-fieldset').style.display = 'none';
+    document.getElementById('no-matches-message').style.display = 'none';
+
+    // Reset state
+    selectedDate = null;
+  }
+</script>

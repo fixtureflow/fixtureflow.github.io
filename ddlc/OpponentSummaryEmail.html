@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 14px; }
+      .fixture-table {
+        border-collapse: collapse;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        border: 1px solid #ccc;
+      }
+      .fixture-table th, .fixture-table td {
+        border: 1px solid #ccc;
+        padding: 4px 8px;
+        text-align: left;
+      }
+      .fixture-table th {
+        background-color: #f4f4f4;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Match Summary: <?= ourClubName ?> vs. <?= opponentClubName ?></h3>
+    <p>
+      Hi <?= secretaryName ?>,
+    </p>
+    <p>
+      Here is a summary of all scheduled matches between our two clubs for the season, formatted for easy copy-pasting into your own spreadsheet. If you spot any mistakes, please do let us know!
+    </p>
+
+    <? if (matches.length > 0) { ?>
+      <table class="fixture-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Day</th>
+            <th>Time</th>
+            <th>Event</th>
+            <th>Div</th>
+            <th>Sctn</th>
+            <th>League / Cup</th>
+            <th>Your Club</th>
+            <th>Team No.</th>
+            <th>v</th>
+            <th>Home / Away</th>
+            <th>Opposition Club</th>
+            <th>Opp Team No.</th>
+            <th>Venue / Hall</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <? for (const match of matches) { ?>
+            <tr>
+              <td><?= match.date ?></td>
+              <td><?= match.day ?></td>
+              <td><?= match.time ?></td>
+              <td><?= match.event ?></td>
+              <td><?= match.div ?></td>
+              <td><?= match.sctn ?></td>
+              <td><?= match.leagueCup ?></td>
+              
+              <!-- This is the logic to show the perspective from THEIR side -->
+              <td><?= opponentClubName ?></td>
+              <td><?= match.theirTeamNumber ?></td>
+              <td>v</td>
+              <td><?= match.homeAway === 'Home' ? 'Away' : 'Home' ?></td>
+              <td><?= ourClubName ?></td>
+              <td><?= match.ourTeamNumber ?></td>
+              
+              <td><?= match.venue ?></td>
+              <td><?= match.status ?></td>
+            </tr>
+          <? } ?>
+        </tbody>
+      </table>
+    <? } else { ?>
+      <p>
+        No matches were found scheduled between our clubs.
+      </p>
+    <? } ?>
+    
+    <br>
+    <p>
+      Best regards,<br>
+      <?= ourClubName ?> Match Secretary
+    </p>
+  </body>
+</html>
