@@ -142,12 +142,3 @@ function onOpen() {
   }
   menu.addToUi();
 }
-
-// --- Tier 3: Developer-Only Functions (NO MENU ITEMS) ---
-// These functions are intentionally not added to any menu and must be run manually
-// from the Apps Script editor by the developer. Can be found in 99_Host_Maintenance.js.
-//
-// - saveSettingsToProperties() (Library)
-// - updateWebAppUrl()
-// - setupTrigger()
-// - showResetAllDialog()
