@@ -136,6 +136,8 @@ function onOpen() {
     adminMenu.addSeparator();
     adminMenu.addItem('Install/Verify Booking Trigger', 'setupTrigger');
     adminMenu.addItem('Install Weekly Summary Trigger', 'setupWeeklySummaryTrigger');
+    adminMenu.addSeparator();
+    adminMenu.addItem('🔒 Lock Down Settings', 'lockDownSettings_menu');
     menu.addSubMenu(adminMenu);
   }
   menu.addToUi();

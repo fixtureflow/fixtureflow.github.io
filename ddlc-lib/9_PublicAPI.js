@@ -176,6 +176,13 @@ function clearCache() {
 }
 
 /**
+ * [ADMIN] Saves settings to properties and locks down the sheet.
+ */
+function saveSettingsToProperties() {
+  return saveSettingsToProperties_();
+}
+
+/**
  * Processes a booking change (Trigger Entry Point).
  * @param {Object} e 
  * @param {string} action 

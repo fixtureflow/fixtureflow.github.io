@@ -131,3 +131,10 @@ function showOpponentSummaryDialog() {
     ui.alert(`Error showing dialog: ${e.message}`);
   }
 }
+
+/**
+ * [MENU ITEM] Wrapper to run the Lock Down Settings function from the Library.
+ */
+function lockDownSettings_menu() {
+  BadmintonLib.saveSettingsToProperties();
+}

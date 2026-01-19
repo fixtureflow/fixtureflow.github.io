@@ -394,7 +394,7 @@ function _applyProductionProtections() {
  * programmatically disables Test Mode, protects the sheet, and then hides it.
  * This is the complete, one-click "lock-down" and deployment function.
  */
-function saveSettingsToProperties() {
+function saveSettingsToProperties_() {
   const ui = SpreadsheetApp.getUi();
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
