@@ -1,11 +1,8 @@
 /*******************************************************************
- * Match Admin System: Spreadsheet Administration & Triggers
+ * Match Admin System: Spreadsheet Triggers & Wrappers
  *
- * This file contains all functions that are executed from the
- * Google Sheet interface, either via the custom "Match Admin" menu
- * or by automated triggers like `onEdit`.
- * 
- * CORE LOGIC has been moved to `3_Spreadsheet_Admin_Logic.js`.
+ * This file contains the Host-side triggers (onEdit) and menu
+ * wrappers. It delegates the heavy lifting to the Library.
  *******************************************************************/
 //==============================================================
 // 3️⃣ SPREADSHEET - ADMIN & TRIGGERS
@@ -84,9 +81,8 @@ function handleConfirmationEdit(e) {
     SpreadsheetApp.flush();
 
     // 3. And finally, route to the unified processor.
-    const sheetName = sheet.getName();
+    // const sheetName = sheet.getName();
     const isHome = (sheetName === CONFIG.SHEETS.BOOKING_REQUESTS);
-    // const settings = getClubSettings_(); // REMOVED: API wrapper handles this
 
     if (isHome || sheetName === CONFIG.SHEETS.AWAY_MATCH_PROPOSALS) {
       BadmintonLib._processBookingChange(e, newValue, isHome); // Call wrapper (which calls _Internal)
