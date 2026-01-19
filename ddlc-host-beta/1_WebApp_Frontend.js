@@ -1,14 +1,13 @@
 /*******************************************************************
- * Match Admin System: Web App - Frontend & Data Services
+ * Match Admin System: Web App - Host Wrapper
  * 
- * Responsible for all logic related to serving the web application
- * and its data, including the main doGet() and all cached data-
- * getter functions called by the UI.
+ * Responsible for all logic related to serving the web application.
+ * DELEGATES ALL LOGIC TO THE LIBRARY.
  * 
- * HELPER FUNCTIONS have been moved to `1_WebApp_Frontend_Helpers.js`.
+ * HELPER FUNCTIONS are now in the Library.
  *******************************************************************/
 //==============================================================
-// 1️⃣ WEB APP - FRONTEND & DATA SERVICES
+// 1️⃣ WEB APP - FRONTEND WRAPPER
 //==============================================================
 
 /**

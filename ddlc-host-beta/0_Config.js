@@ -1,9 +1,9 @@
 /*******************************************************************
- * Match Admin System: Configuration & Setup
+ * Match Admin System: Host Configuration & Setup
  * 
- * Contains the foundational configuration for the entire
- * application, including the global CONFIG object and the
- * functions for creating the admin menu and installing triggers.
+ * Contains the foundational configuration for the application,
+ * including menus and trigger installation.
+ * MOST LOGIC DELEGATED TO LIBRARY.
  *******************************************************************/
 //==============================================================
 // 0️⃣ CONFIG & SETUP
@@ -145,7 +145,9 @@ function onOpen() {
 
 // --- Tier 3: Developer-Only Functions (NO MENU ITEMS) ---
 // These functions are intentionally not added to any menu and must be run manually
-// from the Apps Script editor by the developer. Can be found in 99_Admin_Utilities file.
+// from the Apps Script editor by the developer. Can be found in 99_Host_Maintenance.js.
 //
-// - saveSettingsToProperties()
-// - _admin_checkSingleProperty()
+// - saveSettingsToProperties() (Library)
+// - updateWebAppUrl()
+// - setupTrigger()
+// - showResetAllDialog()
