@@ -304,11 +304,24 @@ function saveSettingsToProperties_() {
       throw new Error("No settings were found on the 'Settings' sheet to save.");
     }
     
-    // --- Step 2: AUTOMATICALLY DISABLE TEST MODE ---
+    // --- Step 2: AUTOMATICALLY DISABLE TEST MODE (IN SHEET & PROPERTIES) ---
     // This is the new, crucial "pre-flight check".
     scriptProperties.setProperty('Test Mode Active', 'FALSE');
     scriptProperties.setProperty('Test Mode Email', ''); // Clear the test email address
-    Logger.log("Deployment lock-down: Test Mode has been programmatically disabled.");
+
+    // Find the "Test Mode Active" row in the data to update the SHEET too
+    // This is critical because getClubSettings reads from the Sheet, not Properties.
+    for (let i = 0; i < data.length; i++) {
+      if (data[i][0] === 'Test Mode Active') {
+        // Write "FALSE" to the cell (Row = startRow + i, Col = 2)
+        settingsSheet.getRange(2 + i, 2).setValue('FALSE');
+      }
+      if (data[i][0] === 'Test Mode Email') {
+        settingsSheet.getRange(2 + i, 2).setValue('');
+      }
+    }
+
+    Logger.log("Deployment lock-down: Test Mode has been programmatically disabled in Properties AND Sheet.");
       
     // --- Step 3: Automated Protection Logic ---
     const protection = settingsSheet.protect().setDescription('Master admin settings - script protected');
