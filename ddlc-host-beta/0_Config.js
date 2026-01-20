@@ -79,7 +79,8 @@ const CONFIG = {
     OPPONENT_SELECT_DIALOG: 'OpponentSelectDialog',
     AWAY_FINDER: 'AwayFinder',
     PLAYER_CLEARER: 'PlayerClearer',
-    LOADING_SPINNER: 'LoadingSpinner'
+    LOADING_SPINNER: 'LoadingSpinner',
+    SHUTTLE_ALLOCATION: 'ShuttleAllocationEmail'
   },
   TEAM_SHEET: {
     ALLOWED_DAYS_COL: 2, // Column C (NEW)
@@ -89,6 +90,9 @@ const CONFIG = {
   SETTINGS_KEYS: {
     CLUB_NAME: 'Club Name',
     MATCH_SECRETARY_EMAIL: 'Match Secretary Email',
+    MATCH_SECRETARY_NAME: 'Match Secretary Name', // [NEW] For email signature
+    SHUTTLE_MANAGER_EMAIL: 'Shuttle Manager Email', // [NEW] Optional split config
+    SHUTTLE_MANAGER_NAME: 'Shuttle Manager Name', // [NEW] For email greeting
     ENABLE_AWAY_BOOKING: 'Enable Away Booking',
     CLUB_LOGO_LINK: 'Club Logo Link',
     AUTO_CLEAR_CACHE: 'Auto-Clear Cache',
