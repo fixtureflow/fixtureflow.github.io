@@ -187,7 +187,7 @@ function setupWeeklySummaryTrigger() {
       .atHour(16)
       .create();
 
-    SpreadsheetApp.getUi().alert('Success! The automated Weekly Match Summary trigger has been installed.\n\nYou will receive an email every Friday afternoon with a summary of the FOLLOWING week\'s matches (Mon-Sun).');
+    SpreadsheetApp.getUi().alert('Success! The automated Weekly Trigger has been installed.\n\nEvery Friday afternoon, it will automatically:\n\n1. Send a Match Summary to the Secretary.\n2. Send a Shuttle Report to the Manager (if configured).\n3. Send Courtesy Reminders to Opponents.');
     Logger.log("Weekly Summary Trigger created successfully for Friday afternoons.");
 
   } catch (e) {
