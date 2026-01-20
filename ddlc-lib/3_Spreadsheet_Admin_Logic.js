@@ -445,10 +445,7 @@ function sendWeeklyMatchSummary_(settings = null) {
       shuttleTemplate.startDate = formatDate(startOfNextWeek);
       shuttleTemplate.endDate = formatDate(endOfNextWeek);
 
-      // Dynamic Variables for User Template
-      // note: secretaryName might not be in settings, so we fallback.
-      // Actually, we can try to parse it from the email or just say "Match Secretary".
-      // But better: we can add "Match Secretary Name" to settings later. For now, use "The Match Secretary".
+      // Assign dynamic variables for the template
       shuttleTemplate.secretaryName = settings['Match Secretary Name'] || 'The Match Secretary';
       shuttleTemplate.managerName = settings['Shuttle Manager Name'] || 'Shuttle Manager';
 
