@@ -23,6 +23,8 @@
     }
     /* Style for the Location column to make it distinct */
     .location-cell { font-weight: bold; font-size: 0.9em; letter-spacing: 0.5px; }
+    .location-home { color: #27ae60; }
+    .location-away { color: #c0392b; }
     .footer { margin-top: 30px; font-size: 12px; color: #666; }
   </style>
 </head>
@@ -53,7 +55,7 @@
           <td><?= matches[i].time ?></td>
           
           <!-- The Location Column: Shows HOME or AWAY from THEIR perspective -->
-          <td class="location-cell" style="color: <?= matches[i].location === 'HOME' ? '#27ae60' : '#c0392b' ?>;">
+          <td class="location-cell <?= matches[i].location === 'HOME' ? 'location-home' : 'location-away' ?>">
             <?= matches[i].location ?>
           </td>
           
