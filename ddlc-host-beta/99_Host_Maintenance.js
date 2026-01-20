@@ -121,6 +121,82 @@ function updateWebAppUrl() {
 }
 
 /**
+ * [ADMIN] Installs the onEdit trigger needed for the 'Booking Requests' sheet.
+ * This is safe to run multiple times.
+ */
+function setupTrigger() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let triggerExists = false;
+  const handlerFunction = 'handleConfirmationEdit'; // The function to trigger
+
+  // 1. Check if the trigger is already installed
+  const allTriggers = ScriptApp.getUserTriggers(ss);
+  for (const trigger of allTriggers) {
+    if (trigger.getHandlerFunction() === handlerFunction) {
+      triggerExists = true;
+      break;
+    }
+  }
+
+  // 2. Install if it doesn't exist, or inform the user if it does
+  if (triggerExists) {
+    SpreadsheetApp.getUi().alert('Trigger is already installed. No action needed.');
+  } else {
+    // Create the new trigger
+    ScriptApp.newTrigger(handlerFunction)
+      .forSpreadsheet(ss)
+      .onEdit()
+      .create();
+
+    SpreadsheetApp.getUi().alert('Success! The booking confirmation trigger has been installed. This sheet is now ready.');
+  }
+}
+
+/**
+ * [ADMIN] Installs the time-driven trigger for the weekly match summary email.
+ * This is safe to run multiple times. If the trigger already exists,
+ * it will not create a duplicate.
+ * Scheduled the trigger for Friday afternoon.
+ */
+function setupWeeklySummaryTrigger() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ui = SpreadsheetApp.getUi();
+  const handlerFunction = 'sendWeeklyMatchSummary';
+  let triggerExists = false;
+
+  // 1. Check all existing project triggers to see if ours is already there.
+  const allTriggers = ScriptApp.getUserTriggers(ss);
+  for (const trigger of allTriggers) {
+    if (trigger.getHandlerFunction() === handlerFunction) {
+      triggerExists = true;
+      break;
+    }
+  }
+
+  // 2. If the trigger already exists, inform the user and stop.
+  if (triggerExists) {
+    ui.alert('The Weekly Summary trigger is already installed. No action needed.');
+    return;
+  }
+
+  // 3. If it does not exist, create it with the new, improved settings.
+  try {
+    ScriptApp.newTrigger(handlerFunction)
+      .timeBased() // Start with the time-based builder directly
+      .onWeekDay(ScriptApp.WeekDay.FRIDAY)
+      .atHour(16)
+      .create();
+
+    SpreadsheetApp.getUi().alert('Success! The automated Weekly Match Summary trigger has been installed.\n\nYou will receive an email every Friday afternoon with a summary of the FOLLOWING week\'s matches (Mon-Sun).');
+    Logger.log("Weekly Summary Trigger created successfully for Friday afternoons.");
+
+  } catch (e) {
+    Logger.log(`Failed to create Weekly Summary Trigger: ${e.message}`);
+    ui.alert(`An error occurred while creating the trigger: ${e.message}`);
+  }
+}
+
+/**
  * [MENU ITEM] Shows a confirmation dialog before resetting all availability.
  */
 function showResetAllDialog() {
