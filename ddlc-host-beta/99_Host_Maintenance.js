@@ -124,20 +124,7 @@ function updateWebAppUrl() {
  * [MENU ITEM] Shows a confirmation dialog before resetting all availability.
  */
 function showResetAllDialog() {
-  const ui = SpreadsheetApp.getUi();
-  const title = 'WARNING: EXTREMELY DESTRUCTIVE ACTION';
-  const prompt = 'You are about to remove ALL \'U\' (Unavailable) marks for ALL players.\n\n' +
-    'This action cannot be undone and is intended for end-of-season cleanup.\n\n' +
-    'To proceed, you must type the exact phrase "CONFIRM NUKE" into the box below and click OK.';
-  
-  const response = ui.prompt(title, prompt, ui.ButtonSet.OK_CANCEL);
-
-  if (response.getSelectedButton() == ui.Button.OK) {
-    const confirmationText = response.getResponseText();
-    _resetAllPlayerAvailability(confirmationText);
-  } else {
-    ui.alert('Action cancelled. No changes were made.');
-  }
+  BadmintonLib.showResetAllDialog();
 }
 
 /**
@@ -145,52 +132,5 @@ function showResetAllDialog() {
  * Safely removes 'U's without touching the ADMIN_LOCK column.
  */
 function _resetAllPlayerAvailability(confirmation) {
-  const ui = SpreadsheetApp.getUi();
-  const CONFIRMATION_PHRASE = 'CONFIRM NUKE';
-
-  if (confirmation !== CONFIRMATION_PHRASE) {
-    ui.alert(`Incorrect confirmation phrase entered.\n\nAction cancelled.`);
-    return;
-  }
-
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const availabilitySheet = ss.getSheetByName(CONFIG.SHEETS.AVAILABILITY);
-
-    if (!availabilitySheet) {
-      throw new Error(`'${CONFIG.SHEETS.AVAILABILITY}' sheet not found.`);
-    }
-
-    const availDataRange = availabilitySheet.getDataRange();
-    const availData = availDataRange.getValues();
-    const headers = availData[0];
-    const adminLockCol = headers.indexOf(CONFIG.HEADERS.ADMIN_LOCK);
-
-    let removedCount = 0;
-    const newData = availData.map(row => [...row]);
-
-    // Loop through cells, skipping headers and date column (col 0)
-    for (let r = 1; r < newData.length; r++) {
-      for (let c = 1; c < newData[r].length; c++) {
-        if (c === adminLockCol) continue;
-
-        const cellValue = String(newData[r][c]).trim().toUpperCase();
-        if (cellValue === 'U') {
-          newData[r][c] = '';
-          removedCount++;
-        }
-      }
-    }
-
-    if (removedCount > 0) {
-      availDataRange.setValues(newData);
-      ui.alert(`Reset Complete.\n\nRemoved ${removedCount} 'U' marks from the Availability grid.`);
-    } else {
-      ui.alert('No \'U\' marks were found to remove.');
-    }
-
-  } catch (e) {
-    Logger.log(`Error in _resetAllPlayerAvailability: ${e.message}`);
-    ui.alert(`An error occurred: ${e.message}`);
-  }
+  BadmintonLib._resetAllPlayerAvailability(confirmation);
 }
