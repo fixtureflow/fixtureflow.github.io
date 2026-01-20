@@ -90,6 +90,7 @@ const CONFIG = {
   SETTINGS_KEYS: {
     CLUB_NAME: 'Club Name',
     MATCH_SECRETARY_EMAIL: 'Match Secretary Email',
+    MATCH_SECRETARY_NAME: 'Match Secretary Name', // [NEW] For email signature
     SHUTTLE_MANAGER_EMAIL: 'Shuttle Manager Email', // [NEW] Optional split config
     ENABLE_AWAY_BOOKING: 'Enable Away Booking',
     CLUB_LOGO_LINK: 'Club Logo Link',

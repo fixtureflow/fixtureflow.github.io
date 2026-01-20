@@ -439,17 +439,26 @@ function sendWeeklyMatchSummary_(settings = null) {
 
     // --- 5. B - Setup Shuttle Manager Email (Allocation Only) ---
     if (isSplitMode && shuttleAllocationDetails.length > 0) {
+      // Send to Shuttle Manager (Test Mode Safe)
       const shuttleTemplate = HtmlService.createTemplateFromFile(CONFIG.TEMPLATES.SHUTTLE_ALLOCATION);
       shuttleTemplate.clubName = clubName;
       shuttleTemplate.startDate = formatDate(startOfNextWeek);
       shuttleTemplate.endDate = formatDate(endOfNextWeek);
-      shuttleTemplate.matchTubesNeeded = matchTubesNeeded;
+
+      // Dynamic Variables for User Template
+      // note: secretaryName might not be in settings, so we fallback.
+      // Actually, we can try to parse it from the email or just say "Match Secretary".
+      // But better: we can add "Match Secretary Name" to settings later. For now, use "The Match Secretary".
+      shuttleTemplate.secretaryName = settings['Match Secretary Name'] || 'The Match Secretary';
+
+      const tubesText = matchTubesNeeded === 0 ? 'No tubes required this week.'
+        : `Total Tubes Required: ${matchTubesNeeded} tube${matchTubesNeeded !== 1 ? 's' : ''}`;
+      shuttleTemplate.shuttleSummaryText = tubesText;
       shuttleTemplate.shuttleAllocationDetails = shuttleAllocationDetails;
 
       const shuttleHtmlBody = shuttleTemplate.evaluate().getContent();
       const shuttleSubject = `${clubName} Shuttle Allocation: Week of ${subjectDate}`;
 
-      // Send to Shuttle Manager (Test Mode Safe)
       const shuttleSentInfo = _sendClubEmail(shuttleManagerEmail, shuttleSubject, shuttleHtmlBody, settings);
       console.log(`✅ Shuttle Allocation sent to ${shuttleSentInfo.recipient}`);
     } else if (isSplitMode) {
