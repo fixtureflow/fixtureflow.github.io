@@ -351,7 +351,117 @@ function sendWeeklyMatchSummary_(settings = null) {
 
     if (!clubEmail) throw new Error("'Match Secretary Email' is not set in Settings.");
 
-    // ... [existing logic] ...
+    const matchesByDay = {};
+    const matchesByOpponent = {};
+    let matchTubesNeeded = 0;
+    const shuttleAllocationDetails = [];
+
+    // --- 3. Process Fixtures ---
+    for (let i = h.headerRowIndex + 1; i < fixturesData.length; i++) {
+      const row = fixturesData[i];
+      if (row[h[CONFIG.HEADERS.FIXTURE_STATUS]] === CONFIG.STATUSES.CONFIRMED && row[h[CONFIG.HEADERS.FIXTURE_DATE]]) {
+        const matchDate = new Date(row[h[CONFIG.HEADERS.FIXTURE_DATE]]);
+
+        if (matchDate >= startOfNextWeek && matchDate <= endOfNextWeek) {
+          const dateStr = formatDateForSheet(matchDate);
+          const timeStr = row[h[CONFIG.HEADERS.FIXTURE_TIME]] ? Utilities.formatDate(new Date(row[h[CONFIG.HEADERS.FIXTURE_TIME]]), Session.getScriptTimeZone(), 'HH:mm') : 'TBC';
+          const ourTeam = row[h[CONFIG.HEADERS.FIXTURE_OUR_TEAM]];
+          const homeAway = row[h[CONFIG.HEADERS.FIXTURE_HOME_AWAY]];
+          const leagueCup = row[h[CONFIG.HEADERS.FIXTURE_LEAGUE_CUP]];
+          const oppClub = row[h[CONFIG.HEADERS.FIXTURE_OPP_CLUB]];
+          const oppTeam = row[h[CONFIG.HEADERS.FIXTURE_OPP_TEAM]];
+          const venueRaw = row[h[CONFIG.HEADERS.FIXTURE_VENUE]];
+          const dateDisplay = Utilities.formatDate(matchDate, Session.getScriptTimeZone(), 'd MMM (EEE)');
+
+          // A. Internal List
+          if (!matchesByDay[dateStr]) matchesByDay[dateStr] = [];
+          matchesByDay[dateStr].push({
+            day: Utilities.formatDate(matchDate, Session.getScriptTimeZone(), 'EEEE, d MMMM'),
+            time: timeStr,
+            ourTeam: ourTeam,
+            homeAway: homeAway,
+            opponent: `${oppClub} ${oppTeam}`
+          });
+
+          // B. Shuttle Logic
+          let needsTube = (leagueCup === 'Cup') || (homeAway === 'Home' && leagueCup === 'League');
+          if (needsTube) {
+            matchTubesNeeded++;
+            const captainName = (captainMap && captainMap[ourTeam.trim().toUpperCase()]) ? captainMap[ourTeam.trim().toUpperCase()] : 'N/A';
+            const reason = (leagueCup === 'Cup') ? `Cup Match (${homeAway})` : 'Home League Match';
+            shuttleAllocationDetails.push({ date: dateDisplay, team: ourTeam, captain: captainName, reason: reason });
+          }
+
+          // C. Opponent List
+          if (oppClub && opponentContactMap[oppClub]) {
+            if (!matchesByOpponent[oppClub]) matchesByOpponent[oppClub] = [];
+            const theirLocation = (homeAway === 'Home') ? 'AWAY' : 'HOME';
+            let displayVenue = venueRaw;
+            if (!displayVenue || displayVenue === 'Away') {
+              displayVenue = (theirLocation === 'HOME') ? 'Your Courts' : clubName;
+            }
+            matchesByOpponent[oppClub].push({
+              date: dateDisplay, time: timeStr, location: theirLocation,
+              theirTeam: oppTeam, ourTeam: ourTeam, venue: displayVenue
+            });
+          }
+        }
+      }
+    }
+
+    // --- 4. Prepare Email Data ---
+    const subjectDate = Utilities.formatDate(startOfNextWeek, Session.getScriptTimeZone(), 'd MMM');
+    const rawSubject = `${clubName} Weekly Match Summary: Week of ${subjectDate}`;
+
+    // Check if we are in "Split Mode" (Shuttle Manager Configured)
+    const shuttleManagerEmail = settings[CONFIG.SETTINGS_KEYS.SHUTTLE_MANAGER_EMAIL];
+    const isSplitMode = !!shuttleManagerEmail;
+
+    // --- 5. A - Setup Secretary Email (Match Summary) ---
+    const internalTemplate = HtmlService.createTemplateFromFile(CONFIG.TEMPLATES.WEEKLY_SUMMARY);
+    internalTemplate.clubName = clubName;
+    internalTemplate.startDate = formatDate(startOfNextWeek);
+    internalTemplate.endDate = formatDate(endOfNextWeek);
+    internalTemplate.sortedDays = Object.keys(matchesByDay).sort();
+    internalTemplate.matchesByDay = matchesByDay;
+    internalTemplate.matchTubesNeeded = matchTubesNeeded;
+
+    // CRITICAL LOGIC: If Split Mode, we pass an EMPTY list to the Secretary's email logic,
+    // so it only shows the "Total Tubes" count but hides the itemized list to reduce clutter.
+    // If NOT Split Mode, we pass the full list so they see everything.
+    internalTemplate.shuttleAllocationDetails = isSplitMode ? [] : shuttleAllocationDetails;
+
+    const htmlBody = internalTemplate.evaluate().getContent();
+
+    // Send to Match Secretary
+    const sentInfo = _sendClubEmail(clubEmail, rawSubject, htmlBody, settings);
+    console.log(`✅ Match Summary sent to ${sentInfo.recipient}`);
+
+    // --- 5. B - Setup Shuttle Manager Email (Allocation Only) ---
+    if (isSplitMode && shuttleAllocationDetails.length > 0) {
+      // Send to Shuttle Manager (Test Mode Safe)
+      const shuttleTemplate = HtmlService.createTemplateFromFile(CONFIG.TEMPLATES.SHUTTLE_ALLOCATION);
+      shuttleTemplate.clubName = clubName;
+      shuttleTemplate.startDate = formatDate(startOfNextWeek);
+      shuttleTemplate.endDate = formatDate(endOfNextWeek);
+
+      // Assign dynamic variables for the template
+      shuttleTemplate.secretaryName = settings['Match Secretary Name'] || 'The Match Secretary';
+      shuttleTemplate.managerName = settings['Shuttle Manager Name'] || 'Shuttle Manager';
+
+      const tubesText = matchTubesNeeded === 0 ? 'No tubes required this week.'
+        : `Total Tubes Required: ${matchTubesNeeded} tube${matchTubesNeeded !== 1 ? 's' : ''}`;
+      shuttleTemplate.shuttleSummaryText = tubesText;
+      shuttleTemplate.shuttleAllocationDetails = shuttleAllocationDetails;
+
+      const shuttleHtmlBody = shuttleTemplate.evaluate().getContent();
+      const shuttleSubject = `${clubName} Shuttle Allocation: Week of ${subjectDate}`;
+
+      const shuttleSentInfo = _sendClubEmail(shuttleManagerEmail, shuttleSubject, shuttleHtmlBody, settings);
+      console.log(`✅ Shuttle Allocation sent to ${shuttleSentInfo.recipient}`);
+    } else if (isSplitMode) {
+      console.log(`ℹ️ Split Mode Active, but no shuttles needed. Skipping Shuttle Manager email.`);
+    }
 
     // --- 6. Send Opponent Courtesy Reminders ---
     let opponentsContacted = 0;
