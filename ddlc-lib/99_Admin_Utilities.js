@@ -9,6 +9,8 @@
 // 9️⃣9️⃣ ADMIN & DEPLOYMENT UTILITIES
 //==============================================================
 
+
+
 /**
  * [ADMIN] Core logic to clear ALL 'U' marks from the entire grid.
  * This function is intentionally designed to ONLY run if it receives the exact confirmation phrase from the dialog function.
@@ -95,41 +97,6 @@ function showResetAllDialog() {
 }
 
 /**
- * [ADMIN] Cache Clearing Utility.
- * This version intelligently checks the "Enable Away Booking" setting
- * and only attempts to clear the away fixtures cache if the feature is active.
- * It also provides a clear reminder to the user about the manual cache-clearing step.
- */
-function clearCache_() {
-  // 1. Start with the list of cache keys that are ALWAYS used.
-  const keysToClear = [
-    'CLUB_SETTINGS',
-    'OUR_TEAMS',
-    'SEASON_MONTHS',
-    'OPPONENT_CLUBS',
-    'PENDING_FIXTURES'
-  ];
-
-  // 2. Intelligently add the away fixtures key ONLY if the feature is enabled.
-  const settings = getClubSettings(); // This is fast; it will use the cache if available.
-  if (settings['Enable Away Booking'] === 'TRUE') {
-    keysToClear.push('PENDING_AWAY_FIXTURES');
-  }
-
-  // 3. Now, attempt to remove all keys that are currently active.
-  CacheService.getScriptCache().removeAll(keysToClear);
-  Logger.log(`Attempted to clear the following backend caches: ${keysToClear.join(', ')}`);
-  
-  // 4. Provide a helpful alert to the user.
-  const ui = SpreadsheetApp.getUi();
-  ui.alert(
-    'Cache Cleared (Reminder)',
-    'The script has cleared the server-side cache. To ensure the web app loads the absolute latest version, you should also:\n\n1. Do a hard refresh (Ctrl+Shift+R or Cmd+Shift+R) on the web app tab.\n2. (If issues persist) Manually add "?action=clear" to the end of the deployment URL.',
-    ui.ButtonSet.OK
-  );
-}
-
-/**
  * [ADMIN] Installs the onEdit trigger needed for the 'Booking Requests' sheet.
  * This is safe to run multiple times.
  */
@@ -196,7 +163,7 @@ function setupWeeklySummaryTrigger() {
       .atHour(16)
       .create();
 
-    ui.alert('Success! The automated Weekly Match Summary trigger has been installed.\n\nYou will receive an email every Friday afternoon with a summary of the FOLLOWING week\'s matches (Mon-Sun).');
+    SpreadsheetApp.getUi().alert('Success! The automated Weekly Match Summary trigger has been installed.\n\nYou will receive an email every Friday afternoon with a summary of the FOLLOWING week\'s matches (Mon-Sun).');
     Logger.log("Weekly Summary Trigger created successfully for Friday afternoons.");
 
   } catch (e) {
@@ -206,48 +173,38 @@ function setupWeeklySummaryTrigger() {
 }
 
 /**
- * [MENU ITEM] Finds and updates the 'Web App URL' in the 'Settings' sheet
- * by reading the last known URL that the web app saved about itself.
+ * [ADMIN] Cache Clearing Utility.
+ * This version intelligently checks the "Enable Away Booking" setting
+ * and only attempts to clear the away fixtures cache if the feature is active.
+ * It also provides a clear reminder to the user about the manual cache-clearing step.
  */
-function updateWebAppUrl() {
-  const ui = SpreadsheetApp.getUi();
-  try {
-    // Read the URL from the script's memory, where the web app saved it.
-    const latestUrl = PropertiesService.getScriptProperties().getProperty('LAST_KNOWN_URL');
-    
-    if (!latestUrl) {
-      throw new Error("Could not retrieve the web app URL from memory. Please visit the web app URL once and try this again.");
-    }
+function clearCache_() {
+  // 1. Start with the list of cache keys that are ALWAYS used.
+  const keysToClear = [
+    'CLUB_SETTINGS',
+    'OUR_TEAMS',
+    'SEASON_MONTHS',
+    'OPPONENT_CLUBS',
+    'PENDING_FIXTURES'
+  ];
 
-    const settingsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.SETTINGS);
-    if (!settingsSheet) {
-      throw new Error(`The '${CONFIG.SHEETS.SETTINGS}' sheet could not be found.`);
-    }
-
-    const settingName = 'Web App URL';
-    const data = settingsSheet.getDataRange().getValues();
-    let settingRow = -1;
-
-    // Find the row for our setting
-    for (let i = 0; i < data.length; i++) {
-      if (data[i][0] === settingName) {
-        settingRow = i + 1;
-        break;
-      }
-    }
-
-    if (settingRow !== -1) {
-      settingsSheet.getRange(settingRow, 2).setValue(latestUrl);
-    } else {
-      settingsSheet.appendRow([settingName, latestUrl]);
-    }
-
-    ui.alert('Success!', `The 'Web App URL' setting has been successfully updated to:\n\n${latestUrl}`, ui.ButtonSet.OK);
-
-  } catch (e) {
-    Logger.log(`Error in updateWebAppUrl: ${e.message}`);
-    ui.alert('Error', `Could not update the Web App URL:\n\n${e.message}`, ui.ButtonSet.OK);
+  // 2. Intelligently add the away fixtures key ONLY if the feature is enabled.
+  const settings = getClubSettings(); // This is fast; it will use the cache if available.
+  if (settings['Enable Away Booking'] === 'TRUE') {
+    keysToClear.push('PENDING_AWAY_FIXTURES');
   }
+
+  // 3. Now, attempt to remove all keys that are currently active.
+  CacheService.getScriptCache().removeAll(keysToClear);
+  Logger.log(`Attempted to clear the following backend caches: ${keysToClear.join(', ')}`);
+
+  // 4. Provide a helpful alert to the user.
+  const ui = SpreadsheetApp.getUi();
+  ui.alert(
+    'Cache Cleared (Reminder)',
+    'The script has cleared the server-side cache. To ensure the web app loads the absolute latest version, you should also:\n\n1. Do a hard refresh (Ctrl+Shift+R or Cmd+Shift+R) on the web app tab.\n2. (If issues persist) Manually add "?action=clear" to the end of the deployment URL.',
+    ui.ButtonSet.OK
+  );
 }
 
 /**
