@@ -450,6 +450,7 @@ function sendWeeklyMatchSummary_(settings = null) {
       // Actually, we can try to parse it from the email or just say "Match Secretary".
       // But better: we can add "Match Secretary Name" to settings later. For now, use "The Match Secretary".
       shuttleTemplate.secretaryName = settings['Match Secretary Name'] || 'The Match Secretary';
+      shuttleTemplate.managerName = settings['Shuttle Manager Name'] || 'Shuttle Manager';
 
       const tubesText = matchTubesNeeded === 0 ? 'No tubes required this week.'
         : `Total Tubes Required: ${matchTubesNeeded} tube${matchTubesNeeded !== 1 ? 's' : ''}`;

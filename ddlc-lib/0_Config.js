@@ -92,6 +92,7 @@ const CONFIG = {
     MATCH_SECRETARY_EMAIL: 'Match Secretary Email',
     MATCH_SECRETARY_NAME: 'Match Secretary Name', // [NEW] For email signature
     SHUTTLE_MANAGER_EMAIL: 'Shuttle Manager Email', // [NEW] Optional split config
+    SHUTTLE_MANAGER_NAME: 'Shuttle Manager Name', // [NEW] For email greeting
     ENABLE_AWAY_BOOKING: 'Enable Away Booking',
     CLUB_LOGO_LINK: 'Club Logo Link',
     AUTO_CLEAR_CACHE: 'Auto-Clear Cache',
