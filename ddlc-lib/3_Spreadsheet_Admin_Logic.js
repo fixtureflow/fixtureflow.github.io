@@ -409,10 +409,15 @@ function sendWeeklyMatchSummary_(settings = null) {
       }
     }
 
-    // --- 4. Send Internal Email ---
+    // --- 4. Prepare Email Data ---
     const subjectDate = Utilities.formatDate(startOfNextWeek, Session.getScriptTimeZone(), 'd MMM');
     const rawSubject = `${clubName} Weekly Match Summary: Week of ${subjectDate}`;
     
+    // Check if we are in "Split Mode" (Shuttle Manager Configured)
+    const shuttleManagerEmail = settings[CONFIG.SETTINGS_KEYS.SHUTTLE_MANAGER_EMAIL];
+    const isSplitMode = !!shuttleManagerEmail;
+
+    // --- 5. A - Setup Secretary Email (Match Summary) ---
     const internalTemplate = HtmlService.createTemplateFromFile(CONFIG.TEMPLATES.WEEKLY_SUMMARY);
     internalTemplate.clubName = clubName;
     internalTemplate.startDate = formatDate(startOfNextWeek);
@@ -420,17 +425,38 @@ function sendWeeklyMatchSummary_(settings = null) {
     internalTemplate.sortedDays = Object.keys(matchesByDay).sort();
     internalTemplate.matchesByDay = matchesByDay;
     internalTemplate.matchTubesNeeded = matchTubesNeeded;
-    internalTemplate.shuttleAllocationDetails = shuttleAllocationDetails;
+
+    // CRITICAL LOGIC: If Split Mode, we pass an EMPTY list to the Secretary's email logic,
+    // so it only shows the "Total Tubes" count but hides the itemized list to reduce clutter.
+    // If NOT Split Mode, we pass the full list so they see everything.
+    internalTemplate.shuttleAllocationDetails = isSplitMode ? [] : shuttleAllocationDetails;
 
     const htmlBody = internalTemplate.evaluate().getContent();
 
-    // Use the master helper
+    // Send to Match Secretary
     const sentInfo = _sendClubEmail(clubEmail, rawSubject, htmlBody, settings);
+    console.log(`✅ Match Summary sent to ${sentInfo.recipient}`);
 
-    // Now you can log specifically
-    console.log(`✅ Internal Summary sent to ${sentInfo.recipient}`);
+    // --- 5. B - Setup Shuttle Manager Email (Allocation Only) ---
+    if (isSplitMode && shuttleAllocationDetails.length > 0) {
+      const shuttleTemplate = HtmlService.createTemplateFromFile(CONFIG.TEMPLATES.SHUTTLE_ALLOCATION);
+      shuttleTemplate.clubName = clubName;
+      shuttleTemplate.startDate = formatDate(startOfNextWeek);
+      shuttleTemplate.endDate = formatDate(endOfNextWeek);
+      shuttleTemplate.matchTubesNeeded = matchTubesNeeded;
+      shuttleTemplate.shuttleAllocationDetails = shuttleAllocationDetails;
 
-    // --- 5. Send Opponent Courtesy Reminders ---
+      const shuttleHtmlBody = shuttleTemplate.evaluate().getContent();
+      const shuttleSubject = `${clubName} Shuttle Allocation: Week of ${subjectDate}`;
+
+      // Send to Shuttle Manager (Test Mode Safe)
+      const shuttleSentInfo = _sendClubEmail(shuttleManagerEmail, shuttleSubject, shuttleHtmlBody, settings);
+      console.log(`✅ Shuttle Allocation sent to ${shuttleSentInfo.recipient}`);
+    } else if (isSplitMode) {
+      console.log(`ℹ️ Split Mode Active, but no shuttles needed. Skipping Shuttle Manager email.`);
+    }
+
+    // --- 6. Send Opponent Courtesy Reminders ---
     let opponentsContacted = 0;
     for (const oppClub in matchesByOpponent) {
       const contactInfo = opponentContactMap[oppClub];
@@ -446,21 +472,18 @@ function sendWeeklyMatchSummary_(settings = null) {
       const oppHtmlBody = oppTemplate.evaluate().getContent();
       const rawOppSubject = `${clubName} vs ${oppClub}: Upcoming Match Reminder`;
 
-      // It automatically adds the "Reply-To" and "Sender Name" now!
       const oppSentInfo = _sendClubEmail(contactInfo.email, rawOppSubject, oppHtmlBody, settings);
-
       opponentsContacted++;
-
-      // Now you can log the specific opponent name again!
       console.log(`📤 Sent reminder for ${oppClub} to ${oppSentInfo.recipient}`);
     }
 
     if (typeof logAction === 'function') {
-       logAction('sendWeeklyMatchSummary', 'Sent Weekly Summaries', { }, `Internal Sent. Opponent Reminders Sent: ${opponentsContacted}`);
+      logAction('sendWeeklyMatchSummary', 'Sent Weekly Summaries', { splitMode: isSplitMode }, `Secretary & Opponents Contacted. Shuttle Email: ${isSplitMode ? 'Yes' : 'Merged'}`);
     }
 
   } catch (e) {
     console.log(`CRITICAL ERROR in sendWeeklyMatchSummary: ${e.message}\nStack: ${e.stack}`);
+    // Notify Developer/Admin of failure
     const adminEmail = Session.getActiveUser().getEmail();
     if(adminEmail) {
       MailApp.sendEmail({ to: adminEmail, subject: "ERROR: Weekly Match Summary Failed", body: `Error: ${e.message}` });

@@ -41,20 +41,35 @@
   <!-- SECTION 2: SHUTTLE ALLOCATION (List Format for WhatsApp) -->
   <h3>🏸 Shuttle Allocation</h3>
   
-  <? if (!shuttleAllocationDetails || shuttleAllocationDetails.length === 0) { ?>
+  <? if (matchTubesNeeded === 0) { ?>
     <p><i>No shuttles need to be prepared for matches this week.</i></p>
   <? } else { ?>
+    
     <div class="total-count">
       Total Tubes to Prepare: <?= matchTubesNeeded ?> tube<?= matchTubesNeeded !== 1 ? 's' : '' ?>
     </div>
 
-    <ul>
-      <? for (const item of shuttleAllocationDetails) { ?>
+    <!-- Case 1: Split Mode (Details sent separately) -->
+    <? if (!shuttleAllocationDetails || shuttleAllocationDetails.length === 0) { ?>
+    <p><i>(A detailed allocation list has been sent separately to the Shuttle Manager).</i></p>
+    
+    <!-- Case 2: Unified Mode (Show details here) -->
+    <? } else { ?>
+      <ul>
+        <? for (const item of shuttleAllocationDetails) { ?>
         <li>
-          <b><?= item.date ?></b>: 1 tube for <b><?= item.team ?></b> (Capt: <?= item.captain ?>) - <?= item.reason ?>
+          <b>
+            <?= item.date ?>
+          </b>: 1 tube for <b>
+            <?= item.team ?>
+          </b> (Capt:
+          <?= item.captain ?>) -
+          <?= item.reason ?>
         </li>
-      <? } ?>
-    </ul>
+        <? } ?>
+      </ul>
+    <? } ?>
+
   <? } ?>
 
   <br>

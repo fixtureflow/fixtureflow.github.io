@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.6; }
+    h2 { color: #d32f2f; border-bottom: 2px solid #d32f2f; padding-bottom: 10px; }
+    ul { list-style-type: none; padding: 0; }
+    li { background: #f9f9f9; margin: 5px 0; padding: 10px; border-left: 4px solid #d32f2f; }
+    .footer { font-size: 12px; color: #777; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; }
+    .total-count { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: #333; }
+  </style>
+</head>
+<body>
+
+  <h2>🏸 Weekly Shuttle Allocation</h2>
+  <p>Hi Shuttle Manager,</p>
+  <p>Here is the shuttle requirement list for the upcoming week <b>(<?= startDate ?> to <?= endDate ?>)</b>.</p>
+
+  <? if (!shuttleAllocationDetails || shuttleAllocationDetails.length === 0) { ?>
+    <p><i>No matches require shuttles this week.</i></p>
+  <? } else { ?>
+    
+    <div class="total-count">
+      Total Tubes Required: <?= matchTubesNeeded ?> tube<?= matchTubesNeeded !== 1 ? 's' : '' ?>
+    </div>
+
+    <ul>
+      <? for (const item of shuttleAllocationDetails) { ?>
+        <li>
+          <b><?= item.date ?></b><br>
+          Team: <b><?= item.team ?></b><br>
+          Captain: <?= item.captain ?><br>
+          <span style="font-size: 0.9em; color: #666;">(<?= item.reason ?>)</span>
+        </li>
+      <? } ?>
+    </ul>
+
+  <? } ?>
+
+  <div class="footer">
+    <p><i>This is an automated system email from <b><?= clubName ?></b>.</i></p>
+  </div>
+
+</body>
+</html>
