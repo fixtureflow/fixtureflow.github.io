@@ -277,7 +277,7 @@ function _getDaySettingKey(dayOfWeek, settingType) {
  * Used by the 'Clear Player Unavailability' sidebar.
  * @returns {string[]} An array of player names.
  */
-function getClearablePlayerList() {
+function getClearablePlayerList_() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const availabilitySheet = ss.getSheetByName(CONFIG.SHEETS.AVAILABILITY);

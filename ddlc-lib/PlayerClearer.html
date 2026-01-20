@@ -65,7 +65,7 @@
         google.script.run
           .withSuccessHandler(onClearSuccess)
           .withFailureHandler(onFailure)
-          ._clearPlayerUnavailability(playerName);
+          .clearPlayerUnavailability(playerName);
       }
 
       // --- 3. Handle success and failure ---

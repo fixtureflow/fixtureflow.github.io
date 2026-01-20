@@ -266,6 +266,23 @@ function getOpponentSelectDialogHtml() {
 }
 
 /**
+ * [SIDEBAR] Gets the list of players for the "Clear U" sidebar.
+ * @returns {string[]} List of player names.
+ */
+function getClearablePlayerList() {
+  return getClearablePlayerList_();
+}
+
+/**
+ * [SIDEBAR] Clears 'U' marks for a specific player.
+ * @param {string} playerName 
+ * @returns {number} Count of cleared marks.
+ */
+function clearPlayerUnavailability(playerName) {
+  return _clearPlayerUnavailability(playerName);
+}
+
+/**
  * [DIALOG] Returns the HTML for the Loading Spinner.
  * @returns {HtmlOutput}
  */

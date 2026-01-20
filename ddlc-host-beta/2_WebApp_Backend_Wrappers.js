@@ -64,3 +64,11 @@ function sendWeeklyMatchSummary() {
 function sendOpponentSummaryEmail(opponentName) {
   return BadmintonLib.sendOpponentSummaryEmail(opponentName);
 }
+
+function getClearablePlayerList() {
+  return BadmintonLib.getClearablePlayerList();
+}
+
+function clearPlayerUnavailability(playerName) {
+  return BadmintonLib.clearPlayerUnavailability(playerName);
+}
