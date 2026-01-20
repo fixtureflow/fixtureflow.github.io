@@ -111,10 +111,10 @@ const DEVELOPER_EMAIL = 'fixtureflow.ddlc@gmail.com';
  * [TRIGGER] The onOpen Trigger.
  * Creates the main "Match Admin" menu when the spreadsheet is opened.
  * 
- * V3: Implements a three-tiered access system.
- * - Tier 1: General user functions.
- * - Tier 2: Hidden admin tools for the developer.
- * - Tier 3: Nuclear/setup functions with NO menu item (run from editor only).
+ * Menu Structure:
+ * 1. General User Functions: Day-to-day operations (Sync, Process, Email).
+ * 2. Setup & Config: Validation triggers and Web App URL sync.
+ * 3. Admin Tools: Restricted functions for the Developer (Dev Mode).
  */
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
