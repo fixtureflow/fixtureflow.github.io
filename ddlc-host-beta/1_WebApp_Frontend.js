@@ -12,8 +12,7 @@
 
 /**
  * Serves the main web app (index.html).
- * V2: Now reads the 'Enable Away Booking' setting and passes it to the template.
- * Also has secret backdoor.
+ * Reads settings like 'Enable Away Booking' and passes them to the client.
  */
 function doGet(e) {
   // [HOST FIX] Save the URL to the HOST'S properties store, so the Host's "Sync" menu can find it.

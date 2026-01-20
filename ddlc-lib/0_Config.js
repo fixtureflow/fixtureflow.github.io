@@ -128,7 +128,7 @@ function onOpen() {
   menu.addSeparator();
   menu.addItem('Send Opponent Summary...', 'showOpponentSummaryDialog');    
   
-  // --- Tier 1.5: Setup & Maintenance (Visible to ALL, for initial setup) ---
+  // --- Setup & Maintenance (Visible to ALL) ---
   menu.addSeparator();
   const setupMenu = ui.createMenu('Setup & Config');
   setupMenu.addItem('1. Install/Verify Booking Trigger', 'setupTrigger');

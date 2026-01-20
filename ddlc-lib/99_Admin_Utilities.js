@@ -95,7 +95,7 @@ function showResetAllDialog() {
 }
 
 /**
- * [ADMIN] V2: "Smarter" Cache Clearing.
+ * [ADMIN] Cache Clearing Utility.
  * This version intelligently checks the "Enable Away Booking" setting
  * and only attempts to clear the away fixtures cache if the feature is active.
  * It also provides a clear reminder to the user about the manual cache-clearing step.
