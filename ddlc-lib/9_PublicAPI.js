@@ -27,11 +27,6 @@ function getClubSettings() {
  * @returns {Object[]} List of teams.
  */
 function getOurTeams() {
-  const settings = getClubSettings_();
-  // Call the internal cached getter, passing settings if needed
-  // Note: getOurTeams_ in Helpers handles caching internally, but we can inject if we refactor further.
-  // For now, we delegate to the existing public-ish helper which we will rename/move logic from.
-  // actually, getOurTeams in Helpers IS the public one. We will move it here.
   return getOurTeams_Public_();
 }
 

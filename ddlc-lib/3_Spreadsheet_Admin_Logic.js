@@ -535,7 +535,7 @@ function sendOpponentSummaryEmail_(opponentName, settings = null) {
       // We only care about rows where the opponent's name matches.
       if (row[h[CONFIG.HEADERS.FIXTURE_OPP_CLUB]] === opponentName) {
 
-        // --- Definitive Resilient Date Handling Logic ---
+        // --- Date Parsing Logic ---
         const rawDateString = row[h[CONFIG.HEADERS.FIXTURE_DATE]];
         let displayDate = 'TBC';
         let displayDay = 'TBC';
