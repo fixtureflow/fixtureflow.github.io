@@ -444,8 +444,10 @@ function sendWeeklyMatchSummary_(settings = null) {
         // Use the configured Captain Name or a generic fallback
         const clubCaptain = settings[CONFIG.SETTINGS_KEYS.CLUB_CAPTAIN_NAME] || 'Club Captain';
 
+        matchTubesNeeded++; // Increment total tube count
+
         shuttleAllocationDetails.push({
-          date: formatDateForSheet(upcomingWednesday), // Use the specific Wednesday date
+          date: Utilities.formatDate(upcomingWednesday, Session.getScriptTimeZone(), 'd MMM (EEE)'),
           team: 'Club Night',
           captain: clubCaptain,
           reason: 'Weekly Club Night Allocation'
