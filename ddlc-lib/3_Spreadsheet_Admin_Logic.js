@@ -353,7 +353,8 @@ function sendWeeklyMatchSummary_(settings = null) {
 
     const matchesByDay = {};
     const matchesByOpponent = {};
-    let matchTubesNeeded = 0;
+    let matchTubeCount = 0;
+    let clubNightTubeCount = 0;
     const shuttleAllocationDetails = [];
 
     // --- 3. Process Fixtures ---
@@ -386,10 +387,10 @@ function sendWeeklyMatchSummary_(settings = null) {
           // B. Shuttle Logic
           let needsTube = (leagueCup === 'Cup') || (homeAway === 'Home' && leagueCup === 'League');
           if (needsTube) {
-            matchTubesNeeded++;
+            matchTubeCount++;
             const captainName = (captainMap && captainMap[ourTeam.trim().toUpperCase()]) ? captainMap[ourTeam.trim().toUpperCase()] : 'N/A';
             const reason = (leagueCup === 'Cup') ? `Cup Match (${homeAway})` : 'Home League Match';
-            shuttleAllocationDetails.push({ date: dateDisplay, team: ourTeam, captain: captainName, reason: reason });
+            shuttleAllocationDetails.push({ date: dateDisplay, team: ourTeam, captain: captainName, reason: reason, sortDate: matchDate });
           }
 
           // C. Opponent List
@@ -444,18 +445,29 @@ function sendWeeklyMatchSummary_(settings = null) {
         // Use the configured Captain Name or a generic fallback
         const clubCaptain = settings[CONFIG.SETTINGS_KEYS.CLUB_CAPTAIN_NAME] || 'Club Captain';
 
-        matchTubesNeeded++; // Increment total tube count
+        clubNightTubeCount++; // Increment clubnight tube count
 
         shuttleAllocationDetails.push({
           date: Utilities.formatDate(upcomingWednesday, Session.getScriptTimeZone(), 'd MMM (EEE)'),
           team: 'Club Night',
           captain: clubCaptain,
-          reason: 'Weekly Club Night Allocation'
+          reason: 'Weekly Club Night Allocation',
+          sortDate: upcomingWednesday
         });
 
         Logger.log('Added 1 tube for Club Night on ' + formatDateForSheet(upcomingWednesday));
       }
     }
+
+    // --- 3.C: Finalize Shuttle Data (Counts & Sorting) ---
+    const matchTubesNeeded = matchTubeCount + clubNightTubeCount;
+    let totalTubesBreakdown = '';
+    if (clubNightTubeCount > 0) {
+      totalTubesBreakdown = `(${matchTubeCount} for matches + ${clubNightTubeCount} for club night)`;
+    }
+
+    // Sort allocation details by date so Club Night appears in order
+    shuttleAllocationDetails.sort((a, b) => a.sortDate - b.sortDate);
 
     // --- 4. Prepare Email Data ---
     const subjectDate = Utilities.formatDate(startOfNextWeek, Session.getScriptTimeZone(), 'd MMM');
@@ -473,6 +485,7 @@ function sendWeeklyMatchSummary_(settings = null) {
     internalTemplate.sortedDays = Object.keys(matchesByDay).sort();
     internalTemplate.matchesByDay = matchesByDay;
     internalTemplate.matchTubesNeeded = matchTubesNeeded;
+    internalTemplate.totalTubesBreakdown = totalTubesBreakdown;
 
     // CRITICAL LOGIC: If Split Mode, we pass an EMPTY list to the Secretary's email logic,
     // so it only shows the "Total Tubes" count but hides the itemized list to reduce clutter.
