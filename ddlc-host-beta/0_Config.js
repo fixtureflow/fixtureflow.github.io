@@ -96,7 +96,9 @@ const CONFIG = {
     ENABLE_AWAY_BOOKING: 'Enable Away Booking',
     CLUB_LOGO_LINK: 'Club Logo Link',
     AUTO_CLEAR_CACHE: 'Auto-Clear Cache',
-    TEAM_BUFFER_DAYS: 'Team Buffer Days (each side)'
+    TEAM_BUFFER_DAYS: 'Team Buffer Days (each side)',
+    ENABLE_CLUB_NIGHT_SHUTTLES: 'Enable Club Night Shuttles', // [NEW] Toggle for automatic shuttle calc
+    CLUB_CAPTAIN_NAME: 'Club Captain Name' // [NEW] For the shuttle allocation email
   }
 };
 

@@ -409,6 +409,52 @@ function sendWeeklyMatchSummary_(settings = null) {
       }
     }
 
+    // --- 3.B: "Club Night" Shuttle Logic (Restored) ---
+    // Checks if we should automatically allocate a tube for Wednesday Club Night.
+    const enableClubNight = String(settings[CONFIG.SETTINGS_KEYS.ENABLE_CLUB_NIGHT_SHUTTLES] || 'FALSE').toUpperCase() === 'TRUE';
+
+    if (enableClubNight) {
+      const weekStart = new Date(startOfNextWeek);
+      const weekEnd = new Date(endOfNextWeek);
+      const startMonth = weekStart.getMonth(); // 0-11 (Jan=0, Sep=8)
+
+      // Condition 1: Check if we are "in season" (September to May)
+      // September (8) to May (4) inclusive.
+      // 0,1,2,3,4 (Jan-May) OR 8,9,10,11 (Sep-Dec).
+      const isInSeason = (startMonth >= 8 || startMonth <= 4);
+
+      // Condition 2: Check if the week contains Christmas or New Year's Day
+      let isExclusionWeek = false;
+      for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+        const month = d.getMonth();
+        const day = d.getDate();
+        // Dec 25 or Jan 1
+        if ((month === 11 && day === 25) || (month === 0 && day === 1)) {
+          isExclusionWeek = true;
+          break;
+        }
+      }
+
+      // If we are in season AND it's not an exclusion week, add the club night shuttle.
+      if (isInSeason && !isExclusionWeek) {
+        const upcomingWednesday = new Date(startOfNextWeek);
+        const dayOffset = (3 - upcomingWednesday.getDay() + 7) % 7; // 3 = Wednesday
+        upcomingWednesday.setDate(upcomingWednesday.getDate() + dayOffset);
+
+        // Use the configured Captain Name or a generic fallback
+        const clubCaptain = settings[CONFIG.SETTINGS_KEYS.CLUB_CAPTAIN_NAME] || 'Club Captain';
+
+        shuttleAllocationDetails.push({
+          date: formatDateForSheet(upcomingWednesday), // Use the specific Wednesday date
+          team: 'Club Night',
+          captain: clubCaptain,
+          reason: 'Weekly Club Night Allocation'
+        });
+
+        Logger.log('Added 1 tube for Club Night on ' + formatDateForSheet(upcomingWednesday));
+      }
+    }
+
     // --- 4. Prepare Email Data ---
     const subjectDate = Utilities.formatDate(startOfNextWeek, Session.getScriptTimeZone(), 'd MMM');
     const rawSubject = `${clubName} Weekly Match Summary: Week of ${subjectDate}`;
@@ -449,8 +495,18 @@ function sendWeeklyMatchSummary_(settings = null) {
       shuttleTemplate.secretaryName = settings['Match Secretary Name'] || 'The Match Secretary';
       shuttleTemplate.managerName = settings['Shuttle Manager Name'] || 'Shuttle Manager';
 
-      const tubesText = matchTubesNeeded === 0 ? 'No tubes required this week.'
-        : `Total Tubes Required: ${matchTubesNeeded} tube${matchTubesNeeded !== 1 ? 's' : ''}`;
+      // Calculate Totals for Summary
+      const clubNightEntries = shuttleAllocationDetails.filter(d => d.team === 'Club Night').length;
+      const matchEntries = shuttleAllocationDetails.length - clubNightEntries;
+
+      const summaryParts = [];
+      if (matchEntries > 0) summaryParts.push(`${matchEntries} tube${matchEntries !== 1 ? 's' : ''} for matches`);
+      if (clubNightEntries > 0) summaryParts.push(`${clubNightEntries} tube${clubNightEntries !== 1 ? 's' : ''} for club night`);
+
+      let tubesText;
+      if (summaryParts.length === 0) tubesText = 'No shuttles need to be prepared this week.';
+      else tubesText = `Total Tubes Required: ${shuttleAllocationDetails.length} (${summaryParts.join(' + ')}).`;
+
       shuttleTemplate.shuttleSummaryText = tubesText;
       shuttleTemplate.shuttleAllocationDetails = shuttleAllocationDetails;
 
