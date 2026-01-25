@@ -980,10 +980,10 @@ function _extractBookingData(sheet, rowData, isHome) {
     opponentClub: isHome ? rowData[h['Requesting Club']] : rowData[h['Opponent Club']],
     opponentTeam: rowData[h['Their Team']],
     ourTeam: isHome ? rowData[h['Your Team']] : rowData[h['Our Team']],
-    email: rowData[h['Contact Email']],
+    email: rowData[h[CONFIG.HEADERS.CONTACT_EMAIL] || h['Contact Email']],
     matchType: rowData[h['Match Type']],
-    proposedDate: rowData[h['Proposed Date']],
-    proposedTime: rowData[h['Proposed Time']],
+    proposedDate: rowData[h[CONFIG.HEADERS.REQ_DATE]],
+    proposedTime: rowData[h[CONFIG.HEADERS.REQ_TIME]],
     venue: isHome ? null : rowData[h['Venue']] // Venue only explicitly in Away sheet
   };
 

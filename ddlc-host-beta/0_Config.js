@@ -39,6 +39,7 @@ const CONFIG = {
     REQ_THEIR_TEAM: 'Their Team',
     REQ_YOUR_TEAM: 'Your Team',
     REQ_DATE: 'Proposed Date',
+    REQ_TIME: 'Proposed Time',  // [ADDED] Missing header key
     OPP_CLUB: 'Opponent Club',
     OPP_TEAM: 'Their Team', // Note: In Away Proposals, it's "Their Team" vs "Our Team"
     OPP_OUR_TEAM: 'Our Team',
