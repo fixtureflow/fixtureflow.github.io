@@ -102,7 +102,8 @@ function parseDMY(dateString, referenceDate = null) {
  * @returns {string} The formatted time string (e.g., "19:30") or "N/A" if input is invalid.
  */
 function formatTimeFromSheet(timeValue) {
-  if (timeValue instanceof Date) {
+  // Use duck-typing to check for Date-like objects (more robust than instanceof in some contexts)
+  if (timeValue && typeof timeValue.getTime === 'function') {
     // It's a proper Date object.
     return Utilities.formatDate(timeValue, Session.getScriptTimeZone(), 'HH:mm');
   } 
