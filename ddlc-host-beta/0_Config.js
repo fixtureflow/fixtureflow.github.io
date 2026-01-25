@@ -98,16 +98,12 @@ const CONFIG = {
     AUTO_CLEAR_CACHE: 'Auto-Clear Cache',
     TEAM_BUFFER_DAYS: 'Team Buffer Days (each side)',
     ENABLE_CLUB_NIGHT_SHUTTLES: 'Enable Club Night Shuttles', // [NEW] Toggle for automatic shuttle calc
-    CLUB_CAPTAIN_NAME: 'Club Captain Name' // [NEW] For the shuttle allocation email
+    CLUB_CAPTAIN_NAME: 'Club Captain Name', // [NEW] For the shuttle allocation email
+    DEVELOPER_EMAIL: 'Developer Email'  // [NEW] For Admin Menu access
   }
 };
 
-/**
- * [CORE] The Developer Email Address.
- * Used to grant access to Tier 2 Admin Tools in the menu.
- * IMPORTANT: Set this to the email address of the developer/admin.
- */
-const DEVELOPER_EMAIL = 'fixtureflow.ddlc@gmail.com'; 
+// [REMOVED] const DEVELOPER_EMAIL - now fetched dynamically in onOpen 
 
 /**
  * [TRIGGER] The onOpen Trigger.
@@ -139,7 +135,26 @@ function onOpen() {
   menu.addSubMenu(setupMenu);
 
   // --- Tier 2: Hidden Admin Tools (Visible only to Developer) ---
-  if (Session.getEffectiveUser().getEmail() === DEVELOPER_EMAIL) {
+  // FETCH DYNAMICALLY: Try Script Properties first (fast/hidden), then Sheet (fallback).
+  let adminEmail = PropertiesService.getScriptProperties().getProperty(CONFIG.SETTINGS_KEYS.DEVELOPER_EMAIL);
+
+  // Fallback: If Property is empty (e.g., before first Lock Down), try reading the Settings sheet directly.
+  if (!adminEmail) {
+    const settingsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.SETTINGS);
+    if (settingsSheet) {
+      // We have to iterate because we don't have a map helper here and onOpen must be self-contained/fast
+      const data = settingsSheet.getDataRange().getValues();
+      for (let i = 0; i < data.length; i++) {
+        if (data[i][0] === CONFIG.SETTINGS_KEYS.DEVELOPER_EMAIL) {
+          adminEmail = data[i][1];
+          break;
+        }
+      }
+    }
+  }
+
+  // Check if current user is the admin
+  if (adminEmail && Session.getEffectiveUser().getEmail().toLowerCase() === String(adminEmail).toLowerCase()) {
     menu.addSeparator();
     const adminMenu = ui.createMenu('⚠️ Admin Tools (Dev Only)');
     adminMenu.addItem('Clear Player\'s Unavailability (U)', 'clearPlayerUnavailability_menu');

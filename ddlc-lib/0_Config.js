@@ -98,6 +98,7 @@ const CONFIG = {
     AUTO_CLEAR_CACHE: 'Auto-Clear Cache',
     TEAM_BUFFER_DAYS: 'Team Buffer Days (each side)',
     ENABLE_CLUB_NIGHT_SHUTTLES: 'Enable Club Night Shuttles', // [NEW] Toggle for automatic shuttle calc
-    CLUB_CAPTAIN_NAME: 'Club Captain Name' // [NEW] For the shuttle allocation email
+    CLUB_CAPTAIN_NAME: 'Club Captain Name', // [NEW] For the shuttle allocation email
+    DEVELOPER_EMAIL: 'Developer Email'  // [NEW] For Admin Menu access
   }
 };
