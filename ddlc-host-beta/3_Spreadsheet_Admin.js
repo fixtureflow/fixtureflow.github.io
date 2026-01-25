@@ -81,7 +81,7 @@ function handleConfirmationEdit(e) {
     SpreadsheetApp.flush();
 
     // 3. And finally, route to the unified processor.
-    // const sheetName = sheet.getName();
+    const sheetName = sheet.getName();
     const isHome = (sheetName === CONFIG.SHEETS.BOOKING_REQUESTS);
 
     if (isHome || sheetName === CONFIG.SHEETS.AWAY_MATCH_PROPOSALS) {
