@@ -126,7 +126,7 @@ function _validateNoDuplicateRequest(sheetData, booking, isHomeMatch, settings) 
       (status === CONFIG.STATUSES.PENDING || status === CONFIG.STATUSES.CONFIRMED)
     ) {
       const email = settings['Match Secretary Email'] || 'the match secretary';
-      throw new Error(`A '${status}' request for this exact match already exists. Please contact the match secretary at ${email}.`);
+      throw new Error(`You have already submitted this request (Status: ${status}). If you need to make changes, please contact the Match Secretary directly at ${email}.`);
     }
   }
   // No error thrown = check passed
