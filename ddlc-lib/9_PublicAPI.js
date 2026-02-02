@@ -117,6 +117,16 @@ function submitAwayBookingRequest(proposal) {
   return submitAwayBookingRequest_(proposal, settings);
 }
 
+/**
+ * [WEB APP] Gets dashboard data for Captains.
+ * @param {string} pin 
+ * @returns {Object} { success, data, error }
+ */
+function getCaptainDashboardData(pin) {
+  const settings = getClubSettings_();
+  return getCaptainDashboardData_(pin, settings);
+}
+
 //==============================================================
 // 2. ADMIN API (Called by Triggers/Menu)
 //==============================================================
@@ -212,6 +222,16 @@ function handleDoGet(e) {
 
   // 3. Serve the Web App HTML
   const settings = getClubSettings_();
+
+  // [ROUTING] Check for Captain's Dashboard View
+  if (e && e.parameter && e.parameter.view === 'captain') {
+    const template = HtmlService.createTemplateFromFile('Dashboard'); // We will create this file next
+    template.clubName = settings[CONFIG.SETTINGS_KEYS.CLUB_NAME] || 'Match Booking Portal';
+    return template.evaluate()
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1.0')
+      .setTitle('Captain\'s Dashboard');
+  }
+
   const template = HtmlService.createTemplateFromFile('index');
 
   template.clubName = settings[CONFIG.SETTINGS_KEYS.CLUB_NAME] || 'Match Booking Portal';

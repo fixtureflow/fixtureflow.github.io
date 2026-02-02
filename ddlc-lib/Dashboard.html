@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Captain's Dashboard</title>
+    <style>
+      :root {
+        --bg: #121212;
+        --surface: #1e1e1e;
+        --primary: #bb86fc;
+        --secondary: #03dac6;
+        --error: #cf6679;
+        --on-bg: #e0e0e0;
+        --on-surface: #ffffff;
+        --border: #333333;
+        --shadow: 0 4px 6px rgba(0,0,0,0.3);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; padding: 0;
+        background-color: var(--bg);
+        color: var(--on-bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        padding-bottom: 80px; /* Space for bottom nav */
+      }
+      
+      /* --- UTILITIES --- */
+      .hidden { display: none !important; }
+      .container { padding: 16px; max-width: 600px; margin: 0 auto; }
+      h1, h2, h3 { margin: 0 0 8px 0; color: var(--on-surface); }
+      .text-center { text-align: center; }
+      .text-small { font-size: 0.85rem; opacity: 0.7; }
+      .flex-row { display: flex; align-items: center; justify-content: space-between; }
+      
+      /* --- LOGIN SCREEN --- */
+      #login-screen {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+      input.pin-input {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--on-surface);
+        padding: 12px;
+        font-size: 1.2rem;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 16px;
+        width: 100%;
+        max-width: 200px;
+        letter-spacing: 4px;
+      }
+      button.btn-primary {
+        background: var(--primary);
+        color: #000;
+        border: none;
+        padding: 12px 24px;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        max-width: 200px;
+        transition: transform 0.1s;
+      }
+      button.btn-primary:active { transform: scale(0.98); }
+      
+      /* --- MATCH CARD --- */
+      .match-card {
+        background: var(--surface);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: var(--shadow);
+        border-left: 4px solid var(--primary);
+      }
+      .match-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 8px;
+      }
+      .match-date { font-weight: bold; color: var(--secondary); font-size: 1.1rem; }
+      .match-time { font-family: monospace; font-size: 1.1rem; }
+      .match-teams { font-size: 1.2rem; margin-bottom: 8px; }
+      .match-details { display: flex; gap: 12px; font-size: 0.9rem; opacity: 0.8; }
+      .badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        background: #333;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: bold;
+      }
+      .badge.home { background: rgba(3, 218, 198, 0.2); color: var(--secondary); }
+      .badge.away { background: rgba(187, 134, 252, 0.2); color: var(--primary); }
+      
+      /* --- AVAILABILITY GRID --- */
+      .avail-grid {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .avail-row-date {
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        border-right: 1px solid var(--border);
+        padding-right: 8px;
+      }
+      .avail-row-dots {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .dot {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: bold;
+        background: #333;
+        color: #fff;
+        cursor: default;
+      }
+      .dot.u { background: var(--error); opacity: 0.4; } /* U = Unavailable */
+      .dot.x { background: var(--secondary); color: #000; box-shadow: 0 0 4px var(--secondary); } /* X = Playing */
+      .dot.r { background: #ffb74d; color: #000; } /* R = Rest/Reserve */
+      .dot.ok { background: #2e7d32; opacity: 0.2; } /* Empty = Available (dimmed) */
+      
+      /* --- BOTTOM NAV --- */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-around;
+        padding: 12px;
+        z-index: 100;
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+      }
+      .nav-item {
+        color: var(--on-bg);
+        text-decoration: none;
+        font-size: 0.8rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+        border: none;
+        background: none;
+      }
+      .nav-item.active { opacity: 1; color: var(--primary); }
+      .nav-icon { font-size: 1.5rem; margin-bottom: 4px; }
+      
+      /* --- SPINNER --- */
+      .spinner {
+        border: 4px solid rgba(255,255,255,0.1);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border-left-color: var(--primary);
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      .error-msg { color: var(--error); margin-top: 12px; font-weight: bold; }
+
+    </style>
+  </head>
+  <body>
+    
+    <div id="app">
+      <!-- LOGIN VIEW -->
+      <div id="login-view" class="container text-center">
+        <h2>Captain Access</h2>
+        <p class="text-small">Enter your team PIN to view the dashboard.</p>
+        <div style="margin-top:20px;">
+          <input type="password" id="pin-input" class="pin-input" placeholder="PIN" inputmode="numeric" pattern="[0-9]*">
+          <button class="btn-primary" onclick="attemptLogin()">ENTER</button>
+        </div>
+        <div id="login-error" class="error-msg hidden"></div>
+        <div id="login-spinner" class="spinner hidden"></div>
+      </div>
+
+      <!-- DASHBOARD VIEW -->
+      <div id="dashboard-view" class="hidden">
+        <header style="background: var(--surface); padding: 16px; position: sticky; top: 0; z-index: 90; box-shadow: var(--shadow);">
+          <h3><?= clubName ?></h3>
+          <div class="text-small" id="last-updated">Updating...</div>
+        </header>
+
+        <div id="tab-matches" class="container">
+          <!-- Matches injected here -->
+          <div class="spinner"></div>
+        </div>
+
+        <div id="tab-availability" class="container hidden">
+          <!-- Availability Grid injected here -->
+          <p class="text-small text-center">Availability Overview (Next 5 Weeks)</p>
+          <div id="avail-container"></div>
+        </div>
+      </div>
+    
+      <!-- NAV -->
+      <nav id="bottom-nav" class="bottom-nav hidden">
+        <button class="nav-item active" onclick="switchTab('matches')">
+          <span class="nav-icon">📅</span>
+          <span>Matches</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('availability')">
+          <span class="nav-icon">👥</span>
+          <span>Availability</span>
+        </button>
+      </nav>
+    </div>
+
+    <script>
+      // --- STATE ---
+      let appData = null;
+      let currentPin = localStorage.getItem('captain_pin') || '';
+
+      // --- INIT ---
+      document.addEventListener('DOMContentLoaded', () => {
+        if (currentPin) {
+          // Auto-login attempt
+          document.getElementById('pin-input').value = currentPin;
+          attemptLogin();
+        }
+      });
+
+      // --- ACTIONS ---
+      function attemptLogin() {
+        const pin = document.getElementById('pin-input').value;
+        const btn = document.querySelector('button');
+        const spinner = document.getElementById('login-spinner');
+        const errorEl = document.getElementById('login-error');
+
+        if (!pin) return;
+
+        // UI Loading State
+        btn.disabled = true;
+        btn.style.opacity = 0.5;
+        spinner.classList.remove('hidden');
+        errorEl.classList.add('hidden');
+
+        // Call Backend
+        google.script.run
+          .withSuccessHandler(onLoginSuccess)
+          .withFailureHandler(onLoginFail)
+          .getCaptainDashboardData(pin);
+      }
+
+      function onLoginSuccess(response) {
+        const btn = document.querySelector('button');
+        const spinner = document.getElementById('login-spinner');
+        
+        btn.disabled = false;
+        btn.style.opacity = 1;
+        spinner.classList.add('hidden');
+
+        if (response && response.success) {
+          // Success!
+          appData = response.data;
+          const pin = document.getElementById('pin-input').value;
+          localStorage.setItem('captain_pin', pin); // Persist PIN
+          
+          showDashboard();
+        } else {
+          // Failed (Wrong PIN)
+          document.getElementById('login-error').innerText = response.error || 'Invalid PIN';
+          document.getElementById('login-error').classList.remove('hidden');
+          localStorage.removeItem('captain_pin');
+        }
+      }
+
+      function onLoginFail(err) {
+         const btn = document.querySelector('button');
+         const spinner = document.getElementById('login-spinner');
+         btn.disabled = false;
+         btn.style.opacity = 1;
+         spinner.classList.add('hidden');
+         
+         const errorEl = document.getElementById('login-error');
+         errorEl.innerText = "Connection Error: " + err.message;
+         errorEl.classList.remove('hidden');
+      }
+
+      function showDashboard() {
+        document.getElementById('login-view').classList.add('hidden');
+        document.getElementById('dashboard-view').classList.remove('hidden');
+        document.getElementById('bottom-nav').classList.remove('hidden');
+        
+        renderMatches();
+        renderAvailability();
+        document.getElementById('last-updated').innerText = 'Data as of: ' + (appData.generatedAt || 'Just now');
+      }
+
+      function switchTab(tabName) {
+        document.getElementById('tab-matches').classList.add('hidden');
+        document.getElementById('tab-availability').classList.add('hidden');
+        
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        
+        if (tabName === 'matches') {
+          document.getElementById('tab-matches').classList.remove('hidden');
+          document.querySelector('button[onclick="switchTab(\'matches\')"]').classList.add('active');
+        } else {
+          document.getElementById('tab-availability').classList.remove('hidden');
+          document.querySelector('button[onclick="switchTab(\'availability\')"]').classList.add('active');
+        }
+      }
+
+      // --- RENDERERS ---
+      function renderMatches() {
+        const container = document.getElementById('tab-matches');
+        container.innerHTML = '';
+        
+        if (!appData.fixtures || appData.fixtures.length === 0) {
+          container.innerHTML = '<div class="text-center" style="margin-top:40px; opacity:0.6;">No upcoming confirmed matches.</div>';
+          return;
+        }
+
+        appData.fixtures.forEach(match => {
+          const card = document.createElement('div');
+          card.className = 'match-card';
+          
+          const badgeClass = match.homeAway === 'Home' ? 'home' : 'away';
+          
+          card.innerHTML = `
+            <div class="match-header">
+              <span class="match-date">${match.displayDate}</span>
+              <span class="match-time">${match.time}</span>
+            </div>
+            <div class="match-teams">
+              ${match.ourTeam} <span style="opacity:0.5; font-size:0.8em;">vs</span> ${match.opponent}
+            </div>
+            <div class="match-details">
+              <span class="badge ${badgeClass}">${match.homeAway}</span>
+              <span>📍 ${match.venue || 'Unknown Venue'}</span>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      function renderAvailability() {
+        const container = document.getElementById('avail-container');
+        container.innerHTML = '';
+        
+        if (!appData.availability) return;
+        
+        // Get sorted dates from map
+        const dates = Object.keys(appData.availability).sort();
+        
+        dates.forEach(dateKey => {
+           const rowMap = appData.availability[dateKey];
+           // Only show row if there is at least one U/X/R? 
+           // Yes, otherwise it's empty space.
+           const players = Object.keys(rowMap).sort();
+           if (players.length === 0) return;
+           
+           const dateObj = new Date(dateKey);
+           const dateDisplay = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', weekday: 'short' });
+           
+           const rowDiv = document.createElement('div');
+           rowDiv.className = 'avail-grid';
+           
+           let dotsHtml = '';
+           players.forEach(p => {
+             const status = rowMap[p];
+             // Initial letter logic
+             const initials = p.split(' ').map(n => n[0]).join('').slice(0,2);
+             
+             let dotClass = 'ok'; // Default should be OK if checking all players, but we only have sparse data for U/X
+             if (status === 'U') dotClass = 'u';
+             else if (status === 'X') dotClass = 'x';
+             else if (status === 'R') dotClass = 'r';
+             
+             dotsHtml += `<div class="dot ${dotClass}" title="${p}: ${status}">${initials}</div>`;
+           });
+           
+           rowDiv.innerHTML = `
+             <div class="avail-row-date">${dateDisplay}</div>
+             <div class="avail-row-dots">${dotsHtml}</div>
+           `;
+           container.appendChild(rowDiv);
+        });
+      }
+
+    </script>
+  </body>
+</html>
