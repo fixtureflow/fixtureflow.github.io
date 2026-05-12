@@ -32,6 +32,16 @@
     
     --shadow-subtle: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
     --shadow-premium: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.04);
+
+    /* Mockup Adaptations (Light Mode) */
+    --mockup-bg: #ffffff;
+    --mockup-header-bg: #f1f5f9;
+    --mockup-card-bg: #f8fafc;
+    --mockup-card-border: rgba(15, 23, 42, 0.06);
+    --mockup-overlay-bg: rgba(15, 23, 42, 0.02);
+    --mockup-text-primary: #0f172a;
+    --mockup-text-secondary: #475569;
+    --mockup-text-muted: #64748b;
 }
 
 [data-theme="dark"] {
@@ -57,6 +67,16 @@
     
     --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
     --shadow-premium: 0 30px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+
+    /* Mockup Adaptations (Dark Mode Elevation) */
+    --mockup-bg: #11131e;        /* Elevated container */
+    --mockup-header-bg: #161928; /* Header */
+    --mockup-card-bg: #1b1f32;   /* Elevated cards */
+    --mockup-card-border: rgba(255, 255, 255, 0.05);
+    --mockup-overlay-bg: rgba(255, 255, 255, 0.02);
+    --mockup-text-primary: #f8fafc;
+    --mockup-text-secondary: #94a3b8;
+    --mockup-text-muted: #64748b;
 }
 
 /* --- BASE STYLES --- */
@@ -449,7 +469,7 @@ header.nav-header.scrolled {
 
 .portal-features-list li {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
     font-weight: 500;
     color: var(--text-secondary);
@@ -459,6 +479,8 @@ header.nav-header.scrolled {
     color: var(--color-success);
     width: 20px;
     height: 20px;
+    flex-shrink: 0;
+    margin-top: 3px;
 }
 
 /* --- PORTAL SCREEN MOCKUPS (HTML/CSS DRAWN) --- */
@@ -467,26 +489,28 @@ header.nav-header.scrolled {
     overflow: hidden;
     border: 1px solid var(--border-glass);
     box-shadow: var(--shadow-premium);
-    background: #0f1117; /* Dark mode preview default style */
+    background: var(--mockup-bg);
     aspect-ratio: 4/3;
     display: flex;
     flex-direction: column;
+    transition: var(--transition-smooth);
 }
 
 /* Portal Header */
 .mockup-header {
-    background: #161922;
+    background: var(--mockup-header-bg);
     padding: 12px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--mockup-card-border);
+    transition: var(--transition-smooth);
 }
 
 .mockup-title {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #f8fafc;
+    color: var(--mockup-text-primary);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -511,13 +535,14 @@ header.nav-header.scrolled {
 
 /* Mockup Cards */
 .mockup-card {
-    background: #1b1f2d;
+    background: var(--mockup-card-bg);
     border-radius: 10px;
     padding: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--mockup-card-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    transition: var(--transition-smooth);
 }
 
 .mockup-card-left {
@@ -529,12 +554,12 @@ header.nav-header.scrolled {
 .mockup-card-title {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #f8fafc;
+    color: var(--mockup-text-primary);
 }
 
 .mockup-card-subtitle {
     font-size: 0.75rem;
-    color: #94a3b8;
+    color: var(--mockup-text-secondary);
 }
 
 /* Mockup Badges */
@@ -569,7 +594,7 @@ header.nav-header.scrolled {
 
 .mockup-cal-header {
     font-weight: 600;
-    color: #64748b;
+    color: var(--mockup-text-muted);
     padding-bottom: 6px;
 }
 
@@ -579,8 +604,8 @@ header.nav-header.scrolled {
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    color: #94a3b8;
-    background: rgba(255, 255, 255, 0.02);
+    color: var(--mockup-text-secondary);
+    background: var(--mockup-overlay-bg);
 }
 
 .mockup-cal-day.match {
@@ -735,7 +760,7 @@ footer.main-footer {
 @media (max-width: 992px) {
     .hero-grid {
         grid-template-columns: 1fr;
-        gap: 48px;
+        gap: 40px;
         text-align: center;
     }
     
@@ -749,24 +774,107 @@ footer.main-footer {
     
     .portal-content {
         grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 32px;
     }
     
     .portal-info {
-        order: 2;
+        order: 1; /* Text details first for reading context */
     }
     
     .mockup-container {
-        order: 1;
-        max-width: 550px;
+        order: 2; /* Visual mockup second to verify text details */
+        max-width: 500px;
         margin: 0 auto;
         width: 100%;
     }
 }
 
 @media (max-width: 768px) {
+    body {
+        font-size: 15px; /* Slightly tighter global baseline for mobile columns */
+    }
+
+    .container {
+        padding: 0 20px;
+    }
+
+    /* Fluid Mobile Typography */
+    .hero-section {
+        padding: 120px 0 60px;
+    }
+
+    .hero-title {
+        font-size: 2.4rem;
+        margin-bottom: 16px;
+    }
+
+    .hero-description {
+        font-size: 1.05rem;
+        margin-bottom: 28px;
+    }
+
+    .section-title {
+        font-size: 1.9rem;
+        margin-bottom: 12px;
+    }
+
+    .section-description {
+        font-size: 0.95rem;
+    }
+
+    .journey-section {
+        padding: 60px 0;
+    }
+
+    /* Portal tab scroll system (Touch-First) */
+    .portal-tabs {
+        display: flex;
+        justify-content: flex-start;
+        gap: 8px;
+        overflow-x: auto;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* IE/Edge */
+        padding: 6px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 24px;
+    }
+
+    .portal-tabs::-webkit-scrollbar {
+        display: none; /* Chrome/Safari/Opera */
+    }
+
+    .tab-btn {
+        flex: 0 0 auto; /* Prevents squishing */
+        padding: 8px 14px;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        min-height: 44px; /* Apple/Android touch target guidelines */
+    }
+
+    .portal-info h3 {
+        font-size: 1.45rem;
+        margin-bottom: 8px;
+    }
+
+    .portal-info p {
+        font-size: 0.95rem;
+        margin-bottom: 16px;
+    }
+
+    .portal-features-list {
+        gap: 8px;
+    }
+
+    .portal-features-list li {
+        font-size: 0.9rem;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
     .nav-links {
-        display: none; /* Minimal mobile nav or toggle can be added later */
+        display: none;
     }
     
     .lead-wrapper {
