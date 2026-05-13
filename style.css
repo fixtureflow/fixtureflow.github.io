@@ -923,6 +923,30 @@ footer.main-footer {
     .form-group-full, .lead-form button {
         grid-column: span 1;
     }
+
+    /* Mobile Touch-First Form Sizing (Apple/Android 48px guidelines) */
+    .lead-form input {
+        padding: 16px;
+        font-size: 1rem; /* Prevents iOS Safari auto-zoom on focus */
+        min-height: 48px;
+    }
+
+    .lead-form button {
+        min-height: 48px;
+        font-size: 1.05rem;
+    }
+
+    .btn {
+        min-height: 48px; /* Enforce 48px touch targets globally on mobile */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn:active {
+        transform: scale(0.96); /* Natural mobile tap feedback */
+    }
     
     .footer-content {
         flex-direction: column;
