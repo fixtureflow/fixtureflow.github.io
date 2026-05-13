@@ -361,7 +361,6 @@ header.nav-header.scrolled {
 .interactive-mockup {
     position: relative;
     width: 100%;
-    aspect-ratio: 4/3;
     border-radius: 20px;
     overflow: hidden;
     border: 1px solid var(--border-glass);
@@ -490,7 +489,6 @@ header.nav-header.scrolled {
     border: 1px solid var(--border-glass);
     box-shadow: var(--shadow-premium);
     background: var(--mockup-bg);
-    aspect-ratio: 4/3;
     display: flex;
     flex-direction: column;
     transition: var(--transition-smooth);
@@ -526,11 +524,26 @@ header.nav-header.scrolled {
 /* Mockup Scroll Area */
 .mockup-body {
     flex: 1;
-    overflow-y: auto;
+    overflow: hidden; /* Completely scroll-less for visual effects */
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+/* High-Fidelity Split columns layout (Captain Portal) */
+.mockup-split-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 12px;
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .mockup-split-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
 }
 
 /* Mockup Cards */
@@ -603,21 +616,32 @@ header.nav-header.scrolled {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
+    border-radius: 50%;
     color: var(--mockup-text-secondary);
     background: var(--mockup-overlay-bg);
+    font-size: 0.8rem;
+    transition: var(--transition-smooth);
 }
 
 .mockup-cal-day.match {
-    background: rgba(59, 130, 246, 0.2);
-    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.15) !important;
+    color: #3b82f6 !important;
+    font-weight: 700;
     border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 .mockup-cal-day.unavailable {
-    background: rgba(244, 63, 94, 0.2);
-    color: #f43f5e;
-    border: 1px solid rgba(244, 63, 94, 0.3);
+    background: rgba(198, 40, 40, 0.15) !important;
+    color: #c62828 !important;
+    font-weight: 700;
+    border: 1px solid rgba(198, 40, 40, 0.3);
+}
+
+.mockup-cal-day.conflict {
+    background: linear-gradient(135deg, rgba(198, 40, 40, 0.2) 0%, rgba(198, 40, 40, 0.2) 50%, rgba(59, 130, 246, 0.2) 50%, rgba(59, 130, 246, 0.2) 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    border: 1px solid rgba(198, 40, 40, 0.3);
 }
 
 /* --- LEAD GENERATION SECTION --- */
@@ -781,11 +805,18 @@ footer.main-footer {
         order: 1; /* Text details first for reading context */
     }
     
-    .mockup-container {
+    .mockup-container, .interactive-mockup {
         order: 2; /* Visual mockup second to verify text details */
         max-width: 500px;
         margin: 0 auto;
         width: 100%;
+        aspect-ratio: auto;
+        height: auto;
+    }
+
+    .mockup-body {
+        overflow-y: visible;
+        max-height: none;
     }
 }
 
