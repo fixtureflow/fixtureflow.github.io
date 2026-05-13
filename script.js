@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fetch('https://script.google.com/macros/s/AKfycbyAEMYfou5_xP9IkULayMQxt9S_7sLlTW3bFCpom9IrS4arQgjXqFOCumeadvnEccHF/exec', {
                 method: 'POST',
                 redirect: 'follow',
+                credentials: 'omit',
                 body: data
             })
             .then(response => response.json())
