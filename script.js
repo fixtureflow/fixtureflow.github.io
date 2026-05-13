@@ -78,29 +78,41 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.textContent = 'Joining...';
 
             const formData = new FormData(form);
-            const data = {
-                name: formData.get('name'),
-                email: formData.get('email'),
-                club: formData.get('club')
-            };
+            const data = new URLSearchParams();
+            data.append('name', formData.get('name'));
+            data.append('email', formData.get('email'));
+            data.append('club', formData.get('club'));
 
-            // Propose a mock successful submission logic until user links their Google Sheet Web App
-            setTimeout(() => {
-                submitButton.textContent = '✓ You\'re on the list!';
-                submitButton.style.backgroundColor = 'var(--color-success)';
-                submitButton.style.color = '#ffffff';
-                
-                // Reset form fields
-                form.reset();
-                
-                // Reset button after a few seconds
+            // Live webhook call to the deployed Apps Script Marketing CRM endpoint
+            fetch('https://script.google.com/macros/s/AKfycbx_3qddQmAZtyUzLBn202MD_YSfIUvpk3fYkGJpngUoV5nJmw8lIeIwvCrQ8TDZ1FuB/exec', {
+                method: 'POST',
+                body: data
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.result === 'success') {
+                    submitButton.textContent = '✓ You\'re on the list!';
+                    submitButton.style.backgroundColor = 'var(--color-success)';
+                    submitButton.style.color = '#ffffff';
+                    form.reset();
+                } else {
+                    submitButton.textContent = '⚠️ ' + (result.error ? result.error.message : 'Submission failed.');
+                    submitButton.style.backgroundColor = 'var(--color-alert)';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                submitButton.textContent = '⚠️ Network error, please retry.';
+                submitButton.style.backgroundColor = 'var(--color-alert)';
+            })
+            .finally(() => {
                 setTimeout(() => {
                     submitButton.disabled = false;
                     submitButton.textContent = originalText;
                     submitButton.style.backgroundColor = '';
                     submitButton.style.color = '';
                 }, 4000);
-            }, 1500);
+            });
         });
     }
 });
