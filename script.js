@@ -83,8 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
             data.append('email', formData.get('email'));
             data.append('club', formData.get('club'));
 
-            // Live webhook call to the deployed Apps Script Marketing CRM endpoint (v4 Web Deploy)
-            fetch('https://script.google.com/macros/s/AKfycbyAEMYfou5_xP9IkULayMQxt9S_7sLlTW3bFCpom9IrS4arQgjXqFOCumeadvnEccHF/exec', {
+            // Live webhook call to the deployed Apps Script Marketing CRM endpoint (v5 Robust Regex)
+            fetch('https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec', {
                 method: 'POST',
                 redirect: 'follow',
                 credentials: 'omit',
