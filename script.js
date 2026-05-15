@@ -1,20 +1,40 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- THEME TOGGLE SYSTEM ---
+    // --- ADVANCED THEME TOGGLE & AUTO-SCHEDULE SYSTEM ---
     const themeToggle = document.querySelector('.theme-toggle');
-    const currentTheme = localStorage.getItem('theme') || 'dark'; // Default to dark mode as requested
+    const OS_PREF = window.matchMedia('(prefers-color-scheme: dark)');
 
-    // Initialize theme
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    updateToggleIcon(currentTheme);
+    // Helper to determine natural system theme based on OS preference or local time (7 PM - 7 AM Dark)
+    function getNaturalTheme() {
+        if (OS_PREF.matches) return 'dark';
+        const hour = new Date().getHours();
+        return (hour >= 19 || hour < 7) ? 'dark' : 'light';
+    }
 
+    // 1. Initialize Theme (Check manual override first, fallback to natural OS/Time schedule)
+    let currentTheme = localStorage.getItem('theme') || getNaturalTheme();
+    applyTheme(currentTheme);
+
+    // 2. Manual Toggle Click Handler (Saves manual choice)
     themeToggle.addEventListener('click', () => {
         const theme = document.documentElement.getAttribute('data-theme');
         const newTheme = theme === 'dark' ? 'light' : 'dark';
         
-        document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
-        updateToggleIcon(newTheme);
+        applyTheme(newTheme);
     });
+
+    // 3. Real-Time OS Auto-Switching Listener
+    // If the visitor's OS automatically changes from day to night schedule while the tab is open,
+    // this listener instantly synchronizes the website and clears the manual override!
+    OS_PREF.addEventListener('change', (e) => {
+        localStorage.removeItem('theme'); // Clear manual lock on natural shift
+        applyTheme(e.matches ? 'dark' : 'light');
+    });
+
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        updateToggleIcon(theme);
+    }
 
     function updateToggleIcon(theme) {
         if (theme === 'dark') {
