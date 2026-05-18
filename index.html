@@ -262,31 +262,122 @@
                     </ul>
                 </div>
                 <div class="mockup-container">
-                    <div class="mockup-header">
-                        <div class="mockup-title"><div class="mockup-dot" style="background-color: #6200ee;"></div>Captain Portal - Roster View</div>
-                        <span class="m-badge m-badge-success" style="font-size: 0.65rem;">Team: L1</span>
-                    </div>
-                    <div class="mockup-body mockup-split-grid">
-                        <div style="background: var(--mockup-card-bg); border-radius: 10px; padding: 10px; border: 1px solid var(--mockup-card-border);">
-                            <div style="font-size: 0.75rem; font-weight: 600; color: var(--mockup-text-primary); margin-bottom: 10px; text-align: center;">Availability Matrix</div>
-                            <div class="mockup-calendar">
-                                <div class="mockup-cal-header">S</div><div class="mockup-cal-header">M</div><div class="mockup-cal-header">T</div><div class="mockup-cal-header">W</div><div class="mockup-cal-header">T</div><div class="mockup-cal-header">F</div><div class="mockup-cal-header">S</div>
-                                <div class="mockup-cal-day">1</div><div class="mockup-cal-day">2</div><div class="mockup-cal-day">3</div><div class="mockup-cal-day">4</div><div class="mockup-cal-day">5</div><div class="mockup-cal-day match">6</div><div class="mockup-cal-day">7</div>
-                                <div class="mockup-cal-day">8</div><div class="mockup-cal-day match">9</div><div class="mockup-cal-day match">10</div><div class="mockup-cal-day">11</div><div class="mockup-cal-day">12</div><div class="mockup-cal-day">13</div><div class="mockup-cal-day match">14</div>
-                                <div class="mockup-cal-day match">15</div><div class="mockup-cal-day">16</div><div class="mockup-cal-day">17</div><div class="mockup-cal-day">18</div><div class="mockup-cal-day match">19</div><div class="mockup-cal-day">20</div><div class="mockup-cal-day">21</div>
-                                <div class="mockup-cal-day">22</div><div class="mockup-cal-day match">23</div><div class="mockup-cal-day">24</div><div class="mockup-cal-day">25</div><div class="mockup-cal-day">26</div><div class="mockup-cal-day">27</div><div class="mockup-cal-day match">28</div>
-                                <div class="mockup-cal-day">29</div><div class="mockup-cal-day">30</div><div class="mockup-cal-day">31</div><div class="mockup-cal-day" style="opacity: 0.15;">1</div><div class="mockup-cal-day" style="opacity: 0.15;">2</div><div class="mockup-cal-day" style="opacity: 0.15;">3</div><div class="mockup-cal-day" style="opacity: 0.15;">4</div>
-                            </div>
+                    <!-- High-Fidelity Captain Portal Header -->
+                    <div class="mockup-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <img src="assets/logo-mountpleasant.png" alt="Mount Pleasant" style="width: 24px; height: 24px; object-fit: contain; border-radius: 50%;">
+                            <span style="font-size: 0.8rem; font-weight: 600; color: var(--mockup-text-primary);">Mount Pleasant <span style="opacity: 0.5;">·</span> Captain Portal</span>
                         </div>
-                        <div style="background: var(--mockup-card-bg); border-radius: 10px; padding: 10px; border: 1px solid var(--mockup-card-border); display: flex; flex-direction: column; gap: 6px;">
-                            <div style="font-size: 0.7rem; font-weight: 600; color: var(--mockup-text-muted);">Target Match Day</div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mockup-overlay-bg); padding: 6px; border-radius: 6px;">
-                                <span style="font-size: 0.7rem; font-weight: 600; color: var(--mockup-text-primary);">Player 1</span>
-                                <span class="m-badge m-badge-success" style="font-size: 0.55rem; padding: 2px 6px;">Available</span>
+                        <span style="font-size: 0.7rem; color: var(--mockup-text-muted);">DDLC 2025-2026</span>
+                    </div>
+                    
+                    <div class="mockup-body" style="background: #f5f7fb; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                        <!-- Managing Team Banner -->
+                        <div style="background: #f0e6ff; border: 1px solid #d1b3ff; border-radius: 8px; padding: 10px; text-align: center; font-weight: 700; font-size: 0.8rem; color: #6200ee; letter-spacing: 0.5px;">
+                            MANAGING: L4
+                        </div>
+
+                        <div class="mockup-split-grid" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;">
+                            <!-- Left Column: Upcoming Matches -->
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <!-- Card 1: AWAY Match -->
+                                <div style="background: #ffffff; border-radius: 10px; padding: 12px; border-left: 4px solid #6200ee; box-shadow: 0 2px 6px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 6px;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #0f172a;">
+                                        <span style="color: #0f172a;">Tue, 18 Nov</span>
+                                        <span>20:00</span>
+                                    </div>
+                                    <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a;">
+                                        L4 <span style="opacity: 0.5;">vs</span> <span style="color: #6200ee; text-decoration: underline; cursor: default;">U.C.D. - L1</span>
+                                    </div>
+                                    <div style="display: flex; gap: 6px; align-items: center; margin-top: 2px;">
+                                        <span class="m-badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px;">AWAY</span>
+                                        <span class="m-badge" style="background: #f1f5f9; color: #475569; font-weight: 700; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px;">LEAGUE</span>
+                                    </div>
+                                    <div style="font-size: 0.7rem; color: #64748b; display: flex; align-items: center; gap: 2px; margin-top: 2px;">
+                                        <span style="color: #ef4444;">📍</span> UCD Sports Hall
+                                    </div>
+                                </div>
+
+                                <!-- Card 2: HOME Match -->
+                                <div style="background: #ffffff; border-radius: 10px; padding: 12px; border-left: 4px solid #6200ee; box-shadow: 0 2px 6px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 6px;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #0f172a;">
+                                        <span style="color: #0f172a;">Thu, 27 Nov</span>
+                                        <span>19:00</span>
+                                    </div>
+                                    <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a;">
+                                        L4 <span style="opacity: 0.5;">vs</span> <span style="color: #6200ee; text-decoration: underline; cursor: default;">Old School - L2</span>
+                                    </div>
+                                    <div style="display: flex; gap: 6px; align-items: center; margin-top: 2px;">
+                                        <span class="m-badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px;">HOME</span>
+                                        <span class="m-badge" style="background: #f1f5f9; color: #475569; font-weight: 700; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px;">CUP</span>
+                                    </div>
+                                    <div style="font-size: 0.7rem; color: #64748b; display: flex; align-items: center; gap: 2px; margin-top: 2px;">
+                                        <span style="color: #ef4444;">📍</span> Mount Pleasant
+                                    </div>
+                                </div>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mockup-overlay-bg); padding: 6px; border-radius: 6px;">
-                                <span style="font-size: 0.7rem; font-weight: 600; color: var(--mockup-text-primary);">Player 2</span>
-                                <span class="m-badge m-badge-success" style="font-size: 0.55rem; padding: 2px 6px;">Available</span>
+
+                            <!-- Right Column: Roster Availability Grid -->
+                            <div style="display: flex; flex-direction: column; gap: 8px; background: #ffffff; border-radius: 10px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); border: 1px solid var(--mockup-card-border);">
+                                <div style="font-size: 0.75rem; font-weight: 700; color: #0f172a; text-align: center; margin-bottom: 4px;">November 2025</div>
+                                <div class="mockup-calendar" style="gap: 4px;">
+                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px;">S</div>
+                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px;">M</div>
+                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px;">T</div>
+                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px;">W</div>
+                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px;">T</div>
+                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px;">F</div>
+                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px;">S</div>
+                                    
+                                    <!-- Grid matching actual screenshot pins -->
+                                    <div class="mockup-cal-day" style="opacity: 0.15;">26</div>
+                                    <div class="mockup-cal-day" style="opacity: 0.15;">27</div>
+                                    <div class="mockup-cal-day" style="opacity: 0.15;">28</div>
+                                    <div class="mockup-cal-day" style="opacity: 0.15;">29</div>
+                                    <div class="mockup-cal-day" style="opacity: 0.15;">30</div>
+                                    <div class="mockup-cal-day" style="opacity: 0.15;">31</div>
+                                    <div class="mockup-cal-day" style="background: rgba(255,255,255,0.1); border: 1px solid #e2e8f0; font-size: 0.7rem;">1</div>
+
+                                    <div class="mockup-cal-day" style="background: #ea580c; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">2</div>
+                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">3</div>
+                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">4</div>
+                                    <div class="mockup-cal-day" style="background: #ea580c; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">5</div>
+                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">6</div>
+                                    <div class="mockup-cal-day" style="background: rgba(255,255,255,0.1); border: 1px solid #e2e8f0; font-size: 0.7rem;">7</div>
+                                    <div class="mockup-cal-day" style="background: rgba(255,255,255,0.1); border: 1px solid #e2e8f0; font-size: 0.7rem;">8</div>
+
+                                    <div class="mockup-cal-day" style="background: rgba(255,255,255,0.1); border: 1px solid #e2e8f0; font-size: 0.7rem;">9</div>
+                                    <div class="mockup-cal-day" style="background: rgba(255,255,255,0.1); border: 1px solid #e2e8f0; font-size: 0.7rem;">10</div>
+                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">11</div>
+                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">12</div>
+                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">13</div>
+                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">14</div>
+                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">15</div>
+
+                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">16</div>
+                                    <div class="mockup-cal-day" style="background: #ea580c; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">17</div>
+                                    <div class="mockup-cal-day" style="background: #3b82f6; color: #ffffff !important; font-weight: 700; font-size: 0.7rem; border: 1px solid rgba(59, 130, 246, 0.5);">18</div>
+                                    <div class="mockup-cal-day" style="background: #ea580c; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">19</div>
+                                    <div class="mockup-cal-day" style="background: #ea580c; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">20</div>
+                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">21</div>
+                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">22</div>
+                                </div>
+                                
+                                <!-- Sidebar: Availability Details Roster -->
+                                <div style="border-top: 1px solid #f1f5f9; margin-top: 6px; padding-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="font-size: 0.6rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px;">Availability Details</div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem;">
+                                        <span style="font-weight: 600; color: #0f172a;">Jing Er Low</span>
+                                        <span style="font-size: 0.55rem; background: #e2e8f0; color: #475569; padding: 1px 4px; border-radius: 4px; font-weight: 700;">CORE SQUAD</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem;">
+                                        <span style="font-weight: 600; color: #0f172a;">Lilac Ferraro</span>
+                                        <span style="font-size: 0.55rem; background: #e2e8f0; color: #475569; padding: 1px 4px; border-radius: 4px; font-weight: 700;">CORE SQUAD</span>
+                                    </div>
+                                    <div style="border: 1px dashed #b380ff; border-radius: 6px; padding: 4px; text-align: center; color: #6200ee; font-size: 0.65rem; font-weight: 700; cursor: default; background: #fbf9ff;">
+                                        + Add Substitute(s)...
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
