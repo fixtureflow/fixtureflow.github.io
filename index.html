@@ -30,6 +30,7 @@
             <ul class="nav-links">
                 <li><a href="#features">Features</a></li>
                 <li><a href="#about">The Portal Journey</a></li>
+                <li><a href="#demo">Live Sandbox</a></li>
                 <li><a href="#waitlist">Waitlist</a></li>
             </ul>
             <div class="nav-actions">
@@ -831,8 +832,52 @@
         </div>
     </section>
 
-    <!-- Waitlist Form Section -->
-    <section id="waitlist" class="lead-section">
+    <!-- Interactive Live Playground & Sandbox Demo -->
+    <section id="demo" class="journey-section" style="border-top: 1px solid var(--border-glass); background: radial-gradient(circle at 90% 10%, rgba(167, 139, 250, 0.08), transparent 40%);">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Experience the Live Playground</h2>
+                <p class="section-description">Don't take our word for it. Test our high-agency Apps Script scheduling engine in real time with a live white-labeled sandbox.</p>
+            </div>
+            
+            <div class="glass-panel demo-grid-wrapper" style="padding: 40px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; max-width: 1000px; margin: 0 auto;">
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="badge" style="width: fit-content; background: rgba(16, 185, 129, 0.1); color: var(--color-success); border-color: rgba(16, 185, 129, 0.2);">
+                        <span class="pulsing-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--color-success); margin-right: 6px;"></span>
+                        Live Playground Active
+                    </div>
+                    <h3 style="font-size: 1.6rem; font-family: var(--font-display); margin-bottom: 8px;">Watch the Spreadsheet Sync Live!</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 10px;">
+                        We have pre-configured a white-labeled public demo account. In this playground, you can log into the Opponent Portal, propose date reschedules, and open the public Sandbox Spreadsheet side-by-side to watch rows update in real time.
+                     </p>
+                     
+                     <div style="display: grid; grid-template-columns: auto 1fr; gap: 12px; background: var(--mockup-overlay-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--mockup-card-border); font-size: 0.9rem; margin-bottom: 10px;">
+                         <div style="font-weight: 700; color: var(--color-primary);">Select Club:</div>
+                         <div style="color: var(--text-primary);">Opponent Club A</div>
+                         <div style="font-weight: 700; color: var(--color-primary);">Demo PIN:</div>
+                         <div style="color: var(--text-primary); font-family: monospace; font-weight: 700; letter-spacing: 1px;">1234</div>
+                     </div>
+                 </div>
+                 
+                 <div style="display: flex; flex-direction: column; gap: 16px;">
+                     <a href="https://script.google.com/macros/s/AKfycbykF0uy5JkbSYIxY-dJVE9bdjcRZJ7pnX6zNdTikEalLF0cweGJ4es4j9R5HcxXRwGB/exec" target="_blank" class="btn btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px; text-decoration: none;">
+                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                         Launch Opponent Portal 🚀
+                     </a>
+                     <a href="https://docs.google.com/spreadsheets/d/1FPFC5hGUd5zCqulRs07FVih6dbPukVO0ByufC6-MQLE/edit?usp=sharing" target="_blank" class="btn btn-secondary" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px; border: 1px solid var(--border-glass); text-decoration: none;">
+                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                         Open Google Sheet Sandbox 📊
+                     </a>
+                     <span style="font-size: 0.75rem; color: var(--text-muted); text-align: center; font-style: italic;">
+                         Tip: Open both links in split screen to see the live synchronization magic!
+                     </span>
+                 </div>
+             </div>
+         </div>
+     </section>
+
+     <!-- Waitlist Form Section -->
+     <section id="waitlist" class="lead-section">
         <div class="ambient-glow" style="top: auto; bottom: -10vw; left: -10vw; right: auto;"></div>
         <div class="container">
             <div class="glass-panel lead-wrapper">
@@ -867,6 +912,7 @@
             <ul class="footer-links">
                 <li><a href="#features">Features</a></li>
                 <li><a href="#about">Portals</a></li>
+                <li><a href="#demo">Live Sandbox</a></li>
                 <li><a href="#waitlist">Waitlist</a></li>
             </ul>
             <span class="footer-badge">Built by a Match Secretary, for Match Secretaries.</span>
