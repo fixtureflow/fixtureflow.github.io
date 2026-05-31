@@ -24,6 +24,18 @@
     --color-primary-hover: #5b21b6;
     --color-primary-glow: rgba(109, 40, 217, 0.15);
     
+    --color-opponent: #0f172a; /* Obsidian Slate */
+    --color-opponent-hover: #1e293b;
+    --color-opponent-glow: rgba(15, 23, 42, 0.06);
+
+    --color-captain: #6d28d9; /* Royal Violet */
+    --color-captain-hover: #5b21b6;
+    --color-captain-glow: rgba(109, 40, 217, 0.15);
+
+    --color-player: #047857; /* Emerald Teal */
+    --color-player-hover: #065f46;
+    --color-player-glow: rgba(4, 120, 87, 0.1);
+
     --color-success: #047857; /* Emerald */
     --color-success-bg: rgba(4, 120, 87, 0.1);
     
@@ -59,6 +71,18 @@
     --color-primary-hover: #c084fc;
     --color-primary-glow: rgba(167, 139, 250, 0.25);
     
+    --color-opponent: #f8fafc; /* Inversed Stark Slate */
+    --color-opponent-hover: #e2e8f0;
+    --color-opponent-glow: rgba(248, 250, 252, 0.15);
+
+    --color-captain: #a78bfa; /* Electric Violet */
+    --color-captain-hover: #c084fc;
+    --color-captain-glow: rgba(167, 139, 250, 0.25);
+
+    --color-player: #10b981; /* Neon Mint/Emerald */
+    --color-player-hover: #34d399;
+    --color-player-glow: rgba(16, 185, 129, 0.15);
+
     --color-success: #10b981; /* Neon Mint/Emerald */
     --color-success-bg: rgba(16, 185, 129, 0.15);
     
@@ -429,9 +453,20 @@ header.nav-header.scrolled {
 
 .tab-btn.active {
     background: var(--bg-container);
-    color: var(--color-primary);
     box-shadow: var(--shadow-subtle);
     border: 1px solid var(--border-glass);
+}
+
+.tab-btn[data-portal="secretary"].active {
+    color: var(--color-opponent);
+}
+
+.tab-btn[data-portal="captain"].active {
+    color: var(--color-captain);
+}
+
+.tab-btn[data-portal="player"].active {
+    color: var(--color-player);
 }
 
 .portal-content {
@@ -766,6 +801,133 @@ footer.main-footer {
     font-weight: 600;
     color: var(--text-secondary);
     border: 1px solid var(--border-glass);
+}
+
+/* --- PLAYGROUND & PORTAL ACCENTS --- */
+.demo-card {
+    grid-column: span 2;
+    margin-top: 32px;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px solid var(--border-glass);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.demo-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 12px;
+}
+
+.demo-card-body-text {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.demo-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 4px;
+}
+
+.demo-card-creds {
+    display: flex;
+    gap: 16px;
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-glass);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Custom Premium Portal Buttons */
+.btn-opponent {
+    background-color: var(--color-opponent) !important;
+    color: var(--bg-app) !important;
+    box-shadow: var(--color-opponent-glow) 0px 10px 20px;
+    border: 1px solid var(--color-opponent) !important;
+}
+.btn-opponent:hover {
+    background-color: var(--color-opponent-hover) !important;
+    border-color: var(--color-opponent-hover) !important;
+    transform: translateY(-2px);
+}
+
+.btn-captain {
+    background-color: var(--color-captain) !important;
+    color: var(--bg-app) !important;
+    box-shadow: var(--color-captain-glow) 0px 10px 20px;
+    border: 1px solid var(--color-captain) !important;
+}
+.btn-captain:hover {
+    background-color: var(--color-captain-hover) !important;
+    border-color: var(--color-captain-hover) !important;
+    transform: translateY(-2px);
+}
+
+.btn-player {
+    background-color: var(--color-player) !important;
+    color: #ffffff !important; /* Stark white against emerald background */
+    box-shadow: var(--color-player-glow) 0px 10px 20px;
+    border: 1px solid var(--color-player) !important;
+}
+.btn-player:hover {
+    background-color: var(--color-player-hover) !important;
+    border-color: var(--color-player-hover) !important;
+    transform: translateY(-2px);
+}
+
+/* Portal Badge Colors */
+.role-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+}
+.badge-opponent {
+    background: var(--color-opponent-glow);
+    color: var(--color-opponent);
+    border-color: rgba(148, 163, 184, 0.2);
+}
+.badge-captain {
+    background: var(--color-captain-glow);
+    color: var(--color-captain);
+    border-color: rgba(167, 139, 250, 0.2);
+}
+.badge-player {
+    background: var(--color-player-glow);
+    color: var(--color-player);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+@media (max-width: 600px) {
+    .demo-card-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .demo-card-creds {
+        width: 100%;
+        justify-content: center;
+    }
+    .demo-card .btn {
+        width: 100%;
+    }
 }
 
 /* --- ANIMATIONS --- */
