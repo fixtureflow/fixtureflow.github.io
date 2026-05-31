@@ -814,6 +814,10 @@ footer.main-footer {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    max-width: 760px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .demo-card-header {
@@ -824,6 +828,14 @@ footer.main-footer {
     gap: 12px;
     border-bottom: 1px solid var(--border-subtle);
     padding-bottom: 12px;
+}
+
+.demo-card-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-success);
 }
 
 .demo-card-body-text {
@@ -899,6 +911,9 @@ footer.main-footer {
     padding: 4px 10px;
     border-radius: 20px;
     border: 1px solid transparent;
+    margin: 0 !important; /* Override legacy badge margin-bottom */
+    display: inline-flex;
+    align-items: center;
 }
 .badge-opponent {
     background: var(--color-opponent-glow);
