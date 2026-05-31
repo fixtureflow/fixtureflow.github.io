@@ -814,6 +814,11 @@ footer.main-footer {
         height: auto;
     }
 
+    .portal-content .demo-card {
+        order: 3 !important;
+        grid-column: auto !important;
+    }
+
     .mockup-body {
         overflow-y: visible;
         max-height: none;
