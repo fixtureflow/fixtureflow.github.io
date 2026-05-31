@@ -420,17 +420,23 @@ header.nav-header.scrolled {
 
 /* Tabs for Portals */
 .portal-tabs {
+    position: sticky;
+    top: 80px;
+    z-index: 500;
     display: flex;
     justify-content: center;
     gap: 12px;
     margin-bottom: 48px;
     background: var(--bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     padding: 8px;
     border-radius: 16px;
     border: 1px solid var(--border-glass);
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
+    transition: var(--transition-smooth);
 }
 
 .tab-btn {
