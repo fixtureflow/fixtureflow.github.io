@@ -931,7 +931,7 @@ footer.main-footer {
     border-color: rgba(16, 185, 129, 0.2);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .demo-card-header {
         flex-direction: column;
         align-items: flex-start;
