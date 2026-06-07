@@ -3,111 +3,1068 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CourtFlow - Racket Sports Social Session Manager</title>
+    <title>CourtFlow | Social Play & Court Queue Autopilot</title>
+    <meta name="description" content="Autopilot busy badminton social nights. Automated court queues, skill-based doubles pairing solvers, and player rotation.">
+    
+    <!-- OpenGraph Metadata -->
+    <meta property="og:title" content="CourtFlow | Social Play & Court Queue Autopilot">
+    <meta property="og:description" content="Autopilot busy badminton social nights. Automated court queues, skill-based doubles pairing solvers, and player rotation.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fixtureflow.github.io/courtflow/">
+    <meta property="og:image" content="https://fixtureflow.github.io/ddlc/assets/card-fixtureflow.png">
+    
+    <!-- Shared Master Assets -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <script src="/assets/js/script.js" defer></script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
+        /* --- COURTFLOW SPECIFIC COLOR OVERRIDES --- */
         :root {
-            --bg-color: #0b0f19;
-            --text-color: #f3f4f6;
-            --primary-color: #10b981; /* Emerald green for CourtFlow */
-            --accent-color: #3b82f6;
-            --card-bg: rgba(17, 24, 39, 0.7);
+            --color-primary: #10b981; /* Neon Mint Emerald */
+            --color-primary-hover: #34d399;
+            --color-primary-glow: rgba(16, 185, 129, 0.15);
         }
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Outfit', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            flex-direction: column;
+        [data-theme="light"] {
+            --color-primary: #047857; /* Emerald Teal for light mode */
+            --color-primary-hover: #065f46;
+            --color-primary-glow: rgba(4, 120, 87, 0.1);
+        }
+
+        /* --- LAYOUT OVERRIDES --- */
+        .hero-section {
+            position: relative;
+            padding: 150px 0 60px 0;
             text-align: center;
+            overflow: hidden;
         }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            padding: 3rem 2rem;
-            background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            backdrop-filter: blur(16px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        .glow-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            pointer-events: none;
+            z-index: -1;
         }
-        .logo {
-            font-size: 3rem;
+        .glow-emerald {
+            position: absolute;
+            top: -100px;
+            left: 20%;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0) 70%);
+            filter: blur(50px);
+        }
+        .glow-blue {
+            position: absolute;
+            bottom: -100px;
+            right: 20%;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0) 70%);
+            filter: blur(50px);
+        }
+
+        .badge {
+            background: var(--color-primary-glow);
+            color: var(--color-primary);
+            border: 1px solid var(--border-glass);
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: 3.2rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #10b981, #3b82f6);
+            line-height: 1.15;
+            letter-spacing: -1.8px;
+            max-width: 900px;
+            background: linear-gradient(135deg, var(--text-primary) 30%, var(--text-secondary) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 0.25rem;
-            letter-spacing: -1px;
+            margin: 0 auto 16px auto;
         }
-        .subtitle {
-            color: #9ca3af;
-            font-size: 0.9rem;
-            margin-bottom: 2.5rem;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-weight: 600;
-        }
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 600;
-            margin-bottom: 1.25rem;
-            line-height: 1.2;
-            letter-spacing: -0.5px;
-        }
-        p {
-            color: #cbd5e1;
+        .hero-description {
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+            max-width: 700px;
+            margin: 0 auto;
             line-height: 1.6;
-            margin-bottom: 2.5rem;
-            font-size: 1.05rem;
         }
-        .badge {
-            display: inline-block;
-            padding: 0.4rem 1rem;
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--primary-color);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 99px;
-            font-size: 0.85rem;
+
+        /* --- PLAYGROUND INTERACTIVE MOCKUP --- */
+        .playground-section {
+            padding: 20px 0 80px 0;
+        }
+        .playground-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .mockup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+            background: var(--border-glass);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+        }
+        .window-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .window-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .window-dot.red { background: #ff5f56; }
+        .window-dot.yellow { background: #ffbd2e; }
+        .window-dot.green { background: #27c93f; }
+        
+        .mockup-title {
+            font-size: 0.8rem;
             font-weight: 600;
-            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        /* Mockup Grid Area */
+        .mockup-body {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 440px;
+            background: var(--bg-app);
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            border: 1px solid var(--border-glass);
+            border-top: none;
+            overflow: hidden;
+        }
+        
+        /* Sidebar: Queue */
+        .mockup-sidebar {
+            padding: 20px;
+            border-right: 1px solid var(--border-subtle);
+            background: var(--bg-glass);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .sidebar-title {
+            font-size: 0.85rem;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
         }
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.75rem;
-            background: var(--primary-color);
-            color: #0b0f19;
-            text-decoration: none;
+        .queue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .player-chip {
+            padding: 8px 12px;
+            background: var(--bg-container);
+            border: 1px solid var(--border-glass);
+            border-radius: 10px;
+            font-size: 0.85rem;
             font-weight: 600;
-            border-radius: 12px;
-            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: grab;
+            user-select: none;
+            transition: var(--transition-smooth);
         }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        .player-chip:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 4px 12px var(--color-primary-glow);
+        }
+        .player-chip.checked-out {
+            opacity: 0.4;
+            cursor: pointer;
+        }
+        .skill-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+        /* Color skill ratings */
+        .skill-1 { background: #be123c; color: #fff; } /* Elite - Rose */
+        .skill-2 { background: #d97706; color: #fff; } /* High - Amber */
+        .skill-3 { background: #0284c7; color: #fff; } /* Medium - Sky */
+        .skill-4 { background: #059669; color: #fff; } /* Recreational - Emerald */
+        .skill-5 { background: #4b5563; color: #fff; } /* Beginner - Grey */
+
+        /* Main Workspace: Active Courts */
+        .mockup-main {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .round-indicator {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+        
+        .courts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            flex-grow: 1;
+        }
+        .court-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: var(--transition-smooth);
+        }
+        .court-card.active {
+            border-top: 3px solid var(--color-primary);
+        }
+        .court-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+        .court-slot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            text-align: center;
+        }
+        .team-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .team-header {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+        .court-slot {
+            height: 36px;
+            background: var(--border-subtle);
+            border: 1px dashed var(--border-glass);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+        }
+        .court-slot.drag-over {
+            border-color: var(--color-primary);
+            background: var(--color-primary-glow);
+        }
+        .court-average-badge {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            align-self: center;
+            margin-top: 4px;
+        }
+        
+        /* Action buttons in Mockup */
+        .mockup-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: auto;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 16px;
+        }
+        
+        /* Sandbox Lockdown Overlay */
+        .sandbox-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(8, 9, 13, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 30px;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .sandbox-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* --- MARKETING / VALUE SECTIONS --- */
+        .marketing-section {
+            padding: 80px 0;
+            border-top: 1px solid var(--border-glass);
+        }
+        .tabs-nav {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+        .tab-btn {
+            background: transparent;
+            border: 1px solid var(--border-glass);
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            border-radius: 99px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--color-primary-glow);
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+        .tab-content {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .tab-content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+        .tab-text h3 {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        .tab-text p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .tab-features {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .tab-features li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .tab-features li svg {
+            color: var(--color-primary);
+        }
+        
+        /* --- WAITLIST SECTION --- */
+        .waitlist-section {
+            padding: 100px 0;
+            border-top: 1px solid var(--border-glass);
+            text-align: center;
+            position: relative;
+        }
+        .waitlist-card {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 50px;
+        }
+        .waitlist-card h2 {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+        .waitlist-card p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-bottom: 30px;
+        }
+        .waitlist-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 440px;
+            margin: 0 auto;
+        }
+        .form-input {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-glass);
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            transition: var(--transition-smooth);
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 4px var(--color-primary-glow);
+        }
+        
+        footer {
+            padding: 60px 0;
+            border-top: 1px solid var(--border-glass);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* --- MOBILE MEDIA QUERIES --- */
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 120px 0 40px 0;
+            }
+            .hero-title {
+                font-size: 2.4rem;
+                letter-spacing: -1.2px;
+            }
+            .mockup-body {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+            .mockup-sidebar {
+                border-right: none;
+                border-bottom: 1px solid var(--border-subtle);
+                max-height: 200px;
+            }
+            .queue-list {
+                flex-direction: row;
+                flex-wrap: wrap;
+                overflow-y: hidden;
+                overflow-x: auto;
+            }
+            .player-chip {
+                flex-shrink: 0;
+            }
+            .tab-content.active {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .waitlist-card {
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="badge">Under Construction</div>
-        <div class="logo">CourtFlow</div>
-        <div class="subtitle">By FixtureFlow</div>
-        <h1>Social Play & Court Queue Autopilot</h1>
-        <p>
-            Tired of running busy club nights with whiteboards, pegs, and constant complaints? CourtFlow automatically manages your queue, pairs players by skill, and ensures fair rotation on autopilot.
-        </p>
-        <a href="../" class="btn">Back to FixtureFlow</a>
-    </div>
+
+    <!-- 1. Sticky Navigation Header -->
+    <header class="nav-header">
+        <div class="container nav-container">
+            <a href="../" class="logo"><span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span></a>
+            <ul class="nav-links">
+                <li><a href="../ddlc/">League Coordinator</a></li>
+                <li><a href="#" class="active">Social Queue Manager</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" aria-label="Toggle light/dark theme">
+                    <!-- Loaded dynamically by script.js -->
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. Hero Section with Ambient Glows -->
+    <section class="hero-section">
+        <div class="glow-container">
+            <div class="glow-emerald"></div>
+            <div class="glow-blue"></div>
+        </div>
+        <div class="container hero-container animate-fade-in">
+            <div class="badge">CourtFlow Manager</div>
+            <h1 class="hero-title">Social nights and court rotation on autopilot.</h1>
+            <p class="hero-description">
+                Free your club organizers from magnetic boards, dry-wipe markers, and queue complaints. Match players fairly by skill, manage wait queues, and optimize court rotations on autopilot.
+            </p>
+        </div>
+    </section>
+
+    <!-- 3. Interactive Social Matchmaker Sandbox -->
+    <section class="playground-section">
+        <div class="container playground-container">
+            
+            <div class="interactive-mockup glass-panel" style="position: relative;">
+                
+                <!-- Windows control bar mockup -->
+                <div class="mockup-header">
+                    <div class="window-dots">
+                        <div class="window-dot red"></div>
+                        <div class="window-dot yellow"></div>
+                        <div class="window-dot green"></div>
+                    </div>
+                    <div class="mockup-title">CourtFlow Live Simulator Sandbox</div>
+                    <div style="width: 50px;"></div>
+                </div>
+
+                <!-- Simulation Work Area -->
+                <div class="mockup-body">
+                    
+                    <!-- Sidebar Waiting Queue -->
+                    <div class="mockup-sidebar">
+                        <div class="sidebar-title">
+                            <span>Waiting Bench</span>
+                            <span id="queue-counter" style="color: var(--color-primary);">12</span>
+                        </div>
+                        <div class="queue-list" id="waiting-queue-list">
+                            <!-- Injected by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Active Courts Area -->
+                    <div class="mockup-main">
+                        <div class="main-header">
+                            <span class="round-indicator" id="round-indicator">Pre-Session Check-In</span>
+                            <span id="active-courts-count" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">2 Courts Active</span>
+                        </div>
+                        
+                        <div class="courts-grid" id="courts-grid">
+                            <!-- Injected by JavaScript -->
+                        </div>
+
+                        <!-- Heuristic Actions bar -->
+                        <div class="mockup-actions">
+                            <button class="btn btn-secondary" id="reset-sim-btn" style="padding: 8px 16px; font-size: 0.85rem;">Reset Pool</button>
+                            <button class="btn btn-primary" id="generate-sim-btn" style="padding: 8px 20px; font-size: 0.85rem;">Generate Next Round</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Sandbox Lockdown Waitlist Form -->
+                <div class="sandbox-overlay" id="sandbox-lockdown-overlay">
+                    <div class="badge">Demo Finished</div>
+                    <h2 style="font-family: var(--font-display); font-size: 1.8rem; letter-spacing: -0.5px;">You've completed 4 simulation rounds!</h2>
+                    <p style="color: var(--text-secondary); max-width: 460px; font-size: 0.95rem; margin: 0 auto 10px auto;">
+                        Want to run CourtFlow at your club with live spreadsheet integrations, permanent rosters, guest check-ins, and persistent queue states?
+                    </p>
+                    <a href="#waitlist" class="btn btn-primary" id="go-to-waitlist-btn">Join early access list</a>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 4. Marketing Component Journey Tabs -->
+    <section class="marketing-section">
+        <div class="container">
+            <div class="tabs-nav">
+                <button class="tab-btn active" data-tab="check-in">1. Roster Check-In</button>
+                <button class="tab-btn" data-tab="matchmaker">2. Heuristics Engine</button>
+                <button class="tab-btn" data-tab="persistence">3. Properties Sync</button>
+            </div>
+
+            <!-- Tab 1: Check-in -->
+            <div class="tab-content active" id="tab-check-in">
+                <div class="tab-text">
+                    <h3>Zero-friction member check-in</h3>
+                    <p>
+                        Match secretaries or volunteers simply tap on player name chips as members walk into the hall. Checked-in players are dynamically queued based on check-in timestamp.
+                    </p>
+                    <ul class="tab-features">
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Dynamic guest additions directly from mobile UI</li>
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Auto-sorting based on benched round count</li>
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Gender tags to control mixed doubles allocations</li>
+                    </ul>
+                </div>
+                <div class="tab-visual glass-panel" style="padding: 24px; min-height: 200px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">Check-In Dashboard View</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <span class="player-chip" style="border-color: var(--color-primary); box-shadow: 0 4px 12px var(--color-primary-glow);">Jane D. <span class="skill-badge skill-2">2</span></span>
+                        <span class="player-chip" style="border-color: var(--color-primary); box-shadow: 0 4px 12px var(--color-primary-glow);">David S. <span class="skill-badge skill-3">3</span></span>
+                        <span class="player-chip checked-out">Steve O. <span class="skill-badge skill-4" style="opacity: 0.6;">4</span></span>
+                        <span class="player-chip" style="border-color: var(--color-primary); box-shadow: 0 4px 12px var(--color-primary-glow);">Claire L. <span class="skill-badge skill-1">1</span></span>
+                        <span class="player-chip checked-out">Ken M. <span class="skill-badge skill-5" style="opacity: 0.6;">5</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Matchmaker -->
+            <div class="tab-content" id="tab-matchmaker">
+                <div class="tab-text">
+                    <h3>Heuristic Doubles Solver</h3>
+                    <p>
+                        No more hand-picking matches. The engine takes waiting players from the bench, groups them, and calculates optimal, balanced doubles pairings.
+                    </p>
+                    <ul class="tab-features">
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Minimizes skill delta between Team A & Team B</li>
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Enforces mixed doubles split restrictions</li>
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Prevents repeat pairings with history queues</li>
+                    </ul>
+                </div>
+                <div class="tab-visual glass-panel" style="padding: 24px; display: flex; flex-direction: column; gap: 12px;">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Matchmaker Balanced Split</div>
+                    <div style="background: var(--border-subtle); border-radius: 12px; padding: 12px; display: flex; justify-content: space-around; align-items: center; border: 1px solid var(--border-glass);">
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">TEAM A (Avg: 2.5)</div>
+                            <div style="font-size: 0.85rem; font-weight: 700;">John M. <span style="font-weight: 400; opacity: 0.6;">(L2)</span></div>
+                            <div style="font-size: 0.85rem; font-weight: 700;">Emma K. <span style="font-weight: 400; opacity: 0.6;">(L3)</span></div>
+                        </div>
+                        <div style="font-weight: 800; color: var(--color-primary);">VS</div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">TEAM B (Avg: 2.5)</div>
+                            <div style="font-size: 0.85rem; font-weight: 700;">Sarah D. <span style="font-weight: 400; opacity: 0.6;">(L2)</span></div>
+                            <div style="font-size: 0.85rem; font-weight: 700;">Dave P. <span style="font-weight: 400; opacity: 0.6;">(L3)</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Persistence -->
+            <div class="tab-content" id="tab-persistence">
+                <div class="tab-text">
+                    <h3>Volatile Properties Persistence</h3>
+                    <p>
+                        To ensure zero lagging in badminton halls, all matches and queue data are processed client-side and synchronized back to Apps Script properties Service.
+                    </p>
+                    <ul class="tab-features">
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 1-second debounce state mirroring</li>
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Safe recovery on browser refresh/disconnect</li>
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Isolated document locks per tenant</li>
+                    </ul>
+                </div>
+                <div class="tab-visual glass-panel" style="padding: 24px; text-align: center; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Real-Time Sync Observer</div>
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 8px 16px; border-radius: 99px; font-size: 0.85rem; color: var(--color-primary); font-weight: 600; width: fit-content; margin: 10px auto;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); display: inline-block; animation: pulse 1.5s infinite;"></span>
+                        Session State Mirrored Upstream
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Dedicated Waitlist Form -->
+    <section class="waitlist-section" id="waitlist">
+        <div class="container">
+            <div class="waitlist-card glass-panel">
+                <h2>Join the CourtFlow Waitlist</h2>
+                <p>
+                    Ready to bring queue rotation autopilot to your social nights? Enter your club details below to register for the early access program.
+                </p>
+                <form class="waitlist-form" id="waitlist-form">
+                    <input type="text" name="name" class="form-input" placeholder="Your Name" required>
+                    <input type="email" name="email" class="form-input" placeholder="Your Email Address" required>
+                    <input type="text" name="club" class="form-input" placeholder="Your Racket Club Name" required>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 10px; width: 100%;">Get Early Access</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 FixtureFlow. Built for Mount Pleasant and racket clubs everywhere.</p>
+            <p style="opacity: 0.5; font-size: 0.8rem; margin-top: 6px;">Powered by Google Sheets & Apps Script</p>
+        </div>
+    </footer>
+
+    <!-- --- INTERACTIVE SANDBOX JS SIMULATION ENGINE --- -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Mock Database
+            const ROSTER = [
+                { id: 1, name: "John D.", skill: 2, gender: "M" },
+                { id: 2, name: "Sarah M.", skill: 3, gender: "F" },
+                { id: 3, name: "Dave B.", skill: 1, gender: "M" },
+                { id: 4, name: "Alice K.", skill: 3, gender: "F" },
+                { id: 5, name: "Bob R.", skill: 4, gender: "M" },
+                { id: 6, name: "Emma L.", skill: 3, gender: "F" },
+                { id: 7, name: "Paul C.", skill: 2, gender: "M" },
+                { id: 8, name: "Helen P.", skill: 4, gender: "F" },
+                { id: 9, name: "Alan W.", skill: 5, gender: "M" },
+                { id: 10, name: "Jane S.", skill: 2, gender: "F" },
+                { id: 11, name: "Ken O.", skill: 4, gender: "M" },
+                { id: 12, name: "Mary G.", skill: 3, gender: "F" },
+                { id: 13, name: "Steve T.", skill: 1, gender: "M" },
+                { id: 14, name: "Claire F.", skill: 2, gender: "F" }
+            ];
+
+            // 2. Simulation State
+            let checkedIn = [...ROSTER]; // Start with all checked in
+            let queue = [...checkedIn];  // Waiting queue
+            let activeCourts = [
+                { id: 1, name: "Court 1", teamA: [], teamB: [] },
+                { id: 2, name: "Court 2", teamA: [], teamB: [] }
+            ];
+            let round = 0;
+            let dragSrcEl = null;
+
+            // DOM Elements
+            const queueListContainer = document.getElementById('waiting-queue-list');
+            const queueCounter = document.getElementById('queue-counter');
+            const courtsGrid = document.getElementById('courts-grid');
+            const roundIndicator = document.getElementById('round-indicator');
+            const generateBtn = document.getElementById('generate-sim-btn');
+            const resetBtn = document.getElementById('reset-sim-btn');
+            const lockdownOverlay = document.getElementById('sandbox-lockdown-overlay');
+            const toWaitlistBtn = document.getElementById('go-to-waitlist-btn');
+
+            // 3. Render Handlers
+            function renderQueue() {
+                queueListContainer.innerHTML = '';
+                queueCounter.textContent = queue.length;
+                
+                queue.forEach(player => {
+                    const chip = document.createElement('div');
+                    chip.className = 'player-chip';
+                    chip.draggable = true;
+                    chip.dataset.id = player.id;
+                    chip.innerHTML = `
+                        <span>${player.name}</span>
+                        <span class="skill-badge skill-${player.skill}">${player.skill}</span>
+                    `;
+                    
+                    // Bind Drag listeners
+                    chip.addEventListener('dragstart', handleDragStart);
+                    chip.addEventListener('dragend', handleDragEnd);
+                    
+                    queueListContainer.appendChild(chip);
+                });
+            }
+
+            function renderCourts() {
+                courtsGrid.innerHTML = '';
+                
+                activeCourts.forEach(court => {
+                    const card = document.createElement('div');
+                    card.className = 'court-card active';
+                    
+                    let avgSkill = '0.0';
+                    const allPlayers = [...court.teamA, ...court.teamB];
+                    if (allPlayers.length > 0) {
+                        const sum = allPlayers.reduce((acc, p) => acc + p.skill, 0);
+                        avgSkill = (sum / allPlayers.length).toFixed(1);
+                    }
+
+                    card.innerHTML = `
+                        <div class="court-title">
+                            <span>${court.name}</span>
+                            <span style="color: var(--color-primary);">Match Playing</span>
+                        </div>
+                        <div class="court-slot-grid">
+                            <div class="team-box">
+                                <div class="team-header">TEAM A</div>
+                                <div class="court-slot" data-court="${court.id}" data-team="A" data-index="0">
+                                    ${court.teamA[0] ? `${court.teamA[0].name} <span class="skill-badge skill-${court.teamA[0].skill}" style="margin-left:4px;">${court.teamA[0].skill}</span>` : 'Drop Player'}
+                                </div>
+                                <div class="court-slot" data-court="${court.id}" data-team="A" data-index="1">
+                                    ${court.teamA[1] ? `${court.teamA[1].name} <span class="skill-badge skill-${court.teamA[1].skill}" style="margin-left:4px;">${court.teamA[1].skill}</span>` : 'Drop Player'}
+                                </div>
+                            </div>
+                            <div class="team-box">
+                                <div class="team-header">TEAM B</div>
+                                <div class="court-slot" data-court="${court.id}" data-team="B" data-index="0">
+                                    ${court.teamB[0] ? `${court.teamB[0].name} <span class="skill-badge skill-${court.teamB[0].skill}" style="margin-left:4px;">${court.teamB[0].skill}</span>` : 'Drop Player'}
+                                </div>
+                                <div class="court-slot" data-court="${court.id}" data-team="B" data-index="1">
+                                    ${court.teamB[1] ? `${court.teamB[1].name} <span class="skill-badge skill-${court.teamB[1].skill}" style="margin-left:4px;">${court.teamB[1].skill}</span>` : 'Drop Player'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="court-average-badge">Court Skill Avg: ${avgSkill}</div>
+                    `;
+
+                    // Bind drop targets
+                    const slots = card.querySelectorAll('.court-slot');
+                    slots.forEach(slot => {
+                        slot.addEventListener('dragover', handleDragOver);
+                        slot.addEventListener('dragenter', handleDragEnter);
+                        slot.addEventListener('dragleave', handleDragLeave);
+                        slot.addEventListener('drop', handleDrop);
+                    });
+
+                    courtsGrid.appendChild(card);
+                });
+            }
+
+            // 4. Drag & Drop Solvers
+            function handleDragStart(e) {
+                this.style.opacity = '0.4';
+                dragSrcEl = this;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', this.dataset.id);
+            }
+
+            function handleDragEnd(e) {
+                this.style.opacity = '1';
+                const slots = document.querySelectorAll('.court-slot');
+                slots.forEach(slot => slot.classList.remove('drag-over'));
+            }
+
+            function handleDragOver(e) {
+                if (e.preventDefault) e.preventDefault();
+                return false;
+            }
+
+            function handleDragEnter(e) {
+                this.classList.add('drag-over');
+            }
+
+            function handleDragLeave(e) {
+                this.classList.remove('drag-over');
+            }
+
+            function handleDrop(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                
+                this.classList.remove('drag-over');
+                const playerId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+                const playerObj = checkedIn.find(p => p.id === playerId);
+                
+                if (!playerObj) return;
+
+                const targetCourtId = parseInt(this.dataset.court, 10);
+                const targetTeam = this.dataset.team;
+                const targetIndex = parseInt(this.dataset.index, 10);
+                
+                const targetCourt = activeCourts.find(c => c.id === targetCourtId);
+                if (!targetCourt) return;
+
+                // Extract player from queue/current location
+                queue = queue.filter(p => p.id !== playerObj.id);
+                activeCourts.forEach(c => {
+                    c.teamA = c.teamA.filter(p => p.id !== playerObj.id);
+                    c.teamB = c.teamB.filter(p => p.id !== playerObj.id);
+                });
+
+                // Get current player occupying target slot
+                const currentOccupant = (targetTeam === 'A') ? targetCourt.teamA[targetIndex] : targetCourt.teamB[targetIndex];
+                if (currentOccupant) {
+                    queue.push(currentOccupant); // Bench current occupant
+                }
+
+                // Place new player
+                if (targetTeam === 'A') {
+                    targetCourt.teamA[targetIndex] = playerObj;
+                } else {
+                    targetCourt.teamB[targetIndex] = playerObj;
+                }
+
+                renderQueue();
+                renderCourts();
+            }
+
+            // 5. Pairing Heuristics Simulator
+            function solveMatchings() {
+                // Return benched active court players back to queue
+                activeCourts.forEach(court => {
+                    [...court.teamA, ...court.teamB].forEach(p => {
+                        if (p) queue.push(p);
+                    });
+                    court.teamA = [];
+                    court.teamB = [];
+                });
+
+                // Check round count limits
+                round++;
+                if (round > 4) {
+                    lockdownOverlay.classList.add('active');
+                    return;
+                }
+
+                roundIndicator.textContent = `Active Round ${round} of 4`;
+
+                // Take top 8 players from queue (for 2 courts)
+                if (queue.length < 8) {
+                    alert('Need at least 8 players checked in to play 2 courts!');
+                    return;
+                }
+
+                const candidates = queue.splice(0, 8);
+
+                // Group candidates into pairs of 4 (Court 1 and Court 2)
+                const group1 = candidates.slice(0, 4);
+                const group2 = candidates.slice(4, 8);
+
+                // Court 1 Heuristic Balanced Split
+                const sorted1 = solveOptimalDoublesSplit(group1);
+                activeCourts[0].teamA = [sorted1[0], sorted1[1]];
+                activeCourts[0].teamB = [sorted1[2], sorted1[3]];
+
+                // Court 2 Heuristic Balanced Split
+                const sorted2 = solveOptimalDoublesSplit(group2);
+                activeCourts[1].teamA = [sorted2[0], sorted2[1]];
+                activeCourts[1].teamB = [sorted2[2], sorted2[3]];
+
+                renderQueue();
+                renderCourts();
+            }
+
+            function solveOptimalDoublesSplit(players) {
+                // Find doubles split of 4 players (A1, A2 vs B1, B2) that minimizes average skill difference
+                // Combinations:
+                // Opt 1: (0, 1) vs (2, 3) -> delta: |(0+1) - (2+3)|
+                // Opt 2: (0, 2) vs (1, 3) -> delta: |(0+2) - (1+3)|
+                // Opt 3: (0, 3) vs (1, 2) -> delta: |(0+3) - (1+2)|
+                
+                const o1_delta = Math.abs((players[0].skill + players[1].skill) - (players[2].skill + players[3].skill));
+                const o2_delta = Math.abs((players[0].skill + players[2].skill) - (players[1].skill + players[3].skill));
+                const o3_delta = Math.abs((players[0].skill + players[3].skill) - (players[1].skill + players[2].skill));
+
+                const minDelta = Math.min(o1_delta, o2_delta, o3_delta);
+
+                if (minDelta === o1_delta) {
+                    return [players[0], players[1], players[2], players[3]];
+                } else if (minDelta === o2_delta) {
+                    return [players[0], players[2], players[1], players[3]];
+                } else {
+                    return [players[0], players[3], players[1], players[2]];
+                }
+            }
+
+            // Reset Simulator
+            function resetSimulation() {
+                queue = [...checkedIn];
+                activeCourts.forEach(c => {
+                    c.teamA = [];
+                    c.teamB = [];
+                });
+                round = 0;
+                roundIndicator.textContent = "Pre-Session Check-In";
+                lockdownOverlay.classList.remove('active');
+                renderQueue();
+                renderCourts();
+            }
+
+            // Initialize Sandbox Rendering
+            resetSimulation();
+
+            // Bind Actions
+            generateBtn.addEventListener('click', solveMatchings);
+            resetBtn.addEventListener('click', resetSimulation);
+            toWaitlistBtn.addEventListener('click', () => {
+                lockdownOverlay.classList.remove('active');
+            });
+
+            // --- MARKETING JOURNEY TAB SWITCHER ---
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetTab = btn.getAttribute('data-tab');
+
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+
+                    btn.classList.add('active');
+                    const contentElement = document.getElementById(`tab-${targetTab}`);
+                    if (contentElement) {
+                        contentElement.classList.add('active');
+                    }
+                });
+            });
+
+            // --- CRM WEBHOOK WAITLIST FORM SUBMIT ---
+            const waitlistForm = document.getElementById('waitlist-form');
+            if (waitlistForm) {
+                waitlistForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const submitBtn = waitlistForm.querySelector('button[type="submit"]');
+                    const origText = submitBtn.textContent;
+                    
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Registering...';
+
+                    const formData = new FormData(waitlistForm);
+                    const queryParams = new URLSearchParams();
+                    queryParams.append('name', formData.get('name'));
+                    queryParams.append('email', formData.get('email'));
+                    // Explicitly tag context as CourtFlow interest
+                    queryParams.append('club', formData.get('club') + " (CourtFlow Interest)");
+
+                    fetch('https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec', {
+                        method: 'POST',
+                        redirect: 'follow',
+                        credentials: 'omit',
+                        body: queryParams
+                    })
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.result === 'success') {
+                            submitBtn.textContent = '✓ You\'re registered!';
+                            submitBtn.style.backgroundColor = '#10b981';
+                            submitBtn.style.color = '#ffffff';
+                            waitlistForm.reset();
+                        } else {
+                            submitBtn.textContent = '⚠️ Registration failed.';
+                            submitBtn.style.backgroundColor = '#f43f5e';
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        submitBtn.textContent = '⚠️ Network error, retry.';
+                        submitBtn.style.backgroundColor = '#f43f5e';
+                    })
+                    .finally(() => {
+                        setTimeout(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = origText;
+                            submitBtn.style.backgroundColor = '';
+                            submitBtn.style.color = '';
+                        }, 4000);
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 </html>

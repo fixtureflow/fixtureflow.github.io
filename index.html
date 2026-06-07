@@ -3,164 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FixtureFlow - Racket Sports Club Management Solutions</title>
+    <title>FixtureFlow | Racket Sports Club Management Solutions</title>
+    <meta name="description" content="Automate league coordinator scheduling and social play court rotations on autopilot. Powered by Google Sheets.">
+    
+    <!-- OpenGraph Metadata -->
+    <meta property="og:title" content="FixtureFlow | Racket Sports Club Management Solutions">
+    <meta property="og:description" content="Automate league coordinator scheduling and social play court rotations on autopilot. Powered by Google Sheets.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fixtureflow.github.io/">
+    <meta property="og:image" content="https://fixtureflow.github.io/ddlc/assets/card-fixtureflow.png">
+    
+    <!-- Shared Master Assets -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <script src="/assets/js/script.js" defer></script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Structured JSON-LD Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "FixtureFlow",
+      "operatingSystem": "All",
+      "applicationCategory": "BusinessApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+    
     <style>
-        :root {
-            --bg-color: #0b0f19;
-            --text-color: #f3f4f6;
-            --fixture-color: #1f6feb; /* Blue theme for league fixtures */
-            --court-color: #10b981; /* Emerald theme for court session management */
-            --card-bg: rgba(17, 24, 39, 0.6);
+        /* --- HOMEPAGE SPECIFIC STYLES --- */
+        
+        /* Ambient Background Glows */
+        .hero-section {
+            position: relative;
+            padding: 160px 0 80px 0;
+            text-align: center;
+            overflow: hidden;
         }
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Outfit', sans-serif;
-            min-height: 100vh;
+        .glow-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 100%;
+            max-width: 1400px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .glow-violet {
+            position: absolute;
+            top: -200px;
+            left: 10%;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(167, 139, 250, 0.12) 0%, rgba(167, 139, 250, 0) 70%);
+            filter: blur(40px);
+        }
+        .glow-emerald {
+            position: absolute;
+            top: -200px;
+            right: 10%;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0) 70%);
+            filter: blur(40px);
+        }
+        
+        /* Hero Content */
+        .hero-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            gap: 16px;
         }
-        header {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 0 1rem;
+        .badge {
+            background: var(--color-primary-glow);
+            color: var(--color-primary);
+            border: 1px solid var(--border-glass);
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: inline-block;
         }
-        .brand {
-            font-size: 3.5rem;
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: 3.2rem;
             font-weight: 800;
-            letter-spacing: -1.5px;
-            background: linear-gradient(135deg, #3b82f6, #10b981);
+            line-height: 1.15;
+            letter-spacing: -1.8px;
+            max-width: 800px;
+            background: linear-gradient(135deg, var(--text-primary) 30%, var(--text-secondary) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
         }
-        .tagline {
-            color: #9ca3af;
-            font-size: 1.25rem;
-            max-width: 600px;
-            line-height: 1.5;
-            font-weight: 300;
+        .hero-description {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            font-weight: 400;
+            max-width: 680px;
+            line-height: 1.6;
         }
-        .products {
+        
+        /* Products Grid Section */
+        .products-section {
+            padding: 40px 0 100px 0;
+        }
+        .products-grid {
             display: flex;
-            gap: 2rem;
-            max-width: 900px;
-            width: 100%;
-            padding: 0 1rem;
-            box-sizing: border-box;
-            flex-wrap: wrap;
+            gap: 32px;
             justify-content: center;
+            flex-wrap: wrap;
         }
-        .card {
-            background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            padding: 2.5rem;
+        .product-panel {
             flex: 1;
             min-width: 320px;
-            max-width: 420px;
-            backdrop-filter: blur(16px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            transition: all 0.3s ease;
+            max-width: 520px;
+            padding: 40px;
             display: flex;
             flex-direction: column;
+            gap: 20px;
+            text-align: left;
+            position: relative;
         }
-        .card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(255, 255, 255, 0.1);
+        
+        /* Product Visual Hover Highlights */
+        .product-panel.fixture:hover {
+            border-color: rgba(167, 139, 250, 0.3);
+            box-shadow: 0 20px 40px rgba(167, 139, 250, 0.08);
         }
-        .card.fixture {
-            border-top: 4px solid var(--fixture-color);
+        .product-panel.court:hover {
+            border-color: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.08);
         }
-        .card.court {
-            border-top: 4px solid var(--court-color);
+        
+        /* Local Scoped Colors for Court Manager panel */
+        .product-panel.court {
+            --color-primary: #10b981;
+            --color-primary-hover: #34d399;
+            --color-primary-glow: rgba(16, 185, 129, 0.15);
         }
-        .card:hover.fixture {
-            box-shadow: 0 20px 40px rgba(31, 111, 235, 0.15);
+        [data-theme="light"] .product-panel.court {
+            --color-primary: #047857;
+            --color-primary-hover: #065f46;
+            --color-primary-glow: rgba(4, 120, 87, 0.1);
         }
-        .card:hover.court {
-            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15);
+        
+        /* Panel Headers */
+        .product-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
-        .card h2 {
+        .product-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--border-glass);
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-primary);
+        }
+        .product-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+        .product-panel h2 {
+            font-family: var(--font-display);
             font-size: 1.8rem;
             font-weight: 700;
-            margin: 0 0 1rem 0;
+            letter-spacing: -0.8px;
+            color: var(--text-primary);
         }
-        .card p {
-            color: #cbd5e1;
+        .product-tagline {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: -10px;
+        }
+        .product-description {
+            color: var(--text-secondary);
+            font-size: 0.98rem;
             line-height: 1.6;
-            margin-bottom: 2.5rem;
-            font-size: 1rem;
             flex-grow: 1;
         }
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 0.85rem;
-            text-align: center;
-            text-decoration: none;
-            font-weight: 600;
-            border-radius: 12px;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
+        
+        /* Feature Bullet List */
+        .product-features {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 12px 0 24px 0;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 20px;
         }
-        .fixture .btn {
-            background: var(--fixture-color);
-            color: #ffffff;
+        .product-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            font-weight: 500;
         }
-        .fixture .btn:hover {
-            box-shadow: 0 10px 20px rgba(31, 111, 235, 0.3);
+        .product-features li svg {
+            color: var(--color-primary);
+            flex-shrink: 0;
         }
-        .court .btn {
-            background: var(--court-color);
-            color: #0b0f19;
-        }
-        .court .btn:hover {
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
-        }
+        
+        /* Footer Layout */
         footer {
-            margin-top: 4rem;
-            color: #4b5563;
+            padding: 60px 0;
+            border-top: 1px solid var(--border-glass);
+            text-align: center;
+            color: var(--text-muted);
             font-size: 0.9rem;
+            margin-top: auto;
+        }
+        
+        /* --- MOBILE RESPONSIVE MEDIA QUERIES --- */
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 120px 0 40px 0;
+            }
+            .hero-title {
+                font-size: 2.4rem;
+                letter-spacing: -1.2px;
+            }
+            .hero-description {
+                font-size: 1.05rem;
+            }
+            .products-grid {
+                gap: 24px;
+            }
+            .product-panel {
+                padding: 30px;
+            }
+            .product-panel h2 {
+                font-size: 1.5rem;
+            }
+            footer {
+                padding: 40px 0;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="brand">FixtureFlow</div>
-        <div class="tagline">Next-generation workflow automation suite for racket sports club committees and match secretaries.</div>
+
+    <!-- 1. Sticky Navigation Header -->
+    <header class="nav-header">
+        <div class="container nav-container">
+            <a href="#" class="logo"><span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span></a>
+            <ul class="nav-links">
+                <li><a href="ddlc/">League Coordinator</a></li>
+                <li><a href="courtflow/">Social Queue Manager</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" aria-label="Toggle light/dark theme">
+                    <!-- Loaded dynamically by script.js -->
+                </button>
+            </div>
+        </div>
     </header>
 
-    <div class="products">
-        <!-- Card 1: Fixture Flow -->
-        <div class="card fixture">
-            <h2>FixtureFlow</h2>
-            <p>
-                Automate your league and cup match scheduling. Opponents self-book times, captains coordinate team sheets, and players report availability—all synchronized directly to your club's Google Sheets on autopilot.
-            </p>
-            <a href="ddlc/" class="btn">Explore League Coordinator</a>
+    <!-- 2. Hero Section with Ambient Glows -->
+    <section class="hero-section">
+        <div class="glow-container">
+            <div class="glow-violet"></div>
+            <div class="glow-emerald"></div>
         </div>
-
-        <!-- Card 2: Court Flow -->
-        <div class="card court">
-            <h2>CourtFlow</h2>
-            <p>
-                Autopilot your busy social nights. Fair court rotation, skill-based player pairing, and wait-queue tracking, completely freeing your committee from whiteboard management.
+        <div class="container hero-container animate-fade-in">
+            <div class="badge">Ecosystem Suite</div>
+            <h1 class="hero-title">Autopilot your racket sports club operations.</h1>
+            <p class="hero-description">
+                Next-generation workflow automation built specifically for club committees, match secretaries, and social play organizers. Stop wrestling with spreadsheet chaos, messy rosters, and constant whiteboard friction.
             </p>
-            <a href="courtflow/" class="btn">Explore Court Manager</a>
         </div>
-    </div>
+    </section>
 
+    <!-- 3. Dual Product Split Columns -->
+    <section class="products-section">
+        <div class="container products-grid">
+            
+            <!-- Product 1: League Coordinator (FixtureFlow / DDLC) -->
+            <div class="product-panel glass-panel fixture animate-fade-in" style="animation-delay: 0.1s;">
+                <div class="product-header">
+                    <div class="product-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <h2>League Coordinator</h2>
+                </div>
+                <p class="product-tagline">Match Scheduling & Roster Coordination</p>
+                <p class="product-description">
+                    Automate league schedule bookings on autopilot. Opponents self-serve and book dates directly based on your live court capacity, captains arrange squad lists, and players report availability dynamically.
+                </p>
+                <ul class="product-features">
+                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Opponent Self-Service Booking Flow</li>
+                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Real-Time Player Availability Grid</li>
+                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Pre-Season Auto-Cancellation Engine</li>
+                </ul>
+                <a href="ddlc/" class="btn btn-primary">Explore Coordinator</a>
+            </div>
+
+            <!-- Product 2: Court Manager (CourtFlow) -->
+            <div class="product-panel glass-panel court animate-fade-in" style="animation-delay: 0.2s;">
+                <div class="product-header">
+                    <div class="product-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <h2>Court Queue Manager</h2>
+                </div>
+                <p class="product-tagline">Social Nights & rotation Autopilot</p>
+                <p class="product-description">
+                    Free your social coordinators from magnetic whiteboards and whiteboard marker logs. Automatically calculate balanced doubles pairings by skill averages, enforce mixed gender guards, and track queue bench-time.
+                </p>
+                <ul class="product-features">
+                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Skill-Balanced Doubles Matchmaker</li>
+                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Checked-In Bench Waiting Rotator</li>
+                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mixed-Doubles Same-Sex Exceptions</li>
+                </ul>
+                <a href="courtflow/" class="btn btn-primary">Explore Queue Manager</a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 4. Unified Footer -->
     <footer>
-        &copy; 2026 FixtureFlow. Built for Mount Pleasant and club leaders everywhere.
+        <div class="container footer-container">
+            <p>&copy; 2026 FixtureFlow. Built for Mount Pleasant and racket clubs everywhere.</p>
+            <p style="opacity: 0.6; font-size: 0.8rem; margin-top: 6px;">Powered by Google Sheets & Apps Script</p>
+        </div>
     </footer>
+
 </body>
 </html>

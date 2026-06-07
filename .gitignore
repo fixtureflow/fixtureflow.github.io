@@ -1,3 +1,6 @@
 # Ignore macOS system files
 .DS_Store
 Icon
+
+# Ignore agents folder and local symlinks
+.agents/
