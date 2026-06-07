@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <defs>
+    <!-- Icon Gradient (40% split for 1:1 circular badge) -->
+    <linearGradient id="icon-g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="40%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+
+    <!-- Text Gradient (55% split for horizontal wordmark) -->
+    <linearGradient id="text-g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="55%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+
+    <!-- Responsive Theming Stylesheet -->
+    <style>
+      :root {
+        --text-fixture: #0f172a; /* Obsidian Slate for light mode */
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --text-fixture: #ffffff; /* Pure White for dark mode */
+        }
+      }
+      .txt-fixture {
+        fill: var(--text-fixture);
+      }
+    </style>
+  </defs>
+
+  <!-- 1. Circular Brand Icon Badge (Left) -->
+  <g transform="translate(10, 10)">
+    <rect width="60" height="60" rx="30" fill="url(#icon-g)"/>
+    <text x="30" y="30" 
+          dominant-baseline="central" 
+          text-anchor="middle" 
+          font-family="Outfit, -apple-system, sans-serif" 
+          font-size="32" 
+          font-weight="900" 
+          letter-spacing="-0.06em" 
+          fill="#ffffff">FF</text>
+  </g>
+
+  <!-- 2. Integrated Wordmark (Right) -->
+  <text x="85" y="40" 
+        dominant-baseline="central" 
+        font-family="Outfit, -apple-system, sans-serif" 
+        font-size="32" 
+        letter-spacing="-0.04em">
+    <tspan class="txt-fixture" font-weight="850">Fixture</tspan>
+    <tspan class="txt-flow" font-weight="500" fill="url(#text-g)">Flow</tspan>
+  </text>
+</svg>

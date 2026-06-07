@@ -274,8 +274,8 @@
         <div class="container nav-container">
             <a href="#" class="logo"><span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span></a>
             <ul class="nav-links">
-                <li><a href="ddlc/">League Coordinator</a></li>
-                <li><a href="courtflow/">Social Queue Manager</a></li>
+                <li><a href="ddlc/"><span class="desktop-label">League Coordinator</span><span class="mobile-label">Leagues</span></a></li>
+                <li><a href="courtflow/"><span class="desktop-label">Social Queue Manager</span><span class="mobile-label">Socials</span></a></li>
             </ul>
             <div class="nav-actions">
                 <button class="theme-toggle" aria-label="Toggle light/dark theme">
@@ -348,10 +348,29 @@
     </section>
 
     <!-- 4. Unified Footer -->
-    <footer>
-        <div class="container footer-container">
-            <p>&copy; 2026 FixtureFlow. Built for Mount Pleasant and racket clubs everywhere.</p>
-            <p style="opacity: 0.6; font-size: 0.8rem; margin-top: 6px;">Powered by Google Sheets & Apps Script</p>
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <!-- Col 1: Brand -->
+            <div class="footer-brand">
+                <a href="#" class="logo"><span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span></a>
+                <span class="footer-tagline">Less club admin, more time on the court.</span>
+            </div>
+            <!-- Col 2: Ecosystem (Hidden on mobile) -->
+            <div class="footer-links-col">
+                <h4>Ecosystem</h4>
+                <ul class="footer-links-list">
+                    <li><a href="ddlc/">League Coordinator</a></li>
+                    <li><a href="courtflow/">Social Queue Manager</a></li>
+                </ul>
+            </div>
+            <!-- Col 3: Badge -->
+            <div class="footer-badge-col">
+                <span class="footer-badge-text">Built for racket clubs everywhere.</span>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <span>&copy; 2026 FixtureFlow. All rights reserved.</span>
+            <span style="opacity: 0.8;">Powered by Google Sheets & Apps Script</span>
         </div>
     </footer>
 
