@@ -1,969 +1,165 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FixtureFlow - A Completely New Way to Manage DDLC Matches</title>
-    <meta name="description" content="Automate schedule coordination, manage availability, and coordinate matches seamlessly. Built for Match Secretaries, Captains, and Players.">
-    
-    <!-- OpenGraph Meta Tags for Premium LinkedIn Link Preview -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://fixtureflow.github.io/">
-    <meta property="og:title" content="FixtureFlow: Next-Generation DDLC Coordinator">
-    <meta property="og:description" content="Manage everything from Google Sheets while opponents self-serve fixtures, captains coordinate rosters, and players block availability on autopilot.">
-    <meta property="og:image" content="https://fixtureflow.github.io/assets/card-fixtureflow.png">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="628">
-    
-    <link rel="stylesheet" href="style.css?v=1.2">
-    
-    <!-- Custom Typographic Gradient Brand Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='50' fill='url(%23g)'/><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23a78bfa'/><stop offset='100%' stop-color='%2310b981'/></linearGradient><text x='50%' y='65%' font-family='Outfit, sans-serif' font-size='48' font-weight='800' fill='%23ffffff' text-anchor='middle'>FF</text></svg>">
+    <title>FixtureFlow - Racket Sports Club Management Solutions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --text-color: #f3f4f6;
+            --fixture-color: #1f6feb; /* Blue theme for league fixtures */
+            --court-color: #10b981; /* Emerald theme for court session management */
+            --card-bg: rgba(17, 24, 39, 0.6);
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 0 1rem;
+        }
+        .brand {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .tagline {
+            color: #9ca3af;
+            font-size: 1.25rem;
+            max-width: 600px;
+            line-height: 1.5;
+            font-weight: 300;
+        }
+        .products {
+            display: flex;
+            gap: 2rem;
+            max-width: 900px;
+            width: 100%;
+            padding: 0 1rem;
+            box-sizing: border-box;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 2.5rem;
+            flex: 1;
+            min-width: 320px;
+            max-width: 420px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        .card.fixture {
+            border-top: 4px solid var(--fixture-color);
+        }
+        .card.court {
+            border-top: 4px solid var(--court-color);
+        }
+        .card:hover.fixture {
+            box-shadow: 0 20px 40px rgba(31, 111, 235, 0.15);
+        }
+        .card:hover.court {
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15);
+        }
+        .card h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+        }
+        .card p {
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+            font-size: 1rem;
+            flex-grow: 1;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 0.85rem;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 12px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        .fixture .btn {
+            background: var(--fixture-color);
+            color: #ffffff;
+        }
+        .fixture .btn:hover {
+            box-shadow: 0 10px 20px rgba(31, 111, 235, 0.3);
+        }
+        .court .btn {
+            background: var(--court-color);
+            color: #0b0f19;
+        }
+        .court .btn:hover {
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+        footer {
+            margin-top: 4rem;
+            color: #4b5563;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
-
-    <!-- Navigation Header -->
-    <header class="nav-header">
-        <div class="container nav-container">
-            <a href="#" class="logo"><span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span></a>
-            <ul class="nav-links">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#about">Portals & Playground</a></li>
-                <li><a href="#waitlist">Waitlist</a></li>
-            </ul>
-            <div class="nav-actions">
-                <button class="theme-toggle" aria-label="Toggle light/dark theme">
-                    <!-- Loaded dynamically by JS -->
-                </button>
-                <a href="#waitlist" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">Join Waitlist</a>
-            </div>
-        </div>
+    <header>
+        <div class="brand">FixtureFlow</div>
+        <div class="tagline">Next-generation workflow automation suite for racket sports club committees and match secretaries.</div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="ambient-glow"></div>
-        <div class="container hero-grid">
-            <div class="hero-content">
-                <div class="badge">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m12 3-1.912 5.886H3.876l4.952 3.599L6.917 18.37 12 14.772l5.083 3.598-1.91-5.885 4.952-3.6H13.912L12 3z"/>
-                    </svg>
-                    Next-Generation Coordinator
-                </div>
-                <h1 class="hero-title">
-                    A completely new way to engage with <span>DDLC scheduling</span>.
-                </h1>
-                <p class="hero-description">
-                    The reliability-first coordinator built specifically to solve DDLC scheduling chaos. Manage everything directly from your Google Sheet, while opponents self-serve fixture dates, captains coordinate rosters, and players block availability on autopilot.
-                </p>
-                <div class="hero-cta-group">
-                    <a href="#waitlist" class="btn btn-primary">Get Early Access</a>
-                    <a href="#about" class="btn btn-secondary">See Portal Journey</a>
-                </div>
-            </div>
-            <div class="hero-visual">
-                <div class="visual-wrapper">
-                    <!-- High-Fidelity Booking Flow Form Mockup (Screenshot 1 Specs) -->
-                    <div class="interactive-mockup glass-panel">
-                        <div class="mockup-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <!-- White-Labeled Shield Logo -->
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: var(--color-opponent);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                <span style="font-size: 0.8rem; font-weight: 600; color: var(--mockup-text-primary);">Club Portal <span style="opacity: 0.5;">·</span> Self-Serve Scheduler</span>
-                            </div>
-                        </div>
-
-                        <div class="mockup-body" style="background: var(--mockup-bg); padding: 16px; display: flex; flex-direction: column; gap: 12px; position: relative;">
-                            <!-- Welcome Roster Banner -->
-                            <div style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); border-radius: 8px; padding: 8px; text-align: center; font-weight: 700; font-size: 0.8rem; color: var(--mockup-text-primary); letter-spacing: 0.3px;">
-                                Welcome, Opponent Club 1
-                            </div>
-
-                            <!-- Booking Target Details Card -->
-                            <div style="background: var(--mockup-card-bg); border-radius: 10px; padding: 12px; border-top: 1px solid var(--mockup-card-border); border-right: 1px solid var(--mockup-card-border); border-bottom: 1px solid var(--mockup-card-border); border-left: 4px solid var(--color-opponent); box-shadow: var(--shadow-subtle); display: flex; flex-direction: column; gap: 4px;">
-                                <div style="display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 700; color: var(--mockup-text-muted); text-transform: uppercase;">
-                                    <span>Booking Match</span>
-                                    <span style="color: #3b82f6;">HOME</span>
-                                </div>
-                                <div style="font-size: 0.85rem; font-weight: 800; color: var(--mockup-text-primary);">
-                                    Opponent Club 1 (L1) <span style="opacity: 0.5;">vs</span> <span style="color: var(--color-opponent);">Club A (L1)</span>
-                                </div>
-                                <div style="font-size: 0.7rem; color: var(--mockup-text-muted); display: flex; gap: 6px;">
-                                    <span>Cup</span> <span style="opacity: 0.5;">•</span> <span>TBD</span> <span style="opacity: 0.5;">•</span> <span>Opponent Arena</span>
-                                </div>
-                                <div style="font-size: 0.65rem; color: var(--mockup-text-muted); font-style: italic; margin-top: 2px; border-top: 1px solid var(--border-subtle); padding-top: 4px;">
-                                    Select a date that matches your court & team availability with our team's availability.
-                                </div>
-                            </div>
-
-                            <!-- Step 1: Contact Panel -->
-                            <div style="background: var(--mockup-card-bg); border-radius: 10px; padding: 10px; border: 1px solid var(--mockup-card-border); display: flex; flex-direction: column; gap: 6px;">
-                                <div style="font-size: 0.75rem; font-weight: 700; color: var(--mockup-text-primary);">Step 1: Contact Details</div>
-                                <div style="display: flex; flex-direction: column; gap: 3px;">
-                                    <span style="font-size: 0.65rem; font-weight: 700; color: var(--mockup-text-muted); text-transform: uppercase;">Your Contact Email(s)</span>
-                                    <input type="text" value="secretary@opponentclub.com" readonly style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); border-radius: 6px; padding: 6px 10px; font-size: 0.75rem; color: var(--mockup-text-primary); width: 100%; font-family: inherit; outline: none;">
-                                </div>
-                            </div>
-
-                            <!-- Step 2: Finalize Grid Panel -->
-                            <div style="background: var(--mockup-card-bg); border-radius: 10px; padding: 12px; border: 1px solid var(--mockup-card-border); display: flex; flex-direction: column; gap: 8px;">
-                                <div style="font-size: 0.75rem; font-weight: 700; color: var(--mockup-text-primary);">Step 2: Finalize Booking</div>
-                                
-                                <!-- Calendars Split-Grid -->
-                                <div class="mockup-split-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                    <!-- Month 1: November 2025 -->
-                                    <div style="background: var(--mockup-overlay-bg); border-radius: 8px; padding: 10px; border: 1px solid var(--mockup-card-border); display: flex; flex-direction: column; gap: 6px;">
-                                        <div style="font-size: 0.7rem; font-weight: 700; color: var(--mockup-text-primary); text-align: center;">November 2025</div>
-                                        <div class="mockup-calendar" style="gap: 4px;">
-                                            <div class="mockup-cal-header" style="font-size: 0.6rem; color: var(--mockup-text-muted);">S</div>
-                                            <div class="mockup-cal-header" style="font-size: 0.6rem; color: var(--mockup-text-muted);">M</div>
-                                            <div class="mockup-cal-header" style="font-size: 0.6rem; color: var(--mockup-text-muted);">T</div>
-                                            <div class="mockup-cal-header" style="font-size: 0.6rem; color: var(--mockup-text-muted);">W</div>
-                                            <div class="mockup-cal-header" style="font-size: 0.6rem; color: var(--mockup-text-muted);">T</div>
-                                            <div class="mockup-cal-header" style="font-size: 0.6rem; color: var(--mockup-text-muted);">F</div>
-                                            <div class="mockup-cal-header" style="font-size: 0.6rem; color: var(--mockup-text-muted);">S</div>
-                                            
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">26</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">27</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">28</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">29</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">30</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">31</div>
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">1</div>
-
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">2</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">3</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">4</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">5</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">6</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">7</div>
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">8</div>
-
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">9</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">10</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">11</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">12</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">13</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">14</div>
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">15</div>
-
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">16</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">17</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">18</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">19</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">20</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">21</div>
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">22</div>
-
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">23</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">24</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">25</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">26</div>
-                                            <!-- Active Selected Date Pin -->
-                                            <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 2px solid var(--color-primary); font-weight: 800; font-size: 0.65rem; color: var(--mockup-text-primary);">27</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">28</div>
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">29</div>
-
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">30</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">1</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">2</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">3</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">4</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">5</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">6</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Month 2: December 2025 (Desktop-Only for mobile visual spacing) -->
-                                    <div class="desktop-only" style="background: var(--mockup-overlay-bg); border-radius: 8px; padding: 10px; border: 1px solid var(--mockup-card-border); display: flex; flex-direction: column; gap: 6px;">
-                                        <div style="font-size: 0.7rem; font-weight: 700; color: var(--mockup-text-primary); text-align: center;">December 2025</div>
-                                        <div class="mockup-calendar" style="gap: 4px;">
-                                            <div class="mockup-cal-header" style="font-size: 0.6rem; color: var(--mockup-text-muted);">S</div>
-                                            <div class="mockup-cal-header" style="font-size: 0.6rem; color: var(--mockup-text-muted);">M</div>
-                                            <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">T</div>
-                                            <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">W</div>
-                                            <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">T</div>
-                                            <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">F</div>
-                                            <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">S</div>
-                                            
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">30</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">1</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">2</div>
-                                            <div class="mockup-cal-day" style="background: #3b82f6; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">3</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">4</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">5</div>
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">6</div>
-
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">7</div>
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">8</div>
-                                            <div class="mockup-cal-day" style="background: #3b82f6; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">9</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">10</div>
-                                            <div class="mockup-cal-day" style="background: #3b82f6; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">11</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">12</div>
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">13</div>
-
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">14</div>
-                                            <div class="mockup-cal-day conflict" style="font-weight: 700; font-size: 0.65rem;">15</div>
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">16</div>
-                                            <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.65rem;">17</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">18</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">19</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">20</div>
-
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">21</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">22</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">23</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">24</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">25</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">26</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">27</div>
-
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">28</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">29</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">30</div>
-                                            <div class="mockup-cal-day" style="font-size: 0.65rem; color: var(--mockup-text-secondary);">31</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">1</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">2</div>
-                                            <div class="mockup-cal-day" style="opacity: 0.12;">3</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Inputs & Confirm Form Box -->
-                                <div style="border-top: 1px solid var(--border-subtle); padding-top: 8px; margin-top: 4px; display: flex; flex-direction: column; gap: 6px;">
-                                    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 8px;">
-                                        <div style="display: flex; flex-direction: column; gap: 2px;">
-                                            <span style="font-size: 0.6rem; font-weight: 700; color: var(--mockup-text-muted); text-transform: uppercase;">Match Time</span>
-                                            <input type="text" value="20:00" readonly style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); border-radius: 4px; padding: 4px 8px; font-size: 0.7rem; color: var(--mockup-text-primary); width: 100%; outline: none;">
-                                        </div>
-                                        <div style="display: flex; flex-direction: column; gap: 2px;">
-                                            <span style="font-size: 0.6rem; font-weight: 700; color: var(--mockup-text-muted); text-transform: uppercase;">Venue Location</span>
-                                            <input type="text" value="Baldoyle Badminton Center" readonly style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); border-radius: 4px; padding: 4px 8px; font-size: 0.7rem; color: var(--mockup-text-primary); width: 100%; outline: none;">
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-primary" style="padding: 8px; font-size: 0.75rem; font-weight: 750; letter-spacing: 0.3px; text-transform: uppercase; width: 100%; cursor: default; pointer-events: none; background: #0f172a; border-color: #1e293b; color: #ffffff; box-shadow: var(--shadow-subtle); margin-top: 2px;">
-                                        Confirm Booking
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="products">
+        <!-- Card 1: Fixture Flow -->
+        <div class="card fixture">
+            <h2>FixtureFlow</h2>
+            <p>
+                Automate your league and cup match scheduling. Opponents self-book times, captains coordinate team sheets, and players report availability—all synchronized directly to your club's Google Sheets on autopilot.
+            </p>
+            <a href="ddlc/" class="btn">Explore League Coordinator</a>
         </div>
-    </section>
 
-    <!-- Feature Bento Grid -->
-    <section id="features" class="journey-section" style="border-top: 1px solid var(--border-glass);">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Designed to Eliminate the Chaos</h2>
-                <p class="section-description">Built by a Match Secretary to solve real-world administrative bottlenecks, making scheduling effortless for everyone.</p>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px;">
-                <div class="glass-panel" style="padding: 40px;">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 20px;">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                    </svg>
-                    <h3 style="font-size: 1.3rem; margin-bottom: 12px; font-family: var(--font-display);">Zero Back-and-Forth Chaos</h3>
-                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Early-season scheduling is traditionally a second job of phone tag and endless emails. FixtureFlow completely automates the initial coordination phase, virtually coordinating match schedules on autopilot so you don't have to lift a finger.</p>
-                </div>
-                <div class="glass-panel" style="padding: 40px;">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 20px;">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                    <h3 style="font-size: 1.3rem; margin-bottom: 12px; font-family: var(--font-display);">Visual Team Command</h3>
-                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Captains get a clean, visual overview of upcoming matches, real-time player availability, and a clear list of eligible substitutes. No more last-minute panic-texting players to fill court spots.</p>
-                </div>
-                <div class="glass-panel" style="padding: 40px;">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 20px;">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
-                    <h3 style="font-size: 1.3rem; margin-bottom: 12px; font-family: var(--font-display);">One-Click Availability</h3>
-                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Players get a simple, personal portal to block out vacation dates and matches in seconds. The system syncs their schedule instantly, keeping captains and match secretaries aligned all season long.</p>
-                </div>
-            </div>
+        <!-- Card 2: Court Flow -->
+        <div class="card court">
+            <h2>CourtFlow</h2>
+            <p>
+                Autopilot your busy social nights. Fair court rotation, skill-based player pairing, and wait-queue tracking, completely freeing your committee from whiteboard management.
+            </p>
+            <a href="courtflow/" class="btn">Explore Court Manager</a>
         </div>
-    </section>
+    </div>
 
-    <!-- The Portal Journey Section -->
-    <section id="about" class="journey-section" style="border-top: 1px solid var(--border-glass); background: none;">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">The Portal Journey</h2>
-                <p class="section-description">Explore how FixtureFlow coordinates the entire DDLC scheduling experience seamlessly across every user role.</p>
-            </div>
-
-            <!-- Portal Navigation Tabs -->
-            <div class="portal-tabs">
-                <button class="tab-btn active" data-portal="secretary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-                    Opponent Portal
-                </button>
-                <button class="tab-btn" data-portal="captain">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    Captain Portal
-                </button>
-                <button class="tab-btn" data-portal="player">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Player Portal
-                </button>
-            </div>
-
-            <!-- Match Secretary Portal Content -->
-            <div class="portal-content active" id="secretary-portal">
-                <div class="portal-info">
-                    <h3>Opponent Match Sec Portal</h3>
-                    <p>Eliminate the mismatch of 'what you have' vs. 'what they have'. The Opponent Portal gives external match secretaries a secure, unified view of fixtures, court availability, and scheduling options so they can completely self-serve the final times.</p>
-                    <ul class="portal-features-list">
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Unified source of truth<span class="desktop-only"> – both clubs see the exact same match data, status, and live court availability, completely eliminating spreadsheet confusion and calendar mistakes.</span></span>
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Hands-off initial scheduling<span class="desktop-only"> – once your preliminary structure is in place, opponents self-serve their times directly from your free slots, completing the schedule without you lifting a finger.</span></span>
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Opponent reschedule triggers<span class="desktop-only"> – opponents get pre-configured messaging triggers to request changes instantly, keeping all requests structured, prefilled, and easy to manage.</span></span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="mockup-container">
-                    <!-- White-Labeled Responsive Header (Screenshot 2 Specs) -->
-                    <div class="mockup-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <!-- Shield Icon -->
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: var(--color-opponent);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            <span style="font-size: 0.8rem; font-weight: 600; color: var(--mockup-text-primary);">Club Portal <span style="opacity: 0.5;">·</span> Opponent Dashboard</span>
-                        </div>
-                        <span style="font-size: 0.7rem; color: var(--mockup-text-muted);">Schedule View</span>
-                    </div>
-                    
-                    <div class="mockup-body" style="background: var(--mockup-bg); padding: 16px; display: flex; flex-direction: column; gap: 12px;">
-                        <div class="mockup-split-grid" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;">
-                            <!-- Left Column: Stack of 4 Unique Mobile Match Cards -->
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <!-- Card 1: State A - Awaiting Booking (TBD Date) -->
-                                <div style="background: var(--mockup-card-bg); border-radius: 10px; padding: 12px; border: 1px solid var(--mockup-card-border); box-shadow: var(--shadow-subtle); display: flex; flex-direction: column; gap: 6px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-                                        <div style="display: flex; flex-direction: column; gap: 2px; font-weight: 700; font-size: 0.8rem;">
-                                            <span style="color: var(--mockup-text-primary);">Opponent Club 1 (L1)</span>
-                                            <span style="color: var(--mockup-text-secondary); font-size: 0.75rem; font-weight: 500;">Club A (L1)</span>
-                                        </div>
-                                        <span class="m-badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; font-weight: 700; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(59, 130, 246, 0.2);">HOME</span>
-                                    </div>
-                                    <div style="font-size: 0.7rem; color: var(--mockup-text-muted); display: flex; gap: 6px;">
-                                        <span>League</span> <span style="opacity: 0.5;">•</span> <span>TBD</span> <span style="opacity: 0.5;">•</span> <span>Opponent Arena</span>
-                                    </div>
-                                    <div style="margin-top: 4px; border-top: 1px solid var(--border-subtle); padding-top: 6px; display: flex; justify-content: space-between; align-items: center;">
-                                        <span class="m-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); font-size: 0.65rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: default;">⚠️ Action Needed ›</span>
-                                    </div>
-                                </div>
-
-                                <!-- Card 2: State B - Confirmed (Future Match) -->
-                                <div style="background: var(--mockup-card-bg); border-radius: 10px; padding: 12px; border: 1px solid var(--mockup-card-border); box-shadow: var(--shadow-subtle); display: flex; flex-direction: column; gap: 6px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-                                        <div style="display: flex; flex-direction: column; gap: 2px; font-weight: 700; font-size: 0.8rem;">
-                                            <span style="color: var(--mockup-text-primary);">Opponent Club 1 (L2)</span>
-                                            <span style="color: var(--mockup-text-secondary); font-size: 0.75rem; font-weight: 500;">Club A (L2)</span>
-                                        </div>
-                                        <span class="m-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.2);">AWAY</span>
-                                    </div>
-                                    <div style="font-size: 0.7rem; color: var(--mockup-text-muted); display: flex; gap: 6px;">
-                                        <span>Cup</span> <span style="opacity: 0.5;">•</span> <span>Mon, 27 Oct @ 19:00</span> <span style="opacity: 0.5;">•</span> <span>Opponent Venue</span>
-                                    </div>
-                                    <div style="margin-top: 4px; border-top: 1px solid var(--border-subtle); padding-top: 6px; display: flex; justify-content: space-between; align-items: center;">
-                                        <span class="m-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); font-size: 0.65rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: default;">✅ Confirmed</span>
-                                    </div>
-                                </div>
-
-                                <!-- Card 3: State C - Confirmed with Reschedule active -->
-                                <div style="background: var(--mockup-card-bg); border-radius: 10px; padding: 12px; border: 1px solid var(--mockup-card-border); box-shadow: var(--shadow-subtle); display: flex; flex-direction: column; gap: 6px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-                                        <div style="display: flex; flex-direction: column; gap: 2px; font-weight: 700; font-size: 0.8rem;">
-                                            <span style="color: var(--mockup-text-primary);">Opponent Club 1 (M1)</span>
-                                            <span style="color: var(--mockup-text-secondary); font-size: 0.75rem; font-weight: 500;">Club A (M1)</span>
-                                        </div>
-                                        <span class="m-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.2);">AWAY</span>
-                                    </div>
-                                    <div style="font-size: 0.7rem; color: var(--mockup-text-muted); display: flex; gap: 6px;">
-                                        <span>Cup</span> <span style="opacity: 0.5;">•</span> <span>Mon, 3 Nov @ 19:00</span> <span style="opacity: 0.5;">•</span> <span>Opponent Venue</span>
-                                    </div>
-                                    <div style="margin-top: 4px; border-top: 1px solid var(--border-subtle); padding-top: 6px; display: flex; justify-content: space-between; align-items: center;">
-                                        <span class="m-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); font-size: 0.65rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: default;">✅ Confirmed</span>
-                                        <span class="m-badge" style="background: var(--mockup-overlay-bg); color: var(--mockup-text-secondary); border: 1px solid var(--mockup-card-border); font-size: 0.65rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: default; display: flex; align-items: center; gap: 4px;">Reschedule</span>
-                                    </div>
-                                </div>
-
-                                <!-- Card 4: State D - Reschedule Requested -->
-                                <div style="background: var(--mockup-card-bg); border-radius: 10px; padding: 12px; border: 1px solid var(--mockup-card-border); box-shadow: var(--shadow-subtle); display: flex; flex-direction: column; gap: 6px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-                                        <div style="display: flex; flex-direction: column; gap: 2px; font-weight: 700; font-size: 0.8rem;">
-                                            <span style="color: var(--mockup-text-primary);">Opponent Club 1 (L1)</span>
-                                            <span style="color: var(--mockup-text-secondary); font-size: 0.75rem; font-weight: 500;">Club A (L1)</span>
-                                        </div>
-                                        <span class="m-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.2);">AWAY</span>
-                                    </div>
-                                    <div style="font-size: 0.7rem; color: var(--mockup-text-muted); display: flex; gap: 6px;">
-                                        <span>League</span> <span style="opacity: 0.5;">•</span> <span>Thu, 19 Feb @ 19:00</span> <span style="opacity: 0.5;">•</span> <span>Opponent Venue</span>
-                                    </div>
-                                    <div style="margin-top: 4px; border-top: 1px solid var(--border-subtle); padding-top: 6px; display: flex; justify-content: space-between; align-items: center; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
-                                        <span style="font-size: 0.65rem; color: var(--mockup-text-muted); font-weight: 600; display: flex; align-items: center; gap: 4px;">Reschedule Requested</span>
-                                        <span style="font-size: 0.6rem; color: var(--mockup-text-muted); opacity: 0.8;">Original Date Booked</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Right Column: High-Fidelity Reschedule Message Preview Modal (Desktop-Only) -->
-                            <div class="desktop-only" style="background: var(--mockup-card-bg); border-radius: 10px; padding: 14px; box-shadow: var(--shadow-subtle); border: 1px solid var(--mockup-card-border); display: flex; flex-direction: column; gap: 10px;">
-                                <div style="font-size: 0.95rem; font-weight: 800; color: var(--mockup-text-primary); text-align: center; border-bottom: 1px solid var(--mockup-card-border); padding-bottom: 6px;">
-                                    Request Reschedule
-                                </div>
-
-                                <!-- Selection Info Details -->
-                                <div style="background: var(--mockup-overlay-bg); border-radius: 8px; padding: 10px; border: 1px solid var(--mockup-card-border); display: flex; flex-direction: column; gap: 3px;">
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--mockup-text-primary);">
-                                        <span>Opponent Club 1 (M1)</span>
-                                        <span style="color: #3b82f6; font-size: 0.6rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.15); padding: 1px 4px; border-radius: 4px;">AWAY</span>
-                                    </div>
-                                    <div style="font-size: 0.75rem; font-weight: 700; color: var(--mockup-text-secondary);">
-                                        vs Club A (M1)
-                                    </div>
-                                    <div style="font-size: 0.65rem; color: var(--mockup-text-muted); margin-top: 2px;">
-                                        Cup <span style="opacity: 0.5;">•</span> Mon, 3 Nov @ 19:00 <span style="opacity: 0.5;">•</span> Opponent Venue
-                                    </div>
-                                </div>
-
-                                <!-- Away Proposing Alert -->
-                                <div style="background: var(--mockup-overlay-bg); border-radius: 8px; padding: 8px; border: 1px solid var(--mockup-card-border); font-size: 0.65rem; color: var(--mockup-text-muted); font-weight: 600; line-height: 1.35;">
-                                    <span style="color: var(--mockup-text-primary);">Away Match:</span> Proposing dates based strictly on player availability (opponent coordinates their own courts).
-                                </div>
-
-                                <!-- Warning Alert Banner (Yellow Card) -->
-                                <div style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 8px; padding: 8px; display: flex; gap: 6px; align-items: flex-start; font-size: 0.65rem; color: #eab308; line-height: 1.35;">
-                                    <span style="font-size: 0.65rem; font-weight: 800; display: inline-block; width: 14px; height: 14px; text-align: center; border-radius: 50%; background: #eab308; color: #1e1b4b; line-height: 14px; font-family: sans-serif; font-style: normal;">i</span>
-                                    <div>
-                                        <div style="font-weight: 750;">Email Link Unavailable on Desktop</div>
-                                        <div style="opacity: 0.85;">Please copy the message below and paste it into your email client.</div>
-                                    </div>
-                                </div>
-
-                                <!-- Monospace Message Preview -->
-                                <div style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 2px;">
-                                    <div style="font-size: 0.6rem; font-weight: 700; color: var(--mockup-text-muted); text-transform: uppercase; margin-bottom: 4px;">Message Preview</div>
-                                    <div style="font-size: 0.6rem; color: var(--mockup-text-secondary); line-height: 1.35; font-family: monospace; overflow-y: auto; max-height: 100px; border-radius: 4px; padding: 6px; background: var(--mockup-card-bg); border: 1px solid var(--mockup-card-border);">
-                                        Hi Match Secretary,<br><br>
-                                        I am contacting you regarding the following fixture:<br>
-                                        -----------------------------------------<br>
-                                        Matchup: Opponent Club 1 vs Club A<br>
-                                        Competition: Cup<br>
-                                        Date: Mon, 3 Nov @ 19:00<br>
-                                        Venue: Home Club Venue (AWAY)<br>
-                                        -----------------------------------------<br><br>
-                                        We would like to request a reschedule for the following reason:<br><br>
-                                        Severe weather conditions.<br><br>
-                                        Please let us know if this is possible.<br><br>
-                                        Regards,<br>
-                                        Opponent Match Secretary
-                                    </div>
-                                </div>
-
-                                <!-- Modal Actions Footer -->
-                                <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 8px; margin-top: 2px;">
-                                    <button style="background: transparent; border: 1px solid var(--mockup-card-border); border-radius: 6px; padding: 8px; font-size: 0.7rem; font-weight: 750; color: var(--mockup-text-primary); cursor: default;">
-                                        CANCEL
-                                    </button>
-                                    <button style="background: #0f172a; border: 1px solid #1e293b; border-radius: 6px; padding: 8px; font-size: 0.7rem; font-weight: 750; color: #ffffff; cursor: default;">
-                                        COPY TO CLIPBOARD
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Testing Playground Section (Post-Mockup & Full-Width Span) -->
-                <div class="demo-card">
-                    <div class="demo-card-header">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="pulsing-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--color-success);"></span>
-                            <strong class="demo-card-title">Interactive Playground</strong>
-                        </div>
-                        <span class="badge role-badge badge-opponent">Role: Opponent Match Secretary</span>
-                    </div>
-                    
-                    <p class="demo-card-body-text">
-                        Experience the self-serve automation first-hand. Propose date reschedules as an opponent secretary and observe the automated schedule changes instantly.
-                    </p>
-                    
-                    <div class="demo-card-footer">
-                        <div class="demo-card-creds">
-                            <div>Select Club: <span style="color: var(--text-primary); font-weight: 700;">Opponent Club 1</span></div>
-                            <div class="creds-divider" style="opacity: 0.3;">|</div>
-                            <div>Demo PIN: <span style="color: var(--text-primary); font-family: monospace; font-weight: 700;">1234</span></div>
-                        </div>
-                        
-                        <a href="https://script.google.com/macros/s/AKfycbyywJCewiYxRoJxkuJh7zZTCrKc4TzGezZKiu4jfRHkmPzEQKDLgfqkZc7PHo_B9NmL/exec" target="_blank" class="btn btn-opponent">
-                            Launch Opponent Portal
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Captain Portal Content -->
-            <div class="portal-content" id="captain-portal">
-                <div class="portal-info">
-                    <h3>Team Independence for Captains</h3>
-                    <p>Empower captains to manage their own rosters and reschedules. Instead of texting you every update, captains get a dedicated dashboard to run their teams independently.</p>
-                    <ul class="portal-features-list">
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Roster calendar views<span class="desktop-only"> – a consolidated monthly matrix showing exactly who is available for upcoming matches.</span></span>
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Prefilled reschedule triggers<span class="desktop-only"> – captains can coordinate reschedules with prefilled, prefilled message scripts ready to send.</span></span>
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Smart substitute sourcing<span class="desktop-only"> – view cross-team availability data to make informed roster adjustments when players are missing.</span></span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="mockup-container">
-                    <!-- White-Labeled Responsive Captain Portal Header -->
-                    <div class="mockup-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <!-- Inline Generic Vector Badge (White-Labeled Shield Icon) -->
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: var(--color-captain);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            <span style="font-size: 0.8rem; font-weight: 600; color: var(--mockup-text-primary);">Club Portal <span style="opacity: 0.5;">·</span> Captain Dashboard</span>
-                        </div>
-                        <span style="font-size: 0.7rem; color: var(--mockup-text-muted);">League Schedule</span>
-                    </div>
-                    
-                    <div class="mockup-body" style="background: var(--mockup-bg); padding: 16px; display: flex; flex-direction: column; gap: 12px;">
-                        <!-- Theme-Adaptive Managing Team Banner -->
-                        <div style="background: var(--color-captain-glow); border: 1px solid rgba(167, 139, 250, 0.2); border-radius: 8px; padding: 10px; text-align: center; font-weight: 700; font-size: 0.8rem; color: var(--color-captain); letter-spacing: 0.5px;">
-                            MANAGING: L1
-                        </div>
-
-                        <div class="mockup-split-grid" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;">
-                            <!-- Left Column: Upcoming Matches -->
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <!-- Card 1: AWAY Match -->
-                                <div style="background: var(--mockup-card-bg); border-radius: 10px; padding: 12px; border-left: 4px solid var(--color-captain); border-top: 1px solid var(--mockup-card-border); border-right: 1px solid var(--mockup-card-border); border-bottom: 1px solid var(--mockup-card-border); box-shadow: var(--shadow-subtle); display: flex; flex-direction: column; gap: 6px;">
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--mockup-text-primary);">
-                                        <span>Tue, 18 Nov</span>
-                                        <span>20:00</span>
-                                    </div>
-                                    <div style="font-size: 0.85rem; font-weight: 800; color: var(--mockup-text-primary);">
-                                        L1 <span style="opacity: 0.5;">vs</span> <span style="color: var(--color-captain); text-decoration: underline; cursor: default;">Opponent Club 1 - L1</span>
-                                    </div>
-                                    <div style="display: flex; gap: 6px; align-items: center; margin-top: 2px;">
-                                        <span class="m-badge" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; font-weight: 700; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(59, 130, 246, 0.2);">AWAY</span>
-                                        <span class="m-badge" style="background: var(--mockup-overlay-bg); color: var(--mockup-text-secondary); font-weight: 700; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--mockup-card-border);">LEAGUE</span>
-                                    </div>
-                                    <div style="font-size: 0.7rem; color: var(--mockup-text-muted); display: flex; align-items: center; gap: 2px; margin-top: 2px;">
-                                        Opponent Arena
-                                    </div>
-                                </div>
-
-                                <!-- Card 2: HOME Match -->
-                                <div style="background: var(--mockup-card-bg); border-radius: 10px; padding: 12px; border-left: 4px solid var(--color-captain); border-top: 1px solid var(--mockup-card-border); border-right: 1px solid var(--mockup-card-border); border-bottom: 1px solid var(--mockup-card-border); box-shadow: var(--shadow-subtle); display: flex; flex-direction: column; gap: 6px;">
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--mockup-text-primary);">
-                                        <span>Thu, 27 Nov</span>
-                                        <span>19:00</span>
-                                    </div>
-                                    <div style="font-size: 0.85rem; font-weight: 800; color: var(--mockup-text-primary);">
-                                        L1 <span style="opacity: 0.5;">vs</span> <span style="color: var(--color-captain); text-decoration: underline; cursor: default;">Opponent Club 2 - L1</span>
-                                    </div>
-                                    <div style="display: flex; gap: 6px; align-items: center; margin-top: 2px;">
-                                        <span class="m-badge" style="background: rgba(4, 120, 87, 0.15); color: #10b981; font-weight: 700; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(4, 120, 87, 0.2);">HOME</span>
-                                        <span class="m-badge" style="background: var(--mockup-overlay-bg); color: var(--mockup-text-secondary); font-weight: 700; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--mockup-card-border);">CUP</span>
-                                    </div>
-                                    <div style="font-size: 0.7rem; color: var(--mockup-text-muted); display: flex; align-items: center; gap: 2px; margin-top: 2px;">
-                                        Home Club Venue
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Right Column: Roster Availability Grid -->
-                            <div style="display: flex; flex-direction: column; gap: 8px; background: var(--mockup-card-bg); border-radius: 10px; padding: 12px; box-shadow: var(--shadow-subtle); border: 1px solid var(--mockup-card-border);">
-                                <div style="font-size: 0.75rem; font-weight: 700; color: var(--mockup-text-primary); text-align: center; margin-bottom: 4px;">November 2025</div>
-                                <div class="mockup-calendar" style="gap: 4px;">
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px; color: var(--mockup-text-muted);">S</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px; color: var(--mockup-text-muted);">M</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px; color: var(--mockup-text-muted);">T</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px; color: var(--mockup-text-muted);">W</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px; color: var(--mockup-text-muted);">T</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px; color: var(--mockup-text-muted);">F</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; padding-bottom: 2px; color: var(--mockup-text-muted);">S</div>
-                                    
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">26</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">27</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">28</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">29</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">30</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">31</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">1</div>
-
-                                    <div class="mockup-cal-day" style="background: #ea580c; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">2</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">3</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">4</div>
-                                    <div class="mockup-cal-day" style="background: #ea580c; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">5</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">6</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">7</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">8</div>
-
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">9</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">10</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">11</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">12</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">13</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">14</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">15</div>
-
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">16</div>
-                                    <div class="mockup-cal-day" style="background: #ea580c; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">17</div>
-                                    <div class="mockup-cal-day" style="background: #3b82f6; color: #ffffff !important; font-weight: 700; font-size: 0.7rem; border: 1px solid rgba(59, 130, 246, 0.5);">18</div>
-                                    <div class="mockup-cal-day" style="background: #ea580c; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">19</div>
-                                    <div class="mockup-cal-day" style="background: #ea580c; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">20</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">21</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">22</div>
-
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">23</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">24</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">25</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">26</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">27</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">28</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">29</div>
-
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">30</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">1</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">2</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">3</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">4</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">5</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">6</div>
-                                </div>
-                                
-                                <!-- Sidebar: Availability Details Roster -->
-                                <div style="border-top: 1px solid var(--border-subtle); margin-top: 6px; padding-top: 6px; display: flex; flex-direction: column; gap: 4px;">
-                                    <div style="font-size: 0.6rem; font-weight: 700; color: var(--mockup-text-muted); text-transform: uppercase; letter-spacing: 0.3px;">Availability Details</div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem;">
-                                        <span style="font-weight: 600; color: var(--mockup-text-primary);">Player 1</span>
-                                        <span style="font-size: 0.55rem; background: var(--mockup-overlay-bg); color: var(--mockup-text-secondary); padding: 1px 4px; border-radius: 4px; font-weight: 700; border: 1px solid var(--mockup-card-border);">CORE SQUAD</span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem;">
-                                        <span style="font-weight: 600; color: var(--mockup-text-primary);">Player 2</span>
-                                        <span style="font-size: 0.55rem; background: var(--mockup-overlay-bg); color: var(--mockup-text-secondary); padding: 1px 4px; border-radius: 4px; font-weight: 700; border: 1px solid var(--mockup-card-border);">CORE SQUAD</span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem;">
-                                        <span style="font-weight: 600; color: var(--mockup-text-primary);">Player 3</span>
-                                        <span style="font-size: 0.55rem; background: var(--mockup-overlay-bg); color: var(--mockup-text-secondary); padding: 1px 4px; border-radius: 4px; font-weight: 700; border: 1px solid var(--mockup-card-border);">CORE SQUAD</span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem;">
-                                        <span style="font-weight: 600; color: var(--mockup-text-primary);">Player 4</span>
-                                        <span style="font-size: 0.55rem; background: var(--mockup-overlay-bg); color: var(--mockup-text-secondary); padding: 1px 4px; border-radius: 4px; font-weight: 700; border: 1px solid var(--mockup-card-border);">CORE SQUAD</span>
-                                    </div>
-                                    <div style="border: 1px dashed var(--color-captain); border-radius: 6px; padding: 4px; text-align: center; color: var(--color-captain); font-size: 0.65rem; font-weight: 700; cursor: default; background: var(--mockup-overlay-bg);">
-                                        + Add Substitute(s)...
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Testing Playground Section (Post-Mockup & Full-Width Span) -->
-                <div class="demo-card">
-                    <div class="demo-card-header">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="pulsing-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--color-success);"></span>
-                            <strong class="demo-card-title">Interactive Playground</strong>
-                        </div>
-                        <span class="badge role-badge badge-captain">Role: Team Captain</span>
-                    </div>
-                    
-                    <p class="demo-card-body-text">
-                        Simulating substitute coordination is instant. Log into a captain's dashboard, review roster availability, source substitutes from other squads, and manage match rosters in real time.
-                    </p>
-                    
-                    <div class="demo-card-footer">
-                        <div class="demo-card-creds">
-                            <div>Select Team: <span style="color: var(--text-primary); font-weight: 700;">L1, L2, or M1</span></div>
-                            <div class="creds-divider" style="opacity: 0.3;">|</div>
-                            <div>Demo PIN: <span style="color: var(--text-primary); font-family: monospace; font-weight: 700;">1234</span></div>
-                        </div>
-                        
-                        <a href="https://script.google.com/macros/s/AKfycbyywJCewiYxRoJxkuJh7zZTCrKc4TzGezZKiu4jfRHkmPzEQKDLgfqkZc7PHo_B9NmL/exec?view=captain" target="_blank" class="btn btn-captain">
-                            Launch Captain Portal
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Player Portal Content -->
-            <div class="portal-content" id="player-portal">
-                <div class="portal-info">
-                    <h3>Effortless Player Control</h3>
-                    <p>Take the administrative burden off captains and secretaries. Players get a simple, mobile-first interface to log and manage their own unavailability throughout the season.</p>
-                    <ul class="portal-features-list">
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Mobile-first blocking<span class="desktop-only"> – a highly visual calendar interface where players can tap to block vacation or busy dates in seconds.</span></span>
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Automatic conflict flagging<span class="desktop-only"> – if a player blocks a date that overlaps with an upcoming draft fixture, the system alerts the captain.</span></span>
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Consolidated match calendar<span class="desktop-only"> – players see all scheduled matches, home/away details, and opponent info in one clear seasonal timeline.</span></span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="mockup-container">
-                    <!-- White-Labeled Responsive Player Portal Header -->
-                    <div class="mockup-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <!-- Inline Generic Vector Badge (White-Labeled Shield Icon) -->
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: var(--color-player);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            <span style="font-size: 0.8rem; font-weight: 600; color: var(--mockup-text-primary);">Club Portal <span style="opacity: 0.5;">·</span> Player Dashboard</span>
-                        </div>
-                        <span style="font-size: 0.7rem; color: var(--mockup-text-muted);">My Schedule</span>
-                    </div>
-
-                    <div class="mockup-body" style="background: var(--mockup-bg); padding: 16px; display: flex; flex-direction: column; gap: 12px;">
-                        <!-- Theme-Adaptive Managing Player Banner -->
-                        <div style="background: var(--color-player-glow); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; padding: 10px; text-align: center; font-weight: 700; font-size: 0.8rem; color: var(--color-player); letter-spacing: 0.5px;">
-                            MANAGING: PLAYER 1
-                        </div>
-
-                        <!-- Instructions & Legend Panel -->
-                        <div style="text-align: center; padding: 4px 0 8px;">
-                            <div style="font-size: 0.9rem; font-weight: 700; color: var(--mockup-text-primary); margin-bottom: 4px;">Review & Manage Calendar</div>
-                            <div style="font-size: 0.7rem; color: var(--mockup-text-muted); max-width: 280px; margin: 0 auto 8px; line-height: 1.3;">
-                                Tap your Start Date, then tap your End Date to block a range (e.g. going on holiday).
-                            </div>
-                            <div style="display: flex; justify-content: center; gap: 12px; font-size: 0.7rem; font-weight: 600;">
-                                <span style="color: #991b1b; display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #991b1b;"></span> Unavailable</span>
-                                <span style="color: #3b82f6; display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #3b82f6;"></span> Match</span>
-                            </div>
-                        </div>
-
-                        <!-- Dual-Month Responsive Grid -->
-                        <div class="mockup-split-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <!-- Month 1: November 2025 -->
-                            <div style="background: var(--mockup-card-bg); border-radius: 10px; padding: 12px; box-shadow: var(--shadow-subtle); border: 1px solid var(--mockup-card-border); display: flex; flex-direction: column; gap: 8px;">
-                                <div style="font-size: 0.75rem; font-weight: 700; color: var(--mockup-text-primary); text-align: center;">November 2025</div>
-                                <div class="mockup-calendar" style="gap: 4px;">
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">S</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">M</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">T</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">W</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">T</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">F</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">S</div>
-                                    
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">26</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">27</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">28</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">29</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">30</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">31</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">1</div>
-
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">2</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">3</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">4</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">5</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">6</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">7</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">8</div>
-
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">9</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">10</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">11</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">12</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">13</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">14</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">15</div>
-
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">16</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">17</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">18</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">19</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">20</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">21</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">22</div>
-
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">23</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">24</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">25</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">26</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">27</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">28</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">29</div>
-
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">30</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">1</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">2</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">3</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">4</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">5</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">6</div>
-                                </div>
-                            </div>
-
-                            <!-- Month 2: December 2025 (Desktop-Only to keep mobile focused and spacious) -->
-                            <div class="desktop-only" style="background: var(--mockup-card-bg); border-radius: 10px; padding: 12px; box-shadow: var(--shadow-subtle); border: 1px solid var(--mockup-card-border); display: flex; flex-direction: column; gap: 8px;">
-                                <div style="font-size: 0.75rem; font-weight: 700; color: var(--mockup-text-primary); text-align: center;">December 2025</div>
-                                <div class="mockup-calendar" style="gap: 4px;">
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">S</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">M</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">T</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">W</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">T</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">F</div>
-                                    <div class="mockup-cal-header" style="font-size: 0.65rem; color: var(--mockup-text-muted);">S</div>
-                                    
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">30</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">1</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">2</div>
-                                    <div class="mockup-cal-day" style="background: #3b82f6; color: #ffffff !important; font-weight: 700; font-size: 0.7rem; border: 1px solid rgba(59, 130, 246, 0.5);">3</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">4</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">5</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">6</div>
-
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">7</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">8</div>
-                                    <div class="mockup-cal-day" style="background: #3b82f6; color: #ffffff !important; font-weight: 700; font-size: 0.7rem; border: 1px solid rgba(59, 130, 246, 0.5);">9</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">10</div>
-                                    <div class="mockup-cal-day" style="background: #3b82f6; color: #ffffff !important; font-weight: 700; font-size: 0.7rem; border: 1px solid rgba(59, 130, 246, 0.5);">11</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">12</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">13</div>
-
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">14</div>
-                                    <div class="mockup-cal-day conflict" style="font-weight: 700; font-size: 0.7rem;">15</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">16</div>
-                                    <div class="mockup-cal-day" style="background: #991b1b; color: #ffffff !important; font-weight: 700; font-size: 0.7rem;">17</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">18</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">19</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">20</div>
-
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">21</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">22</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">23</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">24</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">25</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">26</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">27</div>
-
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">28</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">29</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">30</div>
-                                    <div class="mockup-cal-day" style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); font-size: 0.7rem; color: var(--mockup-text-secondary);">31</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">1</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">2</div>
-                                    <div class="mockup-cal-day" style="opacity: 0.15;">3</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Floating Roster Actions Banner Overlay -->
-                        <div style="background: #7db3b3; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 12px; text-align: center; font-weight: 750; font-size: 0.85rem; color: #ffffff; box-shadow: 0 8px 20px rgba(0,0,0,0.15); letter-spacing: 0.5px; margin-top: 4px; cursor: default; pointer-events: none;">
-                            NO CHANGES (16 BLOCKED)
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Testing Playground Section (Post-Mockup & Full-Width Span) -->
-                <div class="demo-card">
-                    <div class="demo-card-header">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="pulsing-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--color-success);"></span>
-                            <strong class="demo-card-title">Interactive Playground</strong>
-                        </div>
-                        <span class="badge role-badge badge-player">Role: Squad Player</span>
-                    </div>
-                    
-                    <p class="demo-card-body-text">
-                        Tapping dates to block vacation works instantly from any mobile phone. Log in as a player, tap calendar dates to flag unavailability, and easily keep your captain up to date.
-                    </p>
-                    
-                    <div class="demo-card-footer">
-                        <div class="demo-card-creds">
-                            <div>Player Name: <span style="color: var(--text-primary); font-weight: 700;">Player 1</span></div>
-                            <div class="creds-divider" style="opacity: 0.3;">|</div>
-                            <div>Squad PIN: <span style="color: var(--text-primary); font-family: monospace; font-weight: 700;">1234</span></div>
-                        </div>
-                        
-                        <a href="https://script.google.com/macros/s/AKfycbyywJCewiYxRoJxkuJh7zZTCrKc4TzGezZKiu4jfRHkmPzEQKDLgfqkZc7PHo_B9NmL/exec?view=player" target="_blank" class="btn btn-player">
-                            Launch Player Portal
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-
-
-     <!-- Waitlist Form Section -->
-     <section id="waitlist" class="lead-section">
-        <div class="ambient-glow" style="top: auto; bottom: -10vw; left: -10vw; right: auto;"></div>
-        <div class="container">
-            <div class="glass-panel lead-wrapper">
-                <h2>Get Early Access</h2>
-                <p>We are currently launching with a group of selected Badminton clubs. Join the waitlist to bring FixtureFlow's revolutionary coordination system to your club.</p>
-                <form class="lead-form" id="waitlist-form">
-                    <div>
-                        <label for="name">Your Name</label>
-                        <input type="text" id="name" name="name" placeholder="e.g., Alex Smith" required>
-                    </div>
-                    <div>
-                        <label for="club">Badminton Club Name</label>
-                        <input type="text" id="club" name="club" placeholder="e.g., Dublin Badminton Club" required>
-                    </div>
-                    <div class="form-group-full">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" placeholder="you@example.com" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Join the Waitlist</button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- Main Footer -->
-    <footer class="main-footer">
-        <div class="container footer-content">
-            <div class="footer-brand">
-                <a href="#" class="logo" style="font-size: 1.3rem;"><span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span></a>
-                <span class="footer-tagline">Revolutionizing DDLC coordination systems.</span>
-            </div>
-            <ul class="footer-links">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#about">Portals & Playground</a></li>
-                <li><a href="#waitlist">Waitlist</a></li>
-            </ul>
-            <span class="footer-badge">Built by a Match Secretary, for Match Secretaries.</span>
-        </div>
+    <footer>
+        &copy; 2026 FixtureFlow. Built for Mount Pleasant and club leaders everywhere.
     </footer>
-
-    <script src="script.js"></script>
 </body>
 </html>
