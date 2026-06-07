@@ -1,0 +1,34 @@
+# Codebase Structure Map
+
+> [!NOTE]
+> This index is generated automatically by running `python3 scripts/build_codebase_map.py`. Avoid manual edits.
+
+- **Root Directory (/)**
+    - 📄 [.gitignore](file:///Users/mhx/Documents/fixtureflow.github.io/.gitignore) (0.09 KB)
+    - 📄 [README.md](file:///Users/mhx/Documents/fixtureflow.github.io/README.md) (2.23 KB)
+    - 📄 [favicon.svg](file:///Users/mhx/Documents/fixtureflow.github.io/favicon.svg) (0.48 KB)
+    - 📄 [index.html](file:///Users/mhx/Documents/fixtureflow.github.io/index.html) (14.10 KB)
+    - 📁 **assets/** (`/assets`)
+        - 📁 **css/** (`/assets/css`)
+            - 📄 [style.css](file:///Users/mhx/Documents/fixtureflow.github.io/assets/css/style.css) (7.14 KB)
+        - 📁 **js/** (`/assets/js`)
+            - 📄 [script.js](file:///Users/mhx/Documents/fixtureflow.github.io/assets/js/script.js) (2.99 KB)
+    - 📁 **courtflow/** (`/courtflow`)
+        - 📄 [index.html](file:///Users/mhx/Documents/fixtureflow.github.io/courtflow/index.html) (46.05 KB)
+    - 📁 **ddlc/** (`/ddlc`)
+        - 📄 [BACKLOG.md](file:///Users/mhx/Documents/fixtureflow.github.io/ddlc/BACKLOG.md) (0.74 KB)
+        - 📄 [CHANGELOG.md](file:///Users/mhx/Documents/fixtureflow.github.io/ddlc/CHANGELOG.md) (0.29 KB)
+        - 📄 [index.html](file:///Users/mhx/Documents/fixtureflow.github.io/ddlc/index.html) (98.98 KB)
+        - 📄 [script.js](file:///Users/mhx/Documents/fixtureflow.github.io/ddlc/script.js) (6.83 KB)
+        - 📄 [style.css](file:///Users/mhx/Documents/fixtureflow.github.io/ddlc/style.css) (25.13 KB)
+        - 📁 **assets/** (`/ddlc/assets`)
+            - 📄 [card-fixtureflow.png](file:///Users/mhx/Documents/fixtureflow.github.io/ddlc/assets/card-fixtureflow.png) (4239.78 KB)
+            - 📄 [logo-mountpleasant.png](file:///Users/mhx/Documents/fixtureflow.github.io/ddlc/assets/logo-mountpleasant.png) (100.38 KB)
+    - 📁 **docs/** (`/docs`)
+        - 📄 [redesign_plan.md](file:///Users/mhx/Documents/fixtureflow.github.io/docs/redesign_plan.md) (15.22 KB)
+        - 📁 **architecture/** (`/docs/architecture`)
+            - 📄 [MASTER_ARCHITECTURE.md](file:///Users/mhx/Documents/fixtureflow.github.io/docs/architecture/MASTER_ARCHITECTURE.md) (3.63 KB)
+        - 📁 **user_guides/** (`/docs/user_guides`)
+            - 📄 [INSTRUCTION_MANUAL.md](file:///Users/mhx/Documents/fixtureflow.github.io/docs/user_guides/INSTRUCTION_MANUAL.md) (2.40 KB)
+    - 📁 **scripts/** (`/scripts`)
+        - 📄 [build_codebase_map.py](file:///Users/mhx/Documents/fixtureflow.github.io/scripts/build_codebase_map.py) (2.32 KB)
