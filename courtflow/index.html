@@ -153,20 +153,18 @@
         /* Mockup Grid Area */
         .mockup-body {
             display: grid;
-            grid-template-columns: 280px 1fr;
+            grid-template-columns: 1fr 280px;
             min-height: 440px;
             background: var(--bg-app);
-            border-bottom-left-radius: 24px;
-            border-bottom-right-radius: 24px;
+            border-radius: 24px;
             border: 1px solid var(--border-glass);
-            border-top: none;
             overflow: hidden;
         }
         
         /* Sidebar: Queue */
         .mockup-sidebar {
             padding: 20px;
-            border-right: 1px solid var(--border-subtle);
+            border-left: 1px solid var(--border-subtle);
             background: var(--bg-glass);
             display: flex;
             flex-direction: column;
@@ -481,15 +479,17 @@
                 min-height: auto;
             }
             .mockup-sidebar {
-                border-right: none;
-                border-bottom: 1px solid var(--border-subtle);
-                max-height: 200px;
+                border-left: none;
+                border-top: 1px solid var(--border-subtle);
+                max-height: 300px;
             }
             .queue-list {
-                flex-direction: row;
-                flex-wrap: wrap;
-                overflow-y: hidden;
-                overflow-x: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                max-height: 220px;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
             .player-chip {
                 flex-shrink: 0;
@@ -544,32 +544,10 @@
             
             <div class="interactive-mockup glass-panel" style="position: relative;">
                 
-                <!-- Windows control bar mockup -->
-                <div class="mockup-header">
-                    <div class="window-dots">
-                        <div class="window-dot red"></div>
-                        <div class="window-dot yellow"></div>
-                        <div class="window-dot green"></div>
-                    </div>
-                    <div class="mockup-title">CourtFlow Live Simulator Sandbox</div>
-                    <div style="width: 50px;"></div>
-                </div>
-
                 <!-- Simulation Work Area -->
                 <div class="mockup-body">
                     
-                    <!-- Sidebar Waiting Queue -->
-                    <div class="mockup-sidebar">
-                        <div class="sidebar-title">
-                            <span>Waiting Bench</span>
-                            <span id="queue-counter" style="color: var(--color-primary);">12</span>
-                        </div>
-                        <div class="queue-list" id="waiting-queue-list">
-                            <!-- Injected by JavaScript -->
-                        </div>
-                    </div>
-
-                    <!-- Active Courts Area -->
+                    <!-- Active Courts Area (Left) -->
                     <div class="mockup-main">
                         <div class="main-header">
                             <span class="round-indicator" id="round-indicator">Pre-Session Check-In</span>
@@ -582,8 +560,19 @@
 
                         <!-- Heuristic Actions bar -->
                         <div class="mockup-actions">
-                            <button class="btn btn-secondary" id="reset-sim-btn" style="padding: 8px 16px; font-size: 0.85rem;">Reset Pool</button>
+                            <button class="btn btn-secondary" id="reset-sim-btn" style="padding: 8px 16px; font-size: 0.85rem;">Reset Session</button>
                             <button class="btn btn-primary" id="generate-sim-btn" style="padding: 8px 20px; font-size: 0.85rem;">Generate Next Round</button>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar Waiting Queue (Right) -->
+                    <div class="mockup-sidebar">
+                        <div class="sidebar-title">
+                            <span>Waiting Bench</span>
+                            <span id="queue-counter" style="color: var(--color-primary);">12</span>
+                        </div>
+                        <div class="queue-list" id="waiting-queue-list">
+                            <!-- Injected by JavaScript -->
                         </div>
                     </div>
 
@@ -717,7 +706,7 @@
             <!-- Left Column: Brand Stack -->
             <div class="footer-brand">
                 <a href="../" class="logo"><span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span></a>
-                <span class="footer-tagline">Frictionless court rotations for happy, balanced social nights.</span>
+                <span class="footer-tagline">Frictionless court queues and balanced play.</span>
                 <span class="footer-badge-text">Built for Social Night Organizers.</span>
             </div>
             <!-- Right Column: Meta Info -->
