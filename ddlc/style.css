@@ -775,6 +775,9 @@ header.nav-header.scrolled {
     grid-column: span 2;
     margin-top: 12px;
 }
+.lead-form span {
+    grid-column: span 2;
+}
 
 
 
@@ -1082,7 +1085,7 @@ header.nav-header.scrolled {
         grid-template-columns: 1fr !important;
     }
     
-    .form-group-full, .lead-form button {
+    .form-group-full, .lead-form button, .lead-form span {
         grid-column: span 1 !important;
     }
 

@@ -513,6 +513,9 @@
             margin-top: 12px;
             width: 100%;
         }
+        .waitlist-form span {
+            grid-column: span 2;
+        }
         .form-input {
             width: 100%;
             padding: 14px 20px;
@@ -602,7 +605,7 @@
                 grid-template-columns: 1fr !important;
                 gap: 16px;
             }
-            .form-group-full, .waitlist-form button {
+            .form-group-full, .waitlist-form button, .waitlist-form span {
                 grid-column: span 1 !important;
             }
             .form-input {
@@ -1172,7 +1175,7 @@
                             <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Join the Waiting List</button>
-                        <span style="grid-column: span 2; display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
+                        <span style="display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
                     </form>
                 </div>
                 
