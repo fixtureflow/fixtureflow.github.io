@@ -244,6 +244,37 @@
             color: var(--color-primary);
         }
         
+        /* Custom Sandbox Simulation Classes */
+        .simulation-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            min-height: 480px;
+            background: var(--bg-app);
+            border-radius: 24px;
+            border: 1px solid var(--border-glass);
+            overflow: hidden;
+            padding: 24px;
+            gap: 24px;
+        }
+        .courts-layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .mockup-actions-bar {
+            grid-column: span 2;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: rgba(15, 23, 42, 0.15);
+            border-top: 1px solid var(--border-glass);
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            margin: 0 -24px -24px -24px;
+            z-index: 10;
+        }
+        
         .courts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -507,6 +538,27 @@
                 grid-template-columns: 1fr;
                 min-height: auto;
             }
+            .simulation-grid {
+                grid-template-columns: 1fr;
+                padding: 16px;
+                gap: 16px;
+                min-height: auto;
+            }
+            .courts-layout-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .mockup-actions-bar {
+                grid-column: span 1;
+                margin: 0 -16px -16px -16px;
+                padding: 12px 16px;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .mockup-actions-bar a {
+                width: 100%;
+                text-align: center;
+            }
             .mockup-sidebar {
                 border-left: none;
                 border-top: 1px solid var(--border-subtle);
@@ -616,7 +668,7 @@
             <div class="interactive-mockup glass-panel" style="position: relative;">
                 
                 <!-- Simulation Work Area -->
-                <div class="mockup-body" style="display: grid; grid-template-columns: 1.5fr 1fr; min-height: 480px; background: var(--bg-app); border-radius: 24px; border: 1px solid var(--border-glass); overflow: hidden; padding: 24px; gap: 24px;">
+                <div class="simulation-grid">
                     
                     <!-- Left Column: Session Mgmt + Active Courts -->
                     <div style="display: flex; flex-direction: column; gap: 20px;">
@@ -647,7 +699,7 @@
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
                             </div>
                             
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="courts-layout-grid">
                                 
                                 <!-- Court 1 -->
                                 <div style="border: 1px solid var(--border-subtle); border-top: 4px solid #059669; border-radius: 12px; padding: 16px; background: var(--bg-app); display: flex; flex-direction: column; gap: 12px;">
@@ -879,7 +931,7 @@
                     </div>
 
                     <!-- Heuristic Actions bar (Redirect links) -->
-                    <div class="mockup-actions" style="grid-column: span 2; display: flex; justify-content: center; gap: 16px; padding: 16px 20px; background: rgba(15, 23, 42, 0.15); border-top: 1px solid var(--border-glass); border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; margin: 0 -24px -24px -24px; z-index: 10;">
+                    <div class="mockup-actions-bar">
                         <a href="https://script.google.com/macros/s/COURTFLOW_APP_ID/exec" target="_blank" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; text-decoration: none;">Launch Sandbox App</a>
                         <a href="https://script.google.com/macros/s/COURTFLOW_APP_ID/exec" target="_blank" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem; text-decoration: none;">Try Live Matchmaker</a>
                     </div>
