@@ -912,34 +912,50 @@
                     </ul>
                 </div>
                 <div class="tab-visual glass-panel" style="padding: 24px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; gap: 12px;">
-                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Expected Roster check-in</div>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <!-- Checked-In Players (Green Border / Glow fill) -->
-                        <div style="border: 1px solid var(--color-primary); background: var(--color-primary-glow); color: var(--text-primary); padding: 8px 14px; border-radius: 99px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
-                            <span style="color: var(--color-primary); font-weight: 700;">✓</span> Jane D.
-                            <span style="background: var(--color-primary); color: #ffffff; font-size: 0.7rem; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">2</span>
-                        </div>
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-align: center;">Interactive Expected Roster</div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 320px; width: 100%; margin: 0 auto;">
                         
-                        <div style="border: 1px solid var(--color-primary); background: var(--color-primary-glow); color: var(--text-primary); padding: 8px 14px; border-radius: 99px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
-                            <span style="color: var(--color-primary); font-weight: 700;">✓</span> David S.
-                            <span style="background: var(--color-primary); color: #ffffff; font-size: 0.7rem; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">3</span>
+                        <!-- Checked-In (Green border) -->
+                        <div style="border: 1px solid var(--color-success); background: var(--color-success-bg); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="color: #3b82f6; font-size: 1rem; font-weight: 700;">♂</span>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary);">Jane D.</div>
+                                    <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 500;">Div 2</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 0.65rem; font-weight: 700; color: #137333; background: #e6f4ea; border: 1px solid #ceead6; padding: 2px 6px; border-radius: 4px;">Checked In</span>
+                            </div>
                         </div>
 
-                        <div style="border: 1px solid var(--color-primary); background: var(--color-primary-glow); color: var(--text-primary); padding: 8px 14px; border-radius: 99px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
-                            <span style="color: var(--color-primary); font-weight: 700;">✓</span> Claire L.
-                            <span style="background: var(--color-primary); color: #ffffff; font-size: 0.7rem; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">1</span>
+                        <!-- Checked-In 2 (Green border) -->
+                        <div style="border: 1px solid var(--color-success); background: var(--color-success-bg); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="color: #ec4899; font-size: 1rem; font-weight: 700;">♀</span>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary);">Claire L.</div>
+                                    <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 500;">Div 1</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 0.65rem; font-weight: 700; color: #137333; background: #e6f4ea; border: 1px solid #ceead6; padding: 2px 6px; border-radius: 4px;">Checked In</span>
+                            </div>
                         </div>
 
-                        <!-- Checked-Out/Expected Players (Standard border, grayed text, plus icon) -->
-                        <div style="border: 1px solid var(--border-glass); background: var(--bg-app); color: var(--text-muted); padding: 8px 14px; border-radius: 99px; font-weight: 500; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px; opacity: 0.75;">
-                            <span style="color: var(--text-muted); font-weight: 500;">+</span> Steve O.
-                            <span style="background: var(--border-glass); color: var(--text-secondary); font-size: 0.7rem; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">4</span>
+                        <!-- Expected / Checked-out -->
+                        <div style="border: 1px dashed var(--border-glass); background: var(--bg-app); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; opacity: 0.85;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="color: var(--text-muted); font-size: 1rem; font-weight: 700;">♂</span>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.8rem; color: var(--text-muted);">David S.</div>
+                                    <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 500;">Div 3</div>
+                                </div>
+                            </div>
+                            <button style="border: 1px solid var(--color-primary); background: transparent; color: var(--color-primary); font-size: 0.65rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; cursor: pointer;">Tap to Check In</button>
                         </div>
 
-                        <div style="border: 1px solid var(--border-glass); background: var(--bg-app); color: var(--text-muted); padding: 8px 14px; border-radius: 99px; font-weight: 500; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px; opacity: 0.75;">
-                            <span style="color: var(--text-muted); font-weight: 500;">+</span> Ken M.
-                            <span style="background: var(--border-glass); color: var(--text-secondary); font-size: 0.7rem; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">5</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -959,48 +975,52 @@
                 </div>
                 <div class="tab-visual glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: center; gap: 12px;">
                     <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-align: center;">Heuristic Match Balance</div>
-                    <div class="court-card-hi" style="border: 1px solid var(--border-glass); border-radius: 12px; padding: 14px; background: var(--bg-app); max-width: 300px; margin: 0 auto; width: 100%;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                    <div style="border: 1px solid var(--border-subtle); border-top: 4px solid #059669; border-radius: 12px; padding: 14px; background: var(--bg-app); max-width: 300px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
                             <div style="display: flex; align-items: center; gap: 6px;">
-                                <span style="background: var(--color-primary-glow); color: var(--color-primary); font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 99px;">01</span>
+                                <span style="background: #059669; color: #ffffff; font-size: 0.7rem; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">01</span>
                                 <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Court 1</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 4px; font-size: 0.7rem; color: var(--color-primary); font-weight: 700;">
-                                <span>Diff: 1</span>
+                            <div style="display: flex; align-items: center; gap: 4px; font-size: 0.7rem; color: #059669; font-weight: 700;">
+                                <span>Diff: 0</span>
                                 <span style="font-size: 0.6rem; font-weight: 500; color: var(--text-muted);">(Optimal)</span>
                             </div>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                        
+                        <!-- Stacked Team Slots -->
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
                             <!-- Team A -->
-                            <div style="border-right: 1px dashed var(--border-glass); padding-right: 8px;">
-                                <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">TEAM A</div>
-                                <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle); margin-bottom: 4px;">
-                                    <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♀ Alice K.</div>
-                                    <div style="font-size: 0.6rem; color: var(--text-muted);">Div 3</div>
+                            <div style="background: var(--bg-container); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 6px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.75rem; color: #ec4899;">♀ Alice K.</div>
+                                    <span style="font-size: 0.6rem; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 3px; border-radius: 2px;">Div 3</span>
                                 </div>
-                                <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle);">
-                                    <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♀ Sarah M.</div>
-                                    <div style="font-size: 0.6rem; color: var(--text-muted);">Div 3</div>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.75rem; color: #ec4899;">♀ Sarah M.</div>
+                                    <span style="font-size: 0.6rem; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 3px; border-radius: 2px;">Div 3</span>
                                 </div>
                             </div>
+                            
+                            <!-- Middle divider with balance VS sums -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px; font-size: 0.6rem; font-weight: 700; color: var(--text-muted);">
+                                <span style="background: var(--border-subtle); padding: 1px 4px; border-radius: 3px; color: var(--text-secondary);">Sum: 6</span>
+                                <span style="font-weight: 600; font-size: 0.55rem;">VS</span>
+                                <span style="background: var(--border-subtle); padding: 1px 4px; border-radius: 3px; color: var(--text-secondary);">Sum: 6</span>
+                            </div>
+
                             <!-- Team B -->
-                            <div style="padding-left: 8px;">
-                                <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">TEAM B</div>
-                                <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle); margin-bottom: 4px;">
-                                    <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♂ John D.</div>
-                                    <div style="font-size: 0.6rem; color: var(--text-muted);">Div 3</div>
+                            <div style="background: var(--bg-container); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 6px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.75rem; color: #3b82f6;">♂ John D.</div>
+                                    <span style="font-size: 0.6rem; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 3px; border-radius: 2px;">Div 3</span>
                                 </div>
-                                <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle);">
-                                    <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♂ Dave B.</div>
-                                    <div style="font-size: 0.6rem; color: var(--text-muted);">Div 4</div>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.75rem; color: #3b82f6;">♂ Dave B.</div>
+                                    <span style="font-size: 0.6rem; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 3px; border-radius: 2px;">Div 3</span>
                                 </div>
                             </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 6px;">
-                            <span>Sum: 6</span>
-                            <span style="font-weight: 700; color: var(--text-secondary);">VS</span>
-                            <span>Sum: 7</span>
-                        </div>
+
                     </div>
                 </div>
             </div>
