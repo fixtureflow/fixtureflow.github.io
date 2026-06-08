@@ -491,11 +491,27 @@
             margin-bottom: 30px;
         }
         .waitlist-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-width: 440px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            text-align: left;
+            max-width: 600px;
             margin: 0 auto;
+        }
+        .form-group-full {
+            grid-column: span 2;
+        }
+        .waitlist-form label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        .waitlist-form button {
+            grid-column: span 2;
+            margin-top: 12px;
+            width: 100%;
         }
         .form-input {
             width: 100%;
@@ -581,6 +597,18 @@
             }
             .waitlist-card {
                 padding: 30px 20px;
+            }
+            .waitlist-form {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .form-group-full, .waitlist-form button {
+                grid-column: span 1;
+            }
+            .form-input {
+                padding: 16px;
+                font-size: 1rem;
+                min-height: 48px;
             }
             .tabs-nav {
                 display: flex;
@@ -1131,11 +1159,20 @@
                         CourtFlow is launching soon as a premium subscription for racket clubs. Register your interest below to secure your spot in our next onboarding cohort and lock in early-adopter pricing.
                     </p>
                     <form class="waitlist-form" id="waitlist-form">
-                        <input type="text" name="name" class="form-input" placeholder="Your Name" required>
-                        <input type="email" name="email" class="form-input" placeholder="Your Email Address" required>
-                        <input type="text" name="club" class="form-input" placeholder="Your Racket Club Name" required>
-                        <button type="submit" class="btn btn-primary" style="margin-top: 10px; width: 100%;">Join the Waiting List</button>
-                        <span style="display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
+                        <div>
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" name="name" class="form-input" placeholder="e.g., Alex Smith" required>
+                        </div>
+                        <div>
+                            <label for="club">Club Name</label>
+                            <input type="text" id="club" name="club" class="form-input" placeholder="e.g., Dublin Racket Club" required>
+                        </div>
+                        <div class="form-group-full">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Join the Waiting List</button>
+                        <span style="grid-column: span 2; display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
                     </form>
                 </div>
                 
@@ -1225,8 +1262,9 @@
 
                     const queryParams = new URLSearchParams();
                     const formData = new FormData(waitlistForm);
+                    const userName = formData.get('name');
                     const userEmail = formData.get('email');
-                    queryParams.append('name', formData.get('name'));
+                    queryParams.append('name', userName);
                     queryParams.append('email', userEmail);
                     // Explicitly tag context as CourtFlow interest
                     queryParams.append('club', formData.get('club') + " (CourtFlow Interest)");
@@ -1257,6 +1295,7 @@
                                          
                                          // Log budget choice in background sheet
                                          const p = new URLSearchParams();
+                                         p.append('name', userName);
                                          p.append('email', userEmail);
                                          p.append('club', "CourtFlow Budget: " + selectedPrice);
                                          

@@ -113,9 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.textContent = 'Joining...';
 
             const formData = new FormData(form);
+            const userName = formData.get('name');
             const userEmail = formData.get('email');
             const data = new URLSearchParams();
-            data.append('name', formData.get('name'));
+            data.append('name', userName);
             data.append('email', userEmail);
             data.append('club', formData.get('club') + " (DDLC Interest)");
 
@@ -146,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 
                                 // Log budget choice in background sheet
                                 const p = new URLSearchParams();
+                                p.append('name', userName);
                                 p.append('email', userEmail);
                                 p.append('club', "DDLC Budget: " + selectedPrice);
                                 
