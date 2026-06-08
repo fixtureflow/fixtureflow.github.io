@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data.append('club', formData.get('club') + " (DDLC Interest)");
 
             // Live webhook call to the deployed Apps Script Marketing CRM endpoint (v5 Robust Regex)
-            fetch('https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec', {
+            fetch('https://script.google.com/macros/s/AKfycbwjTqvUCCOr_nDYBLuInJJzIli_wbU7LWZA4lNSKsD5TEGHuY1iUaKvI5b2C9vs-Alo/exec', {
                 method: 'POST',
                 mode: 'no-cors',
                 redirect: 'follow',
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             p.append('email', userEmail);
                             p.append('club', "DDLC Budget: " + selectedPrice);
                             
-                            fetch('https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec', {
+                            fetch('https://script.google.com/macros/s/AKfycbwjTqvUCCOr_nDYBLuInJJzIli_wbU7LWZA4lNSKsD5TEGHuY1iUaKvI5b2C9vs-Alo/exec', {
                                 method: 'POST',
                                 mode: 'no-cors',
                                 redirect: 'follow',

@@ -8,7 +8,7 @@ This manual provides instructions for deploying, updating, and operating the Fix
 
 The waitlist capture forms in `/courtflow/` connect directly to the shared CRM spreadsheet using a Google Apps Script Web App webhook.
 
-*   **Endpoint URL:** `https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec`
+*   **Endpoint URL:** `https://script.google.com/macros/s/AKfycbwjTqvUCCOr_nDYBLuInJJzIli_wbU7LWZA4lNSKsD5TEGHuY1iUaKvI5b2C9vs-Alo/exec`
 *   **Method:** `POST`
 *   **Request Payload (URL-encoded):**
     *   `name`: User's full name.
