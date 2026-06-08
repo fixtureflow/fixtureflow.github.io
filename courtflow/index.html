@@ -1271,52 +1271,48 @@
 
                     fetch('https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec', {
                         method: 'POST',
+                        mode: 'no-cors',
                         redirect: 'follow',
                         credentials: 'omit',
                         body: queryParams
                     })
-                    .then(response => response.json())
-                    .then(res => {
-                         if (res.result === 'success') {
-                             // Hide form container, show survey
-                             const parentCard = waitlistForm.closest('.waitlist-card');
-                             const formContainer = parentCard.querySelector('.form-container');
-                             const successSurvey = parentCard.querySelector('.success-survey');
+                    .then(() => {
+                         // Hide form container, show survey
+                         const parentCard = waitlistForm.closest('.waitlist-card');
+                         const formContainer = parentCard.querySelector('.form-container');
+                         const successSurvey = parentCard.querySelector('.success-survey');
+                         
+                         if (formContainer && successSurvey) {
+                             formContainer.style.display = 'none';
+                             successSurvey.style.display = 'flex';
                              
-                             if (formContainer && successSurvey) {
-                                 formContainer.style.display = 'none';
-                                 successSurvey.style.display = 'flex';
-                                 
-                                 // Add event listeners to pricing pills
-                                 const priceBtns = successSurvey.querySelectorAll('.price-btn');
-                                 priceBtns.forEach(btn => {
-                                     btn.addEventListener('click', () => {
-                                         const selectedPrice = btn.getAttribute('data-price');
-                                         
-                                         // Log budget choice in background sheet
-                                         const p = new URLSearchParams();
-                                         p.append('name', userName);
-                                         p.append('email', userEmail);
-                                         p.append('club', "CourtFlow Budget: " + selectedPrice);
-                                         
-                                         fetch('https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec', {
-                                             method: 'POST',
-                                             redirect: 'follow',
-                                             credentials: 'omit',
-                                             body: p
-                                         });
-                                         
-                                         // Show thank you and disable buttons
-                                         priceBtns.forEach(b => b.disabled = true);
-                                         const thanksSpan = successSurvey.querySelector('.survey-thanks');
-                                         if (thanksSpan) thanksSpan.style.display = 'block';
+                             // Add event listeners to pricing pills
+                             const priceBtns = successSurvey.querySelectorAll('.price-btn');
+                             priceBtns.forEach(btn => {
+                                 btn.addEventListener('click', () => {
+                                     const selectedPrice = btn.getAttribute('data-price');
+                                     
+                                     // Log budget choice in background sheet
+                                     const p = new URLSearchParams();
+                                     p.append('name', userName);
+                                     p.append('email', userEmail);
+                                     p.append('club', "CourtFlow Budget: " + selectedPrice);
+                                     
+                                     fetch('https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec', {
+                                         method: 'POST',
+                                         mode: 'no-cors',
+                                         redirect: 'follow',
+                                         credentials: 'omit',
+                                         body: p
                                      });
+                                     
+                                     // Show thank you and disable buttons
+                                     priceBtns.forEach(b => b.disabled = true);
+                                     const thanksSpan = successSurvey.querySelector('.survey-thanks');
+                                     if (thanksSpan) thanksSpan.style.display = 'block';
                                  });
-                             }
-                        } else {
-                            submitBtn.textContent = '⚠️ Registration failed.';
-                            submitBtn.style.backgroundColor = '#f43f5e';
-                        }
+                             });
+                         }
                     })
                     .catch(err => {
                         console.error('Error:', err);

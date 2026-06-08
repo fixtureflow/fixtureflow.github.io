@@ -123,51 +123,47 @@ document.addEventListener('DOMContentLoaded', () => {
             // Live webhook call to the deployed Apps Script Marketing CRM endpoint (v5 Robust Regex)
             fetch('https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec', {
                 method: 'POST',
+                mode: 'no-cors',
                 redirect: 'follow',
                 credentials: 'omit',
                 body: data
             })
-            .then(response => response.json())
-            .then(result => {
-                if (result.result === 'success') {
-                    // Hide form container, show survey
-                    const parentWrapper = form.closest('.lead-wrapper');
-                    const formContainer = parentWrapper.querySelector('.form-container');
-                    const successSurvey = parentWrapper.querySelector('.success-survey');
+            .then(() => {
+                // Hide form container, show survey
+                const parentWrapper = form.closest('.lead-wrapper');
+                const formContainer = parentWrapper.querySelector('.form-container');
+                const successSurvey = parentWrapper.querySelector('.success-survey');
+                
+                if (formContainer && successSurvey) {
+                    formContainer.style.display = 'none';
+                    successSurvey.style.display = 'flex';
                     
-                    if (formContainer && successSurvey) {
-                        formContainer.style.display = 'none';
-                        successSurvey.style.display = 'flex';
-                        
-                        // Add event listeners to pricing pills
-                        const priceBtns = successSurvey.querySelectorAll('.price-btn');
-                        priceBtns.forEach(btn => {
-                            btn.addEventListener('click', () => {
-                                const selectedPrice = btn.getAttribute('data-price');
-                                
-                                // Log budget choice in background sheet
-                                const p = new URLSearchParams();
-                                p.append('name', userName);
-                                p.append('email', userEmail);
-                                p.append('club', "DDLC Budget: " + selectedPrice);
-                                
-                                fetch('https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec', {
-                                    method: 'POST',
-                                    redirect: 'follow',
-                                    credentials: 'omit',
-                                    body: p
-                                });
-                                
-                                // Show thank you and disable buttons
-                                priceBtns.forEach(b => b.disabled = true);
-                                const thanksSpan = successSurvey.querySelector('.survey-thanks');
-                                if (thanksSpan) thanksSpan.style.display = 'block';
+                    // Add event listeners to pricing pills
+                    const priceBtns = successSurvey.querySelectorAll('.price-btn');
+                    priceBtns.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const selectedPrice = btn.getAttribute('data-price');
+                            
+                            // Log budget choice in background sheet
+                            const p = new URLSearchParams();
+                            p.append('name', userName);
+                            p.append('email', userEmail);
+                            p.append('club', "DDLC Budget: " + selectedPrice);
+                            
+                            fetch('https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec', {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                redirect: 'follow',
+                                credentials: 'omit',
+                                body: p
                             });
+                            
+                            // Show thank you and disable buttons
+                            priceBtns.forEach(b => b.disabled = true);
+                            const thanksSpan = successSurvey.querySelector('.survey-thanks');
+                            if (thanksSpan) thanksSpan.style.display = 'block';
                         });
-                    }
-                } else {
-                    submitButton.textContent = '⚠️ ' + (result.error ? result.error.message : 'Submission failed.');
-                    submitButton.style.backgroundColor = 'var(--color-alert)';
+                    });
                 }
             })
             .catch(error => {
