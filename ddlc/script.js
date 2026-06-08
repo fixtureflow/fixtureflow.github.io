@@ -146,9 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             // Log budget choice in background sheet
                             const p = new URLSearchParams();
-                            p.append('name', userName);
                             p.append('email', userEmail);
-                            p.append('club', "DDLC Budget: " + selectedPrice);
+                            p.append('budget', "FixtureFlow: " + selectedPrice);
                             
                             fetch('https://script.google.com/macros/s/AKfycbwjTqvUCCOr_nDYBLuInJJzIli_wbU7LWZA4lNSKsD5TEGHuY1iUaKvI5b2C9vs-Alo/exec', {
                                 method: 'POST',
