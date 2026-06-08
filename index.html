@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FixtureFlow | Racket Sports Club Management Solutions</title>
-    <meta name="description" content="Automate league coordinator scheduling and social play court rotations on autopilot. Powered by Google Sheets.">
+    <meta name="description" content="Take the stress out of coordinating league matches and social club night court rotations. Powered securely by Google Sheets.">
     
     <!-- OpenGraph Metadata -->
     <meta property="og:title" content="FixtureFlow | Racket Sports Club Management Solutions">
-    <meta property="og:description" content="Automate league coordinator scheduling and social play court rotations on autopilot. Powered by Google Sheets.">
+    <meta property="og:description" content="Take the stress out of coordinating league matches and social club night court rotations. Powered securely by Google Sheets.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://fixtureflow.github.io/">
     <meta property="og:image" content="https://fixtureflow.github.io/ddlc/assets/card-fixtureflow.png">
@@ -114,7 +114,7 @@
         }
         .hero-description {
             color: var(--text-secondary);
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 400;
             max-width: 680px;
             line-height: 1.6;
@@ -272,10 +272,22 @@
     <!-- 1. Sticky Navigation Header -->
     <header class="nav-header">
         <div class="container nav-container">
-            <a href="#" class="logo"><span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span></a>
+            <a href="#" class="logo">
+                <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
+                    <defs>
+                        <linearGradient id="logo-badge-grad-index-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="40%" stop-color="#a78bfa"/>
+                            <stop offset="100%" stop-color="#10b981"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-index-nav)"/>
+                    <text x="30" y="32" dominant-baseline="central" text-anchor="middle" font-family="Outfit, -apple-system, sans-serif" font-size="30" font-weight="900" fill="#ffffff">FF</text>
+                </svg>
+                <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
+            </a>
             <ul class="nav-links">
-                <li><a href="ddlc/">League Coordinator</a></li>
-                <li><a href="courtflow/">Social Queue Manager</a></li>
+                <li><a href="ddlc/"><span class="desktop-label">League Coordinator</span><span class="mobile-label">Leagues</span></a></li>
+                <li><a href="courtflow/"><span class="desktop-label">Social Queue Manager</span><span class="mobile-label">Socials</span></a></li>
             </ul>
             <div class="nav-actions">
                 <button class="theme-toggle" aria-label="Toggle light/dark theme">
@@ -293,9 +305,9 @@
         </div>
         <div class="container hero-container animate-fade-in">
             <div class="badge">Ecosystem Suite</div>
-            <h1 class="hero-title">Autopilot your racket sports club operations.</h1>
+            <h1 class="hero-title">Take some stress out of running your racket club.</h1>
             <p class="hero-description">
-                Next-generation workflow automation built specifically for club committees, match secretaries, and social play organizers. Stop wrestling with spreadsheet chaos, messy rosters, and constant whiteboard friction.
+                Running a club shouldn't feel like a second job. Built for volunteer committees, match secretaries, and social night organizers, FixtureFlow rescues you from spreadsheet chaos, captain email chases, and whiteboard complaints—so you can get your weekends back.
             </p>
         </div>
     </section>
@@ -304,7 +316,7 @@
     <section class="products-section">
         <div class="container products-grid">
             
-            <!-- Product 1: League Coordinator (FixtureFlow / DDLC) -->
+            <!-- Product 1: League Coordinator (FixtureFlow Leagues) -->
             <div class="product-panel glass-panel fixture animate-fade-in" style="animation-delay: 0.1s;">
                 <div class="product-header">
                     <div class="product-icon">
@@ -314,12 +326,12 @@
                 </div>
                 <p class="product-tagline">Match Scheduling & Roster Coordination</p>
                 <p class="product-description">
-                    Automate league schedule bookings on autopilot. Opponents self-serve and book dates directly based on your live court capacity, captains arrange squad lists, and players report availability dynamically.
+                    Take the friction out of coordinating league matches. Opponents book dates directly based on your court availability, while captains manage rosters and players submit availability in dedicated portals.
                 </p>
                 <ul class="product-features">
-                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Opponent Self-Service Booking Flow</li>
-                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Real-Time Player Availability Grid</li>
-                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Pre-Season Auto-Cancellation Engine</li>
+                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Self-Serve Match Booking</li>
+                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Visual Squad Management</li>
+                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Instant Player Availability</li>
                 </ul>
                 <a href="ddlc/" class="btn btn-primary">Explore Coordinator</a>
             </div>
@@ -330,16 +342,16 @@
                     <div class="product-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </div>
-                    <h2>Court Queue Manager</h2>
+                    <h2>Social Queue Manager</h2>
                 </div>
-                <p class="product-tagline">Social Nights & rotation Autopilot</p>
+                <p class="product-tagline">Social Nights & Rotation Manager</p>
                 <p class="product-description">
-                    Free your social coordinators from magnetic whiteboards and whiteboard marker logs. Automatically calculate balanced doubles pairings by skill averages, enforce mixed gender guards, and track queue bench-time.
+                    Simplify busy club night court queues and match rotations. Checked-in players are paired automatically by skill, guaranteeing balanced social matches and zero board complaints.
                 </p>
                 <ul class="product-features">
-                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Skill-Balanced Doubles Matchmaker</li>
-                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Checked-In Bench Waiting Rotator</li>
-                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mixed-Doubles Same-Sex Exceptions</li>
+                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Skill-Balanced Matchmaking</li>
+                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Fair Queue Rotation</li>
+                    <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Custom Match Rules</li>
                 </ul>
                 <a href="courtflow/" class="btn btn-primary">Explore Queue Manager</a>
             </div>
@@ -348,10 +360,31 @@
     </section>
 
     <!-- 4. Unified Footer -->
-    <footer>
-        <div class="container footer-container">
-            <p>&copy; 2026 FixtureFlow. Built for Mount Pleasant and racket clubs everywhere.</p>
-            <p style="opacity: 0.6; font-size: 0.8rem; margin-top: 6px;">Powered by Google Sheets & Apps Script</p>
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <!-- Left Column: Brand Stack -->
+            <div class="footer-brand">
+                <a href="#" class="logo">
+                    <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
+                        <defs>
+                            <linearGradient id="logo-badge-grad-index-footer" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="40%" stop-color="#a78bfa"/>
+                                <stop offset="100%" stop-color="#10b981"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-index-footer)"/>
+                        <text x="30" y="32" dominant-baseline="central" text-anchor="middle" font-family="Outfit, -apple-system, sans-serif" font-size="30" font-weight="900" fill="#ffffff">FF</text>
+                    </svg>
+                    <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
+                </a>
+                <span class="footer-tagline">Less club admin, more time on the court.</span>
+                <span class="footer-badge-text">Built for racket clubs everywhere.</span>
+            </div>
+            <!-- Right Column: Meta Info -->
+            <div class="footer-meta">
+                <span>&copy; 2026 FixtureFlow. All rights reserved.</span>
+                <span style="opacity: 0.8;">Powered by Google Sheets & Apps Script</span>
+            </div>
         </div>
     </footer>
 
