@@ -1079,11 +1079,11 @@ header.nav-header.scrolled {
     }
     
     .lead-form {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
     
     .form-group-full, .lead-form button {
-        grid-column: span 1;
+        grid-column: span 1 !important;
     }
 
     /* Mobile Touch-First Form Sizing (Apple/Android 48px guidelines) */
