@@ -555,6 +555,10 @@
                 background: rgba(15, 23, 42, 0.25);
             }
         }
+        @keyframes syncMove {
+            0% { left: -20px; }
+            100% { left: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -595,7 +599,6 @@
             <div class="glow-blue"></div>
         </div>
         <div class="container hero-container animate-fade-in">
-            <div class="badge">CourtFlow Manager</div>
             <h1 class="hero-title">Run smooth social nights without the whiteboard chaos.</h1>
             <p class="hero-description">
                 Free your club organizers from magnetic boards, dry-wipe markers, and queue complaints. Match players fairly by skill, manage wait queues, and optimize court rotations without the hassle.
@@ -615,82 +618,249 @@
                 <!-- Simulation Work Area -->
                 <div class="mockup-body">
                     
-                    <!-- Active Courts Area (Left) -->
-                    <div class="mockup-main">
-                        <div class="main-header">
-                            <span class="round-indicator" id="round-indicator">Active Session Dashboard</span>
-                            <span id="active-courts-count" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">2 Courts Active</span>
-                        </div>
+                <!-- Simulation Work Area -->
+                <div class="mockup-body" style="display: grid; grid-template-columns: 1.4fr 0.95fr; gap: 20px;">
+                    
+                    <!-- Left Column (Session Management + Active Courts) -->
+                    <div class="mockup-main-col" style="display: flex; flex-direction: column; gap: 20px;">
                         
-                        <div class="courts-grid" id="courts-grid">
-                            <!-- Court 1 -->
-                            <div class="court-card active">
-                                <div class="court-title">
-                                    <span>Court 1</span>
-                                    <span style="color: var(--color-primary);">Match Playing</span>
-                                </div>
-                                <div class="court-slot-grid">
-                                    <div class="team-box">
-                                        <div class="team-header">TEAM A</div>
-                                        <div class="court-slot">John D. <span class="skill-badge skill-2" style="margin-left:4px;">2</span></div>
-                                        <div class="court-slot">Sarah M. <span class="skill-badge skill-3" style="margin-left:4px;">3</span></div>
-                                    </div>
-                                    <div class="team-box">
-                                        <div class="team-header">TEAM B</div>
-                                        <div class="court-slot">Dave B. <span class="skill-badge skill-1" style="margin-left:4px;">1</span></div>
-                                        <div class="court-slot">Alice K. <span class="skill-badge skill-3" style="margin-left:4px;">3</span></div>
+                        <!-- Session Management Card -->
+                        <div class="session-mgmt-card glass-panel" style="padding: 20px; border-radius: 16px; background: var(--bg-container); border: 1px solid var(--border-glass);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--text-primary);">Session Management</h3>
+                                <div style="display: flex; align-items: center; gap: 10px; font-size: 0.8rem; color: var(--text-secondary);">
+                                    <span>Active Courts: 2</span>
+                                    <!-- Static Slider representation -->
+                                    <div style="position: relative; width: 80px; height: 4px; background: var(--border-glass); border-radius: 2px;">
+                                        <div style="position: absolute; left: 0; top: 0; width: 50%; height: 100%; background: var(--color-primary); border-radius: 2px;"></div>
+                                        <div style="position: absolute; left: 50%; top: -4px; width: 12px; height: 12px; border-radius: 50%; background: var(--color-primary); transform: translateX(-50%);"></div>
                                     </div>
                                 </div>
-                                <div class="court-average-badge">Court Skill Avg: 2.3</div>
                             </div>
-                            <!-- Court 2 -->
-                            <div class="court-card active">
-                                <div class="court-title">
-                                    <span>Court 2</span>
-                                    <span style="color: var(--color-primary);">Match Playing</span>
-                                </div>
-                                <div class="court-slot-grid">
-                                    <div class="team-box">
-                                        <div class="team-header">TEAM A</div>
-                                        <div class="court-slot">Paul C. <span class="skill-badge skill-2" style="margin-left:4px;">2</span></div>
-                                        <div class="court-slot">Emma L. <span class="skill-badge skill-3" style="margin-left:4px;">3</span></div>
-                                    </div>
-                                    <div class="team-box">
-                                        <div class="team-header">TEAM B</div>
-                                        <div class="court-slot">Bob R. <span class="skill-badge skill-4" style="margin-left:4px;">4</span></div>
-                                        <div class="court-slot">Helen P. <span class="skill-badge skill-4" style="margin-left:4px;">4</span></div>
-                                    </div>
-                                </div>
-                                <div class="court-average-badge">Court Skill Avg: 3.3</div>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <button class="btn btn-primary" style="padding: 8px 18px; font-size: 0.8rem; border-radius: 8px; font-weight: 600;" onclick="return false;">Generate Next Round</button>
+                                <a href="#" style="font-size: 0.8rem; color: var(--text-muted); text-decoration: none; font-weight: 500;" onclick="return false;">Reset Session</a>
                             </div>
                         </div>
+
+                        <!-- Active Courts Card -->
+                        <div class="active-courts-card glass-panel" style="padding: 20px; border-radius: 16px; background: var(--bg-container); border: 1px solid var(--border-glass);">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px; border-left: 3px solid var(--color-primary); padding-left: 10px;">
+                                <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--text-primary);">Active Courts</h3>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <!-- Court 1 -->
+                                <div class="court-card-hi" style="border: 1px solid var(--border-glass); border-radius: 12px; padding: 14px; background: var(--bg-app);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <span style="background: var(--color-primary-glow); color: var(--color-primary); font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 99px;">01</span>
+                                            <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Court 1</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text-muted);">
+                                            <span>Diff: 1</span>
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                        </div>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                                        <!-- Team A -->
+                                        <div style="border-right: 1px dashed var(--border-glass); padding-right: 8px;">
+                                            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">TEAM A</div>
+                                            <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle); margin-bottom: 4px;">
+                                                <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♀ Alice K.</div>
+                                                <div style="font-size: 0.6rem; color: var(--text-muted);">Div 3</div>
+                                            </div>
+                                            <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                                                <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♀ Sarah M.</div>
+                                                <div style="font-size: 0.6rem; color: var(--text-muted);">Div 3</div>
+                                            </div>
+                                        </div>
+                                        <!-- Team B -->
+                                        <div style="padding-left: 8px;">
+                                            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">TEAM B</div>
+                                            <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle); margin-bottom: 4px;">
+                                                <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♂ John D.</div>
+                                                <div style="font-size: 0.6rem; color: var(--text-muted);">Div 3</div>
+                                            </div>
+                                            <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                                                <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♂ Dave B.</div>
+                                                <div style="font-size: 0.6rem; color: var(--text-muted);">Div 4</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 6px;">
+                                        <span>Sum: 6</span>
+                                        <span style="font-weight: 700; color: var(--text-secondary);">VS</span>
+                                        <span>Sum: 7</span>
+                                    </div>
+                                </div>
+                                <!-- Court 2 -->
+                                <div class="court-card-hi" style="border: 1px solid var(--border-glass); border-radius: 12px; padding: 14px; background: var(--bg-app);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <span style="background: var(--color-primary-glow); color: var(--color-primary); font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 99px;">02</span>
+                                            <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Court 2</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text-muted);">
+                                            <span>Diff: 2</span>
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                        </div>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                                        <!-- Team A -->
+                                        <div style="border-right: 1px dashed var(--border-glass); padding-right: 8px;">
+                                            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">TEAM A</div>
+                                            <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle); margin-bottom: 4px;">
+                                                <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♂ Paul C.</div>
+                                                <div style="font-size: 0.6rem; color: var(--text-muted);">Div 4</div>
+                                            </div>
+                                            <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                                                <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♂ Bob R.</div>
+                                                <div style="font-size: 0.6rem; color: var(--text-muted);">Div 4</div>
+                                            </div>
+                                        </div>
+                                        <!-- Team B -->
+                                        <div style="padding-left: 8px;">
+                                            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">TEAM B</div>
+                                            <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle); margin-bottom: 4px;">
+                                                <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♀ Emma L.</div>
+                                                <div style="font-size: 0.6rem; color: var(--text-muted);">Div 4</div>
+                                            </div>
+                                            <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                                                <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♀ Helen P.</div>
+                                                <div style="font-size: 0.6rem; color: var(--text-muted);">Div 2</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 6px;">
+                                        <span>Sum: 8</span>
+                                        <span style="font-weight: 700; color: var(--text-secondary);">VS</span>
+                                        <span>Sum: 6</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <!-- Sidebar Waiting Queue (Right) -->
-                    <div class="mockup-sidebar">
-                        <div class="sidebar-title">
-                            <span>Waiting Bench</span>
-                            <span id="queue-counter" style="color: var(--color-primary);">6</span>
+                    <!-- Right Column: Waiting Queue sidebar -->
+                    <div class="mockup-sidebar" style="height: 100%; display: flex; flex-direction: column; border: 1px solid var(--border-glass); border-radius: 16px; padding: 20px; background: var(--bg-container);">
+                        <div style="border-left: 3px solid #e11d48; padding-left: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--text-primary);">Waiting Queue</h3>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">5 waiting (8 on court)</span>
+                            </div>
+                            <a href="#" style="font-size: 0.75rem; color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 4px;" onclick="return false;">
+                                <span>Check Out All</span>
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                            </a>
                         </div>
-                        <div class="queue-list" id="waiting-queue-list">
-                            <div class="player-chip"><span>Alan W.</span><span class="skill-badge skill-5">5</span></div>
-                            <div class="player-chip"><span>Jane S.</span><span class="skill-badge skill-2">2</span></div>
-                            <div class="player-chip"><span>Ken O.</span><span class="skill-badge skill-4">4</span></div>
-                            <div class="player-chip"><span>Mary G.</span><span class="skill-badge skill-3">3</span></div>
-                            <div class="player-chip"><span>Steve T.</span><span class="skill-badge skill-1">1</span></div>
-                            <div class="player-chip"><span>Claire F.</span><span class="skill-badge skill-2">2</span></div>
+                        <div class="queue-list" style="display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1;">
+                            
+                            <!-- Waiting Row 1 -->
+                            <div class="player-row-hi" style="border: 1px solid var(--color-primary); background: var(--color-primary-glow); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="color: var(--color-primary); font-size: 0.95rem; font-weight: 700;">♂</span>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.8rem; color: var(--text-primary);">Alan W.</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-muted);">Div 4</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fcd34d; padding: 2px 6px; border-radius: 4px;">MX</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Waiting Row 2 -->
+                            <div class="player-row-hi" style="border: 1px solid var(--color-primary); background: var(--color-primary-glow); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="color: var(--color-primary); font-size: 0.95rem; font-weight: 700;">♀</span>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.8rem; color: var(--text-primary);">Jane S.</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-muted);">Div 4</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fcd34d; padding: 2px 6px; border-radius: 4px;">MX</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Waiting Row 3 -->
+                            <div class="player-row-hi" style="border: 1px solid var(--color-primary); background: var(--color-primary-glow); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="color: var(--color-primary); font-size: 0.95rem; font-weight: 700;">♂</span>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.8rem; color: var(--text-primary);">Benjamin</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-muted);">Div 4</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fcd34d; padding: 2px 6px; border-radius: 4px;">MX</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+
+                            <!-- Checked-in Roster Rows (Non-waiting, standard borders) -->
+                            <div class="player-row-hi" style="border: 1px solid var(--border-glass); background: var(--bg-app); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="color: var(--text-muted); font-size: 0.95rem; font-weight: 700;">♀</span>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.8rem; color: var(--text-primary);">Hermy</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-muted);">Div 4</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 500; color: var(--text-muted); background: var(--border-subtle); padding: 2px 6px; border-radius: 4px;">MX</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted); opacity: 0.35;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted); opacity: 0.35;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+                            
+                            <div class="player-row-hi" style="border: 1px solid var(--border-glass); background: var(--bg-app); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="color: var(--text-muted); font-size: 0.95rem; font-weight: 700;">♀</span>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.8rem; color: var(--text-primary);">Hien</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-muted);">Div 3</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 500; color: var(--text-muted); background: var(--border-subtle); padding: 2px 6px; border-radius: 4px;">MX</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted); opacity: 0.35;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted); opacity: 0.35;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+                            
+                            <div class="player-row-hi" style="border: 1px solid var(--border-glass); background: var(--bg-app); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="color: var(--text-muted); font-size: 0.95rem; font-weight: 700;">♂</span>
+                                    <div>
+                                        <div style="font-weight: 600; font-size: 0.8rem; color: var(--text-primary);">Cédric</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-muted);">Div 2</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 500; color: var(--text-muted); background: var(--border-subtle); padding: 2px 6px; border-radius: 4px;">MX</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted); opacity: 0.35;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted); opacity: 0.35;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
                     <!-- Heuristic Actions bar (Redirect links) -->
-                    <div class="mockup-actions">
+                    <div class="mockup-actions" style="grid-column: span 2; display: flex; justify-content: center; gap: 16px; padding: 16px 20px; background: rgba(15, 23, 42, 0.15); border-top: 1px solid var(--border-glass); border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; margin: 0 -24px -24px -24px;">
                         <a href="https://script.google.com/macros/s/COURTFLOW_APP_ID/exec" target="_blank" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; text-decoration: none;">Launch Sandbox App</a>
                         <a href="https://script.google.com/macros/s/COURTFLOW_APP_ID/exec" target="_blank" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem; text-decoration: none;">Try Live Matchmaker</a>
                     </div>
 
                 </div>
             </div>
-
         </div>
     </section>
 
@@ -716,14 +886,35 @@
                         <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Gender tags to control mixed doubles allocations</li>
                     </ul>
                 </div>
-                <div class="tab-visual glass-panel" style="padding: 24px; min-height: 200px; display: flex; flex-direction: column; gap: 8px;">
-                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">Check-In Dashboard View</div>
+                <div class="tab-visual glass-panel" style="padding: 24px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; gap: 12px;">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Expected Roster check-in</div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <span class="player-chip" style="border-color: var(--color-primary); box-shadow: 0 4px 12px var(--color-primary-glow);">Jane D. <span class="skill-badge skill-2">2</span></span>
-                        <span class="player-chip" style="border-color: var(--color-primary); box-shadow: 0 4px 12px var(--color-primary-glow);">David S. <span class="skill-badge skill-3">3</span></span>
-                        <span class="player-chip checked-out">Steve O. <span class="skill-badge skill-4" style="opacity: 0.6;">4</span></span>
-                        <span class="player-chip" style="border-color: var(--color-primary); box-shadow: 0 4px 12px var(--color-primary-glow);">Claire L. <span class="skill-badge skill-1">1</span></span>
-                        <span class="player-chip checked-out">Ken M. <span class="skill-badge skill-5" style="opacity: 0.6;">5</span></span>
+                        <!-- Checked-In Players (Green Border / Glow fill) -->
+                        <div style="border: 1px solid var(--color-primary); background: var(--color-primary-glow); color: var(--text-primary); padding: 8px 14px; border-radius: 99px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
+                            <span style="color: var(--color-primary); font-weight: 700;">✓</span> Jane D.
+                            <span style="background: var(--color-primary); color: #ffffff; font-size: 0.7rem; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">2</span>
+                        </div>
+                        
+                        <div style="border: 1px solid var(--color-primary); background: var(--color-primary-glow); color: var(--text-primary); padding: 8px 14px; border-radius: 99px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
+                            <span style="color: var(--color-primary); font-weight: 700;">✓</span> David S.
+                            <span style="background: var(--color-primary); color: #ffffff; font-size: 0.7rem; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">3</span>
+                        </div>
+
+                        <div style="border: 1px solid var(--color-primary); background: var(--color-primary-glow); color: var(--text-primary); padding: 8px 14px; border-radius: 99px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
+                            <span style="color: var(--color-primary); font-weight: 700;">✓</span> Claire L.
+                            <span style="background: var(--color-primary); color: #ffffff; font-size: 0.7rem; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">1</span>
+                        </div>
+
+                        <!-- Checked-Out/Expected Players (Standard border, grayed text, plus icon) -->
+                        <div style="border: 1px solid var(--border-glass); background: var(--bg-app); color: var(--text-muted); padding: 8px 14px; border-radius: 99px; font-weight: 500; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px; opacity: 0.75;">
+                            <span style="color: var(--text-muted); font-weight: 500;">+</span> Steve O.
+                            <span style="background: var(--border-glass); color: var(--text-secondary); font-size: 0.7rem; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">4</span>
+                        </div>
+
+                        <div style="border: 1px solid var(--border-glass); background: var(--bg-app); color: var(--text-muted); padding: 8px 14px; border-radius: 99px; font-weight: 500; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px; opacity: 0.75;">
+                            <span style="color: var(--text-muted); font-weight: 500;">+</span> Ken M.
+                            <span style="background: var(--border-glass); color: var(--text-secondary); font-size: 0.7rem; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">5</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -741,19 +932,49 @@
                         <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Prevents repeat pairings with history queues</li>
                     </ul>
                 </div>
-                <div class="tab-visual glass-panel" style="padding: 24px; display: flex; flex-direction: column; gap: 12px;">
-                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Matchmaker Balanced Split</div>
-                    <div style="background: var(--border-subtle); border-radius: 12px; padding: 12px; display: flex; justify-content: space-around; align-items: center; border: 1px solid var(--border-glass);">
-                        <div style="text-align: center;">
-                            <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">TEAM A (Avg: 2.5)</div>
-                            <div style="font-size: 0.85rem; font-weight: 700;">John M. <span style="font-weight: 400; opacity: 0.6;">(L2)</span></div>
-                            <div style="font-size: 0.85rem; font-weight: 700;">Emma K. <span style="font-weight: 400; opacity: 0.6;">(L3)</span></div>
+                <div class="tab-visual glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: center; gap: 12px;">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-align: center;">Heuristic Match Balance</div>
+                    <div class="court-card-hi" style="border: 1px solid var(--border-glass); border-radius: 12px; padding: 14px; background: var(--bg-app); max-width: 300px; margin: 0 auto; width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="background: var(--color-primary-glow); color: var(--color-primary); font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 99px;">01</span>
+                                <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Court 1</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 4px; font-size: 0.7rem; color: var(--color-primary); font-weight: 700;">
+                                <span>Diff: 1</span>
+                                <span style="font-size: 0.6rem; font-weight: 500; color: var(--text-muted);">(Optimal)</span>
+                            </div>
                         </div>
-                        <div style="font-weight: 800; color: var(--color-primary);">VS</div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">TEAM B (Avg: 2.5)</div>
-                            <div style="font-size: 0.85rem; font-weight: 700;">Sarah D. <span style="font-weight: 400; opacity: 0.6;">(L2)</span></div>
-                            <div style="font-size: 0.85rem; font-weight: 700;">Dave P. <span style="font-weight: 400; opacity: 0.6;">(L3)</span></div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                            <!-- Team A -->
+                            <div style="border-right: 1px dashed var(--border-glass); padding-right: 8px;">
+                                <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">TEAM A</div>
+                                <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle); margin-bottom: 4px;">
+                                    <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♀ Alice K.</div>
+                                    <div style="font-size: 0.6rem; color: var(--text-muted);">Div 3</div>
+                                </div>
+                                <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                                    <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♀ Sarah M.</div>
+                                    <div style="font-size: 0.6rem; color: var(--text-muted);">Div 3</div>
+                                </div>
+                            </div>
+                            <!-- Team B -->
+                            <div style="padding-left: 8px;">
+                                <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">TEAM B</div>
+                                <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle); margin-bottom: 4px;">
+                                    <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♂ John D.</div>
+                                    <div style="font-size: 0.6rem; color: var(--text-muted);">Div 3</div>
+                                </div>
+                                <div style="background: var(--bg-container); padding: 6px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                                    <div style="font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">♂ Dave B.</div>
+                                    <div style="font-size: 0.6rem; color: var(--text-muted);">Div 4</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 6px;">
+                            <span>Sum: 6</span>
+                            <span style="font-weight: 700; color: var(--text-secondary);">VS</span>
+                            <span>Sum: 7</span>
                         </div>
                     </div>
                 </div>
@@ -772,11 +993,31 @@
                         <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Isolated document locks per tenant</li>
                     </ul>
                 </div>
-                <div class="tab-visual glass-panel" style="padding: 24px; text-align: center; display: flex; flex-direction: column; gap: 8px;">
-                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Real-Time Sync Observer</div>
-                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 8px 16px; border-radius: 99px; font-size: 0.85rem; color: var(--color-primary); font-weight: 600; width: fit-content; margin: 10px auto;">
-                        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); display: inline-block; animation: pulse 1.5s infinite;"></span>
-                        Session State Mirrored Upstream
+                <div class="tab-visual glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: center; gap: 12px; min-height: 200px;">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-align: center;">Properties sync pipeline</div>
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 320px; margin: 0 auto; padding: 16px; background: var(--bg-app); border: 1px solid var(--border-glass); border-radius: 12px; position: relative;">
+                        <!-- Local Client -->
+                        <div style="text-align: center; z-index: 1;">
+                            <div style="font-size: 1.3rem; margin-bottom: 4px;">💻</div>
+                            <div style="font-weight: 700; font-size: 0.75rem; color: var(--text-primary);">Browser</div>
+                            <div style="font-size: 0.6rem; color: var(--text-muted);">Local State</div>
+                        </div>
+                        
+                        <!-- Sync Pipeline Connector -->
+                        <div style="flex: 1; margin: 0 16px; position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <span style="font-size: 0.55rem; color: var(--color-primary); font-weight: 700; font-family: monospace;">syncing...</span>
+                            <div style="width: 100%; height: 2px; background: var(--border-glass); position: relative; border-radius: 1px; overflow: hidden;">
+                                <div style="position: absolute; left: -20px; top: 0; width: 20px; height: 100%; background: linear-gradient(90deg, transparent, var(--color-primary)); animation: syncMove 1.8s infinite linear;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cloud Sheets -->
+                        <div style="text-align: center; z-index: 1;">
+                            <div style="font-size: 1.3rem; margin-bottom: 4px;">📊</div>
+                            <div style="font-weight: 700; font-size: 0.75rem; color: var(--text-primary);">Apps Script</div>
+                            <div style="font-size: 0.6rem; color: var(--text-muted);">Properties</div>
+                        </div>
                     </div>
                 </div>
             </div>
