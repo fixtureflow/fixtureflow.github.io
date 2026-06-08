@@ -381,7 +381,8 @@ header.nav-header.scrolled {
 }
 
 .hero-description {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
     color: var(--text-secondary);
     margin-bottom: 36px;
     font-weight: 400;
@@ -1030,14 +1031,12 @@ header.nav-header.scrolled {
         padding: 60px 0;
     }
 
-    /* Portal tab scroll system (Touch-First) */
+    /* Portal tab wrap system (Fluid Layout) */
     .portal-tabs {
         display: flex;
-        justify-content: flex-start;
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 8px;
-        overflow-x: auto;
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none;  /* IE/Edge */
         padding: 6px;
         border-radius: 12px;
         width: 100%;
@@ -1045,16 +1044,14 @@ header.nav-header.scrolled {
         margin-bottom: 24px;
     }
 
-    .portal-tabs::-webkit-scrollbar {
-        display: none; /* Chrome/Safari/Opera */
-    }
-
     .tab-btn {
-        flex: 0 0 auto; /* Prevents squishing */
+        flex: 1 1 auto;
+        min-width: 120px;
         padding: 8px 14px;
-        font-size: 0.85rem;
+        text-align: center;
+        font-size: 0.9rem;
         border-radius: 8px;
-        min-height: 44px; /* Apple/Android touch target guidelines */
+        min-height: 44px;
     }
 
     .portal-info h3 {

@@ -196,7 +196,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            cursor: grab;
+            cursor: default;
             user-select: none;
             transition: var(--transition-smooth);
         }
@@ -348,10 +348,23 @@
             border-top: 1px solid var(--border-glass);
         }
         .tabs-nav {
+            position: sticky;
+            top: 80px;
+            z-index: 500;
             display: flex;
             justify-content: center;
             gap: 12px;
             margin-bottom: 40px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 8px;
+            border-radius: 16px;
+            border: 1px solid var(--border-glass);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            transition: var(--transition-smooth);
         }
         .tab-btn {
             background: transparent;
@@ -501,6 +514,23 @@
             .waitlist-card {
                 padding: 30px 20px;
             }
+            .tabs-nav {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 6px;
+                border-radius: 12px;
+                width: 100%;
+                max-width: 100%;
+                margin-bottom: 24px;
+            }
+            .tab-btn {
+                flex: 1 1 auto;
+                min-width: 120px;
+                padding: 8px 14px;
+                text-align: center;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -550,18 +580,57 @@
                     <!-- Active Courts Area (Left) -->
                     <div class="mockup-main">
                         <div class="main-header">
-                            <span class="round-indicator" id="round-indicator">Pre-Session Check-In</span>
+                            <span class="round-indicator" id="round-indicator">Active Session Dashboard</span>
                             <span id="active-courts-count" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">2 Courts Active</span>
                         </div>
                         
                         <div class="courts-grid" id="courts-grid">
-                            <!-- Injected by JavaScript -->
+                            <!-- Court 1 -->
+                            <div class="court-card active">
+                                <div class="court-title">
+                                    <span>Court 1</span>
+                                    <span style="color: var(--color-primary);">Match Playing</span>
+                                </div>
+                                <div class="court-slot-grid">
+                                    <div class="team-box">
+                                        <div class="team-header">TEAM A</div>
+                                        <div class="court-slot">John D. <span class="skill-badge skill-2" style="margin-left:4px;">2</span></div>
+                                        <div class="court-slot">Sarah M. <span class="skill-badge skill-3" style="margin-left:4px;">3</span></div>
+                                    </div>
+                                    <div class="team-box">
+                                        <div class="team-header">TEAM B</div>
+                                        <div class="court-slot">Dave B. <span class="skill-badge skill-1" style="margin-left:4px;">1</span></div>
+                                        <div class="court-slot">Alice K. <span class="skill-badge skill-3" style="margin-left:4px;">3</span></div>
+                                    </div>
+                                </div>
+                                <div class="court-average-badge">Court Skill Avg: 2.3</div>
+                            </div>
+                            <!-- Court 2 -->
+                            <div class="court-card active">
+                                <div class="court-title">
+                                    <span>Court 2</span>
+                                    <span style="color: var(--color-primary);">Match Playing</span>
+                                </div>
+                                <div class="court-slot-grid">
+                                    <div class="team-box">
+                                        <div class="team-header">TEAM A</div>
+                                        <div class="court-slot">Paul C. <span class="skill-badge skill-2" style="margin-left:4px;">2</span></div>
+                                        <div class="court-slot">Emma L. <span class="skill-badge skill-3" style="margin-left:4px;">3</span></div>
+                                    </div>
+                                    <div class="team-box">
+                                        <div class="team-header">TEAM B</div>
+                                        <div class="court-slot">Bob R. <span class="skill-badge skill-4" style="margin-left:4px;">4</span></div>
+                                        <div class="court-slot">Helen P. <span class="skill-badge skill-4" style="margin-left:4px;">4</span></div>
+                                    </div>
+                                </div>
+                                <div class="court-average-badge">Court Skill Avg: 3.3</div>
+                            </div>
                         </div>
 
-                        <!-- Heuristic Actions bar -->
+                        <!-- Heuristic Actions bar (Redirect links) -->
                         <div class="mockup-actions">
-                            <button class="btn btn-secondary" id="reset-sim-btn" style="padding: 8px 16px; font-size: 0.85rem;">Reset Session</button>
-                            <button class="btn btn-primary" id="generate-sim-btn" style="padding: 8px 20px; font-size: 0.85rem;">Generate Next Round</button>
+                            <a href="https://script.google.com/macros/s/COURTFLOW_APP_ID/exec" target="_blank" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; text-decoration: none;">Launch Sandbox App</a>
+                            <a href="https://script.google.com/macros/s/COURTFLOW_APP_ID/exec" target="_blank" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem; text-decoration: none;">Try Live Matchmaker</a>
                         </div>
                     </div>
 
@@ -569,25 +638,19 @@
                     <div class="mockup-sidebar">
                         <div class="sidebar-title">
                             <span>Waiting Bench</span>
-                            <span id="queue-counter" style="color: var(--color-primary);">12</span>
+                            <span id="queue-counter" style="color: var(--color-primary);">6</span>
                         </div>
                         <div class="queue-list" id="waiting-queue-list">
-                            <!-- Injected by JavaScript -->
+                            <div class="player-chip"><span>Alan W.</span><span class="skill-badge skill-5">5</span></div>
+                            <div class="player-chip"><span>Jane S.</span><span class="skill-badge skill-2">2</span></div>
+                            <div class="player-chip"><span>Ken O.</span><span class="skill-badge skill-4">4</span></div>
+                            <div class="player-chip"><span>Mary G.</span><span class="skill-badge skill-3">3</span></div>
+                            <div class="player-chip"><span>Steve T.</span><span class="skill-badge skill-1">1</span></div>
+                            <div class="player-chip"><span>Claire F.</span><span class="skill-badge skill-2">2</span></div>
                         </div>
                     </div>
 
                 </div>
-
-                <!-- Sandbox Lockdown Waitlist Form -->
-                <div class="sandbox-overlay" id="sandbox-lockdown-overlay">
-                    <div class="badge">Demo Finished</div>
-                    <h2 style="font-family: var(--font-display); font-size: 1.8rem; letter-spacing: -0.5px;">You've completed 4 simulation rounds!</h2>
-                    <p style="color: var(--text-secondary); max-width: 460px; font-size: 0.95rem; margin: 0 auto 10px auto;">
-                        Want to run CourtFlow at your club with live spreadsheet integrations, permanent rosters, guest check-ins, and persistent queue states?
-                    </p>
-                    <a href="#waitlist" class="btn btn-primary" id="go-to-waitlist-btn">Join early access list</a>
-                </div>
-
             </div>
 
         </div>
@@ -597,9 +660,9 @@
     <section class="marketing-section">
         <div class="container">
             <div class="tabs-nav">
-                <button class="tab-btn active" data-tab="check-in">1. Roster Check-In</button>
-                <button class="tab-btn" data-tab="matchmaker">2. Heuristics Engine</button>
-                <button class="tab-btn" data-tab="persistence">3. Properties Sync</button>
+                <button class="tab-btn active" data-tab="check-in">Roster Check-In</button>
+                <button class="tab-btn" data-tab="matchmaker">Heuristics Engine</button>
+                <button class="tab-btn" data-tab="persistence">Properties Sync</button>
             </div>
 
             <!-- Tab 1: Check-in -->
@@ -720,282 +783,6 @@
     <!-- --- INTERACTIVE SANDBOX JS SIMULATION ENGINE --- -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Mock Database
-            const ROSTER = [
-                { id: 1, name: "John D.", skill: 2, gender: "M" },
-                { id: 2, name: "Sarah M.", skill: 3, gender: "F" },
-                { id: 3, name: "Dave B.", skill: 1, gender: "M" },
-                { id: 4, name: "Alice K.", skill: 3, gender: "F" },
-                { id: 5, name: "Bob R.", skill: 4, gender: "M" },
-                { id: 6, name: "Emma L.", skill: 3, gender: "F" },
-                { id: 7, name: "Paul C.", skill: 2, gender: "M" },
-                { id: 8, name: "Helen P.", skill: 4, gender: "F" },
-                { id: 9, name: "Alan W.", skill: 5, gender: "M" },
-                { id: 10, name: "Jane S.", skill: 2, gender: "F" },
-                { id: 11, name: "Ken O.", skill: 4, gender: "M" },
-                { id: 12, name: "Mary G.", skill: 3, gender: "F" },
-                { id: 13, name: "Steve T.", skill: 1, gender: "M" },
-                { id: 14, name: "Claire F.", skill: 2, gender: "F" }
-            ];
-
-            // 2. Simulation State
-            let checkedIn = [...ROSTER]; // Start with all checked in
-            let queue = [...checkedIn];  // Waiting queue
-            let activeCourts = [
-                { id: 1, name: "Court 1", teamA: [], teamB: [] },
-                { id: 2, name: "Court 2", teamA: [], teamB: [] }
-            ];
-            let round = 0;
-            let dragSrcEl = null;
-
-            // DOM Elements
-            const queueListContainer = document.getElementById('waiting-queue-list');
-            const queueCounter = document.getElementById('queue-counter');
-            const courtsGrid = document.getElementById('courts-grid');
-            const roundIndicator = document.getElementById('round-indicator');
-            const generateBtn = document.getElementById('generate-sim-btn');
-            const resetBtn = document.getElementById('reset-sim-btn');
-            const lockdownOverlay = document.getElementById('sandbox-lockdown-overlay');
-            const toWaitlistBtn = document.getElementById('go-to-waitlist-btn');
-
-            // 3. Render Handlers
-            function renderQueue() {
-                queueListContainer.innerHTML = '';
-                queueCounter.textContent = queue.length;
-                
-                queue.forEach(player => {
-                    const chip = document.createElement('div');
-                    chip.className = 'player-chip';
-                    chip.draggable = true;
-                    chip.dataset.id = player.id;
-                    chip.innerHTML = `
-                        <span>${player.name}</span>
-                        <span class="skill-badge skill-${player.skill}">${player.skill}</span>
-                    `;
-                    
-                    // Bind Drag listeners
-                    chip.addEventListener('dragstart', handleDragStart);
-                    chip.addEventListener('dragend', handleDragEnd);
-                    
-                    queueListContainer.appendChild(chip);
-                });
-            }
-
-            function renderCourts() {
-                courtsGrid.innerHTML = '';
-                
-                activeCourts.forEach(court => {
-                    const card = document.createElement('div');
-                    card.className = 'court-card active';
-                    
-                    let avgSkill = '0.0';
-                    const allPlayers = [...court.teamA, ...court.teamB];
-                    if (allPlayers.length > 0) {
-                        const sum = allPlayers.reduce((acc, p) => acc + p.skill, 0);
-                        avgSkill = (sum / allPlayers.length).toFixed(1);
-                    }
-
-                    card.innerHTML = `
-                        <div class="court-title">
-                            <span>${court.name}</span>
-                            <span style="color: var(--color-primary);">Match Playing</span>
-                        </div>
-                        <div class="court-slot-grid">
-                            <div class="team-box">
-                                <div class="team-header">TEAM A</div>
-                                <div class="court-slot" data-court="${court.id}" data-team="A" data-index="0">
-                                    ${court.teamA[0] ? `${court.teamA[0].name} <span class="skill-badge skill-${court.teamA[0].skill}" style="margin-left:4px;">${court.teamA[0].skill}</span>` : 'Drop Player'}
-                                </div>
-                                <div class="court-slot" data-court="${court.id}" data-team="A" data-index="1">
-                                    ${court.teamA[1] ? `${court.teamA[1].name} <span class="skill-badge skill-${court.teamA[1].skill}" style="margin-left:4px;">${court.teamA[1].skill}</span>` : 'Drop Player'}
-                                </div>
-                            </div>
-                            <div class="team-box">
-                                <div class="team-header">TEAM B</div>
-                                <div class="court-slot" data-court="${court.id}" data-team="B" data-index="0">
-                                    ${court.teamB[0] ? `${court.teamB[0].name} <span class="skill-badge skill-${court.teamB[0].skill}" style="margin-left:4px;">${court.teamB[0].skill}</span>` : 'Drop Player'}
-                                </div>
-                                <div class="court-slot" data-court="${court.id}" data-team="B" data-index="1">
-                                    ${court.teamB[1] ? `${court.teamB[1].name} <span class="skill-badge skill-${court.teamB[1].skill}" style="margin-left:4px;">${court.teamB[1].skill}</span>` : 'Drop Player'}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="court-average-badge">Court Skill Avg: ${avgSkill}</div>
-                    `;
-
-                    // Bind drop targets
-                    const slots = card.querySelectorAll('.court-slot');
-                    slots.forEach(slot => {
-                        slot.addEventListener('dragover', handleDragOver);
-                        slot.addEventListener('dragenter', handleDragEnter);
-                        slot.addEventListener('dragleave', handleDragLeave);
-                        slot.addEventListener('drop', handleDrop);
-                    });
-
-                    courtsGrid.appendChild(card);
-                });
-            }
-
-            // 4. Drag & Drop Solvers
-            function handleDragStart(e) {
-                this.style.opacity = '0.4';
-                dragSrcEl = this;
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', this.dataset.id);
-            }
-
-            function handleDragEnd(e) {
-                this.style.opacity = '1';
-                const slots = document.querySelectorAll('.court-slot');
-                slots.forEach(slot => slot.classList.remove('drag-over'));
-            }
-
-            function handleDragOver(e) {
-                if (e.preventDefault) e.preventDefault();
-                return false;
-            }
-
-            function handleDragEnter(e) {
-                this.classList.add('drag-over');
-            }
-
-            function handleDragLeave(e) {
-                this.classList.remove('drag-over');
-            }
-
-            function handleDrop(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                
-                this.classList.remove('drag-over');
-                const playerId = parseInt(e.dataTransfer.getData('text/plain'), 10);
-                const playerObj = checkedIn.find(p => p.id === playerId);
-                
-                if (!playerObj) return;
-
-                const targetCourtId = parseInt(this.dataset.court, 10);
-                const targetTeam = this.dataset.team;
-                const targetIndex = parseInt(this.dataset.index, 10);
-                
-                const targetCourt = activeCourts.find(c => c.id === targetCourtId);
-                if (!targetCourt) return;
-
-                // Extract player from queue/current location
-                queue = queue.filter(p => p.id !== playerObj.id);
-                activeCourts.forEach(c => {
-                    c.teamA = c.teamA.filter(p => p.id !== playerObj.id);
-                    c.teamB = c.teamB.filter(p => p.id !== playerObj.id);
-                });
-
-                // Get current player occupying target slot
-                const currentOccupant = (targetTeam === 'A') ? targetCourt.teamA[targetIndex] : targetCourt.teamB[targetIndex];
-                if (currentOccupant) {
-                    queue.push(currentOccupant); // Bench current occupant
-                }
-
-                // Place new player
-                if (targetTeam === 'A') {
-                    targetCourt.teamA[targetIndex] = playerObj;
-                } else {
-                    targetCourt.teamB[targetIndex] = playerObj;
-                }
-
-                renderQueue();
-                renderCourts();
-            }
-
-            // 5. Pairing Heuristics Simulator
-            function solveMatchings() {
-                // Return benched active court players back to queue
-                activeCourts.forEach(court => {
-                    [...court.teamA, ...court.teamB].forEach(p => {
-                        if (p) queue.push(p);
-                    });
-                    court.teamA = [];
-                    court.teamB = [];
-                });
-
-                // Check round count limits
-                round++;
-                if (round > 4) {
-                    lockdownOverlay.classList.add('active');
-                    return;
-                }
-
-                roundIndicator.textContent = `Active Round ${round} of 4`;
-
-                // Take top 8 players from queue (for 2 courts)
-                if (queue.length < 8) {
-                    alert('Need at least 8 players checked in to play 2 courts!');
-                    return;
-                }
-
-                const candidates = queue.splice(0, 8);
-
-                // Group candidates into pairs of 4 (Court 1 and Court 2)
-                const group1 = candidates.slice(0, 4);
-                const group2 = candidates.slice(4, 8);
-
-                // Court 1 Heuristic Balanced Split
-                const sorted1 = solveOptimalDoublesSplit(group1);
-                activeCourts[0].teamA = [sorted1[0], sorted1[1]];
-                activeCourts[0].teamB = [sorted1[2], sorted1[3]];
-
-                // Court 2 Heuristic Balanced Split
-                const sorted2 = solveOptimalDoublesSplit(group2);
-                activeCourts[1].teamA = [sorted2[0], sorted2[1]];
-                activeCourts[1].teamB = [sorted2[2], sorted2[3]];
-
-                renderQueue();
-                renderCourts();
-            }
-
-            function solveOptimalDoublesSplit(players) {
-                // Find doubles split of 4 players (A1, A2 vs B1, B2) that minimizes average skill difference
-                // Combinations:
-                // Opt 1: (0, 1) vs (2, 3) -> delta: |(0+1) - (2+3)|
-                // Opt 2: (0, 2) vs (1, 3) -> delta: |(0+2) - (1+3)|
-                // Opt 3: (0, 3) vs (1, 2) -> delta: |(0+3) - (1+2)|
-                
-                const o1_delta = Math.abs((players[0].skill + players[1].skill) - (players[2].skill + players[3].skill));
-                const o2_delta = Math.abs((players[0].skill + players[2].skill) - (players[1].skill + players[3].skill));
-                const o3_delta = Math.abs((players[0].skill + players[3].skill) - (players[1].skill + players[2].skill));
-
-                const minDelta = Math.min(o1_delta, o2_delta, o3_delta);
-
-                if (minDelta === o1_delta) {
-                    return [players[0], players[1], players[2], players[3]];
-                } else if (minDelta === o2_delta) {
-                    return [players[0], players[2], players[1], players[3]];
-                } else {
-                    return [players[0], players[3], players[1], players[2]];
-                }
-            }
-
-            // Reset Simulator
-            function resetSimulation() {
-                queue = [...checkedIn];
-                activeCourts.forEach(c => {
-                    c.teamA = [];
-                    c.teamB = [];
-                });
-                round = 0;
-                roundIndicator.textContent = "Pre-Session Check-In";
-                lockdownOverlay.classList.remove('active');
-                renderQueue();
-                renderCourts();
-            }
-
-            // Initialize Sandbox Rendering
-            resetSimulation();
-
-            // Bind Actions
-            generateBtn.addEventListener('click', solveMatchings);
-            resetBtn.addEventListener('click', resetSimulation);
-            toWaitlistBtn.addEventListener('click', () => {
-                lockdownOverlay.classList.remove('active');
-            });
-
             // --- MARKETING JOURNEY TAB SWITCHER ---
             const tabButtons = document.querySelectorAll('.tab-btn');
             const tabContents = document.querySelectorAll('.tab-content');
@@ -1026,8 +813,8 @@
                     submitBtn.disabled = true;
                     submitBtn.textContent = 'Registering...';
 
-                    const formData = new FormData(waitlistForm);
                     const queryParams = new URLSearchParams();
+                    const formData = new FormData(waitlistForm);
                     queryParams.append('name', formData.get('name'));
                     queryParams.append('email', formData.get('email'));
                     // Explicitly tag context as CourtFlow interest
