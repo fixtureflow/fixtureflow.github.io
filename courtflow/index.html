@@ -308,12 +308,14 @@
         
         /* Action buttons in Mockup */
         .mockup-actions {
+            grid-column: span 2;
             display: flex;
             gap: 12px;
             justify-content: flex-end;
             margin-top: auto;
             border-top: 1px solid var(--border-subtle);
-            padding-top: 16px;
+            padding: 16px 24px;
+            background: rgba(15, 23, 42, 0.15);
         }
         
         /* Sandbox Lockdown Overlay */
@@ -531,6 +533,12 @@
                 text-align: center;
                 font-size: 0.9rem;
             }
+            .mockup-actions {
+                grid-column: span 1;
+                justify-content: center;
+                padding: 16px 20px;
+                background: rgba(15, 23, 42, 0.25);
+            }
         }
     </style>
 </head>
@@ -539,7 +547,19 @@
     <!-- 1. Sticky Navigation Header -->
     <header class="nav-header">
         <div class="container nav-container">
-            <a href="../" class="logo"><span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span></a>
+            <a href="../" class="logo">
+                <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
+                    <defs>
+                        <linearGradient id="logo-badge-grad-courtflow-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="40%" stop-color="#a78bfa"/>
+                            <stop offset="100%" stop-color="#10b981"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-courtflow-nav)"/>
+                    <text x="30" y="32" dominant-baseline="central" text-anchor="middle" font-family="Outfit, -apple-system, sans-serif" font-size="30" font-weight="900" fill="#ffffff">FF</text>
+                </svg>
+                <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
+            </a>
             <ul class="nav-links">
                 <li><a href="../ddlc/"><span class="desktop-label">League Coordinator</span><span class="mobile-label">Leagues</span></a></li>
                 <li><a href="#" class="active"><span class="desktop-label">Social Queue Manager</span><span class="mobile-label">Socials</span></a></li>
@@ -561,10 +581,13 @@
         </div>
         <div class="container hero-container animate-fade-in">
             <div class="badge">CourtFlow Manager</div>
-            <h1 class="hero-title">Social nights and court rotation on autopilot.</h1>
+            <h1 class="hero-title">Run smooth social nights without the whiteboard chaos.</h1>
             <p class="hero-description">
-                Free your club organizers from magnetic boards, dry-wipe markers, and queue complaints. Match players fairly by skill, manage wait queues, and optimize court rotations on autopilot.
+                Free your club organizers from magnetic boards, dry-wipe markers, and queue complaints. Match players fairly by skill, manage wait queues, and optimize court rotations without the hassle.
             </p>
+            <div class="hero-cta-group" style="display: flex; gap: 16px; justify-content: center; margin-top: 28px;">
+                <a href="#waitlist" class="btn btn-primary">Join Waitlist</a>
+            </div>
         </div>
     </section>
 
@@ -626,12 +649,6 @@
                                 <div class="court-average-badge">Court Skill Avg: 3.3</div>
                             </div>
                         </div>
-
-                        <!-- Heuristic Actions bar (Redirect links) -->
-                        <div class="mockup-actions">
-                            <a href="https://script.google.com/macros/s/COURTFLOW_APP_ID/exec" target="_blank" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; text-decoration: none;">Launch Sandbox App</a>
-                            <a href="https://script.google.com/macros/s/COURTFLOW_APP_ID/exec" target="_blank" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem; text-decoration: none;">Try Live Matchmaker</a>
-                        </div>
                     </div>
 
                     <!-- Sidebar Waiting Queue (Right) -->
@@ -648,6 +665,12 @@
                             <div class="player-chip"><span>Steve T.</span><span class="skill-badge skill-1">1</span></div>
                             <div class="player-chip"><span>Claire F.</span><span class="skill-badge skill-2">2</span></div>
                         </div>
+                    </div>
+
+                    <!-- Heuristic Actions bar (Redirect links) -->
+                    <div class="mockup-actions">
+                        <a href="https://script.google.com/macros/s/COURTFLOW_APP_ID/exec" target="_blank" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; text-decoration: none;">Launch Sandbox App</a>
+                        <a href="https://script.google.com/macros/s/COURTFLOW_APP_ID/exec" target="_blank" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem; text-decoration: none;">Try Live Matchmaker</a>
                     </div>
 
                 </div>
@@ -751,13 +774,14 @@
             <div class="waitlist-card glass-panel">
                 <h2>Join the CourtFlow Waitlist</h2>
                 <p>
-                    Ready to bring queue rotation autopilot to your social nights? Enter your club details below to register for the early access program.
+                    Ready to bring smooth queue rotation to your social nights? Enter your club details below to register for the early access program.
                 </p>
                 <form class="waitlist-form" id="waitlist-form">
                     <input type="text" name="name" class="form-input" placeholder="Your Name" required>
                     <input type="email" name="email" class="form-input" placeholder="Your Email Address" required>
                     <input type="text" name="club" class="form-input" placeholder="Your Racket Club Name" required>
                     <button type="submit" class="btn btn-primary" style="margin-top: 10px; width: 100%;">Get Early Access</button>
+                    <span style="display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
                 </form>
             </div>
         </div>
@@ -768,7 +792,19 @@
         <div class="container footer-content">
             <!-- Left Column: Brand Stack -->
             <div class="footer-brand">
-                <a href="../" class="logo"><span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span></a>
+                <a href="../" class="logo">
+                    <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
+                        <defs>
+                            <linearGradient id="logo-badge-grad-courtflow-footer" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="40%" stop-color="#a78bfa"/>
+                                <stop offset="100%" stop-color="#10b981"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-courtflow-footer)"/>
+                        <text x="30" y="32" dominant-baseline="central" text-anchor="middle" font-family="Outfit, -apple-system, sans-serif" font-size="30" font-weight="900" fill="#ffffff">FF</text>
+                    </svg>
+                    <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
+                </a>
                 <span class="footer-tagline">Frictionless court queues and balanced play.</span>
                 <span class="footer-badge-text">Built for Social Night Organizers.</span>
             </div>

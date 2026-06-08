@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://fixtureflow.github.io/ddlc/">
     <meta property="og:title" content="FixtureFlow: Next-Generation DDLC Coordinator">
-    <meta property="og:description" content="Manage everything from Google Sheets while opponents self-serve fixtures, captains coordinate rosters, and players block availability on autopilot.">
+    <meta property="og:description" content="Manage everything from Google Sheets while opponents self-serve fixtures, captains coordinate rosters, and players submit availability in dedicated portals.">
     <meta property="og:image" content="https://fixtureflow.github.io/ddlc/assets/card-fixtureflow.png">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
@@ -26,7 +26,19 @@
     <!-- Navigation Header -->
     <header class="nav-header">
         <div class="container nav-container">
-            <a href="../" class="logo"><span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span></a>
+            <a href="../" class="logo">
+                <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
+                    <defs>
+                        <linearGradient id="logo-badge-grad-ddlc-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="40%" stop-color="#a78bfa"/>
+                            <stop offset="100%" stop-color="#10b981"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-ddlc-nav)"/>
+                    <text x="30" y="32" dominant-baseline="central" text-anchor="middle" font-family="Outfit, -apple-system, sans-serif" font-size="30" font-weight="900" fill="#ffffff">FF</text>
+                </svg>
+                <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
+            </a>
             <ul class="nav-links">
                 <li><a href="#" class="active"><span class="desktop-label">League Coordinator</span><span class="mobile-label">Leagues</span></a></li>
                 <li><a href="../courtflow/"><span class="desktop-label">Social Queue Manager</span><span class="mobile-label">Socials</span></a></li>
@@ -50,11 +62,10 @@
                     A completely new way to engage with <span>DDLC scheduling</span>.
                 </h1>
                 <p class="hero-description">
-                    Free your Match Secretaries from captain chases, scheduling email chains, and calendar chaos. Let opponents self-serve fixture dates, captains manage team matches, and players block availability on autopilot.
+                    Free your Match Secretaries from captain chases, scheduling email chains, and calendar chaos. Let opponents self-serve fixture dates, captains manage team matches, and players submit availability in dedicated portals.
                 </p>
                 <div class="hero-cta-group">
-                    <a href="#waitlist" class="btn btn-primary">Get Early Access</a>
-                    <a href="#about" class="btn btn-secondary">See Portal Journey</a>
+                    <a href="#waitlist" class="btn btn-primary">Join Waitlist</a>
                 </div>
             </div>
             <div class="hero-visual">
@@ -257,20 +268,10 @@
                 <p class="section-description">Built by a Match Secretary to solve real-world administrative bottlenecks, making league scheduling effortless for everyone.</p>
             </div>
 
-            <!-- Portal Navigation Tabs -->
             <div class="portal-tabs">
-                <button class="tab-btn active" data-portal="secretary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-                    Opponent Portal
-                </button>
-                <button class="tab-btn" data-portal="captain">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    Captain Portal
-                </button>
-                <button class="tab-btn" data-portal="player">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Player Portal
-                </button>
+                <button class="tab-btn active" data-portal="secretary">Opponent Portal</button>
+                <button class="tab-btn" data-portal="captain">Captain Portal</button>
+                <button class="tab-btn" data-portal="player">Player Portal</button>
             </div>
 
             <!-- Match Secretary Portal Content -->
@@ -898,6 +899,7 @@
                         <input type="email" id="email" name="email" placeholder="you@example.com" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Join the Waitlist</button>
+                    <span style="display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
                 </form>
             </div>
         </div>
@@ -908,7 +910,19 @@
         <div class="container footer-content">
             <!-- Left Column: Brand Stack -->
             <div class="footer-brand">
-                <a href="../" class="logo" style="font-size: 1.3rem;"><span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span></a>
+                <a href="../" class="logo" style="font-size: 1.3rem;">
+                    <svg class="brand-icon" width="20" height="20" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 5px; flex-shrink: 0; vertical-align: middle;">
+                        <defs>
+                            <linearGradient id="logo-badge-grad-ddlc-footer" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="40%" stop-color="#a78bfa"/>
+                                <stop offset="100%" stop-color="#10b981"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-ddlc-footer)"/>
+                        <text x="30" y="32" dominant-baseline="central" text-anchor="middle" font-family="Outfit, -apple-system, sans-serif" font-size="30" font-weight="900" fill="#ffffff">FF</text>
+                    </svg>
+                    <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
+                </a>
                 <span class="footer-tagline">Stress-free league coordination for your club.</span>
                 <span class="footer-badge-text">Built by a Match Secretary, for Match Secretaries.</span>
             </div>

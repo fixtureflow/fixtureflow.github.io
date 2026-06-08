@@ -462,11 +462,10 @@ header.nav-header.scrolled {
 
 .tab-btn {
     flex: 1;
-    background: none;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-family: var(--font-sans);
+    background: transparent;
+    border: 1px solid var(--border-glass);
+    padding: 10px 20px;
+    border-radius: 99px;
     font-weight: 600;
     font-size: 0.95rem;
     color: var(--text-secondary);
@@ -478,22 +477,25 @@ header.nav-header.scrolled {
     gap: 8px;
 }
 
-.tab-btn.active {
-    background: var(--bg-container);
-    box-shadow: var(--shadow-subtle);
-    border: 1px solid var(--border-glass);
-}
-
-.tab-btn[data-portal="secretary"].active {
+.tab-btn[data-portal="secretary"].active,
+.tab-btn[data-portal="secretary"]:hover {
+    background: var(--color-opponent-glow);
     color: var(--color-opponent);
+    border-color: var(--color-opponent);
 }
 
-.tab-btn[data-portal="captain"].active {
+.tab-btn[data-portal="captain"].active,
+.tab-btn[data-portal="captain"]:hover {
+    background: var(--color-captain-glow);
     color: var(--color-captain);
+    border-color: var(--color-captain);
 }
 
-.tab-btn[data-portal="player"].active {
+.tab-btn[data-portal="player"].active,
+.tab-btn[data-portal="player"]:hover {
+    background: var(--color-player-glow);
     color: var(--color-player);
+    border-color: var(--color-player);
 }
 
 .portal-content {
@@ -1050,7 +1052,7 @@ header.nav-header.scrolled {
         padding: 8px 14px;
         text-align: center;
         font-size: 0.9rem;
-        border-radius: 8px;
+        border-radius: 99px;
         min-height: 44px;
     }
 

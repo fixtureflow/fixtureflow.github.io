@@ -47,7 +47,6 @@
         font-family="Outfit, -apple-system, sans-serif" 
         font-size="32" 
         letter-spacing="-0.04em">
-    <tspan class="txt-fixture" font-weight="850">Fixture</tspan>
-    <tspan class="txt-flow" font-weight="500" fill="url(#text-g)">Flow</tspan>
+    <tspan class="txt-fixture" font-weight="850">Fixture</tspan><tspan class="txt-flow" font-weight="500" fill="url(#text-g)">Flow</tspan>
   </text>
 </svg>
