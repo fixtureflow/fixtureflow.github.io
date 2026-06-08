@@ -369,19 +369,16 @@ header.nav-header.scrolled {
     font-size: clamp(2.5rem, 5vw, 3.8rem);
     font-weight: 800;
     line-height: 1.15;
-    letter-spacing: -1px;
+    letter-spacing: -1.8px;
     margin-bottom: 20px;
-}
-
-.hero-title span {
-    background: linear-gradient(135deg, var(--color-primary) 30%, var(--color-success) 100%);
+    background: linear-gradient(135deg, var(--text-primary) 30%, var(--text-secondary) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .hero-description {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     line-height: 1.6;
     color: var(--text-secondary);
     margin-bottom: 36px;

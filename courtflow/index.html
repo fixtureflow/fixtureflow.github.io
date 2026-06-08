@@ -41,7 +41,7 @@
         /* --- LAYOUT OVERRIDES --- */
         .hero-section {
             position: relative;
-            padding: 150px 0 60px 0;
+            padding: 160px 0 80px 0;
             text-align: center;
             overflow: hidden;
         }
@@ -77,6 +77,12 @@
             filter: blur(50px);
         }
 
+        .hero-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
         .badge {
             background: var(--color-primary-glow);
             color: var(--color-primary);
@@ -87,7 +93,6 @@
             font-weight: 600;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            margin-bottom: 8px;
             display: inline-block;
         }
         .hero-title {
@@ -96,19 +101,19 @@
             font-weight: 800;
             line-height: 1.15;
             letter-spacing: -1.8px;
-            max-width: 900px;
+            max-width: 800px;
             background: linear-gradient(135deg, var(--text-primary) 30%, var(--text-secondary) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin: 0 auto 16px auto;
+            margin: 0;
         }
         .hero-description {
             color: var(--text-secondary);
             font-size: 1.15rem;
-            max-width: 700px;
-            margin: 0 auto;
+            max-width: 680px;
             line-height: 1.6;
+            margin: 0;
         }
 
         /* --- PLAYGROUND INTERACTIVE MOCKUP --- */
@@ -356,7 +361,7 @@
             display: flex;
             justify-content: center;
             gap: 12px;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
             background: var(--bg-glass);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -369,14 +374,20 @@
             transition: var(--transition-smooth);
         }
         .tab-btn {
+            flex: 1;
             background: transparent;
             border: 1px solid var(--border-glass);
             color: var(--text-secondary);
             padding: 10px 20px;
             border-radius: 99px;
             font-weight: 600;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         .tab-btn.active, .tab-btn:hover {
             background: var(--color-primary-glow);
@@ -489,6 +500,9 @@
                 font-size: 2.4rem;
                 letter-spacing: -1.2px;
             }
+            .hero-description {
+                font-size: 1.05rem;
+            }
             .mockup-body {
                 grid-template-columns: 1fr;
                 min-height: auto;
@@ -532,6 +546,7 @@
                 padding: 8px 14px;
                 text-align: center;
                 font-size: 0.9rem;
+                min-height: 44px;
             }
             .mockup-actions {
                 grid-column: span 1;
