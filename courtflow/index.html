@@ -1125,17 +1125,38 @@
     <section class="waitlist-section" id="waitlist">
         <div class="container">
             <div class="waitlist-card glass-panel">
-                <h2>Join the CourtFlow Waitlist</h2>
-                <p>
-                    Ready to bring smooth queue rotation to your social nights? Enter your club details below to register for the early access program.
-                </p>
-                <form class="waitlist-form" id="waitlist-form">
-                    <input type="text" name="name" class="form-input" placeholder="Your Name" required>
-                    <input type="email" name="email" class="form-input" placeholder="Your Email Address" required>
-                    <input type="text" name="club" class="form-input" placeholder="Your Racket Club Name" required>
-                    <button type="submit" class="btn btn-primary" style="margin-top: 10px; width: 100%;">Get Early Access</button>
-                    <span style="display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
-                </form>
+                <div class="form-container">
+                    <h2>Join the Waiting List</h2>
+                    <p>
+                        CourtFlow is launching soon as a premium subscription for racket clubs. Register your interest below to secure your spot in our next onboarding cohort and lock in early-adopter pricing.
+                    </p>
+                    <form class="waitlist-form" id="waitlist-form">
+                        <input type="text" name="name" class="form-input" placeholder="Your Name" required>
+                        <input type="email" name="email" class="form-input" placeholder="Your Email Address" required>
+                        <input type="text" name="club" class="form-input" placeholder="Your Racket Club Name" required>
+                        <button type="submit" class="btn btn-primary" style="margin-top: 10px; width: 100%;">Join the Waiting List</button>
+                        <span style="display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
+                    </form>
+                </div>
+                
+                <!-- Success Survey View -->
+                <div class="success-survey" style="display: none; text-align: center; animation: fadeIn 0.4s ease forwards; flex-direction: column; gap: 16px; align-items: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 8px;">🎉</div>
+                    <h2 style="margin-bottom: 8px;">You're on the Waiting List!</h2>
+                    <p style="color: var(--text-secondary); font-size: 1.05rem; max-width: 440px; margin: 0 auto 12px auto; line-height: 1.5;">
+                        We onboard new clubs in limited cohorts to ensure a smooth transition. While we finalize your release group, <strong>what monthly price feels fair for your club?</strong>
+                    </p>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+                        <button class="btn btn-secondary price-btn" data-price="under-25" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 99px;">Under €25/mo</button>
+                        <button class="btn btn-secondary price-btn" data-price="25-50" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 99px;">€25 - €50/mo</button>
+                        <button class="btn btn-secondary price-btn" data-price="50-100" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 99px;">€50 - €100/mo</button>
+                    </div>
+                    
+                    <span class="survey-thanks" style="display: none; font-size: 0.9rem; color: var(--color-primary); font-weight: 700; margin-top: 8px;">
+                        ✓ Thank you! We will use this to calibrate our cohort plans.
+                    </span>
+                </div>
             </div>
         </div>
     </section>
@@ -1204,8 +1225,9 @@
 
                     const queryParams = new URLSearchParams();
                     const formData = new FormData(waitlistForm);
+                    const userEmail = formData.get('email');
                     queryParams.append('name', formData.get('name'));
-                    queryParams.append('email', formData.get('email'));
+                    queryParams.append('email', userEmail);
                     // Explicitly tag context as CourtFlow interest
                     queryParams.append('club', formData.get('club') + " (CourtFlow Interest)");
 
@@ -1217,11 +1239,41 @@
                     })
                     .then(response => response.json())
                     .then(res => {
-                        if (res.result === 'success') {
-                            submitBtn.textContent = '✓ You\'re registered!';
-                            submitBtn.style.backgroundColor = '#10b981';
-                            submitBtn.style.color = '#ffffff';
-                            waitlistForm.reset();
+                         if (res.result === 'success') {
+                             // Hide form container, show survey
+                             const parentCard = waitlistForm.closest('.waitlist-card');
+                             const formContainer = parentCard.querySelector('.form-container');
+                             const successSurvey = parentCard.querySelector('.success-survey');
+                             
+                             if (formContainer && successSurvey) {
+                                 formContainer.style.display = 'none';
+                                 successSurvey.style.display = 'flex';
+                                 
+                                 // Add event listeners to pricing pills
+                                 const priceBtns = successSurvey.querySelectorAll('.price-btn');
+                                 priceBtns.forEach(btn => {
+                                     btn.addEventListener('click', () => {
+                                         const selectedPrice = btn.getAttribute('data-price');
+                                         
+                                         // Log budget choice in background sheet
+                                         const p = new URLSearchParams();
+                                         p.append('email', userEmail);
+                                         p.append('club', "CourtFlow Budget: " + selectedPrice);
+                                         
+                                         fetch('https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec', {
+                                             method: 'POST',
+                                             redirect: 'follow',
+                                             credentials: 'omit',
+                                             body: p
+                                         });
+                                         
+                                         // Show thank you and disable buttons
+                                         priceBtns.forEach(b => b.disabled = true);
+                                         const thanksSpan = successSurvey.querySelector('.survey-thanks');
+                                         if (thanksSpan) thanksSpan.style.display = 'block';
+                                     });
+                                 });
+                             }
                         } else {
                             submitBtn.textContent = '⚠️ Registration failed.';
                             submitBtn.style.backgroundColor = '#f43f5e';

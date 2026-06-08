@@ -882,24 +882,46 @@
         <div class="ambient-glow" style="top: auto; bottom: -10vw; left: -10vw; right: auto;"></div>
         <div class="container">
             <div class="glass-panel lead-wrapper">
-                <h2>Get Early Access</h2>
-                <p>We are currently launching with a group of selected racket clubs. Join the waitlist to bring FixtureFlow's revolutionary coordination system to your club.</p>
-                <form class="lead-form" id="waitlist-form">
-                    <div>
-                        <label for="name">Your Name</label>
-                        <input type="text" id="name" name="name" placeholder="e.g., Alex Smith" required>
+                <div class="form-container">
+                    <h2>Join the Waiting List</h2>
+                    <p>FixtureFlow is launching soon as a premium subscription for racket clubs. Register your interest below to secure your spot in our next onboarding cohort and lock in early-adopter pricing.</p>
+                    <form class="lead-form" id="waitlist-form">
+                        <div>
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" name="name" placeholder="e.g., Alex Smith" required>
+                        </div>
+                        <div>
+                            <label for="club">Club Name</label>
+                            <input type="text" id="club" name="club" placeholder="e.g., Dublin Racket Club" required>
+                        </div>
+                        <div class="form-group-full">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Join the Waiting List</button>
+                        <span style="grid-column: span 2; display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
+                    </form>
+                </div>
+
+                <!-- Success Survey View -->
+                <div class="success-survey" style="display: none; text-align: center; animation: fadeIn 0.4s ease forwards; flex-direction: column; gap: 16px; align-items: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 8px;">🎉</div>
+                    <h2 style="margin-bottom: 8px;">You're on the Waiting List!</h2>
+                    <p style="color: var(--text-secondary); font-size: 1.05rem; max-width: 440px; margin: 0 auto 12px auto; line-height: 1.5;">
+                        We onboard new clubs in limited cohorts to ensure a smooth transition. While we finalize your release group, <strong>what monthly price feels fair for your club?</strong>
+                    </p>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+                        <button class="btn btn-secondary price-btn" data-price="under-25" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 99px;">Under €25/mo</button>
+                        <button class="btn btn-secondary price-btn" data-price="25-50" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 99px;">€25 - €50/mo</button>
+                        <button class="btn btn-secondary price-btn" data-price="50-100" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 99px;">€50 - €100/mo</button>
                     </div>
-                    <div>
-                        <label for="club">Club Name</label>
-                        <input type="text" id="club" name="club" placeholder="e.g., Dublin Racket Club" required>
-                    </div>
-                    <div class="form-group-full">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" placeholder="you@example.com" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Join the Waitlist</button>
-                    <span style="display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
-                </form>
+                    
+                    <span class="survey-thanks" style="display: none; font-size: 0.9rem; color: var(--color-primary); font-weight: 700; margin-top: 8px;">
+                        ✓ Thank you! We will use this to calibrate our cohort plans.
+                    </span>
+                </div>
+
             </div>
         </div>
     </section>
