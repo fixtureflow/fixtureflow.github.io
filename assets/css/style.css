@@ -370,6 +370,25 @@ header.nav-header.scrolled .nav-actions .btn-secondary {
         font-size: 1rem;
         min-height: 48px;
     }
+    .glass-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 24px;
+    }
+    .glass-tabs .tab-btn {
+        flex: 1 1 auto;
+        min-width: 120px;
+        padding: 8px 14px;
+        text-align: center;
+        font-size: 0.9rem;
+        border-radius: 99px;
+        min-height: 44px;
+    }
 }
 
 /* --- UNIFIED WAITING LIST SYSTEM --- */
@@ -439,6 +458,56 @@ header.nav-header.scrolled .nav-actions .btn-secondary {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 4px var(--color-primary-glow);
+}
+
+/* --- STICKY GLASS TABS SWITCHER --- */
+.glass-tabs {
+    position: sticky;
+    top: 80px;
+    z-index: 500;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 48px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 8px;
+    border-radius: 16px;
+    border: 1px solid var(--border-glass);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: var(--transition-smooth);
+}
+
+.glass-tabs .tab-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border-glass);
+    padding: 10px 20px;
+    border-radius: 99px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.glass-tabs .tab-btn:hover {
+    background: var(--border-subtle);
+    color: var(--text-primary);
+}
+
+.glass-tabs .tab-btn.active {
+    background: var(--color-primary);
+    color: #ffffff;
+    border-color: var(--color-primary);
+    box-shadow: var(--color-primary-glow) 0px 4px 12px;
 }
 
 /* --- UNIFIED FOOTER SYSTEM --- */

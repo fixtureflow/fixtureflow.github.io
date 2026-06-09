@@ -385,46 +385,7 @@
             padding: 80px 0;
             border-top: 1px solid var(--border-glass);
         }
-        .tabs-nav {
-            position: sticky;
-            top: 80px;
-            z-index: 500;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 48px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 8px;
-            border-radius: 16px;
-            border: 1px solid var(--border-glass);
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            transition: var(--transition-smooth);
-        }
-        .tab-btn {
-            flex: 1;
-            background: transparent;
-            border: 1px solid var(--border-glass);
-            color: var(--text-secondary);
-            padding: 10px 20px;
-            border-radius: 99px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .tab-btn.active, .tab-btn:hover {
-            background: var(--color-primary-glow);
-            color: var(--color-primary);
-            border-color: var(--color-primary);
-        }
+        /* Tab switcher layout inherited globally from .glass-tabs in /assets/css/style.css */
         .tab-content {
             display: none;
             max-width: 800px;
@@ -535,24 +496,7 @@
                 gap: 20px;
             }
             /* Waitlist mobile overrides inherited globally */
-            .tabs-nav {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-                padding: 6px;
-                border-radius: 12px;
-                width: 100%;
-                max-width: 100%;
-                margin-bottom: 24px;
-            }
-            .tab-btn {
-                flex: 1 1 auto;
-                min-width: 120px;
-                padding: 8px 14px;
-                text-align: center;
-                font-size: 0.9rem;
-                min-height: 44px;
-            }
+            /* Tab switcher mobile overrides inherited globally */
             .mockup-actions {
                 grid-column: span 1;
                 justify-content: center;
@@ -897,7 +841,7 @@
     <!-- 4. Marketing Component Journey Tabs -->
     <section class="marketing-section">
         <div class="container">
-            <div class="tabs-nav">
+            <div class="glass-tabs">
                 <button class="tab-btn active" data-tab="check-in">Roster Check-In</button>
                 <button class="tab-btn" data-tab="matchmaker">Heuristics Engine</button>
                 <button class="tab-btn" data-tab="persistence">Properties Sync</button>
