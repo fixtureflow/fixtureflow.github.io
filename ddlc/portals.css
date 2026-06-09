@@ -1,0 +1,427 @@
+/* --- LEAGUE COORDINATOR (DDLC) PORTAL SPECIFIC STYLES --- */
+
+:root {
+    /* Mockup Adaptations (Light Mode) */
+    --mockup-bg: #ffffff;
+    --mockup-header-bg: #f1f5f9;
+    --mockup-card-bg: #f8fafc;
+    --mockup-card-border: rgba(15, 23, 42, 0.06);
+    --mockup-overlay-bg: rgba(15, 23, 42, 0.02);
+    --mockup-text-primary: #0f172a;
+    --mockup-text-secondary: #475569;
+    --mockup-text-muted: #64748b;
+    
+    --color-opponent: #0f172a; /* Obsidian Slate */
+    --color-opponent-hover: #1e293b;
+    --color-opponent-glow: rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="dark"] {
+    /* Mockup Adaptations (Dark Mode Elevation) */
+    --mockup-bg: #11131e;        /* Elevated container */
+    --mockup-header-bg: #161928; /* Header */
+    --mockup-card-bg: #1b1f32;   /* Elevated cards */
+    --mockup-card-border: rgba(255, 255, 255, 0.05);
+    --mockup-overlay-bg: rgba(255, 255, 255, 0.02);
+    --mockup-text-primary: #f8fafc;
+    --mockup-text-secondary: #94a3b8;
+    --mockup-text-muted: #64748b;
+    
+    --color-opponent: #f8fafc; /* Inversed Stark Slate */
+    --color-opponent-hover: #e2e8f0;
+    --color-opponent-glow: rgba(248, 250, 252, 0.15);
+}
+
+/* Interactive Glass Mockup inside Hero */
+.hero-visual {
+    position: relative;
+}
+
+.visual-wrapper {
+    width: 100%;
+    position: relative;
+}
+
+.interactive-mockup {
+    position: relative;
+    width: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border-glass);
+    box-shadow: var(--shadow-premium);
+    background: var(--bg-container);
+    transition: var(--transition-smooth);
+}
+
+/* --- THE PORTAL JOURNEY (FEATURES) --- */
+.journey-section {
+    padding: 100px 0;
+    background: radial-gradient(100% 50% at 50% 0%, var(--bg-app) 0%, transparent 100%);
+}
+
+.section-header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 50px auto;
+}
+
+.section-title {
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--text-primary) 30%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.section-description {
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+}
+
+/* Portal Tabs Switcher */
+.portal-tabs {
+    display: inline-flex;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    padding: 6px;
+    border-radius: 16px;
+    gap: 8px;
+    margin-bottom: 40px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.tab-btn.active {
+    background: var(--color-primary);
+    color: #ffffff;
+    box-shadow: var(--color-primary-glow) 0px 4px 12px;
+}
+
+.portal-content {
+    display: none;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 60px;
+    align-items: center;
+    text-align: left;
+}
+
+.portal-content.active {
+    display: grid;
+}
+
+.portal-info h3 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.portal-info p {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    margin-bottom: 24px;
+}
+
+.portal-features-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.portal-features-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.portal-features-list svg {
+    color: var(--color-success);
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+/* --- PORTAL SCREEN MOCKUPS (HTML/CSS DRAWN) --- */
+.mockup-container {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-glass);
+    box-shadow: var(--shadow-premium);
+    background: var(--mockup-bg);
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition-smooth);
+}
+
+/* Portal Header */
+.mockup-header {
+    background: var(--mockup-header-bg);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--mockup-card-border);
+    transition: var(--transition-smooth);
+}
+
+.mockup-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--mockup-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mockup-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3b82f6;
+}
+
+/* Mockup Scroll Area */
+.mockup-body {
+    flex: 1;
+    overflow: hidden;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* High-Fidelity Split columns layout (Captain Portal) */
+.mockup-split-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 12px;
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .mockup-split-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+}
+
+/* Mockup Cards */
+.mockup-card {
+    background: var(--mockup-card-bg);
+    border-radius: 10px;
+    padding: 14px;
+    border: 1px solid var(--mockup-card-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: var(--transition-smooth);
+}
+
+.mockup-card-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mockup-card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--mockup-text-primary);
+}
+
+.mockup-card-subtitle {
+    font-size: 0.75rem;
+    color: var(--mockup-text-secondary);
+}
+
+/* Mockup Badges */
+.m-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.m-badge-alert {
+    background: rgba(244, 63, 94, 0.15);
+    color: #f43f5e;
+    border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+.m-badge-success {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Mockup Calendar Layout */
+.mockup-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    text-align: center;
+    font-size: 0.7rem;
+}
+
+.mockup-cal-header {
+    font-weight: 600;
+    color: var(--mockup-text-muted);
+    padding-bottom: 6px;
+}
+
+.mockup-cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--mockup-text-secondary);
+    background: var(--mockup-overlay-bg);
+    font-size: 0.8rem;
+    transition: var(--transition-smooth);
+}
+
+.mockup-cal-day.match {
+    background: rgba(59, 130, 246, 0.15) !important;
+    color: #3b82f6 !important;
+    font-weight: 700;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.mockup-cal-day.unavailable {
+    background: rgba(198, 40, 40, 0.15) !important;
+    color: #c62828 !important;
+    font-weight: 700;
+    border: 1px solid rgba(198, 40, 40, 0.3);
+}
+
+.mockup-cal-day.conflict {
+    background: linear-gradient(135deg, rgba(198, 40, 40, 0.2) 0%, rgba(198, 40, 40, 0.2) 50%, rgba(59, 130, 246, 0.2) 50%, rgba(59, 130, 246, 0.2) 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    border: 1px solid rgba(198, 40, 40, 0.3);
+}
+
+/* --- PLAYGROUND & PORTAL ACCENTS --- */
+.demo-card {
+    grid-column: span 2;
+    margin-top: 32px;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px solid var(--border-glass);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 760px;
+    width: 100%;
+}
+
+.btn-opponent {
+    background-color: var(--color-opponent);
+    color: #ffffff;
+    box-shadow: var(--color-opponent-glow) 0px 8px 16px;
+}
+
+.btn-opponent:hover {
+    background-color: var(--color-opponent-hover);
+    transform: translateY(-2px);
+}
+
+/* --- PORTAL MOCKUP MEDIA QUERIES --- */
+@media (max-width: 992px) {
+    .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+    }
+    .hero-content {
+        align-items: center;
+    }
+    .portal-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .desktop-only {
+        display: none !important;
+    }
+
+    .section-title {
+        font-size: 1.9rem;
+        margin-bottom: 12px;
+    }
+
+    .section-description {
+        font-size: 0.95rem;
+    }
+
+    .journey-section {
+        padding: 60px 0;
+    }
+
+    /* Portal tab wrap system (Fluid Layout) */
+    .portal-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 24px;
+    }
+
+    .tab-btn {
+        flex: 1 1 auto;
+        min-width: 120px;
+        padding: 8px 14px;
+        text-align: center;
+        font-size: 0.9rem;
+        border-radius: 99px;
+        min-height: 44px;
+    }
+
+    .portal-info h3 {
+        font-size: 1.45rem;
+        margin-bottom: 8px;
+    }
+
+    .portal-info p {
+        font-size: 0.95rem;
+        margin-bottom: 16px;
+    }
+
+    .portal-features-list {
+        gap: 8px;
+    }
+
+    .portal-features-list li {
+        font-size: 0.9rem;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+}
