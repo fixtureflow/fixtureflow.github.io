@@ -841,19 +841,21 @@
     <!-- 4. Marketing Component Journey Tabs -->
     <section class="marketing-section">
         <div class="container">
-            <div class="glass-tabs">
-                <button class="tab-btn active" data-tab="check-in">
-                    <span class="desktop-label">Roster Check-In</span>
-                    <span class="mobile-label">Roster</span>
-                </button>
-                <button class="tab-btn" data-tab="matchmaker">
-                    <span class="desktop-label">Heuristics Engine</span>
-                    <span class="mobile-label">Matches</span>
-                </button>
-                <button class="tab-btn" data-tab="persistence">
-                    <span class="desktop-label">Properties Sync</span>
-                    <span class="mobile-label">Sync</span>
-                </button>
+            <div class="tabs-wrapper">
+                <div class="glass-tabs">
+                    <button class="tab-btn active" data-tab="check-in">
+                        <span class="desktop-label">Roster Check-In</span>
+                        <span class="mobile-label">Roster</span>
+                    </button>
+                    <button class="tab-btn" data-tab="matchmaker">
+                        <span class="desktop-label">Heuristics Engine</span>
+                        <span class="mobile-label">Matches</span>
+                    </button>
+                    <button class="tab-btn" data-tab="persistence">
+                        <span class="desktop-label">Properties Sync</span>
+                        <span class="mobile-label">Sync</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Tab 1: Check-in -->
@@ -1125,12 +1127,12 @@
                         contentElement.classList.add('active');
                     }
 
-                    // Smooth scroll to the top of the tab switcher to keep content in context
-                    const tabsContainer = document.querySelector('.glass-tabs');
-                    if (tabsContainer) {
+                    // Smooth scroll to the top of the tabs wrapper to keep content in context
+                    const tabsWrapper = document.querySelector('.tabs-wrapper');
+                    if (tabsWrapper) {
                         const offset = 70; // Keep space for sticky navbar
                         const bodyRect = document.body.getBoundingClientRect().top;
-                        const elementRect = tabsContainer.getBoundingClientRect().top;
+                        const elementRect = tabsWrapper.getBoundingClientRect().top;
                         const elementPosition = elementRect - bodyRect;
                         const offsetPosition = elementPosition - offset;
 

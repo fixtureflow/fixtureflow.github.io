@@ -83,12 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeContent.classList.add('active');
             }
 
-            // Smooth scroll back to the top of the tab switcher to keep the active mockup and content perfectly in context
-            const tabsContainer = document.querySelector('.glass-tabs');
-            if (tabsContainer) {
+            // Smooth scroll back to the top of the tabs wrapper to keep the active mockup and content perfectly in context
+            const tabsWrapper = document.querySelector('.tabs-wrapper');
+            if (tabsWrapper) {
                 const offset = 70; // Keep space for sticky navbar
                 const bodyRect = document.body.getBoundingClientRect().top;
-                const elementRect = tabsContainer.getBoundingClientRect().top;
+                const elementRect = tabsWrapper.getBoundingClientRect().top;
                 const elementPosition = elementRect - bodyRect;
                 const offsetPosition = elementPosition - offset;
 
