@@ -546,7 +546,7 @@ header.nav-header.scrolled .nav-actions .btn-secondary {
     }
     .glass-tabs .tab-btn {
         flex: 1 1 auto;
-        min-width: 120px;
+        min-width: 80px;
         padding: 8px 14px;
         text-align: center;
         font-size: 0.9rem;
