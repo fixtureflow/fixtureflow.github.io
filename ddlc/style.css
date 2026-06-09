@@ -292,6 +292,20 @@ header.nav-header.scrolled {
     gap: 20px;
 }
 
+/* Header Button Desktop Scroll-Fade */
+.nav-actions .btn-secondary {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease;
+}
+
+header.nav-header.scrolled .nav-actions .btn-secondary {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
 /* Theme Toggle */
 .theme-toggle {
     background: none;
@@ -1082,11 +1096,11 @@ header.nav-header.scrolled {
     }
     
     .lead-form {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr;
     }
     
     .form-group-full, .lead-form button, .lead-form span {
-        grid-column: span 1 !important;
+        grid-column: span 1;
     }
 
     /* Mobile Touch-First Form Sizing (Apple/Android 48px guidelines) */
