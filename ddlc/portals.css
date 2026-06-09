@@ -32,6 +32,77 @@
     --color-opponent-glow: rgba(248, 250, 252, 0.15);
 }
 
+/* --- HERO SECTION --- */
+.hero-section {
+    padding: 160px 0 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+.ambient-glow {
+    position: absolute;
+    width: 40vw;
+    height: 40vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--color-primary-glow) 0%, transparent 70%);
+    top: -10vw;
+    right: -10vw;
+    z-index: -1;
+    filter: blur(80px);
+    pointer-events: none;
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 60px;
+    align-items: center;
+}
+
+.hero-content {
+    max-width: 620px;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 30px;
+    background: var(--color-primary-glow);
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+    border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.hero-title {
+    font-family: var(--font-display);
+    font-size: 3.2rem;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -1.8px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--text-primary) 30%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-description {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: 36px;
+    font-weight: 400;
+}
+
+.hero-cta-group {
+    display: flex;
+    gap: 16px;
+}
+
 /* Interactive Glass Mockup inside Hero */
 .hero-visual {
     position: relative;
@@ -365,6 +436,21 @@
 }
 
 @media (max-width: 768px) {
+    /* Fluid Mobile Typography */
+    .hero-section {
+        padding: 120px 0 60px;
+    }
+
+    .hero-title {
+        font-size: 2.4rem;
+        margin-bottom: 16px;
+    }
+
+    .hero-description {
+        font-size: 1.05rem;
+        margin-bottom: 28px;
+    }
+
     .desktop-only {
         display: none !important;
     }

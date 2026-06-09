@@ -354,6 +354,91 @@ header.nav-header.scrolled .nav-actions .btn-secondary {
     .nav-actions .btn-secondary {
         display: none !important; /* Hide waitlist button in header on mobile */
     }
+    .waitlist-card {
+        padding: 30px 20px;
+    }
+    .waitlist-form {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .form-group-full, .waitlist-form button, .waitlist-form span {
+        grid-column: span 1;
+    }
+    .form-input,
+    .waitlist-form input {
+        padding: 16px;
+        font-size: 1rem;
+        min-height: 48px;
+    }
+}
+
+/* --- UNIFIED WAITING LIST SYSTEM --- */
+.waitlist-section {
+    padding: 100px 0;
+    border-top: 1px solid var(--border-glass);
+    text-align: center;
+    position: relative;
+}
+.waitlist-card {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 50px;
+}
+.waitlist-card h2 {
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+}
+.waitlist-card p {
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+    margin-bottom: 40px;
+}
+.waitlist-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    text-align: left;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.form-group-full {
+    grid-column: span 2;
+}
+.waitlist-form label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+.waitlist-form button {
+    grid-column: span 2;
+    margin-top: 12px;
+    width: 100%;
+}
+.waitlist-form span {
+    grid-column: span 2;
+}
+.form-input,
+.waitlist-form input {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-glass);
+    background: var(--bg-glass);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    transition: var(--transition-smooth);
+}
+.form-input:focus,
+.waitlist-form input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px var(--color-primary-glow);
 }
 
 /* --- UNIFIED FOOTER SYSTEM --- */
