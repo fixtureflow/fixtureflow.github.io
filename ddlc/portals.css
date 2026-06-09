@@ -511,6 +511,9 @@
     .hero-content {
         align-items: center;
     }
+    .hero-cta-group {
+        justify-content: center;
+    }
     .portal-content {
         grid-template-columns: 1fr;
         gap: 32px;

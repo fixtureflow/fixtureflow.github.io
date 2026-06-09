@@ -338,58 +338,6 @@ header.nav-header.scrolled .nav-actions .btn-secondary {
 .mobile-label {
     display: none;
 }
-@media (max-width: 768px) {
-    .container {
-        padding: 0 20px;
-    }
-    .desktop-label {
-        display: none;
-    }
-    .mobile-label {
-        display: inline;
-    }
-    .nav-links {
-        gap: 16px; /* Tighten menu spacing on small viewports */
-    }
-    .nav-actions .btn-secondary {
-        display: none !important; /* Hide waitlist button in header on mobile */
-    }
-    .waitlist-card {
-        padding: 30px 20px;
-    }
-    .waitlist-form {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-    .form-group-full, .waitlist-form button, .waitlist-form span {
-        grid-column: span 1;
-    }
-    .form-input,
-    .waitlist-form input {
-        padding: 16px;
-        font-size: 1rem;
-        min-height: 48px;
-    }
-    .glass-tabs {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        padding: 6px;
-        border-radius: 12px;
-        width: 100%;
-        max-width: 100%;
-        margin-bottom: 24px;
-    }
-    .glass-tabs .tab-btn {
-        flex: 1 1 auto;
-        min-width: 120px;
-        padding: 8px 14px;
-        text-align: center;
-        font-size: 0.9rem;
-        border-radius: 99px;
-        min-height: 44px;
-    }
-}
 
 /* --- UNIFIED WAITING LIST SYSTEM --- */
 .waitlist-section {
@@ -555,6 +503,56 @@ header.nav-header.scrolled .nav-actions .btn-secondary {
 }
 
 @media (max-width: 768px) {
+    .container {
+        padding: 0 20px;
+    }
+    .desktop-label {
+        display: none;
+    }
+    .mobile-label {
+        display: inline;
+    }
+    .nav-links {
+        gap: 16px; /* Tighten menu spacing on small viewports */
+    }
+    .nav-actions .btn-secondary {
+        display: none !important; /* Hide waitlist button in header on mobile */
+    }
+    .waitlist-card {
+        padding: 30px 20px;
+    }
+    .waitlist-form {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .form-group-full, .waitlist-form button, .waitlist-form span {
+        grid-column: span 1;
+    }
+    .form-input,
+    .waitlist-form input {
+        padding: 16px;
+        font-size: 1rem;
+        min-height: 48px;
+    }
+    .glass-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 24px;
+    }
+    .glass-tabs .tab-btn {
+        flex: 1 1 auto;
+        min-width: 120px;
+        padding: 8px 14px;
+        text-align: center;
+        font-size: 0.9rem;
+        border-radius: 99px;
+        min-height: 44px;
+    }
     .footer-content {
         flex-direction: column;
         align-items: center;
