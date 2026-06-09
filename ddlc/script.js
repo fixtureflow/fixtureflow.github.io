@@ -83,12 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeContent.classList.add('active');
             }
 
-            // Smooth scroll back to the top of the journey section to keep the active mockup and content perfectly in context
-            const journeySection = document.getElementById('about');
-            if (journeySection) {
-                const offset = 90; // Keep space for sticky navbar + sticky tabs spacing
+            // Smooth scroll back to the top of the tab switcher to keep the active mockup and content perfectly in context
+            const tabsContainer = document.querySelector('.glass-tabs');
+            if (tabsContainer) {
+                const offset = 70; // Keep space for sticky navbar
                 const bodyRect = document.body.getBoundingClientRect().top;
-                const elementRect = journeySection.getBoundingClientRect().top;
+                const elementRect = tabsContainer.getBoundingClientRect().top;
                 const elementPosition = elementRect - bodyRect;
                 const offsetPosition = elementPosition - offset;
 
