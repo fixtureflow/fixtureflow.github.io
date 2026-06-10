@@ -579,7 +579,6 @@ header.nav-header.scrolled .nav-actions .btn-secondary {
     max-width: 1200px;
     pointer-events: none;
     z-index: -1;
-    overflow: hidden; /* Prevents huge blurred circles from causing horizontal scrollbars */
 }
 
 .glow-circle {
