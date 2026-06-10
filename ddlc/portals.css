@@ -56,12 +56,11 @@
 
 .ddlc-waitlist-glow {
     --glow-color: var(--color-primary-glow);
-    bottom: -10vw;
-    left: -10vw;
-    width: 40vw;
-    height: 40vw;
-    max-width: 500px;
-    max-height: 500px;
+    bottom: -150px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px;
+    height: 500px;
 }
 
 @media (max-width: 992px) {
@@ -79,10 +78,9 @@
 
 @media (max-width: 768px) {
     .ddlc-waitlist-glow {
-        bottom: -15vw;
-        left: -15vw;
-        width: 65vw;
-        height: 65vw;
+        bottom: -100px;
+        width: 300px;
+        height: 300px;
     }
 }
 
