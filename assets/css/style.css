@@ -585,8 +585,69 @@ header.nav-header.scrolled .nav-actions .btn-secondary {
     position: absolute;
     border-radius: 50%;
     background: radial-gradient(circle, var(--glow-color, rgba(167, 139, 250, 0.15)) 0%, transparent 70%);
-    filter: blur(60px);
+    filter: blur(100px); /* Softened default blur */
     pointer-events: none;
+}
+
+/* Page Specific Ambient Glow Configurations */
+.index-glow-1 {
+    --glow-color: rgba(167, 139, 250, 0.12);
+    top: -200px;
+    left: 10%;
+    width: 500px;
+    height: 500px;
+}
+.index-glow-2 {
+    --glow-color: rgba(16, 185, 129, 0.08);
+    top: -200px;
+    right: 10%;
+    width: 500px;
+    height: 500px;
+}
+
+.courtflow-glow-1 {
+    --glow-color: rgba(16, 185, 129, 0.12);
+    top: -100px;
+    left: 20%;
+    width: 600px;
+    height: 600px;
+}
+.courtflow-glow-2 {
+    --glow-color: rgba(59, 130, 246, 0.08);
+    bottom: -100px;
+    right: 20%;
+    width: 500px;
+    height: 500px;
+}
+
+@media (max-width: 768px) {
+    .glow-circle {
+        filter: blur(60px); /* Proportional blur for smaller circles */
+    }
+    .index-glow-1 {
+        top: -100px;
+        left: -15%;
+        width: 280px;
+        height: 280px;
+    }
+    .index-glow-2 {
+        top: -100px;
+        right: -15%;
+        width: 280px;
+        height: 280px;
+    }
+    .courtflow-glow-1 {
+        top: -60px;
+        left: -10%;
+        width: 320px;
+        height: 320px;
+    }
+    .courtflow-glow-2 {
+        bottom: -60px;
+        right: -10%;
+        width: 280px;
+        height: 280px;
+    }
 }
 
 
