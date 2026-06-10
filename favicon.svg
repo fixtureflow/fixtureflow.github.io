@@ -4,5 +4,5 @@
     <stop offset="40%" stop-color="#a78bfa"/>
     <stop offset="100%" stop-color="#10b981"/>
   </linearGradient>
-  <text x="50%" y="64%" text-anchor="middle" font-family="Outfit, sans-serif" font-size="52" font-weight="900" letter-spacing="-0.06em" fill="#ffffff">FF</text>
+  <path d="M29,29 H47 V34 H34 V47 H42 V52 H34 V71 H29 Z M53,29 H71 V34 H58 V47 H66 V52 H58 V71 H53 Z" fill="#ffffff"/>
 </svg>
