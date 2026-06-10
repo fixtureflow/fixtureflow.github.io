@@ -60,38 +60,6 @@
             text-align: center;
             overflow: hidden;
         }
-        .glow-container {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            height: 100%;
-            max-width: 1400px;
-            pointer-events: none;
-            z-index: -1;
-        }
-        .glow-violet {
-            position: absolute;
-            top: -200px;
-            left: 10%;
-            width: 500px;
-            height: 500px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(167, 139, 250, 0.12) 0%, rgba(167, 139, 250, 0) 70%);
-            filter: blur(40px);
-        }
-        .glow-emerald {
-            position: absolute;
-            top: -200px;
-            right: 10%;
-            width: 500px;
-            height: 500px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0) 70%);
-            filter: blur(40px);
-        }
-        
         /* Hero Content */
         .hero-container {
             display: flex;
@@ -312,8 +280,8 @@
     <!-- 2. Hero Section with Ambient Glows -->
     <section class="hero-section">
         <div class="glow-container">
-            <div class="glow-violet"></div>
-            <div class="glow-emerald"></div>
+            <div class="glow-circle" style="--glow-color: rgba(167, 139, 250, 0.12); top: -200px; left: 10%; width: 500px; height: 500px; filter: blur(40px);"></div>
+            <div class="glow-circle" style="--glow-color: rgba(16, 185, 129, 0.08); top: -200px; right: 10%; width: 500px; height: 500px; filter: blur(40px);"></div>
         </div>
         <div class="container hero-container animate-fade-in">
             <h1 class="hero-title">Take some stress out of running your racket club.</h1>

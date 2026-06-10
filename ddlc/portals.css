@@ -47,17 +47,24 @@
     overflow: hidden;
 }
 
-.ambient-glow {
-    position: absolute;
-    width: 40vw;
-    height: 40vw;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--color-primary-glow) 0%, transparent 70%);
-    top: -10vw;
-    right: -10vw;
-    z-index: -1;
-    filter: blur(80px);
-    pointer-events: none;
+.ddlc-hero-glow {
+    top: -100px;
+    right: -50px;
+    width: 500px;
+    height: 500px;
+}
+
+@media (max-width: 992px) {
+    .ddlc-hero-glow {
+        top: auto;
+        bottom: -100px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        width: 400px;
+        height: 400px;
+        opacity: 0.8;
+    }
 }
 
 .hero-grid {
