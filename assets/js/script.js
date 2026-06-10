@@ -34,6 +34,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         updateToggleIcon(theme);
+        
+        // Dynamically synchronize browser address bar/status bar theme
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeColorMeta) {
+            const lightColor = '#f8fafc';
+            let darkColor = '#0b1329'; // Default for Homepage & CourtFlow
+            if (window.location.pathname.includes('/ddlc/')) {
+                darkColor = '#0b0f19'; // DDLC deep obsidian dark color
+            }
+            themeColorMeta.setAttribute('content', theme === 'dark' ? darkColor : lightColor);
+        }
     }
 
     function updateToggleIcon(theme) {
