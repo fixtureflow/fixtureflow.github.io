@@ -1,4 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Failsafe Storage wrapper for incognito/private mode stability
+    const safeStorage = (() => {
+        try {
+            const key = '__storage_test__';
+            localStorage.setItem(key, key);
+            localStorage.removeItem(key);
+            return localStorage;
+        } catch (e) {
+            return {
+                getItem: () => null,
+                setItem: () => {},
+                removeItem: () => {}
+            };
+        }
+    })();
+
     // --- ADVANCED THEME TOGGLE & AUTO-SCHEDULE SYSTEM ---
     const themeToggle = document.querySelector('.theme-toggle');
     const OS_PREF = window.matchMedia('(prefers-color-scheme: dark)');
@@ -11,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 1. Initialize Theme (Check manual override first, fallback to natural OS/Time schedule)
-    let currentTheme = localStorage.getItem('theme') || getNaturalTheme();
+    let currentTheme = safeStorage.getItem('theme') || getNaturalTheme();
     applyTheme(currentTheme);
 
     // 2. Manual Toggle Click Handler (Saves manual choice)
@@ -20,14 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const theme = document.documentElement.getAttribute('data-theme');
             const newTheme = theme === 'dark' ? 'light' : 'dark';
             
-            localStorage.setItem('theme', newTheme);
+            safeStorage.setItem('theme', newTheme);
             applyTheme(newTheme);
         });
     }
 
     // 3. Real-Time OS Auto-Switching Listener
     OS_PREF.addEventListener('change', (e) => {
-        localStorage.removeItem('theme'); // Clear manual lock on natural shift
+        safeStorage.removeItem('theme'); // Clear manual lock on natural shift
         applyTheme(e.matches ? 'dark' : 'light');
     });
 
