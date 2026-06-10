@@ -7,8 +7,8 @@
     --font-display: 'Outfit', var(--font-sans);
 
     /* Transitions */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-smooth: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: background-color 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 
     /* Light Mode Variables (Default) */
     --bg-app: #f8fafc;
@@ -18,7 +18,7 @@
     --border-subtle: rgba(15, 23, 42, 0.05);
     --text-primary: #0f172a;
     --text-secondary: #475569;
-    --text-muted: #64748b;
+    --text-muted: #4b5563;
     
     --color-primary: #6d28d9; /* Royal Violet default */
     --color-primary-hover: #5b21b6;
@@ -55,7 +55,7 @@
     --border-subtle: rgba(255, 255, 255, 0.05);
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-muted: #94a3b8;
     
     --color-primary: #a78bfa; /* Electric Violet default */
     --color-primary-hover: #c084fc;

@@ -56,13 +56,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- HEADER SCROLL EFFECT ---
     const header = document.querySelector('header.nav-header');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
-        }
-    });
+    if (header) {
+        let isScrolled = false;
+        window.addEventListener('scroll', () => {
+            const shouldScroll = window.scrollY > 50;
+            if (shouldScroll !== isScrolled) {
+                isScrolled = shouldScroll;
+                if (isScrolled) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            }
+        }, { passive: true });
+    }
 
     // --- PORTAL TABS SYSTEM ---
     const tabButtons = document.querySelectorAll('.tab-btn');
