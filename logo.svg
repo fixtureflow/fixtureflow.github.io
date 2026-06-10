@@ -31,8 +31,7 @@
   <!-- 1. Circular Brand Icon Badge (Left) -->
   <g transform="translate(10, 10)">
     <rect width="60" height="60" rx="30" fill="url(#icon-g)"/>
-    <text x="30" y="30" 
-          dominant-baseline="central" 
+    <text x="30" y="39" 
           text-anchor="middle" 
           font-family="Outfit, -apple-system, sans-serif" 
           font-size="32" 
