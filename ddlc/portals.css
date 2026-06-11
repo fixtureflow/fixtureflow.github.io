@@ -65,8 +65,8 @@
 
 @media (max-width: 992px) {
     .ddlc-hero-glow {
-        top: auto;
-        bottom: -100px;
+        top: -60px;
+        bottom: auto;
         left: 50%;
         right: auto;
         transform: translateX(-50%);
