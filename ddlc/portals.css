@@ -48,6 +48,7 @@
 }
 
 .ddlc-hero-glow {
+    --glow-color: var(--color-primary-glow);
     top: -100px;
     right: -50px;
     width: 500px;
