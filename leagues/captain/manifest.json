@@ -1,0 +1,17 @@
+{
+  "name": "FixtureFlow: Captain Portal",
+  "short_name": "FF Captain",
+  "start_url": "/leagues/captain/",
+  "display": "standalone",
+  "background_color": "#0b1329",
+  "theme_color": "#a78bfa",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/assets/images/icon-captain.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

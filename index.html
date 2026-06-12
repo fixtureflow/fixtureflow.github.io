@@ -12,11 +12,27 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://fixtureflow.github.io/">
     <meta property="og:image" content="https://fixtureflow.github.io/ddlc/assets/card-fixtureflow.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="628">
+    
+    <!-- Twitter Metadata -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="FixtureFlow | Racket Sports Club Management Solutions">
+    <meta name="twitter:description" content="Take the stress out of coordinating league matches and social club night court rotations. Powered securely by Google Sheets.">
+    <meta name="twitter:image" content="https://fixtureflow.github.io/ddlc/assets/card-fixtureflow.png">
     
     <!-- Shared Master Assets -->
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=1.3">
     <script src="/assets/js/script.js" defer></script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/favicon.svg" color="#10b981">
+    <link rel="canonical" href="https://fixtureflow.github.io/">
+    <meta name="theme-color" content="#0b1329">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,18 +40,26 @@
     
     <!-- Structured JSON-LD Schema -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "FixtureFlow",
-      "operatingSystem": "All",
-      "applicationCategory": "BusinessApplication",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "FixtureFlow",
+        "operatingSystem": "All",
+        "applicationCategory": "BusinessApplication",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "FixtureFlow",
+        "url": "https://fixtureflow.github.io/"
       }
-    }
+    ]
     </script>
     
     <style>
@@ -48,38 +72,6 @@
             text-align: center;
             overflow: hidden;
         }
-        .glow-container {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            height: 100%;
-            max-width: 1400px;
-            pointer-events: none;
-            z-index: -1;
-        }
-        .glow-violet {
-            position: absolute;
-            top: -200px;
-            left: 10%;
-            width: 500px;
-            height: 500px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(167, 139, 250, 0.12) 0%, rgba(167, 139, 250, 0) 70%);
-            filter: blur(40px);
-        }
-        .glow-emerald {
-            position: absolute;
-            top: -200px;
-            right: 10%;
-            width: 500px;
-            height: 500px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0) 70%);
-            filter: blur(40px);
-        }
-        
         /* Hero Content */
         .hero-container {
             display: flex;
@@ -276,18 +268,20 @@
                 <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
                     <defs>
                         <linearGradient id="logo-badge-grad-index-nav" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="40%" stop-color="#a78bfa"/>
-                            <stop offset="100%" stop-color="#10b981"/>
+                            <stop offset="40%" stop-color="var(--logo-gradient-start, #a78bfa)"/>
+                            <stop offset="100%" stop-color="var(--logo-gradient-end, #10b981)"/>
                         </linearGradient>
                     </defs>
                     <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-index-nav)"/>
-                    <text x="30" y="32" dominant-baseline="central" text-anchor="middle" font-family="Outfit, -apple-system, sans-serif" font-size="30" font-weight="900" fill="#ffffff">FF</text>
+                    <g transform="scale(0.6)">
+                        <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+                    </g>
                 </svg>
                 <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
             </a>
             <ul class="nav-links">
                 <li><a href="ddlc/"><span class="desktop-label">League Coordinator</span><span class="mobile-label">Leagues</span></a></li>
-                <li><a href="courtflow/"><span class="desktop-label">Social Queue Manager</span><span class="mobile-label">Socials</span></a></li>
+                <li><a href="courtflow/"><span class="desktop-label">Queue Manager</span><span class="mobile-label">Socials</span></a></li>
             </ul>
             <div class="nav-actions">
                 <button class="theme-toggle" aria-label="Toggle light/dark theme">
@@ -300,11 +294,10 @@
     <!-- 2. Hero Section with Ambient Glows -->
     <section class="hero-section">
         <div class="glow-container">
-            <div class="glow-violet"></div>
-            <div class="glow-emerald"></div>
+            <div class="glow-circle index-glow-1"></div>
+            <div class="glow-circle index-glow-2"></div>
         </div>
         <div class="container hero-container animate-fade-in">
-            <div class="badge">Ecosystem Suite</div>
             <h1 class="hero-title">Take some stress out of running your racket club.</h1>
             <p class="hero-description">
                 Running a club shouldn't feel like a second job. Built for volunteer committees, match secretaries, and social night organizers, FixtureFlow rescues you from spreadsheet chaos, captain email chases, and whiteboard complaints—so you can get your weekends back.
@@ -342,7 +335,7 @@
                     <div class="product-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </div>
-                    <h2>Social Queue Manager</h2>
+                    <h2>Queue Manager</h2>
                 </div>
                 <p class="product-tagline">Social Nights & Rotation Manager</p>
                 <p class="product-description">
@@ -368,12 +361,14 @@
                     <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
                         <defs>
                             <linearGradient id="logo-badge-grad-index-footer" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="40%" stop-color="#a78bfa"/>
-                                <stop offset="100%" stop-color="#10b981"/>
+                                <stop offset="40%" stop-color="var(--logo-gradient-start, #a78bfa)"/>
+                                <stop offset="100%" stop-color="var(--logo-gradient-end, #10b981)"/>
                             </linearGradient>
                         </defs>
                         <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-index-footer)"/>
-                        <text x="30" y="32" dominant-baseline="central" text-anchor="middle" font-family="Outfit, -apple-system, sans-serif" font-size="30" font-weight="900" fill="#ffffff">FF</text>
+                        <g transform="scale(0.6)">
+                            <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+                        </g>
                     </svg>
                     <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
                 </a>

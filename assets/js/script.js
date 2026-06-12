@@ -1,4 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Failsafe Storage wrapper for incognito/private mode stability
+    const safeStorage = (() => {
+        try {
+            const key = '__storage_test__';
+            localStorage.setItem(key, key);
+            localStorage.removeItem(key);
+            return localStorage;
+        } catch (e) {
+            return {
+                getItem: () => null,
+                setItem: () => {},
+                removeItem: () => {}
+            };
+        }
+    })();
+
     // --- ADVANCED THEME TOGGLE & AUTO-SCHEDULE SYSTEM ---
     const themeToggle = document.querySelector('.theme-toggle');
     const OS_PREF = window.matchMedia('(prefers-color-scheme: dark)');
@@ -11,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 1. Initialize Theme (Check manual override first, fallback to natural OS/Time schedule)
-    let currentTheme = localStorage.getItem('theme') || getNaturalTheme();
+    let currentTheme = safeStorage.getItem('theme') || getNaturalTheme();
     applyTheme(currentTheme);
 
     // 2. Manual Toggle Click Handler (Saves manual choice)
@@ -20,20 +36,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const theme = document.documentElement.getAttribute('data-theme');
             const newTheme = theme === 'dark' ? 'light' : 'dark';
             
-            localStorage.setItem('theme', newTheme);
+            safeStorage.setItem('theme', newTheme);
             applyTheme(newTheme);
         });
     }
 
     // 3. Real-Time OS Auto-Switching Listener
     OS_PREF.addEventListener('change', (e) => {
-        localStorage.removeItem('theme'); // Clear manual lock on natural shift
+        safeStorage.removeItem('theme'); // Clear manual lock on natural shift
         applyTheme(e.matches ? 'dark' : 'light');
     });
 
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         updateToggleIcon(theme);
+        
+        // Dynamically synchronize browser address bar/status bar theme
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeColorMeta) {
+            const lightColor = '#f8fafc';
+            let darkColor = '#0b1329'; // Default for Homepage & CourtFlow
+            if (window.location.pathname.includes('/ddlc/')) {
+                darkColor = '#0b0f19'; // DDLC deep obsidian dark color
+            }
+            themeColorMeta.setAttribute('content', theme === 'dark' ? darkColor : lightColor);
+        }
     }
 
     function updateToggleIcon(theme) {
@@ -58,12 +85,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- HEADER SCROLL EFFECT ---
     const header = document.querySelector('header.nav-header');
     if (header) {
+        let isScrolled = false;
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
+            const shouldScroll = window.scrollY > 50;
+            if (shouldScroll !== isScrolled) {
+                isScrolled = shouldScroll;
+                if (isScrolled) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
             }
-        });
+        }, { passive: true });
     }
 });

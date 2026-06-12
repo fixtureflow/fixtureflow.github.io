@@ -1,4 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Failsafe Storage wrapper for incognito/private mode stability
+    const safeStorage = (() => {
+        try {
+            const key = '__storage_test__';
+            localStorage.setItem(key, key);
+            localStorage.removeItem(key);
+            return localStorage;
+        } catch (e) {
+            return {
+                getItem: () => null,
+                setItem: () => {},
+                removeItem: () => {}
+            };
+        }
+    })();
+
     // --- ADVANCED THEME TOGGLE & AUTO-SCHEDULE SYSTEM ---
     const themeToggle = document.querySelector('.theme-toggle');
     const OS_PREF = window.matchMedia('(prefers-color-scheme: dark)');
@@ -11,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 1. Initialize Theme (Check manual override first, fallback to natural OS/Time schedule)
-    let currentTheme = localStorage.getItem('theme') || getNaturalTheme();
+    let currentTheme = safeStorage.getItem('theme') || getNaturalTheme();
     applyTheme(currentTheme);
 
     // 2. Manual Toggle Click Handler (Saves manual choice)
@@ -19,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const theme = document.documentElement.getAttribute('data-theme');
         const newTheme = theme === 'dark' ? 'light' : 'dark';
         
-        localStorage.setItem('theme', newTheme);
+        safeStorage.setItem('theme', newTheme);
         applyTheme(newTheme);
     });
 
@@ -27,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // If the visitor's OS automatically changes from day to night schedule while the tab is open,
     // this listener instantly synchronizes the website and clears the manual override!
     OS_PREF.addEventListener('change', (e) => {
-        localStorage.removeItem('theme'); // Clear manual lock on natural shift
+        safeStorage.removeItem('theme'); // Clear manual lock on natural shift
         applyTheme(e.matches ? 'dark' : 'light');
     });
 
@@ -56,13 +72,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- HEADER SCROLL EFFECT ---
     const header = document.querySelector('header.nav-header');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
-        }
-    });
+    if (header) {
+        let isScrolled = false;
+        window.addEventListener('scroll', () => {
+            const shouldScroll = window.scrollY > 50;
+            if (shouldScroll !== isScrolled) {
+                isScrolled = shouldScroll;
+                if (isScrolled) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            }
+        }, { passive: true });
+    }
 
     // --- PORTAL TABS SYSTEM ---
     const tabButtons = document.querySelectorAll('.tab-btn');
@@ -83,12 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeContent.classList.add('active');
             }
 
-            // Smooth scroll back to the top of the journey section to keep the active mockup and content perfectly in context
-            const journeySection = document.getElementById('about');
-            if (journeySection) {
-                const offset = 90; // Keep space for sticky navbar + sticky tabs spacing
+            // Smooth scroll back to the top of the tabs anchor to keep the active mockup and content perfectly in context
+            const tabsAnchor = document.querySelector('.tabs-anchor');
+            if (tabsAnchor) {
+                const offset = 70; // Keep space for sticky navbar
                 const bodyRect = document.body.getBoundingClientRect().top;
-                const elementRect = journeySection.getBoundingClientRect().top;
+                const elementRect = tabsAnchor.getBoundingClientRect().top;
                 const elementPosition = elementRect - bodyRect;
                 const offsetPosition = elementPosition - offset;
 
@@ -113,28 +136,56 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.textContent = 'Joining...';
 
             const formData = new FormData(form);
+            const userName = formData.get('name');
+            const userEmail = formData.get('email');
             const data = new URLSearchParams();
-            data.append('name', formData.get('name'));
-            data.append('email', formData.get('email'));
-            data.append('club', formData.get('club'));
+            data.append('name', userName);
+            data.append('email', userEmail);
+            data.append('club', formData.get('club') + " (DDLC Interest)");
 
             // Live webhook call to the deployed Apps Script Marketing CRM endpoint (v5 Robust Regex)
-            fetch('https://script.google.com/macros/s/AKfycbyWzShGOez4Pge9sSn59cxPhlgVa0ayi7qkaSdr4sHrN6D0USqgc7E7Oa5KdMATNDKY/exec', {
+            fetch('https://script.google.com/macros/s/AKfycbwjTqvUCCOr_nDYBLuInJJzIli_wbU7LWZA4lNSKsD5TEGHuY1iUaKvI5b2C9vs-Alo/exec', {
                 method: 'POST',
+                mode: 'no-cors',
                 redirect: 'follow',
                 credentials: 'omit',
                 body: data
             })
-            .then(response => response.json())
-            .then(result => {
-                if (result.result === 'success') {
-                    submitButton.textContent = '✓ You\'re on the list!';
-                    submitButton.style.backgroundColor = 'var(--color-success)';
-                    submitButton.style.color = '#ffffff';
-                    form.reset();
-                } else {
-                    submitButton.textContent = '⚠️ ' + (result.error ? result.error.message : 'Submission failed.');
-                    submitButton.style.backgroundColor = 'var(--color-alert)';
+            .then(() => {
+                // Hide form container, show survey
+                const parentWrapper = form.closest('.lead-wrapper');
+                const formContainer = parentWrapper.querySelector('.form-container');
+                const successSurvey = parentWrapper.querySelector('.success-survey');
+                
+                if (formContainer && successSurvey) {
+                    formContainer.style.display = 'none';
+                    successSurvey.style.display = 'flex';
+                    
+                    // Add event listeners to pricing pills
+                    const priceBtns = successSurvey.querySelectorAll('.price-btn');
+                    priceBtns.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const selectedPrice = btn.getAttribute('data-price');
+                            
+                            // Log budget choice in background sheet
+                            const p = new URLSearchParams();
+                            p.append('email', userEmail);
+                            p.append('budget', "FixtureFlow: " + selectedPrice);
+                            
+                            fetch('https://script.google.com/macros/s/AKfycbwjTqvUCCOr_nDYBLuInJJzIli_wbU7LWZA4lNSKsD5TEGHuY1iUaKvI5b2C9vs-Alo/exec', {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                redirect: 'follow',
+                                credentials: 'omit',
+                                body: p
+                            });
+                            
+                            // Show thank you and disable buttons
+                            priceBtns.forEach(b => b.disabled = true);
+                            const thanksSpan = successSurvey.querySelector('.survey-thanks');
+                            if (thanksSpan) thanksSpan.style.display = 'block';
+                        });
+                    });
                 }
             })
             .catch(error => {

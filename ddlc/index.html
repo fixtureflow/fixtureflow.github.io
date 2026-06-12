@@ -16,7 +16,26 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="628">
     
-    <link rel="stylesheet" href="style.css?v=1.2">
+    <!-- Twitter Metadata -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="FixtureFlow | Next-Generation League Coordinator">
+    <meta name="twitter:description" content="Manage everything from Google Sheets while opponents self-serve fixtures, captains coordinate rosters, and players submit availability in dedicated portals.">
+    <meta name="twitter:image" content="https://fixtureflow.github.io/ddlc/assets/card-fixtureflow.png">
+    
+    <link rel="stylesheet" href="/assets/css/style.css?v=1.3">
+    <link rel="stylesheet" href="portals.css?v=1.3">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/favicon.svg" color="#10b981">
+    <link rel="canonical" href="https://fixtureflow.github.io/ddlc/">
+    <meta name="theme-color" content="#0b0f19">
+    
+    <!-- iOS Standalone Web App Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="League Coord">
     
     <!-- Custom Typographic Gradient Brand Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='50' fill='url(%23g)'/><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23a78bfa'/><stop offset='100%' stop-color='%2310b981'/></linearGradient><text x='50%' y='65%' font-family='Outfit, sans-serif' font-size='48' font-weight='800' fill='%23ffffff' text-anchor='middle'>FF</text></svg>">
@@ -30,18 +49,20 @@
                 <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
                     <defs>
                         <linearGradient id="logo-badge-grad-ddlc-nav" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="40%" stop-color="#a78bfa"/>
-                            <stop offset="100%" stop-color="#10b981"/>
+                            <stop offset="40%" stop-color="var(--logo-gradient-start, #a78bfa)"/>
+                            <stop offset="100%" stop-color="var(--logo-gradient-end, #10b981)"/>
                         </linearGradient>
                     </defs>
                     <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-ddlc-nav)"/>
-                    <text x="30" y="32" dominant-baseline="central" text-anchor="middle" font-family="Outfit, -apple-system, sans-serif" font-size="30" font-weight="900" fill="#ffffff">FF</text>
+                    <g transform="scale(0.6)">
+                        <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+                    </g>
                 </svg>
                 <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
             </a>
             <ul class="nav-links">
                 <li><a href="#" class="active"><span class="desktop-label">League Coordinator</span><span class="mobile-label">Leagues</span></a></li>
-                <li><a href="../courtflow/"><span class="desktop-label">Social Queue Manager</span><span class="mobile-label">Socials</span></a></li>
+                <li><a href="../courtflow/"><span class="desktop-label">Queue Manager</span><span class="mobile-label">Socials</span></a></li>
             </ul>
             <div class="nav-actions">
                 <button class="theme-toggle" aria-label="Toggle light/dark theme">
@@ -54,10 +75,11 @@
 
     <!-- Hero Section -->
     <section class="hero-section">
-        <div class="ambient-glow"></div>
+        <div class="glow-container">
+            <div class="glow-circle ddlc-hero-glow"></div>
+        </div>
         <div class="container hero-grid">
             <div class="hero-content">
-                <div class="badge">Next-Generation Coordinator</div>
                 <h1 class="hero-title">
                     A completely new way to manage league scheduling.
                 </h1>
@@ -245,7 +267,7 @@
                                         </div>
                                         <div style="display: flex; flex-direction: column; gap: 2px;">
                                             <span style="font-size: 0.6rem; font-weight: 700; color: var(--mockup-text-muted); text-transform: uppercase;">Venue Location</span>
-                                            <input type="text" value="Baldoyle Badminton Center" readonly style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); border-radius: 4px; padding: 4px 8px; font-size: 0.7rem; color: var(--mockup-text-primary); width: 100%; outline: none;">
+                                            <input type="text" value="Example Racket Club" readonly style="background: var(--mockup-overlay-bg); border: 1px solid var(--mockup-card-border); border-radius: 4px; padding: 4px 8px; font-size: 0.7rem; color: var(--mockup-text-primary); width: 100%; outline: none;">
                                         </div>
                                     </div>
                                     <button class="btn btn-primary" style="padding: 8px; font-size: 0.75rem; font-weight: 750; letter-spacing: 0.3px; text-transform: uppercase; width: 100%; cursor: default; pointer-events: none; background: #0f172a; border-color: #1e293b; color: #ffffff; box-shadow: var(--shadow-subtle); margin-top: 2px;">
@@ -268,16 +290,26 @@
                 <p class="section-description">Built by a Match Secretary to solve real-world administrative bottlenecks, making league scheduling effortless for everyone.</p>
             </div>
 
-            <div class="portal-tabs">
-                <button class="tab-btn active" data-portal="secretary">Opponent Portal</button>
-                <button class="tab-btn" data-portal="captain">Captain Portal</button>
-                <button class="tab-btn" data-portal="player">Player Portal</button>
+            <div class="tabs-anchor" style="height: 0px; margin: 0; padding: 0; overflow: hidden;"></div>
+            <div class="glass-tabs">
+                <button class="tab-btn active" data-portal="secretary">
+                    <span class="desktop-label">Opponent Portal</span>
+                    <span class="mobile-label">Opponent</span>
+                </button>
+                <button class="tab-btn" data-portal="captain">
+                    <span class="desktop-label">Captain Portal</span>
+                    <span class="mobile-label">Captain</span>
+                </button>
+                <button class="tab-btn" data-portal="player">
+                    <span class="desktop-label">Player Portal</span>
+                    <span class="mobile-label">Player</span>
+                </button>
             </div>
 
             <!-- Match Secretary Portal Content -->
             <div class="portal-content active" id="secretary-portal">
                 <div class="portal-info">
-                    <h3>Opponent Match Sec Portal</h3>
+                    <h3>Secretary Freedom</h3>
                     <p>Eliminate the mismatch of 'what you have' vs. 'what they have'. Early-season scheduling is traditionally a second job of phone tag and endless emails. The Opponent Portal gives external match secretaries a secure, self-serve view to book fixture dates directly based on your court availability—saving you hours of back-and-forth.</p>
                     <ul class="portal-features-list">
                         <li>
@@ -479,7 +511,7 @@
             <!-- Captain Portal Content -->
             <div class="portal-content" id="captain-portal">
                 <div class="portal-info">
-                    <h3>Team Independence for Captains</h3>
+                    <h3>Captain Independence</h3>
                     <p>Give your captains a clean, visual overview of upcoming matches, real-time availability, and eligible substitutes. Instead of panic-texting players last-minute or email-chasing you, captains run their match rosters independently in one simple dashboard.</p>
                     <ul class="portal-features-list">
                         <li>
@@ -673,7 +705,7 @@
             <!-- Player Portal Content -->
             <div class="portal-content" id="player-portal">
                 <div class="portal-info">
-                    <h3>Effortless Player Control</h3>
+                    <h3>Player Autonomy</h3>
                     <p>Take the administrative burden off captains and secretaries. Players get a simple, personal portal to block out vacation dates and matches in seconds—keeping your captains and match secretaries aligned all season long.</p>
                     <ul class="portal-features-list">
                         <li>
@@ -879,28 +911,50 @@
 
 
      <!-- Waitlist Form Section -->
-     <section id="waitlist" class="lead-section">
-        <div class="ambient-glow" style="top: auto; bottom: -10vw; left: -10vw; right: auto;"></div>
+     <section id="waitlist" class="waitlist-section">
+        <div class="glow-circle ddlc-waitlist-glow"></div>
         <div class="container">
-            <div class="glass-panel lead-wrapper">
-                <h2>Get Early Access</h2>
-                <p>We are currently launching with a group of selected Badminton clubs. Join the waitlist to bring FixtureFlow's revolutionary coordination system to your club.</p>
-                <form class="lead-form" id="waitlist-form">
-                    <div>
-                        <label for="name">Your Name</label>
-                        <input type="text" id="name" name="name" placeholder="e.g., Alex Smith" required>
+            <div class="glass-panel waitlist-card">
+                <div class="form-container">
+                    <h2>Join the Waiting List</h2>
+                    <p>FixtureFlow is launching soon as a premium subscription for racket clubs. Register your interest below to secure your spot in our next onboarding cohort and lock in early-adopter pricing.</p>
+                    <form class="waitlist-form" id="waitlist-form">
+                        <div>
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" name="name" placeholder="e.g., Alex Smith" required>
+                        </div>
+                        <div>
+                            <label for="club">Club Name</label>
+                            <input type="text" id="club" name="club" placeholder="e.g., Dublin Racket Club" required>
+                        </div>
+                        <div class="form-group-full">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Join the Waiting List</button>
+                        <span style="display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
+                    </form>
+                </div>
+
+                <!-- Success Survey View -->
+                <div class="success-survey" style="display: none; text-align: center; animation: fadeIn 0.4s ease forwards; flex-direction: column; gap: 16px; align-items: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 8px;">🎉</div>
+                    <h2 style="margin-bottom: 8px;">You're on the Waiting List!</h2>
+                    <p style="color: var(--text-secondary); font-size: 1.05rem; max-width: 440px; margin: 0 auto 12px auto; line-height: 1.5;">
+                        We onboard new clubs in limited cohorts to ensure a smooth transition. While we finalize your release group, <strong>what yearly price feels fair for your club?</strong>
+                    </p>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+                        <button class="btn btn-secondary price-btn" data-price="under-200" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 99px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center;">Under €200/yr</button>
+                        <button class="btn btn-secondary price-btn" data-price="200-400" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 99px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center;">€200 - €400/yr</button>
+                        <button class="btn btn-secondary price-btn" data-price="400-plus" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 99px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center;">€400+/yr</button>
                     </div>
-                    <div>
-                        <label for="club">Badminton Club Name</label>
-                        <input type="text" id="club" name="club" placeholder="e.g., Dublin Badminton Club" required>
-                    </div>
-                    <div class="form-group-full">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" placeholder="you@example.com" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Join the Waitlist</button>
-                    <span style="display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
-                </form>
+                    
+                    <span class="survey-thanks" style="display: none; font-size: 0.9rem; color: var(--color-primary); font-weight: 700; margin-top: 8px;">
+                        ✓ Thank you! We will use this to calibrate our cohort plans.
+                    </span>
+                </div>
+
             </div>
         </div>
     </section>
@@ -914,12 +968,14 @@
                     <svg class="brand-icon" width="20" height="20" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 5px; flex-shrink: 0; vertical-align: middle;">
                         <defs>
                             <linearGradient id="logo-badge-grad-ddlc-footer" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="40%" stop-color="#a78bfa"/>
-                                <stop offset="100%" stop-color="#10b981"/>
+                                <stop offset="40%" stop-color="var(--logo-gradient-start, #a78bfa)"/>
+                                <stop offset="100%" stop-color="var(--logo-gradient-end, #10b981)"/>
                             </linearGradient>
                         </defs>
                         <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-ddlc-footer)"/>
-                        <text x="30" y="32" dominant-baseline="central" text-anchor="middle" font-family="Outfit, -apple-system, sans-serif" font-size="30" font-weight="900" fill="#ffffff">FF</text>
+                        <g transform="scale(0.6)">
+                            <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+                        </g>
                     </svg>
                     <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
                 </a>

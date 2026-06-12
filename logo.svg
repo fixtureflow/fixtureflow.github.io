@@ -31,14 +31,9 @@
   <!-- 1. Circular Brand Icon Badge (Left) -->
   <g transform="translate(10, 10)">
     <rect width="60" height="60" rx="30" fill="url(#icon-g)"/>
-    <text x="30" y="30" 
-          dominant-baseline="central" 
-          text-anchor="middle" 
-          font-family="Outfit, -apple-system, sans-serif" 
-          font-size="32" 
-          font-weight="900" 
-          letter-spacing="-0.06em" 
-          fill="#ffffff">FF</text>
+    <g transform="scale(0.6)">
+      <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+    </g>
   </g>
 
   <!-- 2. Integrated Wordmark (Right) -->
