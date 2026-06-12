@@ -7,7 +7,6 @@
   <title>FixtureFlow | Captain Portal</title>
   <link rel="icon" type="image/svg+xml" href="/assets/images/icon-captain.svg">
   <link rel="apple-touch-icon" href="/assets/images/icon-captain.png">
-  <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="FF Captain">
@@ -248,45 +247,43 @@
       roleView = localStorage.getItem('pwa_role_view');
     }
 
-    // Dynamically update manifest to preserve query params in start_url
-    if (hostId) {
-      const manifestData = {
-        "name": "FixtureFlow: Captain Portal",
-        "short_name": "FF Captain",
-        "start_url": window.location.pathname + "?h=" + hostId + (roleView ? "&view=" + roleView : ""),
-        "display": "standalone",
-        "background_color": "#0b1329",
-        "theme_color": "#a78bfa",
-        "orientation": "any",
-        "icons": [
-          {
-            "src": "/assets/images/icon-captain.png",
-            "sizes": "180x180",
-            "type": "image/png"
-          },
-          {
-            "src": "/assets/images/icon-captain.svg",
-            "sizes": "any",
-            "type": "image/svg+xml",
-            "purpose": "any"
-          }
-        ]
-      };
-      const base64Manifest = btoa(unescape(encodeURIComponent(JSON.stringify(manifestData))));
-      const manifestLink = document.querySelector('link[rel="manifest"]');
-      if (manifestLink) {
-        manifestLink.setAttribute('href', 'data:application/json;base64,' + base64Manifest);
-      }
-    }
-
-    // iOS Safari Sandbox Workaround: Remove manifest on iOS so Safari bookmarks the exact URL (with ?h=...)
+    // iOS Safari Workaround: Inject manifest dynamically ONLY on non-iOS devices
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (isIOS) {
-      const manifestLink = document.querySelector('link[rel="manifest"]');
-      if (manifestLink) {
-        manifestLink.remove();
+
+    if (!isIOS) {
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      
+      if (hostId) {
+        const manifestData = {
+          "name": "FixtureFlow: Captain Portal",
+          "short_name": "FF Captain",
+          "start_url": window.location.pathname + "?h=" + hostId + (roleView ? "&view=" + roleView : ""),
+          "display": "standalone",
+          "background_color": "#0b1329",
+          "theme_color": "#a78bfa",
+          "orientation": "any",
+          "icons": [
+            {
+              "src": "/assets/images/icon-captain.png",
+              "sizes": "180x180",
+              "type": "image/png"
+            },
+            {
+              "src": "/assets/images/icon-captain.svg",
+              "sizes": "any",
+              "type": "image/svg+xml",
+              "purpose": "any"
+            }
+          ]
+        };
+        const base64Manifest = btoa(unescape(encodeURIComponent(JSON.stringify(manifestData))));
+        link.href = 'data:application/json;base64,' + base64Manifest;
+      } else {
+        link.href = 'manifest.json';
       }
+      document.head.appendChild(link);
     }
 
     // Initialize Theme State
