@@ -10,15 +10,63 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b1329">
   <style>
+    :root {
+      --bg-color: #0b1329;
+      --bg-gradient: radial-gradient(circle at center, #111827 0%, #0b1329 100%);
+      --text-color: #ffffff;
+      --muted-text: #94a3b8;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --loader-bg: rgba(255, 255, 255, 0.08);
+      --glow-color: rgba(16, 185, 129, 0.08);
+    }
+
+    /* System preference light mode fallback */
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg-color: #f8fafc;
+        --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
+        --text-color: #0f172a;
+        --muted-text: #64748b;
+        --card-bg: rgba(15, 23, 42, 0.03);
+        --card-border: rgba(15, 23, 42, 0.08);
+        --loader-bg: rgba(15, 23, 42, 0.08);
+        --glow-color: rgba(16, 185, 129, 0.04);
+      }
+    }
+
+    /* Explicit theme overrides */
+    body.theme-dark {
+      --bg-color: #0b1329;
+      --bg-gradient: radial-gradient(circle at center, #111827 0%, #0b1329 100%);
+      --text-color: #ffffff;
+      --muted-text: #94a3b8;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --loader-bg: rgba(255, 255, 255, 0.08);
+      --glow-color: rgba(16, 185, 129, 0.08);
+    }
+
+    body.theme-light {
+      --bg-color: #f8fafc;
+      --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
+      --text-color: #0f172a;
+      --muted-text: #64748b;
+      --card-bg: rgba(15, 23, 42, 0.03);
+      --card-border: rgba(15, 23, 42, 0.08);
+      --loader-bg: rgba(15, 23, 42, 0.08);
+      --glow-color: rgba(16, 185, 129, 0.04);
+    }
+
     body, html {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #0b1329;
+      background-color: var(--bg-color);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      color: #ffffff;
+      color: var(--text-color);
     }
     
     iframe {
@@ -41,14 +89,14 @@
       top: 0;
       left: 0;
       z-index: 10;
-      background: radial-gradient(circle at center, #111827 0%, #0b1329 100%);
+      background: var(--bg-gradient);
     }
 
     .glow-backdrop {
       position: absolute;
       width: 300px;
       height: 300px;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0) 70%);
+      background: radial-gradient(circle, var(--glow-color) 0%, rgba(16, 185, 129, 0) 70%);
       pointer-events: none;
       z-index: 1;
     }
@@ -56,7 +104,7 @@
     .spinner {
       width: 44px;
       height: 44px;
-      border: 4px solid rgba(255, 255, 255, 0.08);
+      border: 4px solid var(--loader-bg);
       border-top-color: #10b981;
       border-radius: 50%;
       animation: spin 1s linear infinite;
@@ -78,7 +126,7 @@
       font-size: 13px;
       letter-spacing: 0.08em;
       margin-top: 16px;
-      color: #94a3b8;
+      color: var(--muted-text);
       z-index: 2;
     }
 
@@ -87,8 +135,8 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-radius: 16px;
@@ -109,12 +157,12 @@
       font-size: 18px;
       font-weight: 600;
       margin: 0 0 8px 0;
-      color: #ffffff;
+      color: var(--text-color);
     }
 
     .offline-desc {
       font-size: 14px;
-      color: #94a3b8;
+      color: var(--muted-text);
       line-height: 1.5;
       margin: 0 0 24px 0;
     }
@@ -194,6 +242,38 @@
       roleView = localStorage.getItem('pwa_role_view');
     }
 
+    // Initialize Theme State
+    function applySavedTheme() {
+      const savedTheme = localStorage.getItem('pwa_theme');
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        document.body.classList.add(`theme-${savedTheme}`);
+        updateThemeColor(savedTheme);
+      } else {
+        const isSystemLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        updateThemeColor(isSystemLight ? 'light' : 'dark');
+      }
+    }
+
+    function updateThemeColor(theme) {
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) {
+        metaTheme.setAttribute('content', theme === 'light' ? '#f8fafc' : '#0b1329');
+      }
+    }
+
+    // Listen for postMessage updates from GAS app
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'THEME_CHANGE') {
+        const newTheme = event.data.theme;
+        if (newTheme === 'light' || newTheme === 'dark') {
+          localStorage.setItem('pwa_theme', newTheme);
+          document.body.classList.remove('theme-light', 'theme-dark');
+          document.body.classList.add(`theme-${newTheme}`);
+          updateThemeColor(newTheme);
+        }
+      }
+    });
+
     function initApp() {
       if (!hostId) {
         showError('CONFIG ERROR: Missing host ID parameter (?h=...)');
@@ -252,6 +332,8 @@
       showOfflineState();
     });
 
+    // Run theme setup and initialize
+    applySavedTheme();
     initApp();
   </script>
 </body>
