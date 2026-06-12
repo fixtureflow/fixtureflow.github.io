@@ -1,0 +1,17 @@
+{
+  "name": "FixtureFlow: Club Admin",
+  "short_name": "FF Club",
+  "start_url": "/leagues/club/",
+  "display": "standalone",
+  "background_color": "#0b1329",
+  "theme_color": "#0f172a",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/assets/images/icon-club.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

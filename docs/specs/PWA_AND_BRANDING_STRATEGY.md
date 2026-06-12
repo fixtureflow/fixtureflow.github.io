@@ -136,8 +136,22 @@ All four PWA shells share a lightweight, unified HTML wrapper. It contains a ful
 
     // 2. Parse Host ID and dynamically load iframe
     const urlParams = new URLSearchParams(window.location.search);
-    const hostId = urlParams.get('h');
-    const roleView = urlParams.get('view'); // For leagues forwarding
+    let hostId = urlParams.get('h');
+    let roleView = urlParams.get('view'); // For leagues forwarding
+
+    // Persist query parameters if they are explicitly passed
+    if (hostId) {
+      localStorage.setItem('pwa_host_id', hostId);
+      if (roleView) {
+        localStorage.setItem('pwa_role_view', roleView);
+      } else {
+        localStorage.removeItem('pwa_role_view');
+      }
+    } else {
+      // Fallback to persisted credentials if launched from home screen without query params
+      hostId = localStorage.getItem('pwa_host_id');
+      roleView = localStorage.getItem('pwa_role_view');
+    }
 
     if (hostId) {
       const frame = document.getElementById('app-frame');
@@ -259,69 +273,74 @@ Each of the 4 wrapper directories contains a custom `manifest.json` file. This t
 
 ## 5. Vector SVG Role Icons Spec
 
-The icons reuse the base FixtureFlow logo symbol (circular gradient with the "FF" grid mark) and overlay a distinct, color-coded badge in the bottom-right corner.
+To keep the brand identity highly consistent and elegant, each PWA portal uses the corporate "FF" logo mark on a distinct, domain-specific diagonal color gradient background. No visual overlays or sub-badges are used to ensure maximum legibility and visual clarity at small resolutions.
 
-### 5.1. Base SVG Pattern (Gradient circle + FF mark)
+### 5.1. CourtFlow App Icon (`assets/images/icon-courtflow.svg`)
+*   **Domain**: Active Play (Teal to Mint Green)
+*   **SVG Code**:
 ```xml
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="40%" stop-color="#a78bfa"/>
-      <stop offset="100%" stop-color="#10b981"/>
+    <linearGradient id="g-courtflow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#2dd4bf"/>
     </linearGradient>
   </defs>
-  <!-- Background Brand circle -->
-  <rect width="100" height="100" rx="50" fill="url(#icon-gradient)"/>
-  <!-- Central FF bracket grid mark -->
+  <rect width="100" height="100" rx="50" fill="url(#g-courtflow)"/>
   <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
-  
-  <!-- BADGE DEFINITIONS INSERTED HERE -->
 </svg>
 ```
 
-### 5.2. Role-Specific Badges
-
-#### 🏸 CourtFlow Shuttlecock Badge (Mint Green)
-Add this block inside the base SVG before the closing `</svg>` tag:
+### 5.2. Leagues Player Icon (`assets/images/icon-player.svg`)
+*   **Domain**: Player Base (Forest to Emerald Green)
+*   **SVG Code**:
 ```xml
-  <!-- Shuttlecock badge circle -->
-  <circle cx="76" cy="76" r="18" fill="#0b1329" stroke="#ffffff" stroke-width="2.5"/>
-  <!-- Shuttlecock lines (Vibrant Mint) -->
-  <path d="M72,79 L78,79 L80,71 L70,71 Z M70,71 L74.5,67.5 L79,71" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linejoin="round"/>
-  <line x1="73.5" y1="79" x2="73" y2="71" stroke="#10b981" stroke-width="1"/>
-  <line x1="76.5" y1="79" x2="77" y2="71" stroke="#10b981" stroke-width="1"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="g-player" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#047857"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="50" fill="url(#g-player)"/>
+  <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+</svg>
 ```
 
-#### 👤 Player Avatar Badge (Emerald Green)
-Add this block inside the base SVG:
+### 5.3. Leagues Captain Icon (`assets/images/icon-captain.svg`)
+*   **Domain**: Team Organization (Violet to Purple)
+*   **SVG Code**:
 ```xml
-  <!-- Player badge circle -->
-  <circle cx="76" cy="76" r="18" fill="#0b1329" stroke="#ffffff" stroke-width="2.5"/>
-  <!-- Avatar: head + shoulders (Emerald Green) -->
-  <circle cx="75" cy="71.5" r="4.5" fill="#34d399"/>
-  <path d="M67,81 C67,76.5 70,76.5 75,76.5 C80,76.5 83,76.5 83,81" fill="#34d399"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="g-captain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6d28d9"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="50" fill="url(#g-captain)"/>
+  <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+</svg>
 ```
 
-#### ⚓ Captain "C" Badge (Electric Violet)
-Add this block inside the base SVG:
+### 5.4. Leagues Club Admin Icon (`assets/images/icon-club.svg`)
+*   **Domain**: System Administration (Obsidian Slate to Steel Grey)
+*   **SVG Code**:
 ```xml
-  <!-- Captain badge circle -->
-  <circle cx="76" cy="76" r="18" fill="#0b1329" stroke="#ffffff" stroke-width="2.5"/>
-  <!-- Bold heavy C (Electric Violet) -->
-  <text x="75" y="77" font-family="Outfit, sans-serif" font-weight="900" font-size="17" fill="#a78bfa" text-anchor="middle" dominant-baseline="central">C</text>
-```
-
-#### 🔑 Club Admin Gear/Key Badge (Obsidian Slate)
-Add this block inside the base SVG:
-```xml
-  <!-- Admin badge circle -->
-  <circle cx="76" cy="76" r="18" fill="#0b1329" stroke="#ffffff" stroke-width="2.5"/>
-  <!-- Key icon (Slate Blue / Grey) -->
-  <circle cx="72" cy="73" r="3.5" fill="none" stroke="#94a3b8" stroke-width="2"/>
-  <path d="M75,76 L80,81 M77.5,78.5 L79,77" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="g-club" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="50" fill="url(#g-club)"/>
+  <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+</svg>
 ```
 
 ---
+
 
 ## 6. Host Web App Branding Sync
 
@@ -383,3 +402,20 @@ All dynamic wrapper `index.html` shells served under `/courtflow/` or `/leagues/
 ```html
 <meta name="robots" content="noindex, nofollow">
 ```
+
+---
+
+## 8. Decision Log
+
+### 8.1. PWA Host ID Query Parameter Persistence
+*   **Decision**: Cache query parameters (`h` and `view`) in `localStorage` on first load, and fall back to these cached values when parameters are missing.
+*   **Alternative Considered**:
+    1.  Hardcoding separate wrapper pages/folders per club: Rejected due to maintenance overhead and lack of dynamic scalability.
+    2.  Prompting the user to enter their ID manually if missing: Rejected as it provides a poor, non-app-like user experience for an installed PWA.
+*   **Rationale**: Ensures that when a user installs the PWA (where the OS installs the static `/` URL without parameters), launching the PWA from the home screen still successfully resolves their club's target Google Apps Script Host ID seamlessly.
+
+### 8.2. Portal Icon Strategy
+*   **Decision**: Use domain-specific color gradients for the base "FF" logo background (Option 1) instead of overlaying secondary SVGs/badges in the bottom-right corner.
+*   **Alternative Considered**: Superimposing custom mini-badges (shuttlecock, avatar, Captain C, key) on the bottom corner of the logo.
+*   **Rationale**: Overlaying secondary shapes on the geometric "FF" brand mark compromises its premium, clean aesthetic and renders poorly at small resolutions. Customizing the entire background gradient keeps the brand consistent while visually segregating the portals into a beautiful app family (Mint/Teal for CourtFlow, Forest/Emerald for Players, Violet/Purple for Captains, Obsidian/Slate for Admin).
+
