@@ -323,7 +323,7 @@
 
     function initApp() {
       if (!hostId) {
-        showError('CONFIG ERROR: Missing host ID parameter (?h=...)');
+        showError(`CONFIG ERROR: Missing host ID parameter (?h=...)<br><span style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-top: 8px; display: block; word-break: break-all;">URL: ${window.location.href}</span>`);
         return;
       }
 
