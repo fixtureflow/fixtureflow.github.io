@@ -8,6 +8,9 @@
   <link rel="icon" type="image/svg+xml" href="/assets/images/icon-club.svg">
   <link rel="apple-touch-icon" href="/assets/images/icon-club.png">
   <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="FF Admin">
   <meta name="theme-color" content="#0b1329">
   <style>
     :root {
@@ -273,6 +276,16 @@
       const manifestLink = document.querySelector('link[rel="manifest"]');
       if (manifestLink) {
         manifestLink.setAttribute('href', 'data:application/json;base64,' + base64Manifest);
+      }
+    }
+
+    // iOS Safari Sandbox Workaround: Remove manifest on iOS so Safari bookmarks the exact URL (with ?h=...)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) {
+      const manifestLink = document.querySelector('link[rel="manifest"]');
+      if (manifestLink) {
+        manifestLink.remove();
       }
     }
 
