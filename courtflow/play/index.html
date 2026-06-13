@@ -1,384 +1,3489 @@
+<!--
+  ClubFlow Main Single-Page Web Application View.
+  Serves as the core mobile-responsive layout containing court cards,
+  player roster check-in toggles, and live matchmaking queue actions.
+-->
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="robots" content="noindex, nofollow">
-  <title>CourtFlow Portal</title>
-  <link rel="icon" type="image/svg+xml" href="/assets/images/icon-courtflow.svg">
-  <link rel="apple-touch-icon" href="/assets/images/icon-courtflow.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="CourtFlow">
-  <meta name="theme-color" content="#0b1329">
-  <style>
-    :root {
-      --bg-color: #0b1329;
-      --bg-gradient: radial-gradient(circle at center, #111827 0%, #0b1329 100%);
-      --text-color: #ffffff;
-      --muted-text: #94a3b8;
-      --card-bg: rgba(255, 255, 255, 0.03);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --loader-bg: rgba(255, 255, 255, 0.08);
-      --glow-color: rgba(16, 185, 129, 0.08);
+<html data-theme="light">
+  <head>
+    <base target="_top">
+    <meta name="theme-color" content="#0b1329">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="apple-touch-icon" href="https://fixtureflow.github.io/apple-touch-icon.png">
+    
+    <!-- Include global variables and styles -->
+    <!--
+  Global CSS Variables and Styling Tokens.
+  Contains CSS custom properties for sleek dark mode, vibrant neon colors, and premium glassmorphism.
+-->
+<style>
+  /* Google Fonts Import for Outfit (modern typography for UI) and Inter */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
+  /* Global Theme Variables */
+  :root, html[data-theme="dark"] {
+    /* Backgrounds */
+    --bg-app: #080d16;
+    --bg-panel: rgba(15, 23, 42, 0.65);
+    --border-panel: rgba(16, 185, 129, 0.12); /* Subtle Mint glow border */
+    
+    /* Typography */
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    
+    /* Accents (SaaS Emerald/Mint Active Play Palette) */
+    --accent-primary: #10b981;
+    --accent-primary-hover: #34d399;
+    --accent-primary-glow: rgba(16, 185, 129, 0.15);
+    --accent-success: #10b981;
+    --accent-success-hover: #34d399;
+    --accent-success-glow: rgba(16, 185, 129, 0.2);
+    --accent-warning: #f59e0b;
+    --accent-warning-hover: #fbbf24;
+    --accent-warning-glow: rgba(245, 158, 11, 0.2);
+    --accent-danger: #ef4444;
+    --accent-danger-hover: #f87171;
+    
+    /* Gender colors */
+    --color-male: #38bdf8;
+    --color-female: #c084fc;
+    
+    /* Shadow & Effects */
+    --shadow-card: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    --backdrop-blur: 16px;
+    --glass-reflection: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+    
+    /* UI icons visibility toggle */
+    --sun-display: block;
+    --moon-display: none;
+    --nav-active-text: #080d16;
+  }
+
+  html[data-theme="light"] {
+    /* Backgrounds (Welcoming & Warm - Alabaster Cream) */
+    --bg-app: #fcfaf7;
+    --bg-panel: #ffffff;
+    --border-panel: #e7e1d5;
+    
+    /* Typography (Warm Charcoal) */
+    --text-primary: #2d2926;
+    --text-secondary: #78716c;
+    
+    /* Accents (Clean Emerald & Soft Sage Green) */
+    --accent-primary: #047857;
+    --accent-primary-hover: #065f46;
+    --accent-primary-glow: rgba(4, 120, 87, 0.08);
+    --accent-success: #4d7c0f; /* Warm Sage/Olive Green */
+    --accent-success-hover: #3f620a;
+    --accent-success-glow: rgba(77, 124, 15, 0.15);
+    --accent-warning: #ca8a04; /* Warm Gold */
+    --accent-warning-hover: #a16207;
+    --accent-warning-glow: rgba(202, 138, 4, 0.15);
+    --accent-danger: #b91c1c; /* Brick Red */
+    --accent-danger-hover: #991b1b;
+    
+    /* Gender colors */
+    --color-male: #0284c7;
+    --color-female: #7c3aed;
+    
+    /* Shadow & Effects */
+    --shadow-card: 0 8px 24px 0 rgba(139, 125, 110, 0.08);
+    --backdrop-blur: 0px;
+    --glass-reflection: none;
+    
+    /* UI icons visibility toggle */
+    --sun-display: none;
+    --moon-display: block;
+    --nav-active-text: #ffffff;
+  }
+
+  /* Global Rules */
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+    margin: 0;
+  }
+
+  /* Base Glass Card styling that adapts via variables */
+  .glass-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-panel);
+    background-image: var(--glass-reflection);
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
+    transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  /* If backdrop blur is supported, use it */
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .glass-card {
+      backdrop-filter: blur(var(--backdrop-blur));
+      -webkit-backdrop-filter: blur(var(--backdrop-blur));
+    }
+  }
+</style>
+
+    <!--
+  CSS overrides specific to the Main Dashboard Layout.
+  Contains layout properties for responsive columns, checked-in badges, and active court tables.
+-->
+<style>
+  /* Logo and Branding styles */
+  .branding {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  /* Shared Spinner Base Animation */
+  .spinner {
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 1s linear infinite;
+    box-sizing: border-box;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .branding h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+  }
+
+  /* Theme Switcher Button overrides */
+  .icon-button {
+    background: transparent;
+    border: 1px solid var(--border-panel);
+    border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+  
+  .icon-button:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 10px var(--accent-primary-glow);
+  }
+  
+  .sun-icon {
+    display: var(--sun-display);
+    width: 22px;
+    height: 22px;
+  }
+  
+  .moon-icon {
+    display: var(--moon-display);
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Grid & Columns Layout */
+  .app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-sizing: border-box;
+  }
+
+  .header-panel {
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 2.2fr 1.8fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 992px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .main-left-column, .main-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .container-panel {
+    padding: 24px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-sizing: border-box;
+  }
+  
+  .container-panel h2 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 4px solid var(--accent-primary);
+    padding-left: 12px;
+  }
+
+  /* Action Buttons and Control Card */
+  .controls-card {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .controls-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .controls-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  
+  .court-slider-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .court-slider-group label {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-secondary);
+    min-width: 110px;
+  }
+  
+  .court-slider-group input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 120px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border-panel);
+    outline: none;
+    transition: all 0.2s;
+  }
+  
+  .court-slider-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  
+  .court-slider-group input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.25);
+  }
+  
+  .action-buttons-group {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  
+  .btn {
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 0 24px;
+    height: 48px; /* Touch target minimum height */
+    border-radius: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    border: none;
+    outline: none;
+    box-sizing: border-box;
+  }
+  
+  .btn-primary {
+    background-color: var(--accent-primary);
+    color: var(--bg-app);
+    font-weight: 700;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--accent-primary-hover);
+    box-shadow: 0 0 16px var(--accent-primary-glow);
+  }
+  
+  .btn-outline-danger {
+    background-color: transparent;
+    border: 1.5px solid var(--accent-danger);
+    color: var(--accent-danger);
+  }
+  
+  .btn-outline-danger:hover {
+    background-color: var(--accent-danger);
+    color: #ffffff;
+  }
+  
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none !important;
+  }
+
+  .btn-link-danger {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 12px;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    box-sizing: border-box;
+  }
+
+  .btn-link-danger:hover {
+    color: var(--accent-danger);
+  }
+
+  /* Contextual Banner for Old Sessions */
+  .contextual-banner {
+    background-color: var(--bg-panel);
+    border: 1.5px solid var(--accent-danger);
+    color: var(--text-primary);
+    padding: 12px 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    box-sizing: border-box;
+    position: relative;
+    z-index: 10;
+  }
+
+  .contextual-banner .banner-link-btn {
+    background-color: var(--accent-danger);
+    color: #ffffff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    transition: background-color 0.2s ease;
+  }
+
+  .contextual-banner .banner-link-btn:hover {
+    background-color: #dc2626;
+  }
+
+  /* Badges & Headers */
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border-bottom: 1px solid var(--border-panel);
+    padding-bottom: 12px;
+  }
+  
+  .badge {
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background-color: var(--border-panel);
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+  }
+  
+  .queue-panel .badge {
+    background-color: var(--accent-success-glow);
+    color: var(--accent-success);
+    border: 1px solid var(--accent-success);
+  }
+
+  /* Player Lists & Chips */
+  .flex-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  
+  .player-chip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-radius: 12px;
+    min-height: 48px; /* Touch target minimum height */
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-panel);
+    background-color: var(--bg-panel);
+  }
+  
+  /* Roster Checked Out Chip styling */
+  .player-chip.checked-out {
+    color: var(--text-secondary);
+  }
+  
+  .player-chip.checked-out:hover {
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .player-chip.checked-out.backup-chip {
+    background-color: transparent !important;
+    border: 1.5px dashed var(--border-panel) !important;
+    opacity: 0.6;
+    box-shadow: none !important;
+  }
+  
+  .player-chip.checked-out.backup-chip:hover {
+    opacity: 1;
+    border-color: var(--accent-primary) !important;
+    background-color: rgba(255, 255, 255, 0.03) !important;
+  }
+  
+  /* Roster Checked In Waiting Chip styling */
+  .player-chip.checked-in {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-panel);
+    border-left: 4px solid var(--accent-success);
+    color: var(--text-primary);
+    padding-left: 13px; /* Offset left border to prevent text shifting */
+  }
+  
+  .player-chip.checked-in:hover {
+    border-color: var(--border-panel);
+    border-left-color: var(--accent-success-hover);
+    box-shadow: var(--shadow-card);
+    transform: translateY(-1px);
+  }
+
+  /* Boosted check-in override */
+  .player-chip.checked-in.boosted {
+    border-left-color: var(--accent-warning);
+  }
+
+  .player-chip.checked-in.boosted:hover {
+    border-left-color: var(--accent-warning-hover);
+  }
+  
+  /* Playing status */
+  .player-chip.on-court {
+    opacity: 0.6;
+    background-color: var(--bg-panel);
+    border-color: var(--border-panel);
+    cursor: pointer;
+    box-shadow: none !important;
+  }
+  
+  .on-court-badge {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--border-panel);
+    color: var(--text-secondary);
+  }
+  
+  /* Boost override styling */
+  .player-chip.boosted {
+    border-color: var(--accent-warning);
+    background-color: var(--accent-warning-glow);
+  }
+  
+  .player-chip.boosted .player-name {
+    color: var(--accent-warning);
+    font-weight: 600;
+  }
+  
+  /* Leaving early priority styling */
+  .player-chip.leaving-early {
+    border-color: var(--accent-danger);
+    background-color: rgba(185, 28, 28, 0.06);
+    box-shadow: 0 0 6px rgba(185, 28, 28, 0.1);
+  }
+  
+  .player-chip.leaving-early .player-name {
+    font-weight: 600;
+  }
+  
+  .chip-main-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    height: 100%;
+    min-width: 0;
+  }
+  
+  .player-gender {
+    font-weight: 700;
+    opacity: 0.65;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  
+  .player-text-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+  
+  .player-name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .player-skill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--border-panel);
+    color: var(--text-secondary);
+  }
+  
+  /* Action buttons inside player chips */
+  .chip-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  
+  .action-btn {
+    background: transparent;
+    border: 1px solid var(--border-panel);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .action-btn:hover {
+    color: var(--text-primary);
+    background: var(--border-panel);
+    border-color: var(--text-secondary);
+  }
+  
+  .action-btn.boost-btn.active {
+    color: var(--accent-warning);
+    background-color: rgba(245, 158, 11, 0.1);
+    border-color: var(--accent-warning);
+  }
+  
+  .action-btn.leave-btn.active {
+    color: var(--accent-danger);
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: var(--accent-danger);
+  }
+  
+  .action-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Court Cards & Layout */
+  .grid-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    column-gap: 16px;
+    row-gap: 32px;
+    margin-top: 8px;
+  }
+  
+  @keyframes courtFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .court-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    /* Sequential fade-in */
+    opacity: 0;
+    animation: courtFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+    /* Theme color tokens - neutral fallbacks */
+    --court-primary: var(--text-secondary);
+    --court-secondary: var(--text-secondary);
+    --court-primary-glow: transparent;
+    --court-border: var(--border-panel);
+    --court-bg-radial: var(--bg-panel);
+    --court-team-bg: rgba(255, 255, 255, 0.015);
+    --court-team-border: var(--border-panel);
+
+    /* Apply local variables */
+    border: 1px solid var(--court-border);
+    background: var(--court-bg-radial);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .court-card {
+      opacity: 1;
+      animation: none;
+    }
+  }
+  
+  .court-card::before {
+    display: none; /* Hide colored top border */
+  }
+  
+  .court-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-panel);
+    padding-bottom: 10px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .court-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .club-logo {
+    height: 26px;
+    width: auto;
+    border-radius: 4px;
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .court-number {
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  /* ==========================================
+     Court Themes - Dark Mode (Default)
+     ========================================== */
+  
+  
+  .court-diff-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: var(--border-panel);
+    color: var(--text-secondary);
+  }
+
+  .court-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .court-refresh-btn {
+    background: var(--border-panel);
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .court-refresh-btn:hover {
+    color: var(--text-light);
+    background: var(--bg-hover);
+    transform: rotate(30deg);
+  }
+
+  .court-refresh-btn:active {
+    transform: rotate(90deg) scale(0.95);
+  }
+  
+  .teams-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .team-row {
+    background: var(--court-team-bg);
+    border-radius: 12px;
+    border: 1px solid var(--court-team-border);
+    display: flex;
+    flex-direction: row; /* Horizontal partners! */
+    align-items: center;
+    padding: 6px 12px;
+    gap: 4px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .team-divider-vertical {
+    width: 1.5px;
+    align-self: stretch;
+    background-color: var(--court-team-border);
+    margin: 0 4px;
+    opacity: 0.8;
+  }
+
+  .team-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+  }
+  
+  .player-slot {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .player-slot-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .player-slot .player-name {
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: auto;
+  }
+
+  .player-name.gender-male {
+    color: var(--color-male);
+  }
+
+  .player-name.gender-female {
+    color: var(--color-female);
+  }
+
+  .player-slot[draggable="true"] {
+    cursor: grab;
+    padding: 8px;
+    min-height: 48px; /* Touch target minimum height */
+    border-radius: 8px;
+    border: 1.5px dashed transparent;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .player-slot[draggable="true"]:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--court-team-border);
+  }
+
+  .player-slot.drag-over {
+    border-color: var(--accent-primary) !important;
+    background: var(--accent-primary-glow) !important;
+    border-style: solid;
+    box-shadow: 0 0 10px var(--accent-primary-glow);
+  }
+  
+  .player-skill-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--border-panel);
+    color: var(--text-secondary);
+    align-self: flex-start;
+  }
+  
+  .team-skill-sum {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: right;
+    border-top: 1px dashed var(--border-panel);
+    padding-top: 6px;
+    margin-top: 2px;
+  }
+  
+  .vs-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -6px 0;
+    z-index: 2;
+  }
+  
+  .vs-circle {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg-app);
+    border: 1px solid var(--border-panel);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Empty State components */
+  .empty-state {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 32px 20px;
+    border: 2px dashed var(--border-panel);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.005);
+  }
+  
+  .courts-empty {
+    grid-column: 1 / -1;
+  }
+
+  /* Custom Alert Modal styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(8, 13, 22, 0.75); /* dark transparent overlay */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  
+  .modal-overlay.show {
+    opacity: 1;
+  }
+  
+  .modal-card {
+    width: 90%;
+    max-width: 440px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-sizing: border-box;
+    transform: scale(0.9);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .modal-overlay.show .modal-card {
+    transform: scale(1);
+  }
+  
+  .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .modal-title-icon {
+    font-size: 24px;
+  }
+  
+  .modal-header h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+  }
+  
+  .modal-body {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+
+  .btn-text-action {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: var(--text-secondary);
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+  }
+  
+  .btn-text-action:hover {
+    color: var(--accent-primary);
+  }
+
+  /* Loading Overlay and Spinner */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(8, 13, 22, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .loading-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .loading-card {
+    padding: 32px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    box-sizing: border-box;
+    max-width: 320px;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .loading-overlay.show .loading-card {
+    transform: scale(1);
+  }
+
+  .loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(0, 240, 255, 0.1);
+    border-top-color: var(--accent-primary);
+    box-shadow: 0 0 15px var(--accent-primary-glow);
+  }
+
+  .btn-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: currentColor;
+    animation-duration: 0.8s;
+  }
+
+  #loading-message {
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  /* Gender colors */
+  .player-gender.gender-male {
+    color: var(--color-male) !important;
+  }
+
+  .player-gender.gender-female {
+    color: var(--color-female) !important;
+  }
+
+  .gender-icon {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    vertical-align: middle;
+    stroke-width: 3px;
+  }
+
+  /* Mixed Toggle Action Button */
+  .action-btn.mixed-btn {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .action-btn.mixed-btn.active {
+    color: var(--accent-primary);
+    background-color: var(--accent-primary-glow);
+    border-color: var(--accent-primary);
+  }
+
+  /* Collapsible Panels */
+  .panel-body-content {
+    max-height: 3000px;
+    opacity: 1;
+    overflow: visible;
+    padding-bottom: 12px;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.35s ease, margin 0.35s ease;
+  }
+
+  .panel-body-content.collapsed {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .collapse-toggle-btn {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s ease, color 0.2s ease;
+  }
+
+  .collapse-toggle-btn:hover {
+    color: var(--text-primary);
+  }
+
+  .collapse-toggle-btn.collapsed {
+    transform: rotate(-90deg);
+  }
+
+  /* Roster Sub-Tabs */
+  .roster-tabs {
+    display: flex;
+    gap: 16px;
+    border-bottom: 1.5px solid var(--border-panel);
+    width: 100%;
+    padding-bottom: 8px;
+  }
+
+  .roster-tab {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    position: relative;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .roster-tab:hover {
+    color: var(--text-primary);
+  }
+
+  .roster-tab.active {
+    color: var(--accent-primary);
+  }
+
+  .roster-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -9.5px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--accent-primary);
+    box-shadow: 0 0 8px var(--accent-primary-glow);
+  }
+
+  /* Panel Header Sub-layouts */
+  .panel-header.queue-header, .panel-header.roster-header {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .panel-header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .roster-header-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+  }
+
+  .roster-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 480px) {
+    .app-container {
+      padding: 12px;
+      gap: 16px;
     }
 
-    /* System preference light mode fallback */
-    @media (prefers-color-scheme: light) {
-      :root {
-        --bg-color: #f8fafc;
-        --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
-        --text-color: #0f172a;
-        --muted-text: #64748b;
-        --card-bg: rgba(15, 23, 42, 0.03);
-        --card-border: rgba(15, 23, 42, 0.08);
-        --loader-bg: rgba(15, 23, 42, 0.08);
-        --glow-color: rgba(16, 185, 129, 0.04);
-      }
+    .header-panel {
+      padding: 12px 16px;
     }
 
-    /* Explicit theme overrides */
-    body.theme-dark {
-      --bg-color: #0b1329;
-      --bg-gradient: radial-gradient(circle at center, #111827 0%, #0b1329 100%);
-      --text-color: #ffffff;
-      --muted-text: #94a3b8;
-      --card-bg: rgba(255, 255, 255, 0.03);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --loader-bg: rgba(255, 255, 255, 0.08);
-      --glow-color: rgba(16, 185, 129, 0.08);
+    .container-panel {
+      padding: 16px;
     }
 
-    body.theme-light {
-      --bg-color: #f8fafc;
-      --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
-      --text-color: #0f172a;
-      --muted-text: #64748b;
-      --card-bg: rgba(15, 23, 42, 0.03);
-      --card-border: rgba(15, 23, 42, 0.08);
-      --loader-bg: rgba(15, 23, 42, 0.08);
-      --glow-color: rgba(16, 185, 129, 0.04);
+    .controls-card {
+      padding: 16px;
     }
 
-    body, html {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: var(--bg-color);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      color: var(--text-color);
+    .roster-header-container {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
     }
     
-    iframe {
+    .roster-header-actions {
       width: 100%;
-      height: 100dvh;
-      border: none;
-      display: none;
-      /* iOS Safari scrolling improvements */
-      overflow: auto;
-      -webkit-overflow-scrolling: touch;
+      justify-content: space-between;
+      margin-bottom: 0;
     }
+  }
 
-    .screen-overlay {
+  /* Form styling */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .form-input, .form-select {
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border-panel);
+    background: var(--bg-panel);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    height: 48px; /* Touch target minimum height */
+    box-sizing: border-box;
+  }
+
+  .form-input:focus, .form-select:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 8px var(--accent-primary-glow);
+  }
+
+  /* Segmented Control for Gender */
+  .segmented-control {
+    display: flex;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1.5px solid var(--border-panel);
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 2px;
+    height: 48px; /* Touch target minimum height */
+    box-sizing: border-box;
+  }
+
+  html[data-theme="dark"] .segmented-control {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .segment-label {
+    flex: 1;
+    text-align: center;
+    line-height: 40px; /* aligns text center vertically */
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: var(--text-secondary);
+    user-select: none;
+  }
+
+  .segmented-control input[type="radio"]:checked + .segment-label {
+    background-color: var(--accent-primary);
+    color: var(--bg-app);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Plays Mixed Switch styling */
+  .switch-container {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 32px;
+  }
+
+  .switch-container input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-panel);
+    transition: 0.3s;
+    border-radius: 34px;
+  }
+
+  .switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 4px;
+    bottom: 4px;
+    background-color: #ffffff;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .switch-container input:checked + .switch-slider {
+    background-color: var(--accent-success);
+  }
+
+  .switch-container input:checked + .switch-slider:before {
+    transform: translateX(20px);
+  }
+
+  /* Sync Status Dot styling */
+  /* Doubles Alignment Net Row styling */
+  .net-divider-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    position: relative;
+    box-sizing: border-box;
+    z-index: 2;
+    width: 100%;
+  }
+
+  .net-line-text {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 1.5px;
+    background: var(--bg-app);
+    padding: 2px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border-panel);
+    position: relative;
+    z-index: 3;
+  }
+
+  .net-divider-row::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 50%;
+    height: 1.5px;
+    background: dashed var(--border-panel);
+    z-index: 1;
+    transform: translateY(-50%);
+  }
+
+  .net-label-left, .net-label-right {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-app);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border-panel);
+    position: relative;
+    z-index: 3;
+    opacity: 0.9;
+  }
+
+  /* Responsive 2-Column Desktop Grid for Courts */
+  @media (min-width: 900px) {
+    .dashboard-grid {
+      grid-template-columns: 2fr 1fr;
+    }
+    
+    .grid-layout {
+      grid-template-columns: repeat(2, 1fr) !important; /* Force 2-columns on desktop */
+    }
+  }
+
+  /* Responsive Mobile Tab Navigation */
+  .mobile-nav-bar {
+    display: none;
+  }
+
+  @media (max-width: 899px) {
+    .main-left-column, .main-right-column {
+      display: contents; /* Strip grouping layouts to place flex children directly */
+    }
+    
+    .dashboard-grid {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100dvh;
-      box-sizing: border-box;
-      padding: 24px;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 10;
-      background: var(--bg-gradient);
+      gap: 16px;
+      padding-bottom: 80px; /* Leave space for sticky bottom bar */
     }
-
-    .glow-backdrop {
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, var(--glow-color) 0%, rgba(16, 185, 129, 0) 70%);
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .spinner {
-      width: 44px;
-      height: 44px;
-      border: 4px solid var(--loader-bg);
-      border-top-color: #10b981;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      z-index: 2;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .spinner {
-        animation: spin 3s linear infinite;
-      }
-    }
-
-    .loading-text {
-      font-weight: 500;
-      font-size: 13px;
-      letter-spacing: 0.08em;
-      margin-top: 16px;
-      color: var(--muted-text);
-      z-index: 2;
-    }
-
-    .offline-card {
+    
+    /* Default Tab Layout: Hide all panels */
+    .controls-card,
+    #courts-panel,
+    .queue-panel,
+    .roster-panel {
       display: none;
+    }
+    
+    /* Tab Courts active: show controls, active courts, and waiting queue */
+    .app-container.tab-courts .controls-card,
+    .app-container.tab-courts #courts-panel,
+    .app-container.tab-courts .queue-panel {
+      display: flex;
       flex-direction: column;
+    }
+    
+    /* Tab Roster active: show Checked-Out Roster panel */
+    .app-container.tab-roster .roster-panel {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Sticky Bottom Tab Bar */
+    .mobile-nav-bar {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border-panel);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 0 16px;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-sizing: border-box;
+    }
+    
+    .nav-item {
+      background: var(--border-panel);
+      border: none;
+      display: flex;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 16px;
-      padding: 32px 24px;
-      max-width: 320px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-      z-index: 2;
+      gap: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 12px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      flex: 1;
+      max-width: 160px;
+      height: 44px;
+      box-sizing: border-box;
+    }
+    
+    .nav-item:active {
+      transform: scale(0.95);
+    }
+    
+    .nav-item.active {
+      background: var(--accent-primary);
+      color: var(--nav-active-text);
+      box-shadow: 0 4px 12px var(--accent-primary-glow);
+    }
+    
+    .nav-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 20px;
+    }
+    
+    .svg-nav-icon {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.2s ease;
     }
 
-    .offline-icon {
-      font-size: 40px;
-      margin-bottom: 16px;
+    .nav-item:hover .svg-nav-icon {
+      transform: translateY(-2px);
     }
-
-    .offline-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 0 0 8px 0;
-      color: var(--text-color);
-    }
-
-    .offline-desc {
-      font-size: 14px;
-      color: var(--muted-text);
-      line-height: 1.5;
-      margin: 0 0 24px 0;
-    }
-
-    .retry-btn {
+    
+    .badge-count {
+      background: var(--accent-danger);
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 10px;
+      margin-left: 2px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      height: 48px;
-      padding: 0 24px;
-      background: #10b981;
-      border: none;
-      border-radius: 8px;
-      color: #0b1329;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      width: 100%;
-      box-sizing: border-box;
-      transition: background-color 0.2s ease, transform 0.1s ease;
-      touch-action: manipulation;
+      line-height: 1;
+      vertical-align: middle;
     }
 
-    .retry-btn:hover {
-      background: #34d399;
+    /* Force landscape view to layout side-by-side */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .app-container {
+        padding: 8px 12px;
+        gap: 12px;
+      }
+      
+      .mobile-nav-bar {
+        display: none !important; /* Hide tabs in landscape since 3 columns fit */
+      }
+      
+      .main-left-column, .main-right-column {
+        display: contents;
+      }
+      
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* 3 side-by-side columns */
+        gap: 12px;
+        padding-bottom: 12px;
+      }
+      
+      .controls-card {
+        grid-column: span 3; /* Actions span full header width */
+      }
+      
+      #courts-panel {
+        grid-column: span 2; /* Courts take 2/3 width */
+        display: flex !important;
+      }
+      
+      .queue-panel {
+        grid-column: span 1; /* Queue takes 1/3 width */
+        display: flex !important;
+      }
+      
+      /* Layout overrides for 2 or more active courts in landscape */
+      .app-container[data-active-courts-count="multiple"] #courts-panel {
+        grid-column: span 3;
+      }
+      
+      .app-container[data-active-courts-count="multiple"] .queue-panel {
+        grid-column: span 3;
+      }
+      
+      .app-container[data-active-courts-count="multiple"] #courts-panel .grid-layout {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      
+      .app-container[data-active-courts-count="multiple"] #queue-list {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+      }
+      
+      .app-container[data-active-courts-count="multiple"] #queue-list .player-chip {
+        flex: 1 1 200px;
+        max-width: 320px;
+      }
+      
+      .roster-panel {
+        display: none !important; /* Keep roster off screen to avoid clutter */
+      }
     }
+  }
 
-    .retry-btn:active {
-      transform: scale(0.98);
-    }
-  </style>
-</head>
-<body>
+  .sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+  }
+  .sync-dot.green {
+    background-color: var(--accent-success);
+    box-shadow: 0 0 8px var(--accent-success);
+  }
+  .sync-dot.amber {
+    background-color: var(--accent-warning);
+    box-shadow: 0 0 8px var(--accent-warning);
+  }
+  .sync-dot.red {
+    background-color: var(--accent-danger);
+    box-shadow: 0 0 8px var(--accent-danger);
+    animation: pulse-red 1.5s infinite;
+  }
+  @keyframes pulse-red {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.4; }
+    100% { transform: scale(1); opacity: 1; }
+  }
 
-  <div class="screen-overlay" id="status-screen">
-    <div class="glow-backdrop"></div>
-    
-    <div class="spinner" id="spinner-loader"></div>
-    <div class="loading-text" id="status-text">CONNECTING TO PORTAL...</div>
+  .backup-list-collapsed {
+    display: none !important;
+  }
+</style>
 
-    <div class="offline-card" id="offline-panel">
-      <div class="offline-icon">📶</div>
-      <h2 class="offline-title">Connection Lost</h2>
-      <p class="offline-desc">We couldn't connect to the CourtFlow scheduling portal. Please check your network connection.</p>
-      <button class="retry-btn" onclick="tryReload()">RETRY CONNECTION</button>
+  </head>
+  <body>
+    <div class="app-container tab-courts" id="app-container">
+      
+      <!-- Top Branding and Theme Switcher -->
+      <header class="glass-card header-panel">
+        <div class="branding" style="display: flex; align-items: center; gap: 10px;">
+          <img id="club-logo" class="club-logo" src="" alt="Club Logo" style="display: none; height: 26px; width: auto; border-radius: 4px; object-fit: contain;">
+          <h1 style="margin: 0; font-size: 20px; font-weight: 850; letter-spacing: -0.03em; line-height: 1.1;">CourtFlow</h1>
+          <span id="sync-status" class="sync-dot green" title="All changes saved to cloud"></span>
+        </div>
+        <button id="theme-toggle" class="icon-button" onclick="toggleTheme()" aria-label="Toggle visual theme">
+          <!-- Sun Icon (Light Mode) -->
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <!-- Moon Icon (Dark Mode) -->
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </header>
+
+      <!-- Contextual Alert Banner for Old Sessions -->
+      <div id="contextual-banner" class="contextual-banner" style="display: none;">
+        <span class="banner-text">⚠️ Active session from a previous day detected.</span>
+        <button class="banner-link-btn" onclick="triggerSessionReset()">Reset Session</button>
+      </div>
+
+      <main class="dashboard-grid">
+        
+        <!-- Left: Match Generation & Court Layouts -->
+        <div class="main-left-column">
+          
+          <!-- Slider and CTA Control Docks -->
+          <section class="glass-card controls-card">
+            <div class="controls-header">
+              <h2>Session Management</h2>
+              <div class="court-slider-group">
+                <label for="court-slider">Active Courts: <span id="court-count-display">3</span></label>
+                <input type="range" id="court-slider" min="1" max="6" value="3" oninput="onCourtsSliderInput(this.value)">
+              </div>
+            </div>
+            <div class="action-buttons-group">
+              <button id="btn-generate" class="btn btn-primary" onclick="triggerMatchGeneration()">
+                <span>Generate Next Round</span>
+              </button>
+              <button id="btn-reset" class="btn btn-link-danger" onclick="triggerSessionReset()">
+                Reset Session
+              </button>
+            </div>
+          </section>
+
+          <!-- Active Courts Grid Layout -->
+          <section class="glass-card container-panel" id="courts-panel">
+            <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
+              <h2>Active Courts</h2>
+              <button id="btn-collapse-courts" class="collapse-toggle-btn" onclick="togglePanelCollapse('courts')" aria-label="Toggle active courts visibility">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+            </div>
+            <div id="courts-body" class="panel-body-content">
+              <div id="courts-grid" class="grid-layout" style="margin-top: 12px;">
+                <!-- Dynamically painted court cards -->
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right: checked-in lists & waiting lines -->
+        <div class="main-right-column">
+          
+          <!-- Waiting line queue -->
+          <section class="glass-card container-panel queue-panel">
+            <div class="panel-header queue-header">
+              <div class="panel-header-title">
+                <h2>Waiting Queue</h2>
+                <span id="queue-badge" class="badge">0</span>
+              </div>
+              <div class="panel-header-actions">
+                <button class="btn-text-action" onclick="checkOutAllPlayers()">Check Out All</button>
+                <button id="btn-collapse-queue" class="collapse-toggle-btn" onclick="togglePanelCollapse('queue')" aria-label="Toggle waiting queue visibility">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div id="queue-body" class="panel-body-content">
+              <div id="queue-list" class="flex-list flex-wrap" style="margin-top: 12px;">
+                <!-- Dynamically painted checked-in waiting chips -->
+              </div>
+            </div>
+          </section>
+
+          <!-- Roster pool checked-out -->
+          <section class="glass-card container-panel roster-panel">
+            <div class="panel-header roster-header">
+              <div class="roster-header-container">
+                <div class="roster-tabs">
+                  <button id="tab-members" class="roster-tab active" onclick="switchRosterTab('members')">
+                    Members <span id="roster-badge-members" class="badge">0</span>
+                  </button>
+                  <button id="tab-guests" class="roster-tab" onclick="switchRosterTab('guests')">
+                    Guests <span id="roster-badge-guests" class="badge">0</span>
+                  </button>
+                </div>
+                <div class="roster-header-actions">
+                  <button id="btn-collapse-roster" class="collapse-toggle-btn" onclick="togglePanelCollapse('roster')" aria-label="Toggle roster pool visibility">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="roster-body" class="panel-body-content" style="display: flex; flex-direction: column; gap: 16px;">
+              <!-- Swapped action row inside body -->
+              <div id="roster-actions-row" class="roster-actions-row" style="display: flex; gap: 12px; align-items: center; border-bottom: 1px dashed var(--border-panel); padding-bottom: 12px;">
+                <button id="btn-checkin-all" class="btn-text-action" onclick="checkInAllRoster()">Check In All Members</button>
+                <button id="btn-add-guest" class="btn-text-action" onclick="showAddGuestModal()" style="display: none;">+ Add Guest</button>
+              </div>
+
+              <!-- Expected section -->
+              <div id="expected-section">
+                <span class="roster-sub-title" style="font-size: 12px; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.5px;">Tonight's Expected Roster</span>
+                <div id="roster-list" class="flex-list flex-wrap" style="margin-top: 8px;">
+                  <!-- Expected player chips -->
+                </div>
+              </div>
+              
+              <!-- Backup section -->
+              <div id="backup-section" class="backup-accordion-container" style="border-top: 1px dashed var(--border-panel); padding-top: 12px;">
+                <button class="backup-accordion-header" onclick="toggleBackupAccordion()" style="background: none; border: none; padding: 0; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                  <span id="backup-title-text">▼ Add from Backup (0)</span>
+                </button>
+                <div id="backup-list" class="flex-list flex-wrap backup-list-collapsed" style="margin-top: 8px;">
+                  <!-- Backup player chips -->
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+      </main>
     </div>
-  </div>
 
-  <iframe id="app-frame" src=""></iframe>
+    <!-- Custom Alert Modal Dialog -->
+    <div id="custom-alert-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card glass-card">
+        <div class="modal-header">
+          <span class="modal-title-icon">⚠️</span>
+          <h3 id="modal-title">Alert</h3>
+        </div>
+        <div class="modal-body">
+          <p id="modal-message">Something went wrong.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" onclick="closeAlertModal()">OK</button>
+        </div>
+      </div>
+    </div>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('Service Worker registered'))
-        .catch(err => console.error('SW failed: ', err));
-    }
+    <!-- Custom Confirm Modal Dialog -->
+    <div id="custom-confirm-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card glass-card">
+        <div class="modal-header">
+          <span class="modal-title-icon">❓</span>
+          <h3 id="confirm-modal-title">Confirm Action</h3>
+        </div>
+        <div class="modal-body">
+          <p id="confirm-modal-message">Are you sure you want to proceed?</p>
+        </div>
+        <div class="modal-footer" style="gap: 12px;">
+          <button class="btn btn-outline-danger" id="confirm-modal-cancel-btn" onclick="closeConfirmModal()">Cancel</button>
+          <button class="btn btn-primary" id="confirm-modal-ok-btn">Confirm</button>
+        </div>
+      </div>
+    </div>
 
-    const frame = document.getElementById('app-frame');
-    const statusScreen = document.getElementById('status-screen');
-    const statusText = document.getElementById('status-text');
-    const spinnerLoader = document.getElementById('spinner-loader');
-    const offlinePanel = document.getElementById('offline-panel');
+    <!-- Add Guest Modal Dialog -->
+    <div id="add-guest-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card glass-card">
+        <div class="modal-header">
+          <span class="modal-title-icon">👤</span>
+          <h3>Add Guest Player</h3>
+        </div>
+        <div class="modal-body">
+          <form id="add-guest-form" onsubmit="submitAddGuestForm(event)" style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Player Name -->
+            <div class="form-group">
+              <label for="guest-name">Player Name</label>
+              <input type="text" id="guest-name" class="form-input" required placeholder="Enter guest name" />
+            </div>
+            
+            <!-- Gender Segmented Toggle -->
+            <div class="form-group">
+              <label style="margin-bottom: 2px;">Gender</label>
+              <div class="segmented-control">
+                <input type="radio" name="guest-gender" id="gender-male-toggle" value="Male" checked style="display: none;" />
+                <label for="gender-male-toggle" class="segment-label">♂ Male</label>
+                
+                <input type="radio" name="guest-gender" id="gender-female-toggle" value="Female" style="display: none;" />
+                <label for="gender-female-toggle" class="segment-label">♀ Female</label>
+              </div>
+            </div>
 
-    const urlParams = new URLSearchParams(window.location.search);
-    let hostId = urlParams.get('h');
-    let roleView = urlParams.get('view');
+            <!-- Division Selector -->
+            <div class="form-group">
+              <label for="guest-skill">Division</label>
+              <select id="guest-skill" class="form-select">
+                <option value="1">Div 1 (Advanced / League Player)</option>
+                <option value="2">Div 2 (High Intermediate)</option>
+                <option value="3">Div 3 (Intermediate)</option>
+                <option value="4">Div 4 (Low Intermediate)</option>
+                <option value="5" selected>Div 5 (Casual / Beginner)</option>
+              </select>
+            </div>
 
-    if (hostId) {
-      localStorage.setItem('pwa_host_id', hostId);
-      if (roleView) {
-        localStorage.setItem('pwa_role_view', roleView);
-      } else {
-        localStorage.removeItem('pwa_role_view');
-      }
-    } else {
-      hostId = localStorage.getItem('pwa_host_id');
-      roleView = localStorage.getItem('pwa_role_view');
-    }
+            <!-- Plays Mixed Switch -->
+            <div class="form-group" style="flex-direction: row; justify-content: space-between; align-items: center; margin-top: 4px;">
+              <label for="guest-plays-mixed" style="cursor: pointer; user-select: none;">Plays Mixed Doubles</label>
+              <div class="switch-container">
+                <input type="checkbox" id="guest-plays-mixed" checked />
+                <span class="switch-slider"></span>
+              </div>
+            </div>
 
-    // iOS Safari Workaround: Inject manifest dynamically ONLY on non-iOS devices
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            <!-- Modal Footer Buttons -->
+            <div class="modal-footer" style="gap: 12px; margin-top: 12px;">
+              <button type="button" class="btn btn-outline-danger" onclick="closeAddGuestModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary">Add Guest</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
-    if (!isIOS) {
-      const link = document.createElement('link');
-      link.rel = 'manifest';
-      
-      if (hostId) {
-        const manifestData = {
-          "name": "FixtureFlow: CourtFlow",
-          "short_name": "CourtFlow",
-          "start_url": window.location.pathname + "?h=" + hostId + (roleView ? "&view=" + roleView : ""),
-          "display": "standalone",
-          "background_color": "#0b1329",
-          "theme_color": "#10b981",
-          "orientation": "any",
-          "icons": [
-            {
-              "src": "/assets/images/icon-courtflow.png",
-              "sizes": "180x180",
-              "type": "image/png"
+    <!-- Full-Screen Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay show" style="display: flex;">
+      <div class="loading-card glass-card">
+        <div class="spinner loading-spinner"></div>
+        <p id="loading-message">Loading CourtFlow...</p>
+      </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-nav-bar" id="mobile-nav-bar">
+      <button class="nav-item active" id="nav-btn-courts" onclick="switchMobileTab('courts')">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" class="svg-nav-icon">
+            <rect x="3" y="3" width="18" height="18" rx="1.5" />
+            <line x1="6" y1="3" x2="6" y2="21" />
+            <line x1="18" y1="3" x2="18" y2="21" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="12" y1="6" x2="12" y2="18" />
+          </svg>
+        </span>
+        <span class="nav-label">Courts <span id="queue-badge" class="badge-count" style="display: none;">0</span></span>
+      </button>
+      <button class="nav-item" id="nav-btn-roster" onclick="switchMobileTab('roster')">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" class="svg-nav-icon">
+            <!-- Left user (behind) -->
+            <path d="M2 18v-1a4 4 0 0 1 5-3.87" />
+            <circle cx="6" cy="9" r="2.5" />
+            <!-- Right user (behind) -->
+            <path d="M17 13.13a4 4 0 0 1 5 3.87v1" />
+            <circle cx="18" cy="9" r="2.5" />
+            <!-- Center user (front) -->
+            <path d="M6 20v-2a6 6 0 0 1 12 0v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </span>
+        <span class="nav-label">Roster</span>
+      </button>
+    </nav>
+
+    <!-- State initialization and scripts injection -->
+    <!--
+  Client-Side State Management for ClubFlow.
+  Initializes and controls the live reactive memory layers for checked-in queues and court sessions.
+-->
+<script>
+  // Google Apps Script Headless PWA API Mock Wrapper
+  // Source: Antigravity PWA Integration Plan
+  const google = {
+    script: {
+      run: {
+        withSuccessHandler(successHandler) {
+          return {
+            withFailureHandler(failureHandler) {
+              return new Proxy({}, {
+                get(target, propKey) {
+                  return function(...args) {
+                    callHostApi(propKey, args, successHandler, failureHandler);
+                  };
+                }
+              });
             },
-            {
-              "src": "/assets/images/icon-courtflow.svg",
-              "sizes": "any",
-              "type": "image/svg+xml",
-              "purpose": "any"
+            // Fallback proxy if withFailureHandler is omitted
+            ...new Proxy({}, {
+              get(target, propKey) {
+                return function(...args) {
+                  callHostApi(propKey, args, successHandler, null);
+                };
+              }
+            })
+          };
+        },
+        withFailureHandler(failureHandler) {
+          return {
+            withSuccessHandler(successHandler) {
+              return new Proxy({}, {
+                get(target, propKey) {
+                  return function(...args) {
+                    callHostApi(propKey, args, successHandler, failureHandler);
+                  };
+                }
+              });
             }
-          ]
-        };
-        const base64Manifest = btoa(unescape(encodeURIComponent(JSON.stringify(manifestData))));
-        link.href = 'data:application/json;base64,' + base64Manifest;
+          };
+        },
+        // Default proxy when no handler is specified
+        ...new Proxy({}, {
+          get(target, propKey) {
+            return function(...args) {
+              callHostApi(propKey, args, null, null);
+            };
+          }
+        })
+      }
+    }
+  };
+
+  function callHostApi(action, args, successHandler, failureHandler) {
+    const urlParams = new URLSearchParams(window.location.search);
+    let hostId = urlParams.get('h') || localStorage.getItem('pwa_host_id');
+    let roleView = urlParams.get('view') || localStorage.getItem('pwa_role_view');
+    
+    if (urlParams.get('h')) {
+      localStorage.setItem('pwa_host_id', urlParams.get('h'));
+      if (urlParams.get('view')) {
+        localStorage.setItem('pwa_role_view', urlParams.get('view'));
+      }
+    }
+
+    if (!hostId) {
+      const errorMsg = "Configuration Error: Missing host ID parameter (?h=...)";
+      console.error(errorMsg);
+      if (failureHandler) failureHandler(new Error(errorMsg));
+      return;
+    }
+
+    const payload = { action: action };
+    if (action === "saveSessionState") {
+      payload.payload = args[0];
+    } else if (action === "saveMatchHistory") {
+      payload.matchHistoryJSON = args[0];
+    } else if (action === "updatePlayerPlaysMixed") {
+      payload.name = args[0];
+      payload.playsMixed = args[1];
+    } else if (action === "calculateNextRound") {
+      payload.statePayloadJSON = args[0];
+    } else if (action === "calculateMatchForCourt") {
+      payload.statePayloadJSON = args[0];
+      payload.targetCourtId = args[1];
+    }
+
+    const targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
+    
+    fetch(targetUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain"
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`API Error: HTTP status ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(result => {
+      if (!result.success) {
+        throw new Error(result.error || "Unknown server error");
+      }
+      if (successHandler) {
+        successHandler(result.data);
+      }
+    })
+    .catch(err => {
+      console.error(`API Call failed (${action}):`, err);
+      if (failureHandler) {
+        failureHandler(err);
       } else {
-        link.href = 'manifest.json';
-      }
-      document.head.appendChild(link);
-    }
-
-    // Initialize Theme State
-    function applySavedTheme() {
-      const savedTheme = localStorage.getItem('pwa_theme');
-      if (savedTheme === 'light' || savedTheme === 'dark') {
-        document.body.classList.add(`theme-${savedTheme}`);
-        updateThemeColor(savedTheme);
-      } else {
-        const isSystemLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-        updateThemeColor(isSystemLight ? 'light' : 'dark');
-      }
-    }
-
-    function updateThemeColor(theme) {
-      const metaTheme = document.querySelector('meta[name="theme-color"]');
-      if (metaTheme) {
-        metaTheme.setAttribute('content', theme === 'light' ? '#f8fafc' : '#0b1329');
-      }
-    }
-
-    // Listen for postMessage updates from GAS app
-    window.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'THEME_CHANGE') {
-        const newTheme = event.data.theme;
-        if (newTheme === 'light' || newTheme === 'dark') {
-          localStorage.setItem('pwa_theme', newTheme);
-          document.body.classList.remove('theme-light', 'theme-dark');
-          document.body.classList.add(`theme-${newTheme}`);
-          updateThemeColor(newTheme);
-        }
+        alert(`Connection error: ${err.message}`);
       }
     });
+  }
 
-    function initApp() {
-      if (!hostId) {
-        showError(`CONFIG ERROR: Missing host ID parameter (?h=...)<br><span style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-top: 8px; display: block; word-break: break-all;">URL: ${window.location.href}</span>`);
+  /**
+   * The active client-side session data.
+   * Treat this as the master source of truth for the active web browser session.
+   */
+  var state = {
+    players: [],        // Complete master roster list of players [{name, skill, plays_mixed, etc.}]
+    activeCourts: [],    // Games currently being played on courts
+    history: [],        // Queue history tracking last matches to penalize duplication
+    opponentHistory: [], // Queue history tracking last opponents to penalize duplication
+    maxCourts: 3,       // Number of active badminton courts to generate matches for
+    config: {},         // Settings configuration parameters from Google Sheets
+    matchHistory: [],   // Historical record of all generated rounds in the session
+    timestamp: null     // The timestamp of the last saved state
+  };
+
+  /**
+   * Escapes HTML special characters in strings to mitigate XSS injection and syntax crashes.
+   * @param {string} str - Raw input.
+   * @returns {string} Escaped HTML string.
+   */
+  function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+</script>
+
+    <!--
+  Client-Side Matchmaking Solver Engine wrappers.
+  Provides simple queue utility functions for rendering UI components.
+-->
+<script>
+  /**
+   * Generates a sorted string key for a partner pair.
+   * @param {string} a - Player A name.
+   * @param {string} b - Player B name.
+   * @returns {string} Colon-separated sorted names.
+   */
+  function getPartnerKey(a, b) {
+    return a < b ? (a + ":" + b) : (b + ":" + a);
+  }
+
+  /**
+   * Checks if a player is currently playing on any active court.
+   * @param {string} name - Player name to check.
+   * @returns {boolean} True if player is active.
+   */
+  function isPlayerOnCourt(name) {
+    if (!state.activeCourts) return false;
+    return state.activeCourts.some(m => 
+      m.teamA.some(p => p.name === name) || m.teamB.some(p => p.name === name)
+    );
+  }
+</script>
+
+    <!--
+  UI Render Engine for the Main Dashboard.
+  Translates client state changes into DOM updates for checked-in lists and court cards.
+-->
+<script>
+  /**
+   * Scoped selectors for DOM element access.
+   */
+  const UI_SELECTORS = {
+    ROSTER_LIST: "roster-list",
+    QUEUE_LIST: "queue-list",
+    COURTS_GRID: "courts-grid",
+    COURT_SLIDER: "court-slider",
+    COURT_DISPLAY: "court-count-display",
+    QUEUE_BADGE: "queue-badge",
+    ROSTER_BADGE: "roster-badge"
+  };
+
+  /**
+   * Returns the SVG icon string for a player's gender.
+   * @param {string} gender - 'Male' or 'Female'.
+   * @returns {string} SVG HTML.
+   */
+  function getGenderIcon(gender) {
+    if (gender === "Female") {
+      return `<svg class="gender-icon female" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-label="Female"><circle cx="12" cy="8" r="5"></circle><path d="M12 13v8M9 17h6"></path></svg>`;
+    }
+    return `<svg class="gender-icon male" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-label="Male"><circle cx="10" cy="14" r="5"></circle><path d="M14 10l6-6M14 4h6v6"></path></svg>`;
+  }
+
+  /**
+   * Refreshes the HTML dashboard layout.
+   */
+  function renderUI() {
+    renderQueueList();
+    renderRosterList();
+    renderCourtsGrid();
+    renderBadges();
+  }
+
+  /**
+   * Renders the badges containing counts of waiting/playing and rostered players.
+   */
+  function renderBadges() {
+    const queueBadge = document.getElementById(UI_SELECTORS.QUEUE_BADGE);
+    if (queueBadge) {
+      const waitingCount = state.players.filter(p => p.checkedIn && !isPlayerOnCourt(p.name)).length;
+      const playingCount = state.players.filter(p => p.checkedIn && isPlayerOnCourt(p.name)).length;
+      queueBadge.innerText = `${waitingCount} waiting` + (playingCount ? ` (${playingCount} on court)` : "");
+    }
+    
+    const membersBadge = document.getElementById("roster-badge-members");
+    if (membersBadge) {
+      const membersCount = state.players.filter(p => !p.checkedIn && !p.isGuest).length;
+      membersBadge.innerText = membersCount;
+    }
+
+    const guestsBadge = document.getElementById("roster-badge-guests");
+    if (guestsBadge) {
+      const guestsCount = state.players.filter(p => !p.checkedIn && p.isGuest).length;
+      guestsBadge.innerText = guestsCount;
+    }
+  }
+
+  /**
+   * Renders the waiting queue panel.
+   */
+  function renderQueueList() {
+    const queueEl = document.getElementById(UI_SELECTORS.QUEUE_LIST);
+    if (!queueEl) return;
+    
+    // Update mobile navigation badge
+    const badgeEl = document.getElementById("queue-badge");
+    if (badgeEl) {
+      const waitingCount = state.players.filter(p => p.checkedIn && !isPlayerOnCourt(p.name)).length;
+      if (waitingCount > 0) {
+        badgeEl.innerText = waitingCount;
+        badgeEl.style.display = "inline-flex";
+      } else {
+        badgeEl.style.display = "none";
+      }
+    }
+
+    const checkedInPlayers = state.players.filter(p => p.checkedIn);
+    
+    if (checkedInPlayers.length === 0) {
+      queueEl.innerHTML = `
+        <div class="empty-state">
+          No players checked in. Tap Roster members to check in and add them to the queue.
+        </div>
+      `;
+      return;
+    }
+    
+    // Sort queue list: waiting players first, on-court players last
+    checkedInPlayers.sort((a, b) => {
+      const aPlaying = isPlayerOnCourt(a.name);
+      const bPlaying = isPlayerOnCourt(b.name);
+      if (aPlaying && !bPlaying) return 1;
+      if (!aPlaying && bPlaying) return -1;
+      return 0; // Maintain original chronological check-in order
+    });
+
+    queueEl.innerHTML = checkedInPlayers.map(p => {
+      const playing = isPlayerOnCourt(p.name);
+      let chipClasses = "player-chip checked-in";
+      if (playing) chipClasses += " on-court";
+      if (p.force_next) chipClasses += " boosted";
+      if (p.leaving_early) chipClasses += " leaving-early";
+      
+      const genderClass = p.gender === "Female" ? "gender-female" : "gender-male";
+      const escapedName = escapeHtml(p.name);
+      const dragAttr = !playing ? `draggable="true" ondragstart="onPlayerDragStart(event)"` : "";
+      
+      return `
+        <div class="${chipClasses}" ${dragAttr} data-name="${escapedName}">
+          <div class="chip-main-info" onclick="togglePlayerCheckIn(this.closest('.player-chip').getAttribute('data-name'))" title="Click to check out">
+            <span class="player-gender ${genderClass}">${getGenderIcon(p.gender)}</span>
+            <div class="player-text-details">
+              <span class="player-name">${escapedName}</span>
+              <span class="player-skill">Div ${p.skill}</span>
+            </div>
+          </div>
+          <div class="chip-actions">
+            <button class="action-btn mixed-btn ${p.plays_mixed ? 'active' : ''}" onclick="togglePlayerPlaysMixed(this.closest('.player-chip').getAttribute('data-name'), event)" title="Toggle plays mixed doubles">
+              MX
+            </button>
+            <button class="action-btn boost-btn ${p.force_next ? 'active' : ''}" onclick="togglePlayerBoost(this.closest('.player-chip').getAttribute('data-name'), event)" title="Boost priority for next game">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </button>
+            <button class="action-btn leave-btn ${p.leaving_early ? 'active' : ''}" onclick="togglePlayerLeaveEarly(this.closest('.player-chip').getAttribute('data-name'), event)" title="Mark as leaving early">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  /**
+   * Renders the player roster panel with action toggles.
+   */
+  function renderRosterList() {
+    const expectedListEl = document.getElementById("roster-list");
+    const backupListEl = document.getElementById("backup-list");
+    const backupTitleTextEl = document.getElementById("backup-title-text");
+    const backupSectionEl = document.getElementById("backup-section");
+    
+    if (!expectedListEl || !backupListEl) return;
+    
+    const showGuests = (activeRosterTab === "guests");
+    
+    // Tonight's expected roster (not checked-in, matching type, and NOT backup)
+    const expectedPlayers = state.players.filter(p => !p.checkedIn && (!!p.isGuest === showGuests) && !p.isBackup);
+    
+    // Backup list (not checked-in, matching type, and IS backup)
+    const backupPlayers = state.players.filter(p => !p.checkedIn && (!!p.isGuest === showGuests) && p.isBackup);
+    
+    // Render Expected List
+    if (expectedPlayers.length === 0) {
+      expectedListEl.innerHTML = `
+        <div class="empty-state">
+          ${showGuests ? "No guests expected tonight." : "All expected members checked in!"}
+        </div>
+      `;
+    } else {
+      expectedListEl.innerHTML = expectedPlayers.map(p => renderPlayerChip(p)).join("");
+    }
+    
+    // Render Backup List
+    if (backupPlayers.length === 0) {
+      if (backupSectionEl) backupSectionEl.style.display = "none";
+      backupListEl.innerHTML = "";
+    } else {
+      if (backupSectionEl) backupSectionEl.style.display = "block";
+      backupListEl.innerHTML = backupPlayers.map(p => renderPlayerChip(p, true)).join("");
+      if (backupTitleTextEl) {
+        const isCollapsed = backupListEl.classList.contains("backup-list-collapsed");
+        const arrow = isCollapsed ? "▼" : "▲";
+        backupTitleTextEl.innerText = `${arrow} Add from Backup (${backupPlayers.length})`;
+      }
+    }
+  }
+
+  /**
+   * Helper to render a player chip layout.
+   */
+  function renderPlayerChip(p, isBackupStyle = false) {
+    const genderClass = p.gender === "Female" ? "gender-female" : "gender-male";
+    const escapedName = escapeHtml(p.name);
+    const backupClass = isBackupStyle ? " backup-chip" : "";
+    return `
+      <div class="player-chip checked-out${backupClass}" data-name="${escapedName}" onclick="togglePlayerCheckIn(this.getAttribute('data-name'))" title="Click to check in">
+        <div class="chip-main-info">
+          <span class="player-gender ${genderClass}">${getGenderIcon(p.gender)}</span>
+          <div class="player-text-details">
+            <span class="player-name">${escapedName}</span>
+            <span class="player-skill">Div ${p.skill}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Toggles the collapsible state of the backup player accordion.
+   */
+  function toggleBackupAccordion() {
+    const backupListEl = document.getElementById("backup-list");
+    const backupTitleTextEl = document.getElementById("backup-title-text");
+    if (!backupListEl) return;
+    
+    const isCollapsed = backupListEl.classList.toggle("backup-list-collapsed");
+    
+    if (backupTitleTextEl) {
+      const showGuests = (activeRosterTab === "guests");
+      const backupPlayers = state.players.filter(p => !p.checkedIn && (!!p.isGuest === showGuests) && p.isBackup);
+      const arrow = isCollapsed ? "▼" : "▲";
+      backupTitleTextEl.innerText = `${arrow} Add from Backup (${backupPlayers.length})`;
+    }
+  }
+
+  /**
+   * Renders the active court cards.
+   */
+  function renderCourtsGrid() {
+    const gridEl = document.getElementById(UI_SELECTORS.COURTS_GRID);
+    if (!gridEl) return;
+    
+    // Set active courts count attribute on the container for responsive CSS layout rules
+    const containerEl = document.getElementById("app-container");
+    if (containerEl) {
+      const activeCount = state.activeCourts ? state.activeCourts.length : 0;
+      if (activeCount >= 2) {
+        containerEl.setAttribute("data-active-courts-count", "multiple");
+      } else {
+        containerEl.setAttribute("data-active-courts-count", "single");
+      }
+    }
+    
+    if (state.activeCourts.length === 0) {
+      gridEl.innerHTML = `
+        <div class="empty-state courts-empty">
+          No matches generated yet. Tap 'Generate Next Round' to pair waiting players.
+        </div>
+      `;
+      return;
+    }
+    
+    gridEl.innerHTML = state.activeCourts.map((m, courtIndex) => {
+      const sumA = m.teamA[0].skill + m.teamA[1].skill;
+      const sumB = m.teamB[0].skill + m.teamB[1].skill;
+      const diff = Math.abs(sumA - sumB);
+      
+      const makePlayerSlot = (teamKey, index) => {
+        const player = teamKey === 'teamA' ? m.teamA[index] : m.teamB[index];
+        const genderClass = player.gender === "Female" ? "gender-female" : "gender-male";
+        const escapedName = escapeHtml(player.name);
+        return `
+          <div class="player-slot" draggable="true"
+               data-court-id="${m.courtId}"
+               data-team="${teamKey}"
+               data-index="${index}"
+               data-name="${escapedName}"
+               ondragstart="onCourtPlayerDragStart(event)"
+               ondragover="onCourtDragOver(event)"
+               ondragleave="onCourtDragLeave(event)"
+               ondrop="onCourtPlayerDrop(event)">
+            <div class="player-slot-content">
+              <span class="player-gender ${genderClass}">${getGenderIcon(player.gender)}</span>
+              <span class="player-name ${genderClass}">${escapedName}</span>
+            </div>
+            <span class="player-skill-tag">Div ${player.skill}</span>
+          </div>
+        `;
+      };
+      
+      return `
+        <div class="court-card glass-card court-theme-${m.courtId}" style="animation-delay: ${courtIndex * 75}ms;">
+          <div class="court-header">
+            <div class="court-title-group">
+              <span class="court-number">Court ${m.courtId}</span>
+            </div>
+            <div class="court-actions-group">
+              <span class="court-diff-badge" title="Team skill rating gap">Diff: ${diff}</span>
+              <button class="court-refresh-btn" onclick="triggerCourtRefresh(${m.courtId})" title="Finish game & rotate Court ${m.courtId}">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="teams-container">
+            <!-- Team A (Top half) -->
+            <div class="team-row">
+              ${makePlayerSlot('teamA', 0)}
+              <div class="team-divider-vertical"></div>
+              ${makePlayerSlot('teamA', 1)}
+            </div>
+            
+            <!-- Net Divider Line -->
+            <div class="net-divider-row">
+              <span class="net-label-left">Sum: ${sumA}</span>
+              <span class="net-line-text">VS</span>
+              <span class="net-label-right">Sum: ${sumB}</span>
+            </div>
+            
+            <!-- Team B (Bottom half) -->
+            <div class="team-row">
+              ${makePlayerSlot('teamB', 0)}
+              <div class="team-divider-vertical"></div>
+              ${makePlayerSlot('teamB', 1)}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  /**
+   * Toggles the UI layout visual theme.
+   */
+  function toggleTheme() {
+    const htmlEl = document.documentElement;
+    const currentTheme = htmlEl.getAttribute("data-theme") || "light";
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    
+    htmlEl.setAttribute("data-theme", newTheme);
+    localStorage.setItem("clubflow-theme", newTheme);
+    
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'THEME_CHANGE', theme: newTheme }, '*');
+    }
+  }
+
+  /**
+   * Updates display values and state when user changes court slider.
+   */
+  function onCourtsSliderInput(val) {
+    const displayEl = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
+    if (displayEl) {
+      displayEl.innerText = val;
+    }
+    state.maxCourts = parseInt(val, 10);
+    debouncedSync();
+  }
+
+  /**
+   * Action trigger to run matchmaking algorithm and update local state.
+   */
+  /**
+   * Action trigger to run matchmaking algorithm and update local state.
+   */
+  function triggerMatchGeneration() {
+    // If active courts are playing, ask for safety confirmation first
+    if (state.activeCourts && state.activeCourts.length > 0) {
+      showConfirmModal(
+        "Generate Next Round?",
+        "Are you sure you want to generate the next round? This will clear the active courts and archive the current matches to history.",
+        () => executeGeneration()
+      );
+    } else {
+      executeGeneration();
+    }
+
+    function executeGeneration() {
+      // 1. Client-Side Pre-validation (Save network roundtrip if < 4 checked-in players)
+      const candidates = state.players.filter(p => p.checkedIn);
+      if (candidates.length < 4) {
+        showCustomAlert("Error", "Not enough checked-in players to generate a doubles match!");
         return;
       }
 
-      if (!navigator.onLine) {
-        showOfflineState();
-        return;
+      const btn = document.getElementById("btn-generate");
+      let originalHTML = "";
+      if (btn) {
+        originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `
+          <span style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span class="spinner btn-spinner"></span>
+            <span>Generating...</span>
+          </span>
+        `;
       }
 
-      offlinePanel.style.display = 'none';
-      spinnerLoader.style.display = 'block';
-      statusText.textContent = 'CONNECTING TO PORTAL...';
-      statusScreen.style.display = 'flex';
+      showLoadingOverlay("Generating next round matches...");
 
-      let targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
-      if (roleView) {
-        targetUrl += `?view=${roleView}`;
+      // Build compact payload to send to server
+      const payload = {
+        players: state.players.map(p => ({
+          name: p.name,
+          skill: p.skill,
+          gender: p.gender,
+          plays_mixed: p.plays_mixed,
+          checkedIn: p.checkedIn,
+          leaving_early: p.leaving_early,
+          force_next: p.force_next,
+          mixedCount: p.mixedCount || 0,
+          sameSexCount: p.sameSexCount || 0
+        })),
+        activeCourts: state.activeCourts,
+        matchHistory: state.matchHistory,
+        history: state.history,
+        opponentHistory: state.opponentHistory,
+        maxCourts: state.maxCourts
+      };
+
+      google.script.run
+        .withSuccessHandler(responseJSON => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+          }
+          hideLoadingOverlay();
+
+          const nextMatches = JSON.parse(responseJSON);
+
+          if (nextMatches && nextMatches.length > 0) {
+            // Archive current active courts before overwriting
+            if (state.activeCourts && state.activeCourts.length > 0) {
+              state.matchHistory.push(JSON.parse(JSON.stringify(state.activeCourts)));
+            }
+            state.activeCourts = nextMatches;
+            
+            // Update history buffer and play counts
+            nextMatches.forEach(m => {
+              const keyA = getPartnerKey(m.teamA[0].name, m.teamA[1].name);
+              const keyB = getPartnerKey(m.teamB[0].name, m.teamB[1].name);
+              
+              state.history.push(keyA);
+              state.history.push(keyB);
+
+              // Record opponent matches (four relationships: A0-B0, A0-B1, A1-B0, A1-B1)
+              const op1 = getPartnerKey(m.teamA[0].name, m.teamB[0].name);
+              const op2 = getPartnerKey(m.teamA[0].name, m.teamB[1].name);
+              const op3 = getPartnerKey(m.teamA[1].name, m.teamB[0].name);
+              const op4 = getPartnerKey(m.teamA[1].name, m.teamB[1].name);
+              state.opponentHistory.push(op1, op2, op3, op4);
+
+              // Calculate if match is mixed doubles (2 Males + 2 Females)
+              let males = 0;
+              let females = 0;
+              [...m.teamA, ...m.teamB].forEach(p => {
+                if (p.gender === "Female") females++;
+                else males++;
+              });
+              const isMixed = (males === 2 && females === 2);
+
+              // Update player play-type history counts
+              [...m.teamA, ...m.teamB].forEach(p => {
+                const statePlayer = state.players.find(sp => sp.name === p.name);
+                if (statePlayer) {
+                  if (isMixed) {
+                    statePlayer.mixedCount = (statePlayer.mixedCount || 0) + 1;
+                  } else {
+                    statePlayer.sameSexCount = (statePlayer.sameSexCount || 0) + 1;
+                  }
+                }
+              });
+            });
+
+            // Constrain history queues using dynamic, court-scaled limits (preserves 6 rounds of history)
+            const partnerLimit = state.maxCourts * 12;
+            const opponentLimit = state.maxCourts * 24;
+            
+            if (state.history.length > partnerLimit) {
+              state.history = state.history.slice(-partnerLimit);
+            }
+            if (state.opponentHistory.length > opponentLimit) {
+              state.opponentHistory = state.opponentHistory.slice(-opponentLimit);
+            }
+
+            // Consume force_next overrides locally to match backend state
+            nextMatches.forEach(m => {
+              [...m.teamA, ...m.teamB].forEach(p => {
+                const statePlayer = state.players.find(sp => sp.name === p.name);
+                if (statePlayer) {
+                  statePlayer.force_next = false;
+                }
+              });
+            });
+
+            renderUI();
+            debouncedSync();
+          } else {
+            showCustomAlert("Generation Result", "Not enough players with matching genders to form a valid doubles (Men/Women) or Mixed match!");
+          }
+        })
+        .withFailureHandler(err => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+          }
+          hideLoadingOverlay();
+          showCustomAlert("Server Error", "Failed to generate next round matches: " + err.message);
+        })
+        .calculateNextRound(JSON.stringify(payload));
+    }
+  }
+
+  /**
+   * Action trigger to rotate a single court's match.
+   * Archives the finished match, returns players to queue, and generates a new match for the court.
+   * @param {number} courtId - The ID of the court to refresh.
+   */
+  function triggerCourtRefresh(courtId) {
+    const activeMatch = state.activeCourts.find(m => m.courtId === courtId);
+    if (!activeMatch) {
+      alert("No active match found on this court!");
+      return;
+    }
+
+    showConfirmModal(
+      "Rotate Court " + courtId + "?",
+      "Are you sure you want to end the match on Court " + courtId + " and generate a new one?",
+      () => executeCourtRefresh(courtId, activeMatch)
+    );
+
+    function executeCourtRefresh(cId, finishedMatch) {
+      showLoadingOverlay("Generating new match for Court " + cId + "...");
+
+      // 1. Temporarily add the finished match to history so matchmaking prioritizes waiting players
+      state.matchHistory.push([JSON.parse(JSON.stringify(finishedMatch))]);
+
+      // 2. Temporarily remove the match from activeCourts so isPlayerOnOtherCourt works correctly.
+      const originalActive = [...state.activeCourts];
+      state.activeCourts = originalActive.filter(m => m.courtId !== cId);
+
+      // Build compact payload to send to server
+      const payload = {
+        players: state.players.map(p => ({
+          name: p.name,
+          skill: p.skill,
+          gender: p.gender,
+          plays_mixed: p.plays_mixed,
+          checkedIn: p.checkedIn,
+          leaving_early: p.leaving_early,
+          force_next: p.force_next,
+          mixedCount: p.mixedCount || 0,
+          sameSexCount: p.sameSexCount || 0
+        })),
+        activeCourts: state.activeCourts,
+        matchHistory: state.matchHistory,
+        history: state.history,
+        opponentHistory: state.opponentHistory,
+        maxCourts: state.maxCourts
+      };
+
+      google.script.run
+        .withSuccessHandler(responseJSON => {
+          hideLoadingOverlay();
+
+          const newMatch = JSON.parse(responseJSON);
+
+          if (newMatch) {
+            // 4. Update partners and opponents history for the new match
+            const keyA = getPartnerKey(newMatch.teamA[0].name, newMatch.teamA[1].name);
+            const keyB = getPartnerKey(newMatch.teamB[0].name, newMatch.teamB[1].name);
+            state.history.push(keyA, keyB);
+
+            const op1 = getPartnerKey(newMatch.teamA[0].name, newMatch.teamB[0].name);
+            const op2 = getPartnerKey(newMatch.teamA[0].name, newMatch.teamB[1].name);
+            const op3 = getPartnerKey(newMatch.teamA[1].name, newMatch.teamB[0].name);
+            const op4 = getPartnerKey(newMatch.teamA[1].name, newMatch.teamB[1].name);
+            state.opponentHistory.push(op1, op2, op3, op4);
+
+            // Update player play-type counts (mixed vs same-sex)
+            let males = 0;
+            let females = 0;
+            [...newMatch.teamA, ...newMatch.teamB].forEach(p => {
+              if (p.gender === "Female") females++;
+              else males++;
+            });
+            const isMixed = (males === 2 && females === 2);
+
+            [...newMatch.teamA, ...newMatch.teamB].forEach(p => {
+              const statePlayer = state.players.find(sp => sp.name === p.name);
+              if (statePlayer) {
+                if (isMixed) {
+                  statePlayer.mixedCount = (statePlayer.mixedCount || 0) + 1;
+                } else {
+                  statePlayer.sameSexCount = (statePlayer.sameSexCount || 0) + 1;
+                }
+              }
+            });
+
+            // Constrain history queues
+            const partnerLimit = state.maxCourts * 12;
+            const opponentLimit = state.maxCourts * 24;
+            if (state.history.length > partnerLimit) {
+              state.history = state.history.slice(-partnerLimit);
+            }
+            if (state.opponentHistory.length > opponentLimit) {
+              state.opponentHistory = state.opponentHistory.slice(-opponentLimit);
+            }
+
+            // Consume force_next overrides locally to match backend state
+            [...newMatch.teamA, ...newMatch.teamB].forEach(p => {
+              const statePlayer = state.players.find(sp => sp.name === p.name);
+              if (statePlayer) {
+                statePlayer.force_next = false;
+              }
+            });
+
+            // Replace the old match in the active courts list with the new match
+            state.activeCourts = originalActive.map(m => m.courtId === cId ? newMatch : m);
+          } else {
+            // Transaction Rollback
+            state.matchHistory.pop();
+            state.activeCourts = originalActive;
+            showCustomAlert("Generation Result", "Not enough players with matching genders to form a valid doubles (Men/Women) or Mixed match!");
+          }
+
+          renderUI();
+          debouncedSync();
+        })
+        .withFailureHandler(err => {
+          hideLoadingOverlay();
+          // Transaction Rollback
+          state.matchHistory.pop();
+          state.activeCourts = originalActive;
+          showCustomAlert("Server Error", "Failed to refresh court match: " + err.message);
+          renderUI();
+        })
+        .calculateMatchForCourt(JSON.stringify(payload), cId);
+    }
+  }
+
+  /**
+   * Action trigger to reset the entire tournament state.
+   */
+  function triggerSessionReset() {
+    showConfirmModal(
+      "Reset Session?",
+      "Are you sure you want to reset the current session? This will archive active games and clear all waiting lineups.",
+      () => {
+        showLoadingOverlay("Archiving session logs and resetting...");
+        
+        // 1. Archive current active courts before wiping
+        if (state.activeCourts && state.activeCourts.length > 0) {
+          state.matchHistory.push(JSON.parse(JSON.stringify(state.activeCourts)));
+        }
+        
+        // 2. Write history to spreadsheet first
+        google.script.run
+          .withSuccessHandler(() => {
+            // 3. Clear session properties
+            google.script.run
+              .withSuccessHandler(success => {
+                // Re-fetch initial state
+                google.script.run
+                  .withSuccessHandler(data => {
+                    const payload = JSON.parse(data);
+                    state.players = payload.players || [];
+                    state.activeCourts = payload.activeCourts || [];
+                    state.history = payload.history || [];
+                    state.opponentHistory = payload.opponentHistory || [];
+                    state.maxCourts = payload.maxCourts || 3;
+                    state.matchHistory = []; // Reset local history
+                    state.timestamp = null;
+                    
+                    const bannerEl = document.getElementById("contextual-banner");
+                    if (bannerEl) bannerEl.style.display = "none";
+                    
+                    const slider = document.getElementById(UI_SELECTORS.COURT_SLIDER);
+                    if (slider) slider.value = state.maxCourts;
+                    
+                    const display = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
+                    if (display) display.innerText = state.maxCourts;
+                    
+                    renderUI();
+                    hideLoadingOverlay();
+                  })
+                  .withFailureHandler(err => {
+                    hideLoadingOverlay();
+                    showAlertModal("Error", "Failed to fetch initial state: " + err.message);
+                  })
+                  .getInitialState();
+              })
+              .withFailureHandler(err => {
+                hideLoadingOverlay();
+                showAlertModal("Error", "Failed to reset session: " + err.message);
+              })
+              .resetSession();
+          })
+          .withFailureHandler(err => {
+            hideLoadingOverlay();
+            showAlertModal("Logging Error", "Failed to archive match history to spreadsheet: " + err.message);
+          })
+          .saveMatchHistory(JSON.stringify(state.matchHistory));
+      }
+    );
+  }
+
+  /**
+   * Toggles priority boost state.
+   */
+  function togglePlayerBoost(name, event) {
+    if (event) event.stopPropagation();
+    const p = state.players.find(player => player.name === name);
+    if (p) {
+      p.force_next = !p.force_next;
+      renderUI();
+      debouncedSync();
+    }
+  }
+
+  /**
+   * Toggles player leaving early state.
+   */
+  function togglePlayerLeaveEarly(name, event) {
+    if (event) event.stopPropagation();
+    const p = state.players.find(player => player.name === name);
+    if (p) {
+      p.leaving_early = !p.leaving_early;
+      renderUI();
+      debouncedSync();
+    }
+  }
+
+  /**
+   * Checks in/out a player with on-court checkout verification.
+   */
+  function togglePlayerCheckIn(name) {
+    const p = state.players.find(player => player.name === name);
+    if (p) {
+      if (p.checkedIn && isPlayerOnCourt(name)) {
+        showConfirmModal(
+          "Check Out Playing Player?",
+          `Are you sure you want to check out ${name}? They are currently playing on a court, and will be removed from rotation once their match finishes.`,
+          () => {
+            p.checkedIn = false;
+            renderUI();
+            debouncedSync();
+          }
+        );
+        return;
+      }
+      p.checkedIn = !p.checkedIn;
+      renderUI();
+      debouncedSync();
+    }
+  }
+
+  /**
+   * Toggles plays mixed doubles state.
+   */
+  function togglePlayerPlaysMixed(name, event) {
+    if (event) event.stopPropagation();
+    const p = state.players.find(player => player.name === name);
+    if (p) {
+      p.plays_mixed = !p.plays_mixed;
+      renderUI();
+      
+      // Asynchronously update on spreadsheet
+      google.script.run
+        .withSuccessHandler(success => {
+          console.log(`Plays mixed updated for ${name}:`, success);
+        })
+        .withFailureHandler(err => {
+          showAlertModal("Error", `Failed to update Plays Mixed setting: ${err.message}`);
+          p.plays_mixed = !p.plays_mixed;
+          renderUI();
+        })
+        .updatePlayerPlaysMixed(name, p.plays_mixed);
+        
+      debouncedSync();
+    }
+  }
+
+  // --- MANUAL PLAYER DRAG & DROP SWAPPING LOGIC ---
+  let dragSource = null;
+
+  function onPlayerDragStart(event) {
+    const name = event.currentTarget.getAttribute("data-name");
+    dragSource = { type: 'queue', name: name };
+    event.dataTransfer.setData("text/plain", name);
+    event.dataTransfer.effectAllowed = "move";
+  }
+
+  function onCourtPlayerDragStart(event) {
+    const el = event.currentTarget;
+    const courtId = parseInt(el.getAttribute("data-court-id"), 10);
+    const team = el.getAttribute("data-team");
+    const index = parseInt(el.getAttribute("data-index"), 10);
+    const name = el.getAttribute("data-name");
+    
+    dragSource = { type: 'court', courtId: courtId, team: team, index: index, name: name };
+    event.dataTransfer.setData("text/plain", name);
+    event.dataTransfer.effectAllowed = "move";
+  }
+
+  function onCourtDragOver(event) {
+    event.preventDefault();
+    event.currentTarget.classList.add("drag-over");
+  }
+
+  function onCourtDragLeave(event) {
+    event.currentTarget.classList.remove("drag-over");
+  }
+
+  function onCourtPlayerDrop(event) {
+    event.preventDefault();
+    event.currentTarget.classList.remove("drag-over");
+    
+    if (!dragSource) return;
+    
+    const el = event.currentTarget;
+    const targetCourtId = parseInt(el.getAttribute("data-court-id"), 10);
+    const targetTeam = el.getAttribute("data-team");
+    const targetIndex = parseInt(el.getAttribute("data-index"), 10);
+    
+    const targetMatch = state.activeCourts.find(m => m.courtId === targetCourtId);
+    if (!targetMatch) return;
+    
+    const targetTeamPlayers = targetTeam === "teamA" ? targetMatch.teamA : targetMatch.teamB;
+    const targetPlayer = targetTeamPlayers[targetIndex];
+    
+    if (dragSource.type === 'queue') {
+      const sourcePlayer = state.players.find(p => p.name === dragSource.name);
+      if (!sourcePlayer) return;
+      
+      // Update court slot with sourcePlayer
+      targetTeamPlayers[targetIndex] = sourcePlayer;
+      
+      recalculateMatchSkills(targetMatch);
+      renderUI();
+      debouncedSync();
+    } else if (dragSource.type === 'court') {
+      const sourceMatch = state.activeCourts.find(m => m.courtId === dragSource.courtId);
+      if (!sourceMatch) return;
+      
+      const sourceTeamPlayers = dragSource.team === "teamA" ? sourceMatch.teamA : sourceMatch.teamB;
+      const sourcePlayer = sourceTeamPlayers[dragSource.index];
+      
+      // Perform the swap
+      sourceTeamPlayers[dragSource.index] = targetPlayer;
+      targetTeamPlayers[targetIndex] = sourcePlayer;
+      
+      recalculateMatchSkills(sourceMatch);
+      if (sourceMatch.courtId !== targetMatch.courtId) {
+        recalculateMatchSkills(targetMatch);
       }
       
-      frame.src = targetUrl;
+      renderUI();
+      debouncedSync();
+    }
+    
+    dragSource = null;
+  }
 
-      frame.onload = () => {
-        statusScreen.style.display = 'none';
-        frame.style.display = 'block';
+  function recalculateMatchSkills(match) {
+    const sumA = match.teamA[0].skill + match.teamA[1].skill;
+    const sumB = match.teamB[0].skill + match.teamB[1].skill;
+    match.skillSumA = sumA;
+    match.skillSumB = sumB;
+    match.skillDiff = Math.abs(sumA - sumB);
+  }
+
+  // Set the theme configuration from localStorage before DOM fully paints to avoid flickers
+  (function initTheme() {
+    const savedTheme = localStorage.getItem("clubflow-theme") || "light";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+    
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'THEME_CHANGE', theme: savedTheme }, '*');
+    }
+  })();
+
+  // Initialize UI on window load
+  window.addEventListener("load", () => {
+    // Initial fetch from GAS (combines master roster and persistent state properties)
+    google.script.run
+      .withSuccessHandler(data => {
+        const payload = JSON.parse(data);
+        state.players = payload.players || [];
+        state.activeCourts = payload.activeCourts || [];
+        state.history = payload.history || [];
+        state.opponentHistory = payload.opponentHistory || [];
+        state.config = payload.config || {};
+        state.maxCourts = payload.maxCourts || (state.config.maxCourts || 3);
+        
+        // Update branding title if clubName is set
+        if (state.config.clubName) {
+          const brandingH1 = document.querySelector(".branding h1");
+          if (brandingH1) brandingH1.innerText = state.config.clubName;
+        }
+
+        // Update branding logo if clubLogoUrl is set
+        const logoEl = document.getElementById("club-logo");
+        if (logoEl) {
+          if (state.config.clubLogoUrl) {
+            logoEl.src = state.config.clubLogoUrl;
+            logoEl.style.display = "block";
+          } else {
+            logoEl.style.display = "none";
+          }
+        }
+        
+        state.matchHistory = payload.matchHistory || [];
+        state.timestamp = payload.timestamp || null;
+        
+        // Contextual Banner check (older than 8 hours)
+        let isOldSession = false;
+        const bannerEl = document.getElementById("contextual-banner");
+        if (bannerEl) {
+          if (state.timestamp) {
+            isOldSession = (Date.now() - state.timestamp) > (8 * 60 * 60 * 1000);
+            if (isOldSession) {
+              bannerEl.style.display = "flex";
+            } else {
+              bannerEl.style.display = "none";
+            }
+          } else {
+            bannerEl.style.display = "none";
+          }
+        }
+        
+        // Default tab routing based on empty roster or active session
+        const checkedInCount = state.players.filter(p => p.checkedIn).length;
+        if (checkedInCount === 0 || isOldSession) {
+          switchMobileTab('roster');
+        } else {
+          switchMobileTab('courts');
+        }
+        
+        // Update slider input value and display text
+        const slider = document.getElementById(UI_SELECTORS.COURT_SLIDER);
+        if (slider) {
+          slider.value = state.maxCourts;
+        }
+        
+        const displayEl = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
+        if (displayEl) {
+          displayEl.innerText = state.maxCourts;
+        }
+        
+        renderUI();
+        applyAllPanelCollapseStates();
+        hideLoadingOverlay();
+      })
+      .withFailureHandler(err => {
+        hideLoadingOverlay();
+        showAlertModal("Load Error", "Failed to load initial club state: " + err.message);
+      })
+      .getInitialState();
+  });
+
+  /**
+   * Opens the custom alert modal with a title and message.
+   */
+  function showAlertModal(title, message) {
+    const modalEl = document.getElementById("custom-alert-modal");
+    const titleEl = document.getElementById("modal-title");
+    const messageEl = document.getElementById("modal-message");
+    
+    if (modalEl && titleEl && messageEl) {
+      titleEl.innerText = title;
+      messageEl.innerText = message;
+      
+      modalEl.style.display = "flex";
+      // Force layout recalculation for transition
+      modalEl.offsetHeight;
+      modalEl.classList.add("show");
+    }
+  }
+
+  /**
+   * Closes the custom alert modal.
+   */
+  function closeAlertModal() {
+    const modalEl = document.getElementById("custom-alert-modal");
+    if (modalEl) {
+      modalEl.classList.remove("show");
+      setTimeout(() => {
+        modalEl.style.display = "none";
+      }, 250);
+    }
+  }
+
+  /**
+   * Checks in all roster players who are currently checked out.
+   */
+  function checkInAllRoster() {
+    const showGuests = (activeRosterTab === "guests");
+    state.players.forEach(p => {
+      if (!p.checkedIn && (!!p.isGuest === showGuests) && !p.isBackup) {
+        p.checkedIn = true;
+      }
+    });
+    renderUI();
+    debouncedSync();
+  }
+
+  /**
+   * Checks out all checked-in players (clearing the waiting queue).
+   */
+  function checkOutAllPlayers() {
+    state.players.forEach(p => {
+      p.checkedIn = false;
+    });
+    renderUI();
+    debouncedSync();
+  }
+
+  let confirmCallback = null;
+
+  /**
+   * Opens the custom confirm modal with a title, message, and callback.
+   */
+  function showConfirmModal(title, message, onConfirm) {
+    const modalEl = document.getElementById("custom-confirm-modal");
+    const titleEl = document.getElementById("confirm-modal-title");
+    const messageEl = document.getElementById("confirm-modal-message");
+    
+    if (modalEl && titleEl && messageEl) {
+      titleEl.innerText = title;
+      messageEl.innerText = message;
+      confirmCallback = onConfirm;
+      
+      modalEl.style.display = "flex";
+      modalEl.offsetHeight; // Force layout recalculation
+      modalEl.classList.add("show");
+    }
+  }
+
+  /**
+   * Closes the custom confirm modal.
+   */
+  function closeConfirmModal() {
+    const modalEl = document.getElementById("custom-confirm-modal");
+    if (modalEl) {
+      modalEl.classList.remove("show");
+      setTimeout(() => {
+        modalEl.style.display = "none";
+        confirmCallback = null;
+      }, 250);
+    }
+  }
+
+  /**
+   * Shows the full-screen loading overlay.
+   */
+  function showLoadingOverlay(message) {
+    const overlayEl = document.getElementById("loading-overlay");
+    const messageEl = document.getElementById("loading-message");
+    if (overlayEl) {
+      if (messageEl && message) {
+        messageEl.innerText = message;
+      }
+      overlayEl.style.display = "flex";
+      overlayEl.offsetHeight; // Force layout recalculation
+      overlayEl.classList.add("show");
+    }
+  }
+
+  /**
+   * Hides the full-screen loading overlay.
+   */
+  function hideLoadingOverlay() {
+    const overlayEl = document.getElementById("loading-overlay");
+    if (overlayEl) {
+      overlayEl.classList.remove("show");
+      setTimeout(() => {
+        overlayEl.style.display = "none";
+      }, 250);
+    }
+  }
+
+  var activeRosterTab = "members";
+  var collapsedPanels = {
+    courts: false,
+    queue: false,
+    roster: false
+  };
+
+  // Initialize collapse states from localStorage
+  try {
+    const storedCollapse = localStorage.getItem("clubflow-collapsed");
+    if (storedCollapse) {
+      collapsedPanels = JSON.parse(storedCollapse);
+    }
+  } catch (e) {
+    console.warn("Failed to load collapse preferences", e);
+  }
+
+  function switchRosterTab(tab) {
+    activeRosterTab = tab;
+    
+    const tabMembers = document.getElementById("tab-members");
+    const tabGuests = document.getElementById("tab-guests");
+    if (tabMembers && tabGuests) {
+      tabMembers.classList.toggle("active", tab === "members");
+      tabGuests.classList.toggle("active", tab === "guests");
+    }
+    
+    const checkInBtn = document.getElementById("btn-checkin-all");
+    if (checkInBtn) {
+      checkInBtn.innerText = tab === "members" ? "Check In All Members" : "Check In All Guests";
+    }
+    
+    const addGuestBtn = document.getElementById("btn-add-guest");
+    if (addGuestBtn) {
+      addGuestBtn.style.display = tab === "guests" ? "inline-block" : "none";
+    }
+    
+    renderRosterList();
+  }
+
+  function togglePanelCollapse(panelId) {
+    collapsedPanels[panelId] = !collapsedPanels[panelId];
+    try {
+      localStorage.setItem("clubflow-collapsed", JSON.stringify(collapsedPanels));
+    } catch (e) {}
+    applyPanelCollapseState(panelId);
+  }
+
+  function applyPanelCollapseState(panelId) {
+    const collapsed = collapsedPanels[panelId];
+    let bodyEl = null;
+    let btnEl = null;
+    if (panelId === 'courts') {
+      bodyEl = document.getElementById("courts-body");
+      btnEl = document.getElementById("btn-collapse-courts");
+    } else if (panelId === 'queue') {
+      bodyEl = document.getElementById("queue-body");
+      btnEl = document.getElementById("btn-collapse-queue");
+    } else if (panelId === 'roster') {
+      bodyEl = document.getElementById("roster-body");
+      btnEl = document.getElementById("btn-collapse-roster");
+    }
+
+    if (bodyEl) bodyEl.classList.toggle("collapsed", collapsed);
+    if (btnEl) btnEl.classList.toggle("collapsed", collapsed);
+  }
+
+  function applyAllPanelCollapseStates() {
+    ['courts', 'queue', 'roster'].forEach(applyPanelCollapseState);
+  }
+
+  // Override standard browser alert and bind ok button
+  if (typeof window !== "undefined") {
+    window.alert = function(msg) {
+      showAlertModal("Attention", msg);
+    };
+
+    const okBtn = document.getElementById("confirm-modal-ok-btn");
+    if (okBtn) {
+      okBtn.addEventListener("click", () => {
+        if (confirmCallback) confirmCallback();
+        closeConfirmModal();
+      });
+    }
+  }
+
+  /**
+   * Opens the add guest modal and resets the form.
+   */
+  function showAddGuestModal() {
+    const modalEl = document.getElementById("add-guest-modal");
+    const formEl = document.getElementById("add-guest-form");
+    if (formEl) formEl.reset();
+    
+    if (modalEl) {
+      modalEl.style.display = "flex";
+      modalEl.offsetHeight; // Force layout recalculation
+      modalEl.classList.add("show");
+    }
+  }
+
+  /**
+   * Closes the add guest modal.
+   */
+  function closeAddGuestModal() {
+    const modalEl = document.getElementById("add-guest-modal");
+    if (modalEl) {
+      modalEl.classList.remove("show");
+      setTimeout(() => {
+        modalEl.style.display = "none";
+      }, 250);
+    }
+  }
+
+  /**
+   * Handles the submission of the add guest form.
+   */
+  function submitAddGuestForm(event) {
+    if (event) event.preventDefault();
+    
+    const nameInput = document.getElementById("guest-name");
+    const name = nameInput ? nameInput.value.trim() : "";
+    if (!name) {
+      showAlertModal("Validation Error", "Player Name is required.");
+      return;
+    }
+    
+    // Check for duplicate name
+    const nameExists = state.players.some(p => p.name.trim().toLowerCase() === name.toLowerCase());
+    if (nameExists) {
+      showAlertModal("Duplicate Name", `A player named "${name}" already exists in the roster.`);
+      return;
+    }
+    
+    // Get gender
+    let gender = "Male";
+    const femaleRadio = document.getElementById("gender-female-toggle");
+    if (femaleRadio && femaleRadio.checked) {
+      gender = "Female";
+    }
+    
+    // Get skill
+    const skillSelect = document.getElementById("guest-skill");
+    const skill = skillSelect ? parseInt(skillSelect.value, 10) : 5;
+    
+    // Get plays mixed
+    const playsMixedCheckbox = document.getElementById("guest-plays-mixed");
+    const playsMixed = playsMixedCheckbox ? playsMixedCheckbox.checked : true;
+    
+    const newGuest = {
+      name: name,
+      skill: skill,
+      gender: gender,
+      plays_mixed: playsMixed,
+      checkedIn: true, // Optimistically checked in!
+      leaving_early: false,
+      force_next: false,
+      mixedCount: 0,
+      sameSexCount: 0,
+      isGuest: true,
+      isSessionGuest: true
+    };
+    
+    // Optimistic UI Update
+    state.players.push(newGuest);
+    renderUI();
+    closeAddGuestModal();
+    debouncedSync();
+  }
+
+  /**
+   * Switches active tab on mobile devices by updating classes on the app container.
+   * @param {string} tab - The target tab identifier ('courts' or 'roster').
+   */
+  function switchMobileTab(tab) {
+    const container = document.getElementById("app-container");
+    const btnCourts = document.getElementById("nav-btn-courts");
+    const btnRoster = document.getElementById("nav-btn-roster");
+    
+    if (container) {
+      if (tab === 'courts') {
+        container.classList.remove('tab-roster');
+        container.classList.add('tab-courts');
+      } else {
+        container.classList.remove('tab-courts');
+        container.classList.add('tab-roster');
+      }
+    }
+    
+    if (btnCourts && btnRoster) {
+      btnCourts.classList.toggle('active', tab === 'courts');
+      btnRoster.classList.toggle('active', tab === 'roster');
+    }
+  }
+</script>
+
+    <script>
+  let syncTimeout = null;
+
+  /**
+   * Debounces saving session state to prevent flooding Apps Script properties quotas.
+   */
+  function debouncedSync() {
+    const statusEl = document.getElementById("sync-status");
+    if (statusEl) {
+      statusEl.className = "sync-dot amber";
+      statusEl.title = "Pending changes...";
+    }
+
+    if (syncTimeout) clearTimeout(syncTimeout);
+    syncTimeout = setTimeout(() => {
+      if (statusEl) {
+        statusEl.className = "sync-dot amber";
+        statusEl.title = "Saving changes to cloud...";
+      }
+
+      const playCounts = {};
+      state.players.forEach(p => {
+        playCounts[p.name] = {
+          mixed: p.mixedCount || 0,
+          sameSex: p.sameSexCount || 0
+        };
+      });
+
+      const payload = {
+        checkedIn: state.players.filter(p => p.checkedIn).map(p => p.name),
+        activeCourts: state.activeCourts,
+        history: state.history,
+        opponentHistory: state.opponentHistory,
+        maxCourts: state.maxCourts,
+        playCounts: playCounts,
+        guests: state.players.filter(p => p.isSessionGuest).map(p => ({
+          name: p.name,
+          skill: p.skill,
+          gender: p.gender,
+          plays_mixed: p.plays_mixed
+        })),
+        matchHistory: state.matchHistory,
+        leavingEarly: state.players.filter(p => p.leaving_early).map(p => p.name),
+        boosted: state.players.filter(p => p.force_next).map(p => p.name),
+        timestamp: Date.now()
       };
-    }
+      
+      google.script.run
+        .withSuccessHandler(success => {
+          console.log("Session state synced: ", success);
+          if (statusEl) {
+            statusEl.className = "sync-dot green";
+            statusEl.title = "All changes saved to cloud";
+          }
+        })
+        .withFailureHandler(err => {
+          console.error("Session state sync failed: ", err);
+          if (statusEl) {
+            statusEl.className = "sync-dot red";
+            statusEl.title = "Sync failed: " + err.message + ". Retrying on next action...";
+          }
+        })
+        .saveSessionState(JSON.stringify(payload));
+    }, 1000);
+  }
+</script>
 
-    function showOfflineState() {
-      spinnerLoader.style.display = 'none';
-      statusText.textContent = '';
-      offlinePanel.style.display = 'flex';
-      statusScreen.style.display = 'flex';
-      frame.style.display = 'none';
-    }
-
-    function showError(message) {
-      spinnerLoader.style.display = 'none';
-      statusText.innerHTML = `<span style="color: #ef4444; font-weight: 600;">${message}</span>`;
-      statusScreen.style.display = 'flex';
-      frame.style.display = 'none';
-    }
-
-    function tryReload() {
-      initApp();
-    }
-
-    window.addEventListener('online', () => {
-      console.log('Device returned online. Connecting...');
-      initApp();
-    });
-
-    window.addEventListener('offline', () => {
-      console.log('Device went offline.');
-      showOfflineState();
-    });
-
-    // Run theme setup and initialize
-    applySavedTheme();
-    initApp();
-  </script>
-</body>
+  </body>
 </html>
