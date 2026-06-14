@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-courtflow-cache-v2';
+const CACHE_NAME = 'ff-courtflow-cache-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -34,7 +34,7 @@ self.addEventListener('fetch', (event) => {
 
   if (url.origin === self.location.origin) {
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
+      caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
         if (cachedResponse) {
           fetch(event.request).then((response) => {
             if (response && response.status === 200) {
