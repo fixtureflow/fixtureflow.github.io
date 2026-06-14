@@ -60,22 +60,17 @@ Accents align with the functional domain of the portal:
 
 ## 🛡️ 3. Architectural Decisions (ADRs)
 
-### 📜 ADR-01: Isolated `/ddlc/` Codebase
-*   **Stance:** The codebase inside the `/ddlc/` subdirectory must remain completely untouched by root-level style refactors.
-*   **Rationale:** To guarantee zero style or scripting regressions for the highly polished, active League Coordinator landing page.
-*   **Execution:** `/ddlc/index.html` preserves its local link imports and local `assets/` relative path setups.
-
-### 📜 ADR-02: Client-Side Simulator Sandbox
+### 📜 ADR-01: Client-Side Simulator Sandbox
 *   **Stance:** The interactive matchmaker sandbox on the CourtFlow landing page must run entirely client-side.
 *   **Rationale:** Demonstrates the rotation solver utility instantly to visitors without requiring account setup or server calls.
 *   **Execution:** Employs a local array-matching algorithm mimicking the production `clubflow-lib` matching heuristics. Capped at 4 rounds to incentivize waitlist signup.
 
-### 📜 ADR-03: PWA Host ID Query Parameter Persistence
+### 📜 ADR-02: PWA Host ID Query Parameter Persistence
 *   **Stance:** Cache query parameters (`h` and `view`) in `localStorage` on first load, and fall back to these cached values when parameters are missing.
 *   **Rationale:** When a user installs the PWA (where the OS installs the static `/` URL without query parameters), launching the PWA from the home screen must still resolve their club's target Google Apps Script Host ID seamlessly.
 *   **Execution:** The PWA wrapper checks parameters first. If missing, it restores the values from `localStorage` to construct the Google Apps Script Host URL.
 
-### 📜 ADR-04: Favicon & PWA Icon Dual-Strategy
+### 📜 ADR-03: Favicon & PWA Icon Dual-Strategy
 *   **Stance:** Keep website tab favicons circular with a transparent background, and use full-bleed square/squircle background assets for mobile touch icons.
 *   **Rationale:** Circular icons float naturally on browser tabs and blend with light/dark browser chrome. However, iOS and Android home screen launchers require full-bleed background squares to prevent the OS from adding ugly black or white border margins (double-masking).
 *   **Execution:**
