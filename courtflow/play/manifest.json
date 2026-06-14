@@ -8,13 +8,13 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/assets/images/icon-courtflow.svg",
+      "src": "/assets/images/courtflow/icon-courtflow.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/assets/images/icon-courtflow-maskable.svg",
+      "src": "/assets/images/courtflow/icon-courtflow-maskable.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
