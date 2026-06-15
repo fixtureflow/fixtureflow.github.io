@@ -9,7 +9,7 @@
     <base target="_top">
     <meta name="theme-color" content="#0b1329">
     <meta name="robots" content="noindex, nofollow">
-    <link rel="apple-touch-icon" href="/assets/images/brand/ios/apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="https://fixtureflow.github.io/apple-touch-icon.png">
     
     <!-- Include global variables and styles -->
     <!--
@@ -1672,6 +1672,123 @@
   .backup-list-collapsed {
     display: none !important;
   }
+
+  /* Matchmaking Settings & Advanced Accordion CSS styling overrides */
+  .gear-icon {
+    transition: transform 0.4s ease;
+  }
+  .icon-button:hover .gear-icon {
+    transform: rotate(45deg);
+  }
+  
+  .advanced-settings-accordion {
+    border: 1px solid var(--border-panel);
+    border-radius: 8px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+  
+  .accordion-header {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .accordion-header:hover {
+    color: var(--text);
+  }
+  
+  .accordion-header span {
+    transition: transform 0.25s ease;
+    display: inline-block;
+  }
+  
+  .accordion-header.active span {
+    transform: rotate(90deg);
+  }
+  
+  /* Bypassed warning badge for bypassed players */
+  .chip-bypassed-badge {
+    background-color: var(--accent-danger);
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-left: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+  }
+
+  /* Touch Stepper Controls styling */
+  .stepper-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-panel);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+  }
+  
+  .stepper-control button {
+    background: none;
+    border: none;
+    padding: 0;
+    width: 44px;
+    height: 38px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .stepper-control button:hover {
+    color: var(--accent);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  
+  .stepper-control button:active {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--accent);
+  }
+  
+  .stepper-control span {
+    min-width: 40px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--accent);
+    user-select: none;
+  }
+
+  .form-row-inline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -1687,24 +1804,26 @@
           <h1 style="margin: 0; font-size: 20px; font-weight: 850; letter-spacing: -0.03em; line-height: 1.1;">CourtFlow</h1>
           <span id="sync-status" class="sync-dot green" title="All changes saved to cloud"></span>
         </div>
-        <button id="theme-toggle" class="icon-button" onclick="toggleTheme()" aria-label="Toggle visual theme">
-          <!-- Sun Icon (Light Mode) -->
-          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <!-- Moon Icon (Dark Mode) -->
-          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </button>
+        <div class="header-actions" style="display: flex; gap: 8px;">
+          <button id="theme-toggle" class="icon-button" onclick="toggleTheme()" aria-label="Toggle visual theme">
+            <!-- Sun Icon (Light Mode) -->
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <!-- Moon Icon (Dark Mode) -->
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
       </header>
 
       <!-- Contextual Alert Banner for Old Sessions -->
@@ -1720,12 +1839,15 @@
           
           <!-- Slider and CTA Control Docks -->
           <section class="glass-card controls-card">
-            <div class="controls-header">
+            <div class="controls-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
               <h2>Session Management</h2>
-              <div class="court-slider-group">
-                <label for="court-slider">Active Courts: <span id="court-count-display">3</span></label>
-                <input type="range" id="court-slider" min="1" max="6" value="3" oninput="onCourtsSliderInput(this.value)">
-              </div>
+              <!-- Settings Gear Button -->
+              <button id="settings-toggle" class="icon-button" onclick="openSettingsModal()" aria-label="Open matchmaking settings">
+                <svg class="gear-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+              </button>
             </div>
             <div class="action-buttons-group">
               <button id="btn-generate" class="btn btn-primary" onclick="triggerMatchGeneration()">
@@ -1918,6 +2040,101 @@
             <div class="modal-footer" style="gap: 12px; margin-top: 12px;">
               <button type="button" class="btn btn-outline-danger" onclick="closeAddGuestModal()">Cancel</button>
               <button type="submit" class="btn btn-primary">Add Guest</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Matchmaking Settings Modal Dialog -->
+    <div id="settings-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card glass-card">
+        <div class="modal-header">
+          <span class="modal-title-icon">⚙️</span>
+          <h3>Matchmaking Settings</h3>
+        </div>
+        <div class="modal-body">
+          <form id="settings-form" onsubmit="saveSettingsForm(event)" style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Active Courts Stepper -->
+            <!-- Active Courts Stepper -->
+            <div class="form-row-inline" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 4px;">
+              <div style="display: flex; flex-direction: column; text-align: left;">
+                <label style="margin-bottom: 2px; font-weight: 500; font-size: 14px; color: var(--text-secondary);">Active Courts</label>
+                <span class="input-help-text" style="font-size: 11px; color: var(--text-secondary); margin-top: 0;">Number of courts to run.</span>
+              </div>
+              <div class="stepper-control">
+                <button type="button" onclick="decrementCourts()" aria-label="Decrease court count">−</button>
+                <span id="settings-court-display">3</span>
+                <button type="button" onclick="incrementCourts()" aria-label="Increase court count">+</button>
+              </div>
+            </div>
+
+            <!-- Preset Dropdown -->
+            <div class="form-group">
+              <label for="settings-preset">Matchmaking Vibe</label>
+              <select id="settings-preset" class="form-select" onchange="applyPresetToSliders(this.value)">
+                <option value="balanced">Balanced (Default)</option>
+                <option value="social">Mix & Mingle (Social)</option>
+                <option value="competitive">Competitive Focus</option>
+                <option value="custom">Custom Configuration</option>
+              </select>
+            </div>
+
+            <!-- Gender Rules Selector -->
+            <div class="form-group">
+              <label for="settings-gender-rule">Gender Rules</label>
+              <select id="settings-gender-rule" class="form-select">
+                <option value="standard">Standard (Mixed & Doubles)</option>
+                <option value="mixedOnly">Mixed Doubles Only (XD)</option>
+                <option value="sameSexOnly">Doubles Only (MD / WD)</option>
+                <option value="flexible">Flexible (No Gender Rules)</option>
+              </select>
+            </div>
+
+            <!-- Advanced Accordion Header -->
+            <div class="advanced-settings-accordion">
+              <button type="button" class="accordion-header" onclick="toggleAdvancedSettings()">
+                <span id="accordion-toggle-arrow">▶</span> Advanced Tuning (Weights)
+              </button>
+              
+              <!-- Accordion Content -->
+              <div id="advanced-settings-content" class="accordion-content-collapsed" style="display: none; flex-direction: column; gap: 14px; margin-top: 10px;">
+                <!-- Skill Balance Slider -->
+                <div class="form-group">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label for="slider-skill-weight" style="margin-bottom: 0;">Skill Matching Priority</label>
+                    <span id="skill-weight-display" class="slider-value-display" style="font-weight: 700; color: var(--accent);">3</span>
+                  </div>
+                  <input type="range" id="slider-skill-weight" min="0" max="10" step="1" value="3" oninput="onWeightSliderChange()" style="margin-top: 6px;">
+                  <span class="input-help-text" style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">0 = Ignore skill; 10 = Enforce identical division levels.</span>
+                </div>
+
+                <!-- Variety Slider -->
+                <div class="form-group">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label for="slider-variety-weight" style="margin-bottom: 0;">Variety Priority</label>
+                    <span id="variety-weight-display" class="slider-value-display" style="font-weight: 700; color: var(--accent);">2</span>
+                  </div>
+                  <input type="range" id="slider-variety-weight" min="0" max="10" step="1" value="2" oninput="onWeightSliderChange()" style="margin-top: 6px;">
+                  <span class="input-help-text" style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">0 = Allow immediate repeats; 10 = Avoid repeats at all costs.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Utility Admin Actions -->
+            <div class="utility-actions-row" style="display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed var(--border-panel); padding-top: 12px; margin-top: 6px;">
+              <button type="button" class="btn btn-outline-danger" onclick="triggerResetPlayCounts()" style="font-size: 12px; padding: 6px 12px; justify-content: center;">
+                🔄 Reset Gender Play Counts
+              </button>
+              <button type="button" class="btn btn-outline-danger" onclick="triggerResetToDefaults()" style="font-size: 12px; padding: 6px 12px; justify-content: center;">
+                🗑️ Restore Spreadsheet Defaults
+              </button>
+            </div>
+
+            <!-- Modal Footer Buttons -->
+            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; width: 100%;">
+              <button type="button" class="btn btn-outline-danger" onclick="closeSettingsModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary">Apply & Save</button>
             </div>
           </form>
         </div>
@@ -2161,10 +2378,19 @@
     ROSTER_LIST: "roster-list",
     QUEUE_LIST: "queue-list",
     COURTS_GRID: "courts-grid",
-    COURT_SLIDER: "court-slider",
-    COURT_DISPLAY: "court-count-display",
+    COURT_SLIDER: "settings-court-slider",
+    COURT_DISPLAY: "settings-court-display",
     QUEUE_BADGE: "queue-badge",
-    ROSTER_BADGE: "roster-badge"
+    ROSTER_BADGE: "roster-badge",
+    SETTINGS_MODAL: "settings-modal",
+    SETTINGS_FORM: "settings-form",
+    SETTINGS_PRESET: "settings-preset",
+    SETTINGS_GENDER_RULE: "settings-gender-rule",
+    SLIDER_SKILL_WEIGHT: "slider-skill-weight",
+    SLIDER_VARIETY_WEIGHT: "slider-variety-weight",
+    DISPLAY_SKILL_WEIGHT: "skill-weight-display",
+    DISPLAY_VARIETY_WEIGHT: "variety-weight-display",
+    ADVANCED_ACCORDION_CONTENT: "advanced-settings-content"
   };
 
   /**
@@ -2259,6 +2485,10 @@
       if (p.force_next) chipClasses += " boosted";
       if (p.leaving_early) chipClasses += " leaving-early";
       
+      const genderRule = state.config && state.config.genderRule ? state.config.genderRule : "standard";
+      const isBypassed = (genderRule === "mixedOnly" && !p.plays_mixed && !playing);
+      const bypassedBadge = isBypassed ? `<span class="chip-bypassed-badge" title="Bypassed: Mixed Doubles Only (XD) mode active but player has plays mixed disabled">⚠️ Bypassed</span>` : "";
+
       const genderClass = p.gender === "Female" ? "gender-female" : "gender-male";
       const escapedName = escapeHtml(p.name);
       const dragAttr = !playing ? `draggable="true" ondragstart="onPlayerDragStart(event)"` : "";
@@ -2268,7 +2498,7 @@
           <div class="chip-main-info" onclick="togglePlayerCheckIn(this.closest('.player-chip').getAttribute('data-name'))" title="Click to check out">
             <span class="player-gender ${genderClass}">${getGenderIcon(p.gender)}</span>
             <div class="player-text-details">
-              <span class="player-name">${escapedName}</span>
+              <span class="player-name">${escapedName}${bypassedBadge}</span>
               <span class="player-skill">Div ${p.skill}</span>
             </div>
           </div>
@@ -2490,15 +2720,13 @@
   }
 
   /**
-   * Updates display values and state when user changes court slider.
+   * Updates display values when user changes active courts slider inside the settings modal.
    */
-  function onCourtsSliderInput(val) {
+  function onSettingsCourtSliderInput(val) {
     const displayEl = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
     if (displayEl) {
       displayEl.innerText = val;
     }
-    state.maxCourts = parseInt(val, 10);
-    debouncedSync();
   }
 
   /**
@@ -3035,6 +3263,8 @@
         state.history = payload.history || [];
         state.opponentHistory = payload.opponentHistory || [];
         state.config = payload.config || {};
+        if (!state.config.genderRule) state.config.genderRule = "standard";
+        if (!state.config.matchmakerMode) state.config.matchmakerMode = "balanced";
         state.maxCourts = payload.maxCourts || (state.config.maxCourts || 3);
         
         // Update branding title if clubName is set
@@ -3394,6 +3624,276 @@
     debouncedSync();
   }
 
+  // --- SETTINGS MODAL CONTROLLERS ---
+
+  var tempMaxCourts = 3;
+
+  function decrementCourts() {
+    if (tempMaxCourts > 1) {
+      tempMaxCourts--;
+      updateStepperDisplay();
+    }
+  }
+
+  function incrementCourts() {
+    if (tempMaxCourts < 6) {
+      tempMaxCourts++;
+      updateStepperDisplay();
+    }
+  }
+
+  function updateStepperDisplay() {
+    const displayEl = document.getElementById("settings-court-display");
+    if (displayEl) {
+      displayEl.innerText = tempMaxCourts;
+    }
+  }
+
+  const WEIGHT_MAPPINGS = {
+    skill: {
+      toUI: (w) => Math.round(w / 0.5),
+      toMath: (val) => val * 0.5
+    },
+    variety: {
+      toUI: (w) => Math.round(w / 1.0),
+      toMath: (val) => val * 1.0
+    }
+  };
+
+  const PRESETS = {
+    balanced: { skill: 3, variety: 2, rule: "standard" },
+    social: { skill: 1, variety: 8, rule: "standard" },
+    competitive: { skill: 8, variety: 1, rule: "standard" }
+  };
+
+  /**
+   * Opens the settings modal and pre-fills values from state.config
+   */
+  function openSettingsModal() {
+    const modalEl = document.getElementById(UI_SELECTORS.SETTINGS_MODAL);
+    if (!modalEl) return;
+
+    // Load state values into form
+    const presetSelect = document.getElementById(UI_SELECTORS.SETTINGS_PRESET);
+    const genderRuleSelect = document.getElementById(UI_SELECTORS.SETTINGS_GENDER_RULE);
+    const sliderSkill = document.getElementById(UI_SELECTORS.SLIDER_SKILL_WEIGHT);
+    const sliderVariety = document.getElementById(UI_SELECTORS.SLIDER_VARIETY_WEIGHT);
+    const displaySkill = document.getElementById(UI_SELECTORS.DISPLAY_SKILL_WEIGHT);
+    const displayVariety = document.getElementById(UI_SELECTORS.DISPLAY_VARIETY_WEIGHT);
+
+    // Default fallbacks
+    const config = state.config || {};
+    const skillWeight = config.skillWeight !== undefined ? config.skillWeight : 1.5;
+    const duplicateWeight = config.duplicateWeight !== undefined ? config.duplicateWeight : 2.0;
+    const genderRule = config.genderRule || "standard";
+    const presetMode = config.matchmakerMode || "balanced";
+
+    // Set dropdowns
+    if (genderRuleSelect) genderRuleSelect.value = genderRule;
+    if (presetSelect) presetSelect.value = presetMode;
+
+    // Set sliders and displays
+    const uiSkill = WEIGHT_MAPPINGS.skill.toUI(skillWeight);
+    const uiVariety = WEIGHT_MAPPINGS.variety.toUI(duplicateWeight);
+
+    tempMaxCourts = state.maxCourts || 3;
+    updateStepperDisplay();
+    if (sliderSkill) sliderSkill.value = uiSkill;
+    if (sliderVariety) sliderVariety.value = uiVariety;
+    if (displaySkill) displaySkill.innerText = uiSkill;
+    if (displayVariety) displayVariety.innerText = uiVariety;
+
+    // Show modal
+    modalEl.style.display = "flex";
+    modalEl.offsetHeight; // Force layout recalculation
+    modalEl.classList.add("show");
+  }
+
+  /**
+   * Closes the settings modal.
+   */
+  function closeSettingsModal() {
+    const modalEl = document.getElementById(UI_SELECTORS.SETTINGS_MODAL);
+    if (modalEl) {
+      modalEl.classList.remove("show");
+      setTimeout(() => {
+        modalEl.style.display = "none";
+      }, 250);
+    }
+  }
+
+  /**
+   * Toggles advanced settings collapsible accordion display.
+   */
+  function toggleAdvancedSettings() {
+    const content = document.getElementById(UI_SELECTORS.ADVANCED_ACCORDION_CONTENT);
+    const arrow = document.getElementById("accordion-toggle-arrow");
+    const header = document.querySelector(".accordion-header");
+    
+    if (content) {
+      if (content.style.display === "none" || !content.style.display) {
+        content.style.display = "flex";
+        if (arrow) arrow.innerText = "▼";
+        if (header) header.classList.add("active");
+      } else {
+        content.style.display = "none";
+        if (arrow) arrow.innerText = "▶";
+        if (header) header.classList.remove("active");
+      }
+    }
+  }
+
+  /**
+   * Applies selected preset settings to weight sliders and gender rules dropdown.
+   */
+  function applyPresetToSliders(preset) {
+    if (preset === "custom") return;
+    
+    const settings = PRESETS[preset];
+    if (!settings) return;
+
+    const sliderSkill = document.getElementById(UI_SELECTORS.SLIDER_SKILL_WEIGHT);
+    const sliderVariety = document.getElementById(UI_SELECTORS.SLIDER_VARIETY_WEIGHT);
+    const displaySkill = document.getElementById(UI_SELECTORS.DISPLAY_SKILL_WEIGHT);
+    const displayVariety = document.getElementById(UI_SELECTORS.DISPLAY_VARIETY_WEIGHT);
+    const genderRuleSelect = document.getElementById(UI_SELECTORS.SETTINGS_GENDER_RULE);
+
+    if (sliderSkill) sliderSkill.value = settings.skill;
+    if (sliderVariety) sliderVariety.value = settings.variety;
+    if (displaySkill) displaySkill.innerText = settings.skill;
+    if (displayVariety) displayVariety.innerText = settings.variety;
+    if (genderRuleSelect) genderRuleSelect.value = settings.rule;
+  }
+
+  /**
+   * Automatically sets preset dropdown to "custom" if weights are manually modified.
+   */
+  function onWeightSliderChange() {
+    const sliderSkill = document.getElementById(UI_SELECTORS.SLIDER_SKILL_WEIGHT);
+    const sliderVariety = document.getElementById(UI_SELECTORS.SLIDER_VARIETY_WEIGHT);
+    const displaySkill = document.getElementById(UI_SELECTORS.DISPLAY_SKILL_WEIGHT);
+    const displayVariety = document.getElementById(UI_SELECTORS.DISPLAY_VARIETY_WEIGHT);
+    const presetSelect = document.getElementById(UI_SELECTORS.SETTINGS_PRESET);
+
+    if (displaySkill && sliderSkill) displaySkill.innerText = sliderSkill.value;
+    if (displayVariety && sliderVariety) displayVariety.innerText = sliderVariety.value;
+
+    if (presetSelect) {
+      // Check if current values match any preset
+      const currentSkill = sliderSkill ? parseInt(sliderSkill.value, 10) : 3;
+      const currentVariety = sliderVariety ? parseInt(sliderVariety.value, 10) : 2;
+      const genderRuleSelect = document.getElementById(UI_SELECTORS.SETTINGS_GENDER_RULE);
+      const currentRule = genderRuleSelect ? genderRuleSelect.value : "standard";
+
+      let matchedPreset = "custom";
+      for (const [key, presetVal] of Object.entries(PRESETS)) {
+        if (presetVal.skill === currentSkill && presetVal.variety === currentVariety && presetVal.rule === currentRule) {
+          matchedPreset = key;
+          break;
+        }
+      }
+      presetSelect.value = matchedPreset;
+    }
+  }
+
+  /**
+   * Saves settings modal values to state and triggers synchronization
+   */
+  function saveSettingsForm(event) {
+    if (event) event.preventDefault();
+
+    const presetSelect = document.getElementById(UI_SELECTORS.SETTINGS_PRESET);
+    const genderRuleSelect = document.getElementById(UI_SELECTORS.SETTINGS_GENDER_RULE);
+    const sliderSkill = document.getElementById(UI_SELECTORS.SLIDER_SKILL_WEIGHT);
+    const sliderVariety = document.getElementById(UI_SELECTORS.SLIDER_VARIETY_WEIGHT);
+    const preset = presetSelect ? presetSelect.value : "balanced";
+    const genderRule = genderRuleSelect ? genderRuleSelect.value : "standard";
+    const uiSkill = sliderSkill ? parseInt(sliderSkill.value, 10) : 3;
+    const uiVariety = sliderVariety ? parseInt(sliderVariety.value, 10) : 2;
+    const maxCourts = tempMaxCourts;
+
+    const mathSkill = WEIGHT_MAPPINGS.skill.toMath(uiSkill);
+    const mathVariety = WEIGHT_MAPPINGS.variety.toMath(uiVariety);
+
+    // Save to state config
+    state.config = state.config || {};
+    state.config.matchmakerMode = preset;
+    state.config.genderRule = genderRule;
+    state.config.skillWeight = mathSkill;
+    state.config.duplicateWeight = mathVariety;
+    state.config.maxCourts = maxCourts;
+
+    state.maxCourts = maxCourts;
+
+    closeSettingsModal();
+    renderUI(); // Refresh bypassed warning badges
+    debouncedSync();
+  }
+
+  /**
+   * Triggers the server settings overrides wipe and reloads default state
+   */
+  function triggerResetToDefaults() {
+    showConfirmModal(
+      "Restore Defaults?",
+      "Are you sure you want to clear custom settings overrides and restore the spreadsheet default weights? This will reload the application state.",
+      () => {
+        showLoadingOverlay("Restoring spreadsheet defaults...");
+        google.script.run
+          .withSuccessHandler(() => {
+            // Reload initial state from server
+            google.script.run
+              .withSuccessHandler((data) => {
+                const payload = JSON.parse(data);
+                state.config = payload.config || {};
+                if (!state.config.genderRule) state.config.genderRule = "standard";
+                if (!state.config.matchmakerMode) state.config.matchmakerMode = "balanced";
+                
+                // Update slider max courts
+                state.maxCourts = payload.maxCourts || (state.config.maxCourts || 3);
+                const slider = document.getElementById(UI_SELECTORS.COURT_SLIDER);
+                if (slider) slider.value = state.maxCourts;
+                const display = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
+                if (display) display.innerText = state.maxCourts;
+
+                closeSettingsModal();
+                renderUI();
+                hideLoadingOverlay();
+              })
+              .withFailureHandler((err) => {
+                hideLoadingOverlay();
+                showAlertModal("Error", "Failed to reload initial state: " + err.message);
+              })
+              .getInitialState();
+          })
+          .withFailureHandler((err) => {
+            hideLoadingOverlay();
+            showAlertModal("Error", "Failed to clear settings overrides: " + err.message);
+          })
+          .clearSettingsOverride();
+      }
+    );
+  }
+
+  /**
+   * Resets players sameSexCount and mixedCount variables to 0
+   */
+  function triggerResetPlayCounts() {
+    showConfirmModal(
+      "Reset Play Counts?",
+      "Are you sure you want to reset all players same-sex and mixed play counts to 0? This keeps player histories intact but restarts gender-balance matching math from scratch.",
+      () => {
+        state.players.forEach(p => {
+          p.mixedCount = 0;
+          p.sameSexCount = 0;
+        });
+        showAlertModal("Counts Reset", "All player same-sex and mixed play counts have been reset to 0.");
+        renderUI();
+        debouncedSync();
+      }
+    );
+  }
+
   /**
    * Switches active tab on mobile devices by updating classes on the app container.
    * @param {string} tab - The target tab identifier ('courts' or 'roster').
@@ -3464,6 +3964,7 @@
         matchHistory: state.matchHistory,
         leavingEarly: state.players.filter(p => p.leaving_early).map(p => p.name),
         boosted: state.players.filter(p => p.force_next).map(p => p.name),
+        config: state.config,
         timestamp: Date.now()
       };
       
