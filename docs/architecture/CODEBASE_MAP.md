@@ -59,7 +59,7 @@
             - 📄 [logo-mountpleasant.png](file:///Users/mhx/Documents/fixtureflow.github.io/ddlc/assets/logo-mountpleasant.png) (100.38 KB)
     - 📁 **docs/** (`/docs`)
         - 📁 **architecture/** (`/docs/architecture`)
-            - 📄 [MASTER_ARCHITECTURE.md](file:///Users/mhx/Documents/fixtureflow.github.io/docs/architecture/MASTER_ARCHITECTURE.md) (8.29 KB)
+            - 📄 [MASTER_ARCHITECTURE.md](file:///Users/mhx/Documents/fixtureflow.github.io/docs/architecture/MASTER_ARCHITECTURE.md) (8.44 KB)
         - 📁 **user_guides/** (`/docs/user_guides`)
             - 📄 [INSTRUCTION_MANUAL.md](file:///Users/mhx/Documents/fixtureflow.github.io/docs/user_guides/INSTRUCTION_MANUAL.md) (2.40 KB)
     - 📁 **leagues/** (`/leagues`)

@@ -60,10 +60,10 @@ Accents align with the functional domain of the portal:
 
 ## 🛡️ 3. Architectural Decisions (ADRs)
 
-### 📜 ADR-01: Client-Side Simulator Sandbox
-*   **Stance:** The interactive matchmaker sandbox on the CourtFlow landing page must run entirely client-side.
-*   **Rationale:** Demonstrates the rotation solver utility instantly to visitors without requiring account setup or server calls.
-*   **Execution:** Employs a local array-matching algorithm mimicking the production `clubflow-lib` matching heuristics. Capped at 4 rounds to incentivize waitlist signup.
+### 📜 ADR-01: Public Sandbox Portal Demo
+*   **Stance:** Deprecate mock client-side JavaScript solvers on landing pages. Instead, provide an interactive product trial using a live sandboxed environment.
+*   **Rationale:** Ensures potential users get a 100% authentic trial of the real software interface while keeping the proprietary matchmaking engine hidden server-side, and eliminates front-end code duplication.
+*   **Execution:** Map a dedicated public Google Sheet to a public-facing Google Apps Script Host ID, and link the landing page's main call-to-action (CTA) to `/courtflow/play/?h=<DEMO_HOST_ID>`.
 
 ### 📜 ADR-02: PWA Host ID Query Parameter Persistence
 *   **Stance:** Cache query parameters (`h` and `view`) in `localStorage` on first load, and fall back to these cached values when parameters are missing.
