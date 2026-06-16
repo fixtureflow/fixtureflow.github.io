@@ -4009,16 +4009,17 @@
     function activatePwaUpdate() {
       if (newWorker) {
         newWorker.postMessage({ type: 'SKIP_WAITING' });
-      } else {
-        window.location.reload(true);
       }
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 300);
     }
 
     if ('serviceWorker' in navigator) {
       // Register with the compiled buildVersion. This keeps the URL stable across normal page reloads and only breaks caches when a new release is built.
-      navigator.serviceWorker.register('sw.js?v=' + 1781616191460)
+      navigator.serviceWorker.register('sw.js?v=' + 1781617425541)
         .then(reg => {
-          console.log('Service Worker registered successfully (v1781616191460)');
+          console.log('Service Worker registered successfully (v1781617425541)');
           reg.addEventListener('updatefound', () => {
             newWorker = reg.installing;
             newWorker.addEventListener('statechange', () => {
