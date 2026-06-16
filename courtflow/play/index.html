@@ -3994,53 +3994,11 @@
 </script>
 
   
-  <!-- PWA Update Toast Notification Banner -->
-  <div id="pwa-update-toast" class="glass-card" style="display: none; position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 12px 20px; align-items: center; gap: 12px; border-color: var(--accent-primary); box-shadow: 0 4px 25px rgba(0,0,0,0.8);">
-    <span style="font-size: 22px;">🎁</span>
-    <div style="display: flex; flex-direction: column; text-align: left;">
-      <span style="font-weight: 700; font-size: 14px; color: var(--text-primary);">New App Update!</span>
-      <span style="font-size: 11px; color: var(--text-secondary);">A fresh version of CourtFlow was downloaded.</span>
-    </div>
-    <button onclick="activatePwaUpdate()" class="btn btn-primary" style="padding: 6px 14px; font-size: 12px;">Refresh</button>
-  </div>
   <script>
-    let newWorker = null;
-
-    function activatePwaUpdate() {
-      if (newWorker) {
-        newWorker.postMessage({ type: 'SKIP_WAITING' });
-      }
-      setTimeout(() => {
-        window.location.reload(true);
-      }, 300);
-    }
-
     if ('serviceWorker' in navigator) {
-      // Register with the compiled buildVersion. This keeps the URL stable across normal page reloads and only breaks caches when a new release is built.
-      navigator.serviceWorker.register('sw.js?v=' + 1781617425541)
-        .then(reg => {
-          console.log('Service Worker registered successfully (v1781617425541)');
-          reg.addEventListener('updatefound', () => {
-            newWorker = reg.installing;
-            newWorker.addEventListener('statechange', () => {
-              // When new worker finishes downloading and is ready to take over
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                const toast = document.getElementById('pwa-update-toast');
-                if (toast) toast.style.display = 'flex';
-              }
-            });
-          });
-        })
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker registered successfully'))
         .catch(err => console.error('SW register failed: ', err));
-
-      // Listen for controllerchange (when skipWaiting activates) and hard reload
-      let refreshing = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
-          refreshing = true;
-          window.location.reload(true);
-        }
-      });
     }
   </script>
 
