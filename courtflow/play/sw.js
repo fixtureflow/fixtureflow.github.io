@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-courtflow-cache-v8';
+const CACHE_NAME = 'ff-courtflow-cache-v10';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -9,8 +9,14 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting())
+    })
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', (event) => {

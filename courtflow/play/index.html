@@ -4001,16 +4001,26 @@
       <span style="font-weight: 700; font-size: 14px; color: var(--text-primary);">New App Update!</span>
       <span style="font-size: 11px; color: var(--text-secondary);">A fresh version of CourtFlow was downloaded.</span>
     </div>
-    <button onclick="window.location.reload(true)" class="btn btn-primary" style="padding: 6px 14px; font-size: 12px;">Refresh</button>
+    <button onclick="activatePwaUpdate()" class="btn btn-primary" style="padding: 6px 14px; font-size: 12px;">Refresh</button>
   </div>
   <script>
+    let newWorker = null;
+
+    function activatePwaUpdate() {
+      if (newWorker) {
+        newWorker.postMessage({ type: 'SKIP_WAITING' });
+      } else {
+        window.location.reload(true);
+      }
+    }
+
     if ('serviceWorker' in navigator) {
-      // Register with dynamic query parameter to ensure OS WebKit bypasses HTTP cache snapshots
-      navigator.serviceWorker.register('sw.js?v=' + Date.now())
+      // Register with the compiled buildVersion. This keeps the URL stable across normal page reloads and only breaks caches when a new release is built.
+      navigator.serviceWorker.register('sw.js?v=' + 1781616191460)
         .then(reg => {
-          console.log('Service Worker registered successfully');
+          console.log('Service Worker registered successfully (v1781616191460)');
           reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
+            newWorker = reg.installing;
             newWorker.addEventListener('statechange', () => {
               // When new worker finishes downloading and is ready to take over
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
@@ -4022,7 +4032,7 @@
         })
         .catch(err => console.error('SW register failed: ', err));
 
-      // Listen for controllerchange (if skipWaiting activates) and hard reload
+      // Listen for controllerchange (when skipWaiting activates) and hard reload
       let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) {
