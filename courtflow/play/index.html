@@ -967,6 +967,7 @@
   .modal-card {
     width: 90%;
     max-width: 440px;
+    max-height: 85vh;
     padding: 28px;
     display: flex;
     flex-direction: column;
@@ -984,6 +985,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0;
   }
   
   .modal-title-icon {
@@ -1000,6 +1002,9 @@
     font-size: 15px;
     line-height: 1.6;
     color: var(--text-secondary);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 4px; /* prevent custom scrollbar hugging */
   }
   
   .modal-footer {
@@ -2048,14 +2053,13 @@
 
     <!-- Matchmaking Settings Modal Dialog -->
     <div id="settings-modal" class="modal-overlay" style="display: none;">
-      <div class="modal-card glass-card">
-        <div class="modal-header">
+      <form id="settings-form" class="modal-card glass-card" onsubmit="saveSettingsForm(event)">
+        <div class="modal-header" style="flex-shrink: 0;">
           <span class="modal-title-icon">⚙️</span>
           <h3>Matchmaking Settings</h3>
         </div>
-        <div class="modal-body">
-          <form id="settings-form" onsubmit="saveSettingsForm(event)" style="display: flex; flex-direction: column; gap: 16px;">
-            <!-- Active Courts Stepper -->
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px; overflow-y: auto; min-height: 0; padding-right: 4px;">
+          <!-- Active Courts Stepper -->
             <!-- Active Courts Stepper -->
             <div class="form-row-inline" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 4px;">
               <div style="display: flex; flex-direction: column; text-align: left;">
@@ -2122,23 +2126,22 @@
             </div>
 
             <!-- Utility Admin Actions -->
-            <div class="utility-actions-row" style="display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed var(--border-panel); padding-top: 12px; margin-top: 6px;">
-              <button type="button" class="btn btn-outline-danger" onclick="triggerResetPlayCounts()" style="font-size: 12px; padding: 6px 12px; justify-content: center;">
+            <div class="utility-actions-row" style="display: flex; flex-direction: column; gap: 10px; border-top: 1px dashed var(--border-panel); padding-top: 14px; margin-top: 8px;">
+              <button type="button" class="btn btn-outline-danger" onclick="closeSettingsModal(); triggerResetPlayCounts();" style="font-size: 14px; font-weight: 700; padding: 10px 16px; justify-content: center;">
                 🔄 Reset Gender Play Counts
               </button>
-              <button type="button" class="btn btn-outline-danger" onclick="triggerResetToDefaults()" style="font-size: 12px; padding: 6px 12px; justify-content: center;">
+              <button type="button" class="btn btn-outline-danger" onclick="closeSettingsModal(); triggerResetToDefaults();" style="font-size: 14px; font-weight: 700; padding: 10px 16px; justify-content: center;">
                 🗑️ Restore Spreadsheet Defaults
               </button>
             </div>
+          </div>
 
-            <!-- Modal Footer Buttons -->
-            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; width: 100%;">
-              <button type="button" class="btn btn-outline-danger" onclick="closeSettingsModal()">Cancel</button>
-              <button type="submit" class="btn btn-primary">Apply & Save</button>
-            </div>
-          </form>
-        </div>
-      </div>
+          <!-- Sticky Modal Footer Buttons -->
+          <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 0; padding-top: 16px; border-top: 1px solid var(--border-panel); width: 100%; flex-shrink: 0;">
+            <button type="button" class="btn btn-outline-danger" onclick="closeSettingsModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Apply & Save</button>
+          </div>
+        </form>
     </div>
 
     <!-- Full-Screen Loading Overlay -->
@@ -2787,7 +2790,8 @@
         matchHistory: state.matchHistory,
         history: state.history,
         opponentHistory: state.opponentHistory,
-        maxCourts: state.maxCourts
+        maxCourts: state.maxCourts,
+        config: state.config
       };
 
       google.script.run
@@ -2928,7 +2932,8 @@
         matchHistory: state.matchHistory,
         history: state.history,
         opponentHistory: state.opponentHistory,
-        maxCourts: state.maxCourts
+        maxCourts: state.maxCourts,
+        config: state.config
       };
 
       google.script.run
