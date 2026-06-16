@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-courtflow-cache-v12';
+const CACHE_NAME = 'ff-courtflow-cache-v13';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -9,14 +9,8 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
-    })
+    }).then(() => self.skipWaiting())
   );
-});
-
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting().then(() => self.clients.claim());
-  }
 });
 
 self.addEventListener('activate', (event) => {
@@ -40,29 +34,17 @@ self.addEventListener('fetch', (event) => {
 
   if (url.origin === self.location.origin) {
     event.respondWith(
-      caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-        if (cachedResponse) {
-          fetch(event.request).then((response) => {
-            if (response && response.status === 200) {
-              const responseClone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, responseClone);
-              });
-            }
-          }).catch(() => {});
-          
-          return cachedResponse;
-        }
-
-        return fetch(event.request).then((response) => {
-          if (response && response.status === 200) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
-          }
+      fetch(event.request).then((response) => {
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
           return response;
-        });
+        }
+        return caches.match(event.request, { ignoreSearch: true });
+      }).catch(() => {
+        return caches.match(event.request, { ignoreSearch: true });
       })
     );
   }
