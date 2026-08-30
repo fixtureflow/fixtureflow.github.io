@@ -50,23 +50,3 @@ All installable Progressive Web Apps (PWAs) across the FixtureFlow platform:
 ## ⚙️ Configuration & Club Registry
 To register a new club slug or update host IDs, edit:  
 👉 [`assets/js/leagues-registry.js`](assets/js/leagues-registry.js)
-
-
-<!-- MXS_SKILLS_START -->
-### 🪐 Active Workspace Skills (Sovereign Baseline)
-*   **Last System Rebuild:** 2026-08-30 at 22:02:58
-*   **Total Active Symlinks:** 12 link(s)
-*   **Active Symlinks in this Workspace:**
-    *   `awe-ask-questions-if-underspecified` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/ask-questions-if-underspecified`
-    *   `awe-brainstorming` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/brainstorming`
-    *   `awe-commit` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/commit`
-    *   `awe-kaizen` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/kaizen`
-    *   `awe-mermaid-expert` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/mermaid-expert`
-    *   `awe-readme` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/readme`
-    *   `awe-skill-creator` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/skill-creator`
-    *   `awe-skill-writer` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/skill-writer`
-    *   `awe-track-management` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/track-management`
-    *   `awe-verification-before-completion` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/verification-before-completion`
-    *   `awe-writing-great-skills` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/writing-great-skills`
-    *   `matt-write-a-skill` ➔ `../../../../.gemini/vendor_mattpocock_skills/write-a-skill`
-<!-- MXS_SKILLS_END -->
