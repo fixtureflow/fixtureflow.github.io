@@ -11,12 +11,14 @@
     <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/courtflow/icon-courtflow.png">
     <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="CourtFlow">
     <meta name="application-name" content="CourtFlow">
     <meta name="theme-color" content="#0b1329">
     <meta name="robots" content="noindex, nofollow">
+    <script src="/assets/js/leagues-registry.js"></script>
     
     <!-- Include global variables and styles -->
     <!--
@@ -2252,18 +2254,40 @@
 
   function callHostApi(action, args, successHandler, failureHandler) {
     const urlParams = new URLSearchParams(window.location.search);
-    let hostId = urlParams.get('h') || localStorage.getItem('courtflow_host_id');
+    const rawClubParam = urlParams.get('c') || urlParams.get('club') || urlParams.get('h');
     let roleView = urlParams.get('view') || localStorage.getItem('courtflow_role_view');
+    let hostId = null;
     
-    if (urlParams.get('h')) {
-      localStorage.setItem('courtflow_host_id', urlParams.get('h'));
+    if (rawClubParam) {
+      const resolved = (typeof resolveCourtflowHost === 'function') ? resolveCourtflowHost(rawClubParam) : null;
+      if (resolved) {
+        hostId = resolved.hostId;
+        localStorage.setItem('courtflow_host_id', hostId);
+        localStorage.setItem('courtflow_club_name', resolved.name);
+        localStorage.setItem('courtflow_club_slug', resolved.slug);
+      } else if (rawClubParam.startsWith('AKfy') || rawClubParam.length >= 25) {
+        hostId = rawClubParam;
+        localStorage.setItem('courtflow_host_id', hostId);
+      }
       if (urlParams.get('view')) {
         localStorage.setItem('courtflow_role_view', urlParams.get('view'));
+      }
+    } else {
+      hostId = localStorage.getItem('courtflow_host_id');
+      // Default fallback: Mount Pleasant if no host ID is set yet
+      if (!hostId && typeof resolveCourtflowHost === 'function') {
+        const defaultClub = resolveCourtflowHost('mount-pleasant');
+        if (defaultClub) {
+          hostId = defaultClub.hostId;
+          localStorage.setItem('courtflow_host_id', hostId);
+          localStorage.setItem('courtflow_club_name', defaultClub.name);
+          localStorage.setItem('courtflow_club_slug', defaultClub.slug);
+        }
       }
     }
 
     if (!hostId) {
-      const errorMsg = "Configuration Error: Missing host ID parameter (?h=...)";
+      const errorMsg = "Configuration Error: Missing host ID parameter (?h=... or ?c=mount-pleasant)";
       console.error(errorMsg);
       if (failureHandler) failureHandler(new Error(errorMsg));
       return;
