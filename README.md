@@ -8,9 +8,45 @@ This repository hosts the marketing website for Fixture Flow.
 3.  Source: Deploy from a branch.
 4.  Branch: `main` / `root`.
 
-## Structure
--   `index.html`: Main landing page.
--   `assets/`: Images and screenshots.
+## 📱 Master PWA Applications Directory
+
+All installable Progressive Web Apps (PWAs) across the FixtureFlow platform:
+
+### 1. 🏸 CourtFlow (Live Session & Matchmaking Queue)
+| Application | PWA Live URL | Display Mode | Theme Color |
+| :--- | :--- | :--- | :--- |
+| **CourtFlow Game Queue** | [https://fixtureflow.github.io/courtflow/play/](https://fixtureflow.github.io/courtflow/play/) | Standalone | `#10b981` (Emerald) |
+
+---
+
+### 2. 🏆 DDLC Leagues (Multi-Tenant League Management)
+
+#### 🏸 Mount Pleasant Badminton Club (Pilot Club #1)
+| Role | Shareable PWA URL | Short Aliases |
+| :--- | :--- | :--- |
+| **👤 Squad Players** | [https://fixtureflow.github.io/leagues/player/?c=mount-pleasant](https://fixtureflow.github.io/leagues/player/?c=mount-pleasant) | `?c=mp`, `?c=mpbc` |
+| **⚓ Team Captains** | [https://fixtureflow.github.io/leagues/captain/?c=mount-pleasant](https://fixtureflow.github.io/leagues/captain/?c=mount-pleasant) | `?c=mp`, `?c=mpbc` |
+| **🏸 Match Secretary / Admin** | [https://fixtureflow.github.io/leagues/club/?c=mount-pleasant](https://fixtureflow.github.io/leagues/club/?c=mount-pleasant) | `?c=mp`, `?c=mpbc` |
+
+#### 🟡 Dev / Staging Sandbox
+| Role | Sandbox Testing URL |
+| :--- | :--- |
+| **👤 Player Sandbox** | [https://fixtureflow.github.io/leagues/player/?c=dev](https://fixtureflow.github.io/leagues/player/?c=dev) |
+| **⚓ Captain Sandbox** | [https://fixtureflow.github.io/leagues/captain/?c=dev](https://fixtureflow.github.io/leagues/captain/?c=dev) |
+| **🏸 Club Admin Sandbox** | [https://fixtureflow.github.io/leagues/club/?c=dev](https://fixtureflow.github.io/leagues/club/?c=dev) |
+
+---
+
+### 3. 🌐 Web & Marketing Pages
+* **FixtureFlow Homepage:** [https://fixtureflow.github.io/](https://fixtureflow.github.io/)
+* **DDLC Interactive Demo:** [https://fixtureflow.github.io/ddlc/](https://fixtureflow.github.io/ddlc/)
+
+---
+
+## ⚙️ Configuration & Club Registry
+To register a new club slug or update host IDs, edit:  
+👉 [`assets/js/leagues-registry.js`](assets/js/leagues-registry.js)
+
 
 <!-- MXS_SKILLS_START -->
 ### 🪐 Active Workspace Skills (Sovereign Baseline)
