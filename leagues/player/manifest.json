@@ -8,6 +8,11 @@
   "orientation": "any",
   "icons": [
     {
+      "src": "/assets/images/leagues/icon-player.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
       "src": "/assets/images/leagues/icon-player.svg",
       "sizes": "any",
       "type": "image/svg+xml",
