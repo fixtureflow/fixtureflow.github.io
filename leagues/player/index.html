@@ -233,18 +233,14 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     let hostId = urlParams.get('h');
-    let roleView = urlParams.get('view');
+    let roleView = urlParams.get('view') || 'player';
 
     if (hostId) {
       localStorage.setItem('pwa_host_id', hostId);
-      if (roleView) {
-        localStorage.setItem('pwa_role_view', roleView);
-      } else {
-        localStorage.removeItem('pwa_role_view');
-      }
+      localStorage.setItem('pwa_role_view', roleView);
     } else {
       hostId = localStorage.getItem('pwa_host_id');
-      roleView = localStorage.getItem('pwa_role_view');
+      roleView = localStorage.getItem('pwa_role_view') || 'player';
     }
 
     // iOS Safari Workaround: Inject manifest dynamically ONLY on non-iOS devices
