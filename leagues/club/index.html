@@ -11,6 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="FF Admin">
   <meta name="theme-color" content="#0b1329">
+  <script src="/assets/js/leagues-registry.js"></script>
   <style>
     :root {
       --bg-color: #0b1329;
@@ -232,19 +233,31 @@
     const offlinePanel = document.getElementById('offline-panel');
 
     const urlParams = new URLSearchParams(window.location.search);
-    let hostId = urlParams.get('h');
-    let roleView = urlParams.get('view');
+    const rawClubParam = urlParams.get('c') || urlParams.get('club') || urlParams.get('h');
+    let roleView = urlParams.get('view') || '';
+    let hostId = null;
+    let clubName = null;
 
-    if (hostId) {
-      localStorage.setItem('pwa_host_id', hostId);
-      if (roleView) {
-        localStorage.setItem('pwa_role_view', roleView);
+    if (rawClubParam) {
+      const resolved = (typeof resolveClubHost === 'function') ? resolveClubHost(rawClubParam) : null;
+      if (resolved) {
+        hostId = resolved.hostId;
+        clubName = resolved.name;
+        localStorage.setItem('pwa_host_id', hostId);
+        localStorage.setItem('pwa_club_name', clubName);
+        localStorage.setItem('pwa_club_slug', resolved.slug);
+        if (roleView) {
+          localStorage.setItem('pwa_role_view', roleView);
+        } else {
+          localStorage.removeItem('pwa_role_view');
+        }
       } else {
-        localStorage.removeItem('pwa_role_view');
+        hostId = null;
       }
     } else {
       hostId = localStorage.getItem('pwa_host_id');
-      roleView = localStorage.getItem('pwa_role_view');
+      clubName = localStorage.getItem('pwa_club_name');
+      roleView = localStorage.getItem('pwa_role_view') || '';
     }
 
     // iOS Safari Workaround: Inject manifest dynamically ONLY on non-iOS devices
@@ -256,10 +269,11 @@
       link.rel = 'manifest';
       
       if (hostId) {
+        const clubSlug = localStorage.getItem('pwa_club_slug') || 'default';
         const manifestData = {
-          "name": "FixtureFlow: Club Admin",
+          "name": (clubName ? `${clubName} - ` : "") + "FixtureFlow: Club Admin",
           "short_name": "FF Admin",
-          "start_url": window.location.pathname + "?h=" + hostId + (roleView ? "&view=" + roleView : ""),
+          "start_url": window.location.pathname + (rawClubParam ? `?c=${encodeURIComponent(rawClubParam)}` : `?h=${encodeURIComponent(hostId)}`),
           "display": "standalone",
           "background_color": "#0b1329",
           "theme_color": "#0f172a",
@@ -320,7 +334,11 @@
 
     function initApp() {
       if (!hostId) {
-        showError(`CONFIG ERROR: Missing host ID parameter (?h=...)<br><span style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-top: 8px; display: block; word-break: break-all;">URL: ${window.location.href}</span>`);
+        if (rawClubParam) {
+          showError(`CLUB NOT FOUND<br><span style="font-size: 13px; color: #94a3b8; font-weight: normal; margin-top: 8px; display: block;">We couldn't find a club matching <b>"${rawClubParam}"</b>.<br>Please verify your link with your Match Secretary.</span>`);
+        } else {
+          showError(`CONFIG ERROR: Missing club parameter (?c=...)<br><span style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-top: 8px; display: block; word-break: break-all;">URL: ${window.location.href}</span>`);
+        }
         return;
       }
 
@@ -331,7 +349,7 @@
 
       offlinePanel.style.display = 'none';
       spinnerLoader.style.display = 'block';
-      statusText.textContent = 'CONNECTING TO PORTAL...';
+      statusText.textContent = clubName ? `CONNECTING TO ${clubName.toUpperCase()}...` : 'CONNECTING TO PORTAL...';
       statusScreen.style.display = 'flex';
 
       let targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
