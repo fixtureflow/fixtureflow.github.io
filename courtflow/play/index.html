@@ -8,11 +8,15 @@
   <head>
     <base target="_top">
     <title>CourtFlow</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/courtflow/icon-courtflow.png">
+    <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="CourtFlow">
     <meta name="application-name" content="CourtFlow">
     <meta name="theme-color" content="#0b1329">
     <meta name="robots" content="noindex, nofollow">
-    <link rel="apple-touch-icon" href="https://fixtureflow.github.io/assets/images/courtflow/icon-courtflow.png">
     
     <!-- Include global variables and styles -->
     <!--
@@ -2248,13 +2252,13 @@
 
   function callHostApi(action, args, successHandler, failureHandler) {
     const urlParams = new URLSearchParams(window.location.search);
-    let hostId = urlParams.get('h') || localStorage.getItem('pwa_host_id');
-    let roleView = urlParams.get('view') || localStorage.getItem('pwa_role_view');
+    let hostId = urlParams.get('h') || localStorage.getItem('courtflow_host_id');
+    let roleView = urlParams.get('view') || localStorage.getItem('courtflow_role_view');
     
     if (urlParams.get('h')) {
-      localStorage.setItem('pwa_host_id', urlParams.get('h'));
+      localStorage.setItem('courtflow_host_id', urlParams.get('h'));
       if (urlParams.get('view')) {
-        localStorage.setItem('pwa_role_view', urlParams.get('view'));
+        localStorage.setItem('courtflow_role_view', urlParams.get('view'));
       }
     }
 

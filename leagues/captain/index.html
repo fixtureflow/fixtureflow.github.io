@@ -243,17 +243,17 @@
       if (resolved) {
         hostId = resolved.hostId;
         clubName = resolved.name;
-        localStorage.setItem('pwa_host_id', hostId);
-        localStorage.setItem('pwa_club_name', clubName);
-        localStorage.setItem('pwa_club_slug', resolved.slug);
-        localStorage.setItem('pwa_role_view', roleView);
+        localStorage.setItem('leagues_pwa_host_id', hostId);
+        localStorage.setItem('leagues_pwa_club_name', clubName);
+        localStorage.setItem('leagues_pwa_club_slug', resolved.slug);
+        localStorage.setItem('leagues_pwa_role_view', roleView);
       } else {
         hostId = null;
       }
     } else {
-      hostId = localStorage.getItem('pwa_host_id');
-      clubName = localStorage.getItem('pwa_club_name');
-      roleView = localStorage.getItem('pwa_role_view') || 'captain';
+      hostId = localStorage.getItem('leagues_pwa_host_id') || localStorage.getItem('pwa_host_id');
+      clubName = localStorage.getItem('leagues_pwa_club_name') || localStorage.getItem('pwa_club_name');
+      roleView = localStorage.getItem('leagues_pwa_role_view') || localStorage.getItem('pwa_role_view') || 'captain';
     }
 
     // iOS Safari Workaround: Inject manifest dynamically ONLY on non-iOS devices
@@ -265,7 +265,7 @@
       link.rel = 'manifest';
       
       if (hostId) {
-        const clubSlug = localStorage.getItem('pwa_club_slug') || 'default';
+        const clubSlug = localStorage.getItem('leagues_pwa_club_slug') || localStorage.getItem('pwa_club_slug') || 'default';
         const manifestData = {
           "name": (clubName ? `${clubName} - ` : "") + "FixtureFlow: Captain Portal",
           "short_name": "FF Captain",
