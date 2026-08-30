@@ -54,24 +54,19 @@ To register a new club slug or update host IDs, edit:
 
 <!-- MXS_SKILLS_START -->
 ### 🪐 Active Workspace Skills (Sovereign Baseline)
-*   **Last System Rebuild:** 2026-06-07 at 12:25:14
-*   **Total Active Symlinks:** 17 link(s)
+*   **Last System Rebuild:** 2026-08-30 at 22:02:58
+*   **Total Active Symlinks:** 12 link(s)
 *   **Active Symlinks in this Workspace:**
-    *   `anti-antigravity-design-expert` ➔ `../../../../.gemini/vendor_antigravity_skills/antigravity-design-expert`
-    *   `anti-ask-questions-if-underspecified` ➔ `../../../../.gemini/vendor_antigravity_skills/ask-questions-if-underspecified`
-    *   `anti-brainstorming` ➔ `../../../../.gemini/vendor_antigravity_skills/brainstorming`
-    *   `anti-cc-skill-frontend-patterns` ➔ `../../../../.gemini/vendor_antigravity_skills/cc-skill-frontend-patterns`
-    *   `anti-commit` ➔ `../../../../.gemini/vendor_antigravity_skills/commit`
-    *   `anti-frontend-design` ➔ `../../../../.gemini/vendor_antigravity_skills/frontend-design`
-    *   `anti-frontend-dev-guidelines` ➔ `../../../../.gemini/vendor_antigravity_skills/frontend-dev-guidelines`
-    *   `anti-kaizen` ➔ `../../../../.gemini/vendor_antigravity_skills/kaizen`
-    *   `anti-mermaid-expert` ➔ `../../../../.gemini/vendor_antigravity_skills/mermaid-expert`
-    *   `anti-mobile-design` ➔ `../../../../.gemini/vendor_antigravity_skills/mobile-design`
-    *   `anti-readme` ➔ `../../../../.gemini/vendor_antigravity_skills/readme`
-    *   `anti-seo-fundamentals` ➔ `../../../../.gemini/vendor_antigravity_skills/seo-fundamentals`
-    *   `anti-skill-creator` ➔ `../../../../.gemini/vendor_antigravity_skills/skill-creator`
-    *   `anti-skill-writer` ➔ `../../../../.gemini/vendor_antigravity_skills/skill-writer`
-    *   `anti-track-management` ➔ `../../../../.gemini/vendor_antigravity_skills/track-management`
-    *   `anti-ui-ux-pro-max` ➔ `../../../../.gemini/vendor_antigravity_skills/ui-ux-pro-max`
+    *   `awe-ask-questions-if-underspecified` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/ask-questions-if-underspecified`
+    *   `awe-brainstorming` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/brainstorming`
+    *   `awe-commit` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/commit`
+    *   `awe-kaizen` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/kaizen`
+    *   `awe-mermaid-expert` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/mermaid-expert`
+    *   `awe-readme` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/readme`
+    *   `awe-skill-creator` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/skill-creator`
+    *   `awe-skill-writer` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/skill-writer`
+    *   `awe-track-management` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/track-management`
+    *   `awe-verification-before-completion` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/verification-before-completion`
+    *   `awe-writing-great-skills` ➔ `../../../../.gemini/vendor_agentic_awesome_skills/skills/writing-great-skills`
     *   `matt-write-a-skill` ➔ `../../../../.gemini/vendor_mattpocock_skills/write-a-skill`
 <!-- MXS_SKILLS_END -->
