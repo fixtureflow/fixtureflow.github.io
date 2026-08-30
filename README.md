@@ -8,38 +8,42 @@ This repository hosts the marketing website for Fixture Flow.
 3.  Source: Deploy from a branch.
 4.  Branch: `main` / `root`.
 
-## 📱 Master PWA Applications Directory
+## 📱 Master Applications Directory
 
 All installable Progressive Web Apps (PWAs) across the FixtureFlow platform:
 
-### 1. 🏸 CourtFlow (Live Session & Matchmaking Queue)
-| Application | PWA Live URL | Display Mode | Theme Color |
-| :--- | :--- | :--- | :--- |
-| **CourtFlow Game Queue** | [https://fixtureflow.github.io/courtflow/play/](https://fixtureflow.github.io/courtflow/play/) | Standalone | `#10b981` (Emerald) |
-
----
-
-### 2. 🏆 DDLC Leagues (Multi-Tenant League Management)
+### 🏆 1. Pilot Clubs Directory (DDLC Leagues + CourtFlow Social)
 
 #### 🏸 Mount Pleasant Badminton Club (Pilot Club #1)
-| Role | Shareable PWA URL | Short Aliases |
-| :--- | :--- | :--- |
-| **👤 Squad Players** | [https://fixtureflow.github.io/leagues/player/?c=mount-pleasant](https://fixtureflow.github.io/leagues/player/?c=mount-pleasant) | `?c=mp`, `?c=mpbc` |
-| **⚓ Team Captains** | [https://fixtureflow.github.io/leagues/captain/?c=mount-pleasant](https://fixtureflow.github.io/leagues/captain/?c=mount-pleasant) | `?c=mp`, `?c=mpbc` |
-| **🏸 Match Secretary / Admin** | [https://fixtureflow.github.io/leagues/club/?c=mount-pleasant](https://fixtureflow.github.io/leagues/club/?c=mount-pleasant) | `?c=mp`, `?c=mpbc` |
-
-#### 🟡 Dev / Staging Sandbox
-| Role | Sandbox Testing URL |
-| :--- | :--- |
-| **👤 Player Sandbox** | [https://fixtureflow.github.io/leagues/player/?c=dev](https://fixtureflow.github.io/leagues/player/?c=dev) |
-| **⚓ Captain Sandbox** | [https://fixtureflow.github.io/leagues/captain/?c=dev](https://fixtureflow.github.io/leagues/captain/?c=dev) |
-| **🏸 Club Admin Sandbox** | [https://fixtureflow.github.io/leagues/club/?c=dev](https://fixtureflow.github.io/leagues/club/?c=dev) |
+| Application | Shareable PWA URL | Short Aliases | Purpose |
+| :--- | :--- | :--- | :--- |
+| **👤 Player Portal** | [https://fixtureflow.github.io/leagues/player/?c=mount-pleasant](https://fixtureflow.github.io/leagues/player/?c=mount-pleasant) | `?c=mp`, `?c=mpbc` | League fixtures, match availability & standings |
+| **⚓ Captain Portal** | [https://fixtureflow.github.io/leagues/captain/?c=mount-pleasant](https://fixtureflow.github.io/leagues/captain/?c=mount-pleasant) | `?c=mp`, `?c=mpbc` | Team roster selection, scoresheets & approvals |
+| **🏸 Match Secretary** | [https://fixtureflow.github.io/leagues/club/?c=mount-pleasant](https://fixtureflow.github.io/leagues/club/?c=mount-pleasant) | `?c=mp`, `?c=mpbc` | Club fixture scheduling & 2-party rescheduling |
+| **🎾 CourtFlow Social** | [https://fixtureflow.github.io/courtflow/play/?c=mount-pleasant](https://fixtureflow.github.io/courtflow/play/?c=mount-pleasant) | `?c=mp`, `?c=mpbc` | Live club night queue & court rotations |
 
 ---
 
-### 3. 🌐 Web & Marketing Pages
+### 🧪 2. Development & Staging Sandbox
+
+#### 🏆 Development (DDLC Leagues)
+| Role | Sandbox Testing URL | Purpose |
+| :--- | :--- | :--- |
+| **👤 Player Sandbox** | [https://fixtureflow.github.io/leagues/player/?c=dev](https://fixtureflow.github.io/leagues/player/?c=dev) | Test player check-ins & roster views |
+| **⚓ Captain Sandbox** | [https://fixtureflow.github.io/leagues/captain/?c=dev](https://fixtureflow.github.io/leagues/captain/?c=dev) | Test captain submissions & score approvals |
+| **🏸 Admin Sandbox** | [https://fixtureflow.github.io/leagues/club/?c=dev](https://fixtureflow.github.io/leagues/club/?c=dev) | Test master schedule & reschedule handshake |
+
+#### 🏸 Development (CourtFlow Social Play)
+| Application | Sandbox Testing URL | Purpose |
+| :--- | :--- | :--- |
+| **🎾 CourtFlow Dev** | [https://fixtureflow.github.io/courtflow/play/?c=dev](https://fixtureflow.github.io/courtflow/play/?c=dev) | Test matchmaking heuristics & active court queues |
+
+---
+
+### 🌐 3. Web & Marketing Pages
 * **FixtureFlow Homepage:** [https://fixtureflow.github.io/](https://fixtureflow.github.io/)
-* **DDLC Interactive Demo:** [https://fixtureflow.github.io/ddlc/](https://fixtureflow.github.io/ddlc/)
+* **CourtFlow Showcase:** [https://fixtureflow.github.io/courtflow/](https://fixtureflow.github.io/courtflow/)
+* **DDLC Showcase:** [https://fixtureflow.github.io/ddlc/](https://fixtureflow.github.io/ddlc/)
 
 ---
 

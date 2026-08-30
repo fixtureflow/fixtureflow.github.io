@@ -16,7 +16,7 @@ const CLUBS_REGISTRY = {
     name: "Development / Staging",
     aliases: ["test", "local"],
     hostId: "AKfycbykF0uy5JkbSYIxY-dJVE9bdjcRZJ7pnX6zNdTikEalLF0cweGJ4es4j9R5HcxXRwGB",
-    courtflowHostId: "AKfycbw9lPuih5TieELN_fnrT5mbtmAGoj-h18jiZEQdS2u3oVyw_P0uLpw8F69mPOLLMeVWSA"
+    courtflowHostId: "AKfycbxQTGKdHlwYXyYEaHFFW_wsLGNSMGAYV4wUHai69AA"
   }
 };
 

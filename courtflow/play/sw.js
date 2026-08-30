@@ -1,8 +1,11 @@
-const CACHE_NAME = 'ff-courtflow-cache-v15';
+const CACHE_NAME = 'ff-courtflow-cache-v16';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  '/assets/js/leagues-registry.js',
+  '/assets/images/courtflow/icon-courtflow.svg',
+  '/assets/images/courtflow/icon-courtflow.png'
 ];
 
 self.addEventListener('install', (event) => {
