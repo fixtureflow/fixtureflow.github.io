@@ -4026,6 +4026,59 @@
 
   
   <script>
+    // Dynamic Club Resolution & PWA Naming
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const rawClubParam = urlParams.get('c') || urlParams.get('club') || '';
+      const resolved = (typeof resolveCourtflowHost === 'function') ? resolveCourtflowHost(rawClubParam) : null;
+      const clubShort = resolved ? (resolved.shortName || 'FF') : 'CourtFlow';
+      const appShortTitle = (clubShort && clubShort !== 'CourtFlow' && clubShort !== 'FF') ? `${clubShort} Socials` : 'CourtFlow';
+      
+      if (resolved && resolved.name) {
+        document.title = `${resolved.name} - CourtFlow`;
+      }
+      const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+      if (appleTitleMeta) {
+        appleTitleMeta.setAttribute('content', appShortTitle);
+      }
+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      if (!isIOS) {
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        const manifestData = {
+          "name": (resolved ? `${resolved.name} - ` : "") + "FixtureFlow: CourtFlow",
+          "short_name": appShortTitle,
+          "start_url": window.location.pathname + (rawClubParam ? `?c=${encodeURIComponent(rawClubParam)}` : ''),
+          "display": "standalone",
+          "background_color": "#0b1329",
+          "theme_color": "#10b981",
+          "orientation": "any",
+          "icons": [
+            {
+              "src": "/assets/images/courtflow/icon-courtflow.png",
+              "sizes": "512x512",
+              "type": "image/png",
+              "purpose": "any maskable"
+            },
+            {
+              "src": "/assets/images/courtflow/icon-courtflow.svg",
+              "sizes": "any",
+              "type": "image/svg+xml",
+              "purpose": "any"
+            }
+          ]
+        };
+        const base64Manifest = btoa(unescape(encodeURIComponent(JSON.stringify(manifestData))));
+        link.href = 'data:application/json;base64,' + base64Manifest;
+        document.head.appendChild(link);
+      }
+    } catch (e) {
+      console.warn("Dynamic PWA setup error: ", e);
+    }
+
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js')
         .then(() => console.log('Service Worker registered successfully'))

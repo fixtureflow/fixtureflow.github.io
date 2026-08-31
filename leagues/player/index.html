@@ -238,13 +238,16 @@
     let hostId = null;
     let clubName = null;
 
+    let clubShort = 'FF';
     if (rawClubParam) {
       const resolved = (typeof resolveClubHost === 'function') ? resolveClubHost(rawClubParam) : null;
       if (resolved) {
         hostId = resolved.hostId;
         clubName = resolved.name;
+        clubShort = resolved.shortName || 'FF';
         localStorage.setItem('leagues_pwa_host_id', hostId);
         localStorage.setItem('leagues_pwa_club_name', clubName);
+        localStorage.setItem('leagues_pwa_club_short', clubShort);
         localStorage.setItem('leagues_pwa_club_slug', resolved.slug);
         localStorage.setItem('leagues_pwa_role_view', roleView);
       } else {
@@ -253,7 +256,16 @@
     } else {
       hostId = localStorage.getItem('leagues_pwa_host_id') || localStorage.getItem('pwa_host_id');
       clubName = localStorage.getItem('leagues_pwa_club_name') || localStorage.getItem('pwa_club_name');
+      clubShort = localStorage.getItem('leagues_pwa_club_short') || 'FF';
       roleView = localStorage.getItem('leagues_pwa_role_view') || localStorage.getItem('pwa_role_view') || 'player';
+    }
+
+    // Dynamic Titles for iOS & Browser Tab
+    const appShortTitle = (clubShort && clubShort !== 'FF') ? `${clubShort} Players` : 'FF Players';
+    document.title = (clubName ? `${clubName} - ` : '') + 'Player Portal | FixtureFlow';
+    const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if (appleTitleMeta) {
+      appleTitleMeta.setAttribute('content', appShortTitle);
     }
 
     // iOS Safari Workaround: Inject manifest dynamically ONLY on non-iOS devices
@@ -268,7 +280,7 @@
         const clubSlug = localStorage.getItem('leagues_pwa_club_slug') || localStorage.getItem('pwa_club_slug') || 'default';
         const manifestData = {
           "name": (clubName ? `${clubName} - ` : "") + "FixtureFlow: Player Portal",
-          "short_name": "FF Player",
+          "short_name": appShortTitle,
           "start_url": window.location.pathname + (rawClubParam ? `?c=${encodeURIComponent(rawClubParam)}` : `?h=${encodeURIComponent(hostId)}`),
           "display": "standalone",
           "background_color": "#0b1329",
