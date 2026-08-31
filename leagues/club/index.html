@@ -265,7 +265,7 @@
     }
 
     // Dynamic Titles for iOS & Browser Tab
-    const appShortTitle = (clubShort && clubShort !== 'FF') ? `${clubShort} Club` : 'FF Club';
+    const appShortTitle = (clubShort && clubShort !== 'FF') ? `${clubShort} Fixtures` : 'FF Fixtures';
     document.title = (clubName ? `${clubName} - ` : '') + 'Club Admin | FixtureFlow';
     const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
     if (appleTitleMeta) {

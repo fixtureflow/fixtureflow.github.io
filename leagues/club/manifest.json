@@ -1,6 +1,6 @@
 {
   "name": "FixtureFlow: Club Admin",
-  "short_name": "FF Club",
+  "short_name": "FF Fixtures",
   "start_url": "/leagues/club/",
   "display": "standalone",
   "background_color": "#0b1329",
