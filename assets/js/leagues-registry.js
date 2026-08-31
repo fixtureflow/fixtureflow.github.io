@@ -25,7 +25,7 @@ const CLUBS_REGISTRY = {
     shortName: "Dev",
     aliases: ["test", "local"],
     hostId: "AKfycbykF0uy5JkbSYIxY-dJVE9bdjcRZJ7pnX6zNdTikEalLF0cweGJ4es4j9R5HcxXRwGB",
-    courtflowHostId: "AKfycbxQTGKdHlwYXyYEaHFFW_wsLGNSMGAYV4wUHai69AA"
+    courtflowHostId: "AKfycbzQ8ZrOQic6xPG7jIYEQ1r75nJXOPyK0DJ6vymqngIt1tsFBcc7ilENjwirSoWyqJpo"
   }
 };
 

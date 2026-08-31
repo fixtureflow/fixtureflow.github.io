@@ -2303,9 +2303,19 @@
 
   function callHostApi(action, args, successHandler, failureHandler) {
     const urlParams = new URLSearchParams(window.location.search);
-    let hostId = urlParams.get('h') || localStorage.getItem('pwa_host_id');
+    const clubParam = urlParams.get('c') || urlParams.get('club') || '';
+    let hostId = urlParams.get('h');
     let roleView = urlParams.get('view') || localStorage.getItem('pwa_role_view');
-    
+
+    if (clubParam && typeof resolveCourtflowHost === 'function') {
+      const resolved = resolveCourtflowHost(clubParam);
+      if (resolved && resolved.hostId) {
+        hostId = resolved.hostId;
+        localStorage.setItem('pwa_host_id', hostId);
+        localStorage.setItem('pwa_club_slug', clubParam);
+      }
+    }
+
     if (urlParams.get('h')) {
       localStorage.setItem('pwa_host_id', urlParams.get('h'));
       if (urlParams.get('view')) {
@@ -2314,7 +2324,18 @@
     }
 
     if (!hostId) {
-      const errorMsg = "Configuration Error: Missing host ID parameter (?h=...)";
+      hostId = localStorage.getItem('pwa_host_id');
+    }
+
+    if (!hostId && typeof resolveCourtflowHost === 'function') {
+      const defaultResolved = resolveCourtflowHost('dev');
+      if (defaultResolved && defaultResolved.hostId) {
+        hostId = defaultResolved.hostId;
+      }
+    }
+
+    if (!hostId) {
+      const errorMsg = "Configuration Error: Missing host ID or club parameter (?c=... or ?h=...)";
       console.error(errorMsg);
       if (failureHandler) failureHandler(new Error(errorMsg));
       return;
