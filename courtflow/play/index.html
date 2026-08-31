@@ -8,17 +8,11 @@
   <head>
     <base target="_top">
     <title>CourtFlow</title>
-    <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/courtflow/icon-courtflow.png">
-    <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="CourtFlow">
     <meta name="application-name" content="CourtFlow">
     <meta name="theme-color" content="#0b1329">
     <meta name="robots" content="noindex, nofollow">
-    <script src="/assets/js/leagues-registry.js"></script>
+    <link rel="apple-touch-icon" href="https://fixtureflow.github.io/assets/images/courtflow/icon-courtflow.png">
     
     <!-- Include global variables and styles -->
     <!--
@@ -1809,44 +1803,98 @@
   <link rel="manifest" href="manifest.json">
 </head>
   <body>
-    <div class="app-container tab-courts" id="app-container">
+        <div class="app-container tab-courts" id="app-container">
       
-      <!-- Top Branding and Theme Switcher -->
-      <header class="glass-card header-panel">
-        <div class="branding" style="display: flex; align-items: center; gap: 10px;">
-          <img id="club-logo" class="club-logo" src="" alt="Club Logo" style="display: none; height: 26px; width: auto; border-radius: 4px; object-fit: contain;">
-          <h1 style="margin: 0; font-size: 20px; font-weight: 850; letter-spacing: -0.03em; line-height: 1.1;">CourtFlow</h1>
-          <span id="sync-status" class="sync-dot green" title="All changes saved to cloud"></span>
-        </div>
-        <div class="header-actions" style="display: flex; gap: 8px;">
-          <button id="theme-toggle" class="icon-button" onclick="toggleTheme()" aria-label="Toggle visual theme">
-            <!-- Sun Icon (Light Mode) -->
-            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="5"></circle>
-              <line x1="12" y1="1" x2="12" y2="3"></line>
-              <line x1="12" y1="21" x2="12" y2="23"></line>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-              <line x1="1" y1="12" x2="3" y2="12"></line>
-              <line x1="21" y1="12" x2="23" y2="12"></line>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-            </svg>
-            <!-- Moon Icon (Dark Mode) -->
-            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-            </svg>
-          </button>
-        </div>
-      </header>
+      <!-- PIN Gatekeeper View (Shown when unauthenticated - 100% aligned with DDLC Captain Login) -->
+      <div id="portal-view-login" style="min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px 16px; position: relative; box-sizing: border-box;">
+        
+        <!-- Subtle Theme Toggle in top-right -->
+        
 
-      <!-- Contextual Alert Banner for Old Sessions -->
-      <div id="contextual-banner" class="contextual-banner" style="display: none;">
-        <span class="banner-text">⚠️ Active session from a previous day detected.</span>
-        <button class="banner-link-btn" onclick="triggerSessionReset()">Reset Session</button>
+        <div style="width: 100%; max-width: 360px; margin: auto; text-align: center;">
+          <!-- Club Logo (Large Centered Crest) -->
+          <div id="login-logo-container" style="margin-bottom: 20px; display: none;">
+            <img id="login-club-logo" src="" alt="Club Logo" style="width: 130px; height: 130px; object-fit: contain; margin: 0 auto; display: block;">
+          </div>
+          
+          <!-- Fallback Emoji if no logo -->
+          <div id="login-emoji-fallback" style="font-size: 2.8rem; margin-bottom: 12px; display: block;">🏸</div>
+          
+          <!-- Club Title -->
+          <h1 id="login-club-title" style="margin: 0 0 6px 0; font-size: 1.8rem; line-height: 1.2; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em;">
+            CourtFlow
+          </h1>
+          
+          <!-- Subtitle -->
+          <h3 style="margin: 0 0 10px 0; font-size: 1.1rem; color: var(--text-muted); font-weight: 500;">
+            Socials & Club Night
+          </h3>
+          
+          <!-- Instructions -->
+          <p style="margin: 0 0 24px 0; font-size: 0.92rem; color: var(--text-muted); line-height: 1.4;">
+            Manage courts and match rotations. Enter your PIN below.
+          </p>
+          
+          <!-- PIN Form -->
+          <form id="admin-login-form" onsubmit="handleAdminLogin(event)" style="display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 250px; margin: 0 auto;">
+            <input type="password" id="admin-pin-input" name="pin" class="form-input text-center" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="PIN" required autocomplete="off" style="letter-spacing: 6px; font-size: 1.35rem; font-weight: 700; text-align: center; height: 50px; border-radius: 10px; border: 2px solid var(--border-panel); background: rgba(0,0,0,0.02); width: 100%; box-sizing: border-box;">
+            
+            <div id="login-error-msg" style="display: none; color: #ef4444; font-size: 0.85rem; font-weight: 600; line-height: 1.3;"></div>
+            
+            <button type="submit" id="admin-login-btn" class="btn btn-primary" style="height: 50px; font-size: 1.05rem; font-weight: 700; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px; width: 100%;">
+              <span id="admin-login-btn-text">ENTER</span>
+              <span id="admin-login-spinner" style="display: none;">VERIFYING...</span>
+            </button>
+          </form>
+        </div>
       </div>
 
-      <main class="dashboard-grid">
+      <!-- Authenticated Main Dashboard View -->
+      <div id="portal-view-main" style="display: none; flex-direction: column; flex-grow: 1;">
+        
+        <!-- Top Branding and Theme Switcher (Only visible after login) -->
+        <header class="glass-card header-panel">
+          <div class="branding" style="display: flex; align-items: center; gap: 10px;">
+            <img id="club-logo" class="club-logo" src="" alt="Club Logo" style="display: none; height: 26px; width: auto; border-radius: 4px; object-fit: contain;">
+            <h1 style="margin: 0; font-size: 20px; font-weight: 850; letter-spacing: -0.03em; line-height: 1.1;">CourtFlow</h1>
+            <span id="sync-status" class="sync-dot green" title="All changes saved to cloud"></span>
+          </div>
+          <div class="header-actions" style="display: flex; gap: 8px;">
+            <button id="logout-btn" class="icon-button" onclick="handleAdminLogout()" aria-label="Log Out" title="Log Out">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
+            <button id="theme-toggle" class="icon-button" onclick="toggleTheme()" aria-label="Toggle visual theme">
+              <!-- Sun Icon (Light Mode) -->
+              <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              <!-- Moon Icon (Dark Mode) -->
+              <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Contextual Alert Banner for Old Sessions -->
+        <div id="contextual-banner" class="contextual-banner" style="display: none;">
+          <span class="banner-text">⚠️ Active session from a previous day detected.</span>
+          <button class="banner-link-btn" onclick="triggerSessionReset()">Reset Session</button>
+        </div>
+
+        <main class="dashboard-grid">
         
         <!-- Left: Match Generation & Court Layouts -->
         <div class="main-left-column">
@@ -2194,6 +2242,7 @@
         <span class="nav-label">Roster</span>
       </button>
     </nav>
+      </div>
 
     <!-- State initialization and scripts injection -->
     <!--
@@ -2254,46 +2303,29 @@
 
   function callHostApi(action, args, successHandler, failureHandler) {
     const urlParams = new URLSearchParams(window.location.search);
-    const rawClubParam = urlParams.get('c') || urlParams.get('club') || urlParams.get('h');
-    let roleView = urlParams.get('view') || localStorage.getItem('courtflow_role_view');
-    let hostId = null;
+    let hostId = urlParams.get('h') || localStorage.getItem('pwa_host_id');
+    let roleView = urlParams.get('view') || localStorage.getItem('pwa_role_view');
     
-    if (rawClubParam) {
-      const resolved = (typeof resolveCourtflowHost === 'function') ? resolveCourtflowHost(rawClubParam) : null;
-      if (resolved) {
-        hostId = resolved.hostId;
-        localStorage.setItem('courtflow_host_id', hostId);
-        localStorage.setItem('courtflow_club_name', resolved.name);
-        localStorage.setItem('courtflow_club_slug', resolved.slug);
-      } else if (rawClubParam.startsWith('AKfy') || rawClubParam.length >= 25) {
-        hostId = rawClubParam;
-        localStorage.setItem('courtflow_host_id', hostId);
-      }
+    if (urlParams.get('h')) {
+      localStorage.setItem('pwa_host_id', urlParams.get('h'));
       if (urlParams.get('view')) {
-        localStorage.setItem('courtflow_role_view', urlParams.get('view'));
-      }
-    } else {
-      hostId = localStorage.getItem('courtflow_host_id');
-      // Default fallback: Mount Pleasant if no host ID is set yet
-      if (!hostId && typeof resolveCourtflowHost === 'function') {
-        const defaultClub = resolveCourtflowHost('mount-pleasant');
-        if (defaultClub) {
-          hostId = defaultClub.hostId;
-          localStorage.setItem('courtflow_host_id', hostId);
-          localStorage.setItem('courtflow_club_name', defaultClub.name);
-          localStorage.setItem('courtflow_club_slug', defaultClub.slug);
-        }
+        localStorage.setItem('pwa_role_view', urlParams.get('view'));
       }
     }
 
     if (!hostId) {
-      const errorMsg = "Configuration Error: Missing host ID parameter (?h=... or ?c=mount-pleasant)";
+      const errorMsg = "Configuration Error: Missing host ID parameter (?h=...)";
       console.error(errorMsg);
       if (failureHandler) failureHandler(new Error(errorMsg));
       return;
     }
 
     const payload = { action: action };
+    if (action === "getInitialState") {
+      payload.token = args[0] || null;
+    } else if (action === "validateAdminPin") {
+      payload.pin = args[0];
+    }
     if (action === "saveSessionState") {
       payload.payload = args[0];
     } else if (action === "saveMatchHistory") {
@@ -3288,86 +3320,198 @@
     }
   })();
 
+  function initializeDashboard(payload) {
+    state.players = payload.players || [];
+    state.activeCourts = payload.activeCourts || [];
+    state.history = payload.history || [];
+    state.opponentHistory = payload.opponentHistory || [];
+    state.config = payload.config || {};
+    if (!state.config.genderRule) state.config.genderRule = "standard";
+    if (!state.config.matchmakerMode) state.config.matchmakerMode = "balanced";
+    state.maxCourts = payload.maxCourts || (state.config.maxCourts || 3);
+    
+    // Update branding title if clubName is set
+    const clubTitle = state.config.clubName || payload.clubName || "CourtFlow";
+    const brandingH1 = document.querySelector(".branding h1");
+    if (brandingH1) brandingH1.innerText = clubTitle;
+
+    // Update branding logo if clubLogoUrl is set
+    const logoEl = document.getElementById("club-logo");
+    if (logoEl) {
+      const logoUrl = state.config.clubLogoUrl || payload.clubLogoUrl;
+      if (logoUrl) {
+        logoEl.src = logoUrl;
+        logoEl.style.display = "block";
+      } else {
+        logoEl.style.display = "none";
+      }
+    }
+    
+    state.matchHistory = payload.matchHistory || [];
+    state.timestamp = payload.timestamp || null;
+    
+    // Show authenticated view, hide login view, show logout button
+    const loginView = document.getElementById("portal-view-login");
+    const mainView = document.getElementById("portal-view-main");
+    const logoutBtn = document.getElementById("logout-btn");
+    if (loginView) loginView.style.display = "none";
+    if (mainView) mainView.style.display = "flex";
+    if (logoutBtn) logoutBtn.style.display = "flex";
+    
+    // Contextual Banner check (older than 8 hours)
+    let isOldSession = false;
+    const bannerEl = document.getElementById("contextual-banner");
+    if (bannerEl) {
+      if (state.timestamp) {
+        isOldSession = (Date.now() - state.timestamp) > (8 * 60 * 60 * 1000);
+        if (isOldSession) {
+          bannerEl.style.display = "flex";
+        } else {
+          bannerEl.style.display = "none";
+        }
+      } else {
+        bannerEl.style.display = "none";
+      }
+    }
+    
+    // Default tab routing based on empty roster or active session
+    const checkedInCount = state.players.filter(p => p.checkedIn).length;
+    if (checkedInCount === 0 || isOldSession) {
+      switchMobileTab('roster');
+    } else {
+      switchMobileTab('courts');
+    }
+    
+    // Update slider input value and display text
+    const slider = document.getElementById(UI_SELECTORS.COURT_SLIDER);
+    if (slider) {
+      slider.value = state.maxCourts;
+    }
+    
+    const displayEl = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
+    if (displayEl) {
+      displayEl.innerText = state.maxCourts;
+    }
+    
+    renderUI();
+    applyAllPanelCollapseStates();
+    hideLoadingOverlay();
+  }
+
+  function showLoginScreen(payload) {
+    const loginView = document.getElementById("portal-view-login");
+    const mainView = document.getElementById("portal-view-main");
+    
+    if (mainView) mainView.style.display = "none";
+    if (loginView) loginView.style.display = "flex";
+    
+    const clubTitle = (payload && payload.clubName) ? payload.clubName : "CourtFlow";
+    const clubLogo = (payload && payload.clubLogoUrl) ? payload.clubLogoUrl : "";
+    
+    const loginTitleEl = document.getElementById("login-club-title");
+    if (loginTitleEl) loginTitleEl.innerText = clubTitle;
+    
+    const logoContainer = document.getElementById("login-logo-container");
+    const logoImg = document.getElementById("login-club-logo");
+    const emojiFallback = document.getElementById("login-emoji-fallback");
+    
+    if (clubLogo && logoContainer && logoImg) {
+      logoImg.src = clubLogo;
+      logoContainer.style.display = "block";
+      if (emojiFallback) emojiFallback.style.display = "none";
+    } else {
+      if (logoContainer) logoContainer.style.display = "none";
+      if (emojiFallback) emojiFallback.style.display = "block";
+    }
+    
+    const pinInput = document.getElementById("admin-pin-input");
+    if (pinInput) {
+      pinInput.value = "";
+      setTimeout(() => pinInput.focus(), 100);
+    }
+    hideLoadingOverlay();
+  }
+
   // Initialize UI on window load
   window.addEventListener("load", () => {
+    const token = localStorage.getItem("courtflow_auth_token") || null;
+    
     // Initial fetch from GAS (combines master roster and persistent state properties)
     google.script.run
       .withSuccessHandler(data => {
-        const payload = JSON.parse(data);
-        state.players = payload.players || [];
-        state.activeCourts = payload.activeCourts || [];
-        state.history = payload.history || [];
-        state.opponentHistory = payload.opponentHistory || [];
-        state.config = payload.config || {};
-        if (!state.config.genderRule) state.config.genderRule = "standard";
-        if (!state.config.matchmakerMode) state.config.matchmakerMode = "balanced";
-        state.maxCourts = payload.maxCourts || (state.config.maxCourts || 3);
-        
-        // Update branding title if clubName is set
-        if (state.config.clubName) {
-          const brandingH1 = document.querySelector(".branding h1");
-          if (brandingH1) brandingH1.innerText = state.config.clubName;
-        }
-
-        // Update branding logo if clubLogoUrl is set
-        const logoEl = document.getElementById("club-logo");
-        if (logoEl) {
-          if (state.config.clubLogoUrl) {
-            logoEl.src = state.config.clubLogoUrl;
-            logoEl.style.display = "block";
-          } else {
-            logoEl.style.display = "none";
-          }
-        }
-        
-        state.matchHistory = payload.matchHistory || [];
-        state.timestamp = payload.timestamp || null;
-        
-        // Contextual Banner check (older than 8 hours)
-        let isOldSession = false;
-        const bannerEl = document.getElementById("contextual-banner");
-        if (bannerEl) {
-          if (state.timestamp) {
-            isOldSession = (Date.now() - state.timestamp) > (8 * 60 * 60 * 1000);
-            if (isOldSession) {
-              bannerEl.style.display = "flex";
-            } else {
-              bannerEl.style.display = "none";
-            }
-          } else {
-            bannerEl.style.display = "none";
-          }
-        }
-        
-        // Default tab routing based on empty roster or active session
-        const checkedInCount = state.players.filter(p => p.checkedIn).length;
-        if (checkedInCount === 0 || isOldSession) {
-          switchMobileTab('roster');
+        const payload = typeof data === "string" ? JSON.parse(data) : data;
+        if (payload.authenticated === false) {
+          showLoginScreen(payload);
         } else {
-          switchMobileTab('courts');
+          initializeDashboard(payload);
         }
-        
-        // Update slider input value and display text
-        const slider = document.getElementById(UI_SELECTORS.COURT_SLIDER);
-        if (slider) {
-          slider.value = state.maxCourts;
-        }
-        
-        const displayEl = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
-        if (displayEl) {
-          displayEl.innerText = state.maxCourts;
-        }
-        
-        renderUI();
-        applyAllPanelCollapseStates();
-        hideLoadingOverlay();
       })
       .withFailureHandler(err => {
         hideLoadingOverlay();
         showAlertModal("Load Error", "Failed to load initial club state: " + err.message);
       })
-      .getInitialState();
+      .getInitialState(token);
   });
+
+  function handleAdminLogin(e) {
+    if (e) e.preventDefault();
+    const pinInput = document.getElementById("admin-pin-input");
+    const pin = pinInput ? pinInput.value.trim() : "";
+    const errEl = document.getElementById("login-error-msg");
+    const btn = document.getElementById("admin-login-btn");
+    const btnText = document.getElementById("admin-login-btn-text");
+    const spinner = document.getElementById("admin-login-spinner");
+    
+    if (!pin || pin.length !== 4) {
+      if (errEl) {
+        errEl.innerText = "Please enter a 4-digit PIN.";
+        errEl.style.display = "block";
+      }
+      return;
+    }
+    
+    if (btn) btn.disabled = true;
+    if (btnText) btnText.style.display = "none";
+    if (spinner) spinner.style.display = "inline";
+    if (errEl) errEl.style.display = "none";
+    
+    google.script.run
+      .withSuccessHandler(data => {
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.style.display = "inline";
+        if (spinner) spinner.style.display = "none";
+        
+        const res = typeof data === "string" ? JSON.parse(data) : data;
+        if (res.success) {
+          localStorage.setItem("courtflow_auth_token", res.token);
+          const payload = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+          initializeDashboard(payload);
+        } else {
+          if (errEl) {
+            errEl.innerText = res.error || "Incorrect PIN.";
+            errEl.style.display = "block";
+          }
+          if (pinInput) pinInput.select();
+        }
+      })
+      .withFailureHandler(err => {
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.style.display = "inline";
+        if (spinner) spinner.style.display = "none";
+        if (errEl) {
+          errEl.innerText = "Authentication failed: " + err.message;
+          errEl.style.display = "block";
+        }
+      })
+      .validateAdminPin(pin);
+  }
+
+  function handleAdminLogout() {
+    if (confirm("Are you sure you want to log out of CourtFlow on this device?")) {
+      localStorage.removeItem("courtflow_auth_token");
+      showLoginScreen({ clubName: state.config.clubName || "CourtFlow" });
+    }
+  }
 
   /**
    * Opens the custom alert modal with a title and message.
@@ -4026,59 +4170,6 @@
 
   
   <script>
-    // Dynamic Club Resolution & PWA Naming
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const rawClubParam = urlParams.get('c') || urlParams.get('club') || '';
-      const resolved = (typeof resolveCourtflowHost === 'function') ? resolveCourtflowHost(rawClubParam) : null;
-      const clubShort = resolved ? (resolved.shortName || 'FF') : 'CourtFlow';
-      const appShortTitle = (clubShort && clubShort !== 'CourtFlow' && clubShort !== 'FF') ? `${clubShort} Socials` : 'CourtFlow';
-      
-      if (resolved && resolved.name) {
-        document.title = `${resolved.name} - CourtFlow`;
-      }
-      const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-      if (appleTitleMeta) {
-        appleTitleMeta.setAttribute('content', appShortTitle);
-      }
-
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-      if (!isIOS) {
-        const link = document.createElement('link');
-        link.rel = 'manifest';
-        const manifestData = {
-          "name": (resolved ? `${resolved.name} - ` : "") + "FixtureFlow: CourtFlow",
-          "short_name": appShortTitle,
-          "start_url": window.location.pathname + (rawClubParam ? `?c=${encodeURIComponent(rawClubParam)}` : ''),
-          "display": "standalone",
-          "background_color": "#0b1329",
-          "theme_color": "#10b981",
-          "orientation": "any",
-          "icons": [
-            {
-              "src": "/assets/images/courtflow/icon-courtflow.png",
-              "sizes": "512x512",
-              "type": "image/png",
-              "purpose": "any maskable"
-            },
-            {
-              "src": "/assets/images/courtflow/icon-courtflow.svg",
-              "sizes": "any",
-              "type": "image/svg+xml",
-              "purpose": "any"
-            }
-          ]
-        };
-        const base64Manifest = btoa(unescape(encodeURIComponent(JSON.stringify(manifestData))));
-        link.href = 'data:application/json;base64,' + base64Manifest;
-        document.head.appendChild(link);
-      }
-    } catch (e) {
-      console.warn("Dynamic PWA setup error: ", e);
-    }
-
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js')
         .then(() => console.log('Service Worker registered successfully'))
