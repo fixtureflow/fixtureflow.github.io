@@ -18,7 +18,7 @@ const CLUBS_REGISTRY = {
     shortName: "Demo",
     aliases: ["sandbox", "public-demo", "trial"],
     hostId: "AKfycbyu8_pzD00dxoGzd-Tc4kTlCuy7TPqaeVQ04paaL3AUQ0Fdjl4l5kOyfd6ysw71lAiM4A",
-    courtflowHostId: "AKfycbxQTGKdHlwYXyYEaHFFW_wsLGNSMGAYV4wUHai69AA"
+    courtflowHostId: "AKfycby0rMt1SZnw51B1GVQag4PqdtZcHyv9str1acKacg4TJQKM4Ms1M_y6azjZuGzIcTu9"
   },
   "dev": {
     name: "Development / Staging",
