@@ -37,9 +37,9 @@
     --text-muted: #94a3b8;
     
     /* Accents (SaaS Emerald/Mint Active Play Palette) */
-    --accent-primary: #10b981;
-    --accent-primary-hover: #34d399;
-    --accent-primary-glow: rgba(16, 185, 129, 0.15);
+    --accent-primary: #38bdf8;
+    --accent-primary-hover: #0ea5e9;
+    --accent-primary-glow: rgba(56, 189, 248, 0.25);
     --accent-success: #10b981;
     --accent-success-hover: #34d399;
     --accent-success-glow: rgba(16, 185, 129, 0.2);
@@ -83,9 +83,9 @@
     --text-muted: #6e6e73;
     
     /* Accents (Clean Emerald & Soft Sage Green) */
-    --accent-primary: #047857;
-    --accent-primary-hover: #065f46;
-    --accent-primary-glow: rgba(4, 120, 87, 0.08);
+    --accent-primary: #0284c7;
+    --accent-primary-hover: #0369a1;
+    --accent-primary-glow: rgba(2, 132, 199, 0.2);
     --accent-success: #4d7c0f;
     --accent-success-hover: #3f620a;
     --accent-success-glow: rgba(77, 124, 15, 0.15);
@@ -3797,6 +3797,7 @@ function resolveCourtflowHost(input) {
       .withSuccessHandler(data => {
         const payload = typeof data === "string" ? JSON.parse(data) : data;
         if (payload.authenticated === false) {
+          localStorage.removeItem("courtflow_auth_token");
           showLoginScreen(payload);
         } else {
           initializeDashboard(payload);
