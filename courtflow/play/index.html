@@ -3825,7 +3825,10 @@ function resolveCourtflowHost(input) {
   function handleAdminLogout() {
     if (confirm("Are you sure you want to log out of CourtFlow on this device?")) {
       localStorage.removeItem("courtflow_auth_token");
-      showLoginScreen({ clubName: state.config.clubName || "CourtFlow" });
+      showLoginScreen({ 
+        clubName: state.config.clubName || "CourtFlow",
+        clubLogoUrl: state.config.clubLogoUrl || ""
+      });
     }
   }
 
