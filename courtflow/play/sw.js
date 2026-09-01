@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-courtflow-cache-v39';
+const CACHE_NAME = 'ff-courtflow-cache-v40';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
