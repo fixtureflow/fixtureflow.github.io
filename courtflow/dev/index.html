@@ -195,8 +195,17 @@
   }
 
   @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes ff-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+  .shake {
+    animation: ff-shake 0.35s ease-in-out;
   }
   
   .branding h1 {
@@ -1114,9 +1123,13 @@
   .loading-spinner {
     width: 48px;
     height: 48px;
-    border: 4px solid rgba(0, 240, 255, 0.1);
-    border-top-color: var(--accent-primary);
+    border: 4px solid rgba(56, 189, 248, 0.2);
+    border-top-color: var(--accent-primary, #38bdf8);
     box-shadow: 0 0 15px var(--accent-primary-glow);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    box-sizing: border-box;
   }
 
   .btn-spinner {
@@ -1124,7 +1137,10 @@
     height: 14px;
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-top-color: currentColor;
-    animation-duration: 0.8s;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    box-sizing: border-box;
   }
 
   #loading-message {
@@ -1931,18 +1947,13 @@
     z-index: 1;
   }
 
-  .spinner {
+  #spinner-loader {
     width: 44px;
     height: 44px;
     border: 4px solid var(--splash-loader-bg);
     border-top-color: #0ea5e9;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
     z-index: 2;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
   }
 
   .loading-text {
@@ -2020,12 +2031,12 @@
           <form id="admin-login-form" onsubmit="handleAdminLogin(event)" style="margin-top: 24px; display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 250px; margin-left: auto; margin-right: auto;">
             <input type="password" id="admin-pin-input" class="form-input text-center" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="PIN" required autocomplete="one-time-code" style="letter-spacing: 4px; font-size: 1.25rem; font-weight: bold; text-align: center; height: 50px; min-height: 50px; border-radius: 12px; border: 1px solid var(--border-panel); background: var(--bg-panel); color: var(--text-primary); width: 100%; box-sizing: border-box;">
             
-            <div id="login-error-msg" style="display: none; color: #ef4444; font-size: 0.85rem; font-weight: 600; line-height: 1.3;"></div>
-            
             <button type="submit" id="admin-login-btn" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 1.1rem; min-height: 50px; height: 50px; font-weight: 600; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
               <span id="admin-login-btn-text">ENTER</span>
               <span id="admin-login-spinner" style="display: none;">VERIFYING...</span>
             </button>
+
+            <div id="login-error-msg" class="error-msg text-center" style="display: none; color: #ef4444; font-size: 0.875rem; font-weight: 600; line-height: 1.3;"></div>
           </form>
         </div>
 
@@ -2450,7 +2461,7 @@ const CLUBS_REGISTRY = {
     name: "Mount Pleasant Badminton Club",
     shortName: "MP",
     aliases: ["mp", "mpbc", "mountpleasant", "mount_pleasant"],
-    hostId: "AKfycbykF0uy5JkbSYIxY-dJVE9bdjcRZJ7pnX6zNdTikEalLF0cweGJ4es4j9R5HcxXRwGB",
+    hostId: "AKfycbzBielTidLGX-XUrA1OTuInVocRPjAxhqZbyUx7LQnb5jA1Pp_a_8SE1IVyuoePlgpu",
     courtflowHostId: "AKfycbw9lPuih5TieELN_fnrT5mbtmAGoj-h18jiZEQdS2u3oVyw_P0uLpw8F69mPOLLMeVWSA"
   },
   "demo": {
@@ -3835,11 +3846,17 @@ function resolveCourtflowHost(input) {
     const btn = document.getElementById("admin-login-btn");
     const btnText = document.getElementById("admin-login-btn-text");
     const spinner = document.getElementById("admin-login-spinner");
+    const form = document.getElementById("admin-login-form");
     
     if (!pin || pin.length !== 4) {
       if (errEl) {
         errEl.innerText = "Please enter a 4-digit PIN.";
         errEl.style.display = "block";
+      }
+      if (form) {
+        form.classList.remove("shake");
+        void form.offsetWidth;
+        form.classList.add("shake");
       }
       return;
     }
@@ -3848,6 +3865,7 @@ function resolveCourtflowHost(input) {
     if (btnText) btnText.style.display = "none";
     if (spinner) spinner.style.display = "inline";
     if (errEl) errEl.style.display = "none";
+    if (form) form.classList.remove("shake");
     
     google.script.run
       .withSuccessHandler(data => {
@@ -3865,7 +3883,15 @@ function resolveCourtflowHost(input) {
             errEl.innerText = res.error || "Incorrect PIN.";
             errEl.style.display = "block";
           }
-          if (pinInput) pinInput.select();
+          if (form) {
+            form.classList.remove("shake");
+            void form.offsetWidth;
+            form.classList.add("shake");
+          }
+          if (pinInput) {
+            pinInput.value = "";
+            pinInput.focus();
+          }
         }
       })
       .withFailureHandler(err => {
@@ -3873,8 +3899,19 @@ function resolveCourtflowHost(input) {
         if (btnText) btnText.style.display = "inline";
         if (spinner) spinner.style.display = "none";
         if (errEl) {
-          errEl.innerText = "Authentication failed: " + err.message;
+          const raw = err.message || err;
+          const isNetwork = raw && (raw.includes("Network") || raw.includes("server") || raw.includes("Failed to fetch"));
+          errEl.innerText = isNetwork ? ("Authentication failed: " + raw) : "Incorrect PIN.";
           errEl.style.display = "block";
+        }
+        if (form) {
+          form.classList.remove("shake");
+          void form.offsetWidth;
+          form.classList.add("shake");
+        }
+        if (pinInput) {
+          pinInput.value = "";
+          pinInput.focus();
         }
       })
       .validateAdminPin(pin);
