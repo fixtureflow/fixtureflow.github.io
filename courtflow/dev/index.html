@@ -2198,6 +2198,40 @@
         </div>
 
       </main>
+
+      <!-- Mobile Bottom Navigation Bar (Authenticated Session Only) -->
+      <nav class="mobile-nav-bar" id="mobile-nav-bar" style="display: none;">
+        <button class="nav-item active" id="nav-btn-courts" onclick="switchMobileTab('courts')">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" class="svg-nav-icon">
+              <rect x="3" y="3" width="18" height="18" rx="1.5" />
+              <line x1="6" y1="3" x2="6" y2="21" />
+              <line x1="18" y1="3" x2="18" y2="21" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="12" y1="6" x2="12" y2="18" />
+            </svg>
+          </span>
+          <span class="nav-label">Courts <span id="queue-badge" class="badge-count" style="display: none;">0</span></span>
+        </button>
+        <button class="nav-item" id="nav-btn-roster" onclick="switchMobileTab('roster')">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" class="svg-nav-icon">
+              <!-- Left user (behind) -->
+              <path d="M2 18v-1a4 4 0 0 1 5-3.87" />
+              <circle cx="6" cy="9" r="2.5" />
+              <!-- Right user (behind) -->
+              <path d="M17 13.13a4 4 0 0 1 5 3.87v1" />
+              <circle cx="18" cy="9" r="2.5" />
+              <!-- Center user (front) -->
+              <path d="M6 20v-2a6 6 0 0 1 12 0v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </span>
+          <span class="nav-label">Roster</span>
+        </button>
+      </nav>
     </div>
 
     <!-- Custom Alert Modal Dialog -->
@@ -2391,40 +2425,6 @@
         <p id="loading-message">Loading CourtFlow...</p>
       </div>
     </div>
-
-    <!-- Mobile Bottom Navigation Bar -->
-    <nav class="mobile-nav-bar" id="mobile-nav-bar">
-      <button class="nav-item active" id="nav-btn-courts" onclick="switchMobileTab('courts')">
-        <span class="nav-icon">
-          <svg viewBox="0 0 24 24" class="svg-nav-icon">
-            <rect x="3" y="3" width="18" height="18" rx="1.5" />
-            <line x1="6" y1="3" x2="6" y2="21" />
-            <line x1="18" y1="3" x2="18" y2="21" />
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="12" y1="6" x2="12" y2="18" />
-          </svg>
-        </span>
-        <span class="nav-label">Courts <span id="queue-badge" class="badge-count" style="display: none;">0</span></span>
-      </button>
-      <button class="nav-item" id="nav-btn-roster" onclick="switchMobileTab('roster')">
-        <span class="nav-icon">
-          <svg viewBox="0 0 24 24" class="svg-nav-icon">
-            <!-- Left user (behind) -->
-            <path d="M2 18v-1a4 4 0 0 1 5-3.87" />
-            <circle cx="6" cy="9" r="2.5" />
-            <!-- Right user (behind) -->
-            <path d="M17 13.13a4 4 0 0 1 5 3.87v1" />
-            <circle cx="18" cy="9" r="2.5" />
-            <!-- Center user (front) -->
-            <path d="M6 20v-2a6 6 0 0 1 12 0v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
-        </span>
-        <span class="nav-label">Roster</span>
-      </button>
-    </nav>
       </div>
 
     <!-- State initialization and scripts injection -->
@@ -3683,9 +3683,11 @@ function resolveCourtflowHost(input) {
     const loginView = document.getElementById("portal-view-login");
     const mainView = document.getElementById("portal-view-main");
     const logoutBtn = document.getElementById("logout-btn");
+    const mobileNav = document.getElementById("mobile-nav-bar");
     if (loginView) loginView.style.display = "none";
     if (mainView) mainView.style.display = "flex";
     if (logoutBtn) logoutBtn.style.display = "flex";
+    if (mobileNav) mobileNav.style.removeProperty("display");
     
     // Contextual Banner check (older than 8 hours)
     let isOldSession = false;
@@ -3733,9 +3735,11 @@ function resolveCourtflowHost(input) {
 
     const loginView = document.getElementById("portal-view-login");
     const mainView = document.getElementById("portal-view-main");
+    const mobileNav = document.getElementById("mobile-nav-bar");
     
     if (mainView) mainView.style.display = "none";
     if (loginView) loginView.style.display = "flex";
+    if (mobileNav) mobileNav.style.display = "none";
     
     const clubTitle = (payload && payload.clubName) ? payload.clubName : "CourtFlow";
     const clubLogo = (payload && payload.clubLogoUrl) ? payload.clubLogoUrl : "";
