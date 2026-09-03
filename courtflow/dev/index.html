@@ -4,15 +4,296 @@
   player roster check-in toggles, and live matchmaking queue actions.
 -->
 <!DOCTYPE html>
-<html data-theme="light">
+<html>
   <head>
     <base target="_top">
     <title>CourtFlow</title>
     <meta name="apple-mobile-web-app-title" content="CourtFlow">
     <meta name="application-name" content="CourtFlow">
-    <meta name="theme-color" content="#0b1329">
+    <meta name="theme-color" content="#080d16">
     <meta name="robots" content="noindex, nofollow">
     <link rel="apple-touch-icon" href="https://fixtureflow.github.io/assets/images/courtflow/icon-courtflow.png">
+    
+    <!-- Zero-Flash Theme Initialization: Detects System OS or Saved Preference Before Paint -->
+    <script>
+  // Central Leagues & CourtFlow Club Registry
+  /**
+ * Fixture Flow - Central Leagues Club Registry
+ * 
+ * Maps human-readable club slugs to Google Apps Script Web App Host IDs.
+ * Enables clean PWA URLs (e.g. /leagues/player/?c=mount-pleasant).
+ */
+
+const CLUBS_REGISTRY = {
+  "mount-pleasant": {
+    name: "Mount Pleasant Badminton Club",
+    shortName: "MP",
+    aliases: ["mp", "mpbc", "mountpleasant", "mount_pleasant"],
+    hostId: "AKfycbzBielTidLGX-XUrA1OTuInVocRPjAxhqZbyUx7LQnb5jA1Pp_a_8SE1IVyuoePlgpu",
+    courtflowHostId: "AKfycbw9lPuih5TieELN_fnrT5mbtmAGoj-h18jiZEQdS2u3oVyw_P0uLpw8F69mPOLLMeVWSA"
+  },
+  "demo": {
+    name: "FixtureFlow Demo Sandbox",
+    shortName: "Demo",
+    aliases: ["sandbox", "public-demo", "trial"],
+    hostId: "AKfycbyu8_pzD00dxoGzd-Tc4kTlCuy7TPqaeVQ04paaL3AUQ0Fdjl4l5kOyfd6ysw71lAiM4A",
+    courtflowHostId: "AKfycby0rMt1SZnw51B1GVQag4PqdtZcHyv9str1acKacg4TJQKM4Ms1M_y6azjZuGzIcTu9"
+  },
+  "dev": {
+    name: "Development / Staging",
+    shortName: "Dev",
+    aliases: ["test", "local"],
+    hostId: "AKfycbykF0uy5JkbSYIxY-dJVE9bdjcRZJ7pnX6zNdTikEalLF0cweGJ4es4j9R5HcxXRwGB",
+    courtflowHostId: "AKfycbzQ8ZrOQic6xPG7jIYEQ1r75nJXOPyK0DJ6vymqngIt1tsFBcc7ilENjwirSoWyqJpo"
+  }
+};
+
+/**
+ * Resolves a URL parameter (slug, alias, or raw hash) to a Leagues club record.
+ * 
+ * @param {string} input The query parameter value (e.g. "mount-pleasant", "mp", "AKfy...").
+ * @returns {{ name: string, shortName: string, hostId: string, slug: string } | null} The resolved club or null if invalid.
+ */
+function resolveClubHost(input) {
+  if (!input || typeof input !== 'string') return null;
+  const normalized = input.trim().toLowerCase();
+
+  // 1. Direct slug match
+  if (CLUBS_REGISTRY[normalized]) {
+    return {
+      slug: normalized,
+      name: CLUBS_REGISTRY[normalized].name,
+      shortName: CLUBS_REGISTRY[normalized].shortName || normalized.toUpperCase(),
+      hostId: CLUBS_REGISTRY[normalized].hostId
+    };
+  }
+
+  // 2. Alias match
+  for (const [slug, club] of Object.entries(CLUBS_REGISTRY)) {
+    if (club.aliases && club.aliases.includes(normalized)) {
+      return {
+        slug: slug,
+        name: club.name,
+        shortName: club.shortName || slug.toUpperCase(),
+        hostId: club.hostId
+      };
+    }
+  }
+
+  // 3. Fallback: Raw Google Apps Script deployment hash (e.g. starts with AKfy or is long hash)
+  if (input.startsWith('AKfy') || input.length >= 25) {
+    return {
+      slug: 'custom',
+      name: 'Custom Club',
+      shortName: 'Club',
+      hostId: input.trim()
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Resolves a URL parameter (slug, alias, or raw hash) to a CourtFlow club record.
+ * 
+ * @param {string} input The query parameter value (e.g. "mount-pleasant", "mp", "AKfy...").
+ * @returns {{ name: string, shortName: string, hostId: string, slug: string } | null} The resolved club or null if invalid.
+ */
+function resolveCourtflowHost(input) {
+  if (!input || typeof input !== 'string') return null;
+  const normalized = input.trim().toLowerCase();
+
+  // 1. Direct slug match
+  if (CLUBS_REGISTRY[normalized] && CLUBS_REGISTRY[normalized].courtflowHostId) {
+    return {
+      slug: normalized,
+      name: CLUBS_REGISTRY[normalized].name,
+      shortName: CLUBS_REGISTRY[normalized].shortName || normalized.toUpperCase(),
+      hostId: CLUBS_REGISTRY[normalized].courtflowHostId
+    };
+  }
+
+  // 2. Alias match
+  for (const [slug, club] of Object.entries(CLUBS_REGISTRY)) {
+    if (club.aliases && club.aliases.includes(normalized) && club.courtflowHostId) {
+      return {
+        slug: slug,
+        name: club.name,
+        shortName: club.shortName || slug.toUpperCase(),
+        hostId: club.courtflowHostId
+      };
+    }
+  }
+
+  // 3. Fallback: Raw Google Apps Script deployment hash
+  if (input.startsWith('AKfy') || input.length >= 25) {
+    return {
+      slug: 'custom',
+      name: 'Custom Club',
+      shortName: 'Club',
+      hostId: input.trim()
+    };
+  }
+
+  return null;
+}
+
+
+  // Google Apps Script Headless PWA API Mock Wrapper
+  // Source: Antigravity PWA Integration Plan
+  const google = {
+    script: {
+      run: {
+        withSuccessHandler(successHandler) {
+          return {
+            withFailureHandler(failureHandler) {
+              return new Proxy({}, {
+                get(target, propKey) {
+                  return function(...args) {
+                    callHostApi(propKey, args, successHandler, failureHandler);
+                  };
+                }
+              });
+            },
+            // Fallback proxy if withFailureHandler is omitted
+            ...new Proxy({}, {
+              get(target, propKey) {
+                return function(...args) {
+                  callHostApi(propKey, args, successHandler, null);
+                };
+              }
+            })
+          };
+        },
+        withFailureHandler(failureHandler) {
+          return {
+            withSuccessHandler(successHandler) {
+              return new Proxy({}, {
+                get(target, propKey) {
+                  return function(...args) {
+                    callHostApi(propKey, args, successHandler, failureHandler);
+                  };
+                }
+              });
+            }
+          };
+        },
+        // Default proxy when no handler is specified
+        ...new Proxy({}, {
+          get(target, propKey) {
+            return function(...args) {
+              callHostApi(propKey, args, null, null);
+            };
+          }
+        })
+      }
+    }
+  };
+
+  function callHostApi(action, args, successHandler, failureHandler) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const clubParam = urlParams.get('c') || urlParams.get('club') || '';
+    let hostId = urlParams.get('h');
+    let roleView = urlParams.get('view') || localStorage.getItem('pwa_role_view');
+
+    if (clubParam && typeof resolveCourtflowHost === 'function') {
+      const resolved = resolveCourtflowHost(clubParam);
+      if (resolved && resolved.hostId) {
+        hostId = resolved.hostId;
+        localStorage.setItem('pwa_host_id', hostId);
+        localStorage.setItem('pwa_club_slug', clubParam);
+      }
+    }
+
+    if (urlParams.get('h')) {
+      localStorage.setItem('pwa_host_id', urlParams.get('h'));
+      if (urlParams.get('view')) {
+        localStorage.setItem('pwa_role_view', urlParams.get('view'));
+      }
+    }
+
+    if (!hostId) {
+      hostId = localStorage.getItem('pwa_host_id');
+    }
+
+    if (!hostId && typeof resolveCourtflowHost === 'function') {
+      const defaultResolved = resolveCourtflowHost('dev');
+      if (defaultResolved && defaultResolved.hostId) {
+        hostId = defaultResolved.hostId;
+      }
+    }
+
+    if (!hostId) {
+      const errorMsg = "Configuration Error: Missing host ID or club parameter (?c=... or ?h=...)";
+      console.error(errorMsg);
+      if (failureHandler) failureHandler(new Error(errorMsg));
+      return;
+    }
+
+    const payload = { action: action };
+    if (action === "getInitialState") {
+      payload.token = args[0] || null;
+    } else if (action === "validateAdminPin") {
+      payload.pin = args[0];
+    }
+    if (action === "saveSessionState") {
+      payload.payload = args[0];
+    } else if (action === "saveMatchHistory") {
+      payload.matchHistoryJSON = args[0];
+    } else if (action === "updatePlayerPlaysMixed") {
+      payload.name = args[0];
+      payload.playsMixed = args[1];
+    } else if (action === "calculateNextRound") {
+      payload.statePayloadJSON = args[0];
+    } else if (action === "calculateMatchForCourt") {
+      payload.statePayloadJSON = args[0];
+      payload.targetCourtId = args[1];
+    }
+
+    const targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
+    
+    fetch(targetUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain"
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`API Error: HTTP status ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(result => {
+      if (!result.success) {
+        throw new Error(result.error || "Unknown server error");
+      }
+      if (successHandler) {
+        successHandler(result.data);
+      }
+    })
+    .catch(err => {
+      console.error(`API Call failed (${action}):`, err);
+      if (failureHandler) {
+        failureHandler(err);
+      } else {
+        alert(`Connection error: ${err.message}`);
+      }
+    });
+  }
+
+      (function() {
+        try {
+          var saved = localStorage.getItem("clubflow-theme");
+          var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+          var theme = saved || (prefersDark ? "dark" : "light");
+          document.documentElement.setAttribute("data-theme", theme);
+          var metaTheme = document.querySelector('meta[name="theme-color"]');
+          if (metaTheme) metaTheme.setAttribute("content", theme === "dark" ? "#080d16" : "#f0f7fc");
+        } catch (e) {}
+      })();
+    </script>
     
     <!-- Include global variables and styles -->
     <!--
@@ -2448,273 +2729,6 @@
   Initializes and controls the live reactive memory layers for checked-in queues and court sessions.
 -->
 <script>
-  // Central Leagues & CourtFlow Club Registry
-  /**
- * Fixture Flow - Central Leagues Club Registry
- * 
- * Maps human-readable club slugs to Google Apps Script Web App Host IDs.
- * Enables clean PWA URLs (e.g. /leagues/player/?c=mount-pleasant).
- */
-
-const CLUBS_REGISTRY = {
-  "mount-pleasant": {
-    name: "Mount Pleasant Badminton Club",
-    shortName: "MP",
-    aliases: ["mp", "mpbc", "mountpleasant", "mount_pleasant"],
-    hostId: "AKfycbzBielTidLGX-XUrA1OTuInVocRPjAxhqZbyUx7LQnb5jA1Pp_a_8SE1IVyuoePlgpu",
-    courtflowHostId: "AKfycbw9lPuih5TieELN_fnrT5mbtmAGoj-h18jiZEQdS2u3oVyw_P0uLpw8F69mPOLLMeVWSA"
-  },
-  "demo": {
-    name: "FixtureFlow Demo Sandbox",
-    shortName: "Demo",
-    aliases: ["sandbox", "public-demo", "trial"],
-    hostId: "AKfycbyu8_pzD00dxoGzd-Tc4kTlCuy7TPqaeVQ04paaL3AUQ0Fdjl4l5kOyfd6ysw71lAiM4A",
-    courtflowHostId: "AKfycby0rMt1SZnw51B1GVQag4PqdtZcHyv9str1acKacg4TJQKM4Ms1M_y6azjZuGzIcTu9"
-  },
-  "dev": {
-    name: "Development / Staging",
-    shortName: "Dev",
-    aliases: ["test", "local"],
-    hostId: "AKfycbykF0uy5JkbSYIxY-dJVE9bdjcRZJ7pnX6zNdTikEalLF0cweGJ4es4j9R5HcxXRwGB",
-    courtflowHostId: "AKfycbzQ8ZrOQic6xPG7jIYEQ1r75nJXOPyK0DJ6vymqngIt1tsFBcc7ilENjwirSoWyqJpo"
-  }
-};
-
-/**
- * Resolves a URL parameter (slug, alias, or raw hash) to a Leagues club record.
- * 
- * @param {string} input The query parameter value (e.g. "mount-pleasant", "mp", "AKfy...").
- * @returns {{ name: string, shortName: string, hostId: string, slug: string } | null} The resolved club or null if invalid.
- */
-function resolveClubHost(input) {
-  if (!input || typeof input !== 'string') return null;
-  const normalized = input.trim().toLowerCase();
-
-  // 1. Direct slug match
-  if (CLUBS_REGISTRY[normalized]) {
-    return {
-      slug: normalized,
-      name: CLUBS_REGISTRY[normalized].name,
-      shortName: CLUBS_REGISTRY[normalized].shortName || normalized.toUpperCase(),
-      hostId: CLUBS_REGISTRY[normalized].hostId
-    };
-  }
-
-  // 2. Alias match
-  for (const [slug, club] of Object.entries(CLUBS_REGISTRY)) {
-    if (club.aliases && club.aliases.includes(normalized)) {
-      return {
-        slug: slug,
-        name: club.name,
-        shortName: club.shortName || slug.toUpperCase(),
-        hostId: club.hostId
-      };
-    }
-  }
-
-  // 3. Fallback: Raw Google Apps Script deployment hash (e.g. starts with AKfy or is long hash)
-  if (input.startsWith('AKfy') || input.length >= 25) {
-    return {
-      slug: 'custom',
-      name: 'Custom Club',
-      shortName: 'Club',
-      hostId: input.trim()
-    };
-  }
-
-  return null;
-}
-
-/**
- * Resolves a URL parameter (slug, alias, or raw hash) to a CourtFlow club record.
- * 
- * @param {string} input The query parameter value (e.g. "mount-pleasant", "mp", "AKfy...").
- * @returns {{ name: string, shortName: string, hostId: string, slug: string } | null} The resolved club or null if invalid.
- */
-function resolveCourtflowHost(input) {
-  if (!input || typeof input !== 'string') return null;
-  const normalized = input.trim().toLowerCase();
-
-  // 1. Direct slug match
-  if (CLUBS_REGISTRY[normalized] && CLUBS_REGISTRY[normalized].courtflowHostId) {
-    return {
-      slug: normalized,
-      name: CLUBS_REGISTRY[normalized].name,
-      shortName: CLUBS_REGISTRY[normalized].shortName || normalized.toUpperCase(),
-      hostId: CLUBS_REGISTRY[normalized].courtflowHostId
-    };
-  }
-
-  // 2. Alias match
-  for (const [slug, club] of Object.entries(CLUBS_REGISTRY)) {
-    if (club.aliases && club.aliases.includes(normalized) && club.courtflowHostId) {
-      return {
-        slug: slug,
-        name: club.name,
-        shortName: club.shortName || slug.toUpperCase(),
-        hostId: club.courtflowHostId
-      };
-    }
-  }
-
-  // 3. Fallback: Raw Google Apps Script deployment hash
-  if (input.startsWith('AKfy') || input.length >= 25) {
-    return {
-      slug: 'custom',
-      name: 'Custom Club',
-      shortName: 'Club',
-      hostId: input.trim()
-    };
-  }
-
-  return null;
-}
-
-
-  // Google Apps Script Headless PWA API Mock Wrapper
-  // Source: Antigravity PWA Integration Plan
-  const google = {
-    script: {
-      run: {
-        withSuccessHandler(successHandler) {
-          return {
-            withFailureHandler(failureHandler) {
-              return new Proxy({}, {
-                get(target, propKey) {
-                  return function(...args) {
-                    callHostApi(propKey, args, successHandler, failureHandler);
-                  };
-                }
-              });
-            },
-            // Fallback proxy if withFailureHandler is omitted
-            ...new Proxy({}, {
-              get(target, propKey) {
-                return function(...args) {
-                  callHostApi(propKey, args, successHandler, null);
-                };
-              }
-            })
-          };
-        },
-        withFailureHandler(failureHandler) {
-          return {
-            withSuccessHandler(successHandler) {
-              return new Proxy({}, {
-                get(target, propKey) {
-                  return function(...args) {
-                    callHostApi(propKey, args, successHandler, failureHandler);
-                  };
-                }
-              });
-            }
-          };
-        },
-        // Default proxy when no handler is specified
-        ...new Proxy({}, {
-          get(target, propKey) {
-            return function(...args) {
-              callHostApi(propKey, args, null, null);
-            };
-          }
-        })
-      }
-    }
-  };
-
-  function callHostApi(action, args, successHandler, failureHandler) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const clubParam = urlParams.get('c') || urlParams.get('club') || '';
-    let hostId = urlParams.get('h');
-    let roleView = urlParams.get('view') || localStorage.getItem('pwa_role_view');
-
-    if (clubParam && typeof resolveCourtflowHost === 'function') {
-      const resolved = resolveCourtflowHost(clubParam);
-      if (resolved && resolved.hostId) {
-        hostId = resolved.hostId;
-        localStorage.setItem('pwa_host_id', hostId);
-        localStorage.setItem('pwa_club_slug', clubParam);
-      }
-    }
-
-    if (urlParams.get('h')) {
-      localStorage.setItem('pwa_host_id', urlParams.get('h'));
-      if (urlParams.get('view')) {
-        localStorage.setItem('pwa_role_view', urlParams.get('view'));
-      }
-    }
-
-    if (!hostId) {
-      hostId = localStorage.getItem('pwa_host_id');
-    }
-
-    if (!hostId && typeof resolveCourtflowHost === 'function') {
-      const defaultResolved = resolveCourtflowHost('dev');
-      if (defaultResolved && defaultResolved.hostId) {
-        hostId = defaultResolved.hostId;
-      }
-    }
-
-    if (!hostId) {
-      const errorMsg = "Configuration Error: Missing host ID or club parameter (?c=... or ?h=...)";
-      console.error(errorMsg);
-      if (failureHandler) failureHandler(new Error(errorMsg));
-      return;
-    }
-
-    const payload = { action: action };
-    if (action === "getInitialState") {
-      payload.token = args[0] || null;
-    } else if (action === "validateAdminPin") {
-      payload.pin = args[0];
-    }
-    if (action === "saveSessionState") {
-      payload.payload = args[0];
-    } else if (action === "saveMatchHistory") {
-      payload.matchHistoryJSON = args[0];
-    } else if (action === "updatePlayerPlaysMixed") {
-      payload.name = args[0];
-      payload.playsMixed = args[1];
-    } else if (action === "calculateNextRound") {
-      payload.statePayloadJSON = args[0];
-    } else if (action === "calculateMatchForCourt") {
-      payload.statePayloadJSON = args[0];
-      payload.targetCourtId = args[1];
-    }
-
-    const targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
-    
-    fetch(targetUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain"
-      },
-      body: JSON.stringify(payload)
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`API Error: HTTP status ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(result => {
-      if (!result.success) {
-        throw new Error(result.error || "Unknown server error");
-      }
-      if (successHandler) {
-        successHandler(result.data);
-      }
-    })
-    .catch(err => {
-      console.error(`API Call failed (${action}):`, err);
-      if (failureHandler) {
-        failureHandler(err);
-      } else {
-        alert(`Connection error: ${err.message}`);
-      }
-    });
-  }
-
   /**
    * The active client-side session data.
    * Treat this as the master source of truth for the active web browser session.
@@ -3112,19 +3126,33 @@ function resolveCourtflowHost(input) {
   }
 
   /**
-   * Toggles the UI layout visual theme.
+   * Centralized helper to apply theme, update meta tags, persist if requested, and notify parent container.
+   * @param {string} theme 'dark' | 'light'
+   * @param {boolean} persist Whether to store in localStorage (true on manual toggle)
+   */
+  function applyTheme(theme, persist) {
+    document.documentElement.setAttribute("data-theme", theme);
+    if (persist) {
+      try {
+        localStorage.setItem("clubflow-theme", theme);
+      } catch (e) {}
+    }
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute("content", theme === "dark" ? "#080d16" : "#f0f7fc");
+    }
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'THEME_CHANGE', theme: theme }, '*');
+    }
+  }
+
+  /**
+   * Toggles the UI layout visual theme manually.
    */
   function toggleTheme() {
-    const htmlEl = document.documentElement;
-    const currentTheme = htmlEl.getAttribute("data-theme") || "light";
+    const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
     const newTheme = currentTheme === "dark" ? "light" : "dark";
-    
-    htmlEl.setAttribute("data-theme", newTheme);
-    localStorage.setItem("clubflow-theme", newTheme);
-    
-    if (window.parent !== window) {
-      window.parent.postMessage({ type: 'THEME_CHANGE', theme: newTheme }, '*');
-    }
+    applyTheme(newTheme, true);
   }
 
   /**
@@ -3634,13 +3662,36 @@ function resolveCourtflowHost(input) {
     match.skillDiff = Math.abs(sumA - sumB);
   }
 
-  // Set the theme configuration from localStorage before DOM fully paints to avoid flickers
+  // Set the theme configuration from localStorage or system preference before DOM fully paints
   (function initTheme() {
-    const savedTheme = localStorage.getItem("clubflow-theme") || "light";
-    document.documentElement.setAttribute("data-theme", savedTheme);
+    let savedTheme = null;
+    try {
+      savedTheme = localStorage.getItem("clubflow-theme");
+    } catch (e) {}
+
+    const mql = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+    const systemTheme = mql && mql.matches ? "dark" : "light";
+    const activeTheme = savedTheme || systemTheme;
     
-    if (window.parent !== window) {
-      window.parent.postMessage({ type: 'THEME_CHANGE', theme: savedTheme }, '*');
+    applyTheme(activeTheme, false);
+
+    // Live listener for OS theme shifts when user has not locked in an explicit manual preference
+    if (mql) {
+      const handleSystemThemeChange = function(e) {
+        let manualOverride = null;
+        try {
+          manualOverride = localStorage.getItem("clubflow-theme");
+        } catch (err) {}
+        if (!manualOverride) {
+          applyTheme(e.matches ? "dark" : "light", false);
+        }
+      };
+
+      if (mql.addEventListener) {
+        mql.addEventListener("change", handleSystemThemeChange);
+      } else if (mql.addListener) {
+        mql.addListener(handleSystemThemeChange);
+      }
     }
   })();
 
