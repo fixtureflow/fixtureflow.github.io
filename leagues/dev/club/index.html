@@ -265,10 +265,10 @@
         hostId = null;
       }
     } else {
-      hostId = localStorage.getItem('leagues_dev_pwa_host_id') || localStorage.getItem('pwa_host_id');
-      clubName = localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('pwa_club_name');
+      hostId = localStorage.getItem('leagues_dev_pwa_host_id');
+      clubName = localStorage.getItem('leagues_dev_pwa_club_name');
       clubShort = localStorage.getItem('leagues_dev_pwa_club_short') || 'FF';
-      roleView = localStorage.getItem('leagues_dev_pwa_role_view') || localStorage.getItem('pwa_role_view') || '';
+      roleView = localStorage.getItem('leagues_dev_pwa_role_view') || '';
     }
 
     
@@ -304,7 +304,7 @@
       link.rel = 'manifest';
       
       if (hostId) {
-        const clubSlug = localStorage.getItem('leagues_dev_pwa_club_slug') || localStorage.getItem('pwa_club_slug') || 'default';
+        const clubSlug = localStorage.getItem('leagues_dev_pwa_club_slug') || 'default';
         const manifestData = {
           "name": (clubName ? `${clubName} (DEV) - ` : "") + "FixtureFlow: Club Admin (Dev)",
           "short_name": appShortTitle,
