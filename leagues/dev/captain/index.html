@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>FixtureFlow | Captain Portal (DEV)</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-captain.svg">
+  <link rel="apple-touch-icon" href="/assets/images/leagues/icon-captain.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="FF Captain">
+  <meta name="theme-color" content="#0b1329">
+  <script src="/assets/js/leagues-registry.js?v=20260902"></script>
+  <style>
+    :root {
+      --bg-color: #0b1329;
+      --bg-gradient: radial-gradient(circle at center, #111827 0%, #0b1329 100%);
+      --text-color: #ffffff;
+      --muted-text: #94a3b8;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --loader-bg: rgba(255, 255, 255, 0.08);
+      --glow-color: rgba(167, 139, 250, 0.08);
+    }
+
+    /* System preference light mode fallback */
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg-color: #f8fafc;
+        --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
+        --text-color: #0f172a;
+        --muted-text: #64748b;
+        --card-bg: rgba(15, 23, 42, 0.03);
+        --card-border: rgba(15, 23, 42, 0.08);
+        --loader-bg: rgba(15, 23, 42, 0.08);
+        --glow-color: rgba(167, 139, 250, 0.04);
+      }
+    }
+
+    /* Explicit theme overrides */
+    body.theme-dark {
+      --bg-color: #0b1329;
+      --bg-gradient: radial-gradient(circle at center, #111827 0%, #0b1329 100%);
+      --text-color: #ffffff;
+      --muted-text: #94a3b8;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --loader-bg: rgba(255, 255, 255, 0.08);
+      --glow-color: rgba(167, 139, 250, 0.08);
+    }
+
+    body.theme-light {
+      --bg-color: #f8fafc;
+      --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
+      --text-color: #0f172a;
+      --muted-text: #64748b;
+      --card-bg: rgba(15, 23, 42, 0.03);
+      --card-border: rgba(15, 23, 42, 0.08);
+      --loader-bg: rgba(15, 23, 42, 0.08);
+      --glow-color: rgba(167, 139, 250, 0.04);
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-color);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text-color);
+    }
+    
+    iframe {
+      width: 100%;
+      height: 100dvh;
+      border: none;
+      display: none;
+      /* iOS Safari scrolling improvements */
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .screen-overlay {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100dvh;
+      box-sizing: border-box;
+      padding: 24px;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      background: var(--bg-gradient);
+    }
+
+    .glow-backdrop {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, var(--glow-color) 0%, rgba(167, 139, 250, 0) 70%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--loader-bg);
+      border-top-color: #a78bfa;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+      display: block;
+      z-index: 2;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spinner {
+        animation: spin 3s linear infinite;
+      }
+    }
+
+    .loading-text {
+      font-weight: 500;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      margin: 16px auto 0 auto;
+      color: var(--muted-text);
+      z-index: 2;
+      text-align: center;
+      max-width: 85%;
+      display: block;
+      text-transform: uppercase;
+    }
+
+    .offline-card {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 32px 24px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      z-index: 2;
+    }
+
+    .offline-icon {
+      font-size: 40px;
+      margin-bottom: 16px;
+    }
+
+    .offline-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      color: var(--text-color);
+    }
+
+    .offline-desc {
+      font-size: 14px;
+      color: var(--muted-text);
+      line-height: 1.5;
+      margin: 0 0 24px 0;
+    }
+
+    .retry-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 48px;
+      padding: 0 24px;
+      background: #a78bfa;
+      border: none;
+      border-radius: 8px;
+      color: #0b1329;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+      box-sizing: border-box;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      touch-action: manipulation;
+    }
+
+    .retry-btn:hover {
+      background: #c084fc;
+    }
+
+    .retry-btn:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen-overlay" id="status-screen">
+    <div class="glow-backdrop"></div>
+    
+    <div class="spinner" id="spinner-loader"></div>
+    <div class="loading-text" id="status-text">CONNECTING TO CAPTAIN PORTAL (DEV)...</div>
+
+    <div class="offline-card" id="offline-panel">
+      <div class="offline-icon">📶</div>
+      <h2 class="offline-title">Connection Lost</h2>
+      <p class="offline-desc">We couldn't connect to the Leagues Captain portal. Please check your network connection.</p>
+      <button class="retry-btn" onclick="tryReload()">RETRY CONNECTION</button>
+    </div>
+  </div>
+
+  <iframe id="app-frame" src=""></iframe>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch(err => console.error('SW failed: ', err));
+    }
+
+    const frame = document.getElementById('app-frame');
+    const statusScreen = document.getElementById('status-screen');
+    const statusText = document.getElementById('status-text');
+    const spinnerLoader = document.getElementById('spinner-loader');
+    const offlinePanel = document.getElementById('offline-panel');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const rawClubParam = urlParams.get('c') || urlParams.get('club') || urlParams.get('h');
+    let roleView = urlParams.get('view') || 'captain';
+    let hostId = null;
+    let clubName = null;
+
+    let clubShort = 'FF';
+    if (rawClubParam) {
+      const resolved = (typeof resolveClubHost === 'function') ? resolveClubHost(rawClubParam) : null;
+      if (resolved) {
+        hostId = resolved.hostId;
+        clubName = resolved.name;
+        clubShort = resolved.shortName || 'FF';
+        localStorage.setItem('leagues_dev_pwa_host_id', hostId);
+        localStorage.setItem('leagues_dev_pwa_club_name', clubName);
+        localStorage.setItem('leagues_dev_pwa_club_short', clubShort);
+        localStorage.setItem('leagues_dev_pwa_club_slug', resolved.slug);
+        localStorage.setItem('leagues_dev_pwa_role_view', roleView);
+      } else {
+        hostId = null;
+      }
+    } else {
+      hostId = localStorage.getItem('leagues_dev_pwa_host_id') || localStorage.getItem('pwa_host_id');
+      clubName = localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('pwa_club_name');
+      clubShort = localStorage.getItem('leagues_dev_pwa_club_short') || 'FF';
+      roleView = localStorage.getItem('leagues_dev_pwa_role_view') || localStorage.getItem('pwa_role_view') || 'captain';
+    }
+
+    
+    // DEV Environment Default Resolution
+    if (!rawClubParam && !hostId) {
+      const devResolved = (typeof resolveClubHost === 'function') ? resolveClubHost('dev') : null;
+      if (devResolved) {
+        hostId = devResolved.hostId;
+        clubName = devResolved.name;
+        clubShort = devResolved.shortName || 'Dev';
+        localStorage.setItem('leagues_dev_pwa_host_id', hostId);
+        localStorage.setItem('leagues_dev_pwa_club_name', clubName);
+        localStorage.setItem('leagues_dev_pwa_club_short', clubShort);
+        localStorage.setItem('leagues_dev_pwa_club_slug', devResolved.slug);
+        localStorage.setItem('leagues_dev_pwa_role_view', roleView);
+      }
+    }
+  
+    // Dynamic Titles for iOS & Browser Tab
+    const appShortTitle = (clubShort && clubShort !== 'FF') ? `${clubShort} Captains (Dev)` : 'FF Captains (Dev)';
+    document.title = (clubName ? `${clubName} (DEV) - ` : '') + 'Captain Portal (DEV) | FixtureFlow';
+    const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if (appleTitleMeta) {
+      appleTitleMeta.setAttribute('content', appShortTitle);
+    }
+
+    // iOS Safari Workaround: Inject manifest dynamically ONLY on non-iOS devices
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (!isIOS) {
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      
+      if (hostId) {
+        const clubSlug = localStorage.getItem('leagues_dev_pwa_club_slug') || localStorage.getItem('pwa_club_slug') || 'default';
+        const manifestData = {
+          "name": (clubName ? `${clubName} (DEV) - ` : "") + "FixtureFlow: Captain Portal (Dev)",
+          "short_name": appShortTitle,
+          "start_url": window.location.pathname + (rawClubParam ? `?c=${encodeURIComponent(rawClubParam)}` : `?h=${encodeURIComponent(hostId)}`),
+          "display": "standalone",
+          "background_color": "#0b1329",
+          "theme_color": "#a78bfa",
+          "orientation": "any",
+          "icons": [
+            {
+              "src": "/assets/images/leagues/icon-captain.png",
+              "sizes": "180x180",
+              "type": "image/png"
+            },
+            {
+              "src": "/assets/images/leagues/icon-captain.svg",
+              "sizes": "any",
+              "type": "image/svg+xml",
+              "purpose": "any"
+            }
+          ]
+        };
+        const base64Manifest = btoa(unescape(encodeURIComponent(JSON.stringify(manifestData))));
+        link.href = 'data:application/json;base64,' + base64Manifest;
+      } else {
+        link.href = 'manifest.json';
+      }
+      document.head.appendChild(link);
+    }
+
+    // Initialize Theme State
+    function applySavedTheme() {
+      const savedTheme = localStorage.getItem('pwa_theme');
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        document.body.classList.add(`theme-${savedTheme}`);
+        updateThemeColor(savedTheme);
+      } else {
+        const isSystemLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        updateThemeColor(isSystemLight ? 'light' : 'dark');
+      }
+    }
+
+    function updateThemeColor(theme) {
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) {
+        metaTheme.setAttribute('content', theme === 'light' ? '#f8fafc' : '#0b1329');
+      }
+    }
+
+    // Listen for postMessage updates from GAS app
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'THEME_CHANGE') {
+        const newTheme = event.data.theme;
+        if (newTheme === 'light' || newTheme === 'dark') {
+          localStorage.setItem('pwa_theme', newTheme);
+          document.body.classList.remove('theme-light', 'theme-dark');
+          document.body.classList.add(`theme-${newTheme}`);
+          updateThemeColor(newTheme);
+        }
+      }
+    });
+
+    function initApp() {
+      if (!hostId) {
+        if (rawClubParam) {
+          showError(`CLUB NOT FOUND<br><span style="font-size: 13px; color: #94a3b8; font-weight: normal; margin-top: 8px; display: block;">We couldn't find a club matching <b>"${rawClubParam}"</b>.<br>Please verify your link with your Match Secretary.</span>`);
+        } else {
+          showError(`CONFIG ERROR: Missing club parameter (?c=...)<br><span style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-top: 8px; display: block; word-break: break-all;">URL: ${window.location.href}</span>`);
+        }
+        return;
+      }
+
+      if (!navigator.onLine) {
+        showOfflineState();
+        return;
+      }
+
+      offlinePanel.style.display = 'none';
+      spinnerLoader.style.display = 'block';
+      const normalizedSlug = (rawClubParam || '').toLowerCase().trim();
+      let splashText = 'CONNECTING TO CAPTAIN PORTAL (DEV)...';
+      if (normalizedSlug === 'dev' || normalizedSlug === 'test' || normalizedSlug === 'local') {
+        splashText = 'CONNECTING TO CAPTAIN PORTAL (DEV)...';
+      } else if (normalizedSlug === 'demo' || normalizedSlug === 'sandbox' || normalizedSlug === 'public-demo' || normalizedSlug === 'trial') {
+        splashText = 'CONNECTING TO CAPTAIN PORTAL (DEMO)...';
+      } else if (clubName) {
+        const upperName = clubName.toUpperCase();
+        splashText = upperName.includes('CAPTAIN') ? `CONNECTING TO ${upperName} (DEV)...` : `CONNECTING TO ${upperName} CAPTAIN PORTAL (DEV)...`;
+      }
+      statusText.textContent = splashText;
+      statusScreen.style.display = 'flex';
+
+      let targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
+      if (roleView) {
+        targetUrl += `?view=${roleView}`;
+      }
+      
+      frame.src = targetUrl;
+
+      frame.onload = () => {
+        statusScreen.style.display = 'none';
+        frame.style.display = 'block';
+      };
+    }
+
+    function showOfflineState() {
+      spinnerLoader.style.display = 'none';
+      statusText.textContent = '';
+      offlinePanel.style.display = 'flex';
+      statusScreen.style.display = 'flex';
+      frame.style.display = 'none';
+    }
+
+    function showError(message) {
+      spinnerLoader.style.display = 'none';
+      statusText.innerHTML = `<span style="color: #ef4444; font-weight: 600;">${message}</span>`;
+      statusScreen.style.display = 'flex';
+      frame.style.display = 'none';
+    }
+
+    function tryReload() {
+      initApp();
+    }
+
+    window.addEventListener('online', () => {
+      console.log('Device returned online. Connecting...');
+      initApp();
+    });
+
+    window.addEventListener('offline', () => {
+      console.log('Device went offline.');
+      showOfflineState();
+    });
+
+    // Run theme setup and initialize
+    applySavedTheme();
+    initApp();
+  </script>
+</body>
+</html>
