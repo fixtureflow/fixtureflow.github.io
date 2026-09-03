@@ -87,11 +87,12 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 100%;
+      position: fixed;
+      inset: 0;
+      width: 100vw;
       height: 100dvh;
       box-sizing: border-box;
       padding: 24px;
-      position: absolute;
       top: 0;
       left: 0;
       z-index: 10;
@@ -102,7 +103,7 @@
       position: absolute;
       width: 300px;
       height: 300px;
-      background: radial-gradient(circle, var(--glow-color) 0%, rgba(16, 185, 129, 0) 70%);
+      background: radial-gradient(circle, var(--glow-color) 0%, rgba(167, 139, 250, 0) 70%);
       pointer-events: none;
       z-index: 1;
     }
@@ -114,6 +115,8 @@
       border-top-color: #a78bfa;
       border-radius: 50%;
       animation: spin 1s linear infinite;
+      margin: 0 auto;
+      display: block;
       z-index: 2;
     }
 
@@ -131,9 +134,13 @@
       font-weight: 500;
       font-size: 13px;
       letter-spacing: 0.08em;
-      margin-top: 16px;
+      margin: 16px auto 0 auto;
       color: var(--muted-text);
       z-index: 2;
+      text-align: center;
+      max-width: 85%;
+      display: block;
+      text-transform: uppercase;
     }
 
     .offline-card {
@@ -207,7 +214,7 @@
     <div class="glow-backdrop"></div>
     
     <div class="spinner" id="spinner-loader"></div>
-    <div class="loading-text" id="status-text">CONNECTING TO PORTAL...</div>
+    <div class="loading-text" id="status-text">CONNECTING TO CAPTAIN PORTAL...</div>
 
     <div class="offline-card" id="offline-panel">
       <div class="offline-icon">📶</div>
@@ -357,7 +364,17 @@
 
       offlinePanel.style.display = 'none';
       spinnerLoader.style.display = 'block';
-      statusText.textContent = clubName ? `CONNECTING TO ${clubName.toUpperCase()}...` : 'CONNECTING TO PORTAL...';
+      const normalizedSlug = (rawClubParam || '').toLowerCase().trim();
+      let splashText = 'CONNECTING TO CAPTAIN PORTAL...';
+      if (normalizedSlug === 'dev' || normalizedSlug === 'test' || normalizedSlug === 'local') {
+        splashText = 'CONNECTING TO CAPTAIN PORTAL (DEV)...';
+      } else if (normalizedSlug === 'demo' || normalizedSlug === 'sandbox' || normalizedSlug === 'public-demo' || normalizedSlug === 'trial') {
+        splashText = 'CONNECTING TO CAPTAIN PORTAL (DEMO)...';
+      } else if (clubName) {
+        const upperName = clubName.toUpperCase();
+        splashText = upperName.includes('CAPTAIN') ? `CONNECTING TO ${upperName}...` : `CONNECTING TO ${upperName} CAPTAIN PORTAL...`;
+      }
+      statusText.textContent = splashText;
       statusScreen.style.display = 'flex';
 
       let targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
