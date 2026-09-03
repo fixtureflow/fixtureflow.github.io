@@ -3143,6 +3143,67 @@ function resolveCourtflowHost(input) {
   /**
    * Action trigger to run matchmaking algorithm and update local state.
    */
+  /**
+   * Finalizes concluded round matches into matchHistory, partner/opponent memory, and player statistics.
+   * Preserves manual drag-and-drop / player swaps made on the courts before the next round begins.
+   * 
+   * @param {Array<Object>} matches The concluded court matches to commit to memory.
+   */
+  function finalizeRoundMatches_(matches) {
+    if (!matches || matches.length === 0) return;
+
+    // 1. Archive concluded round to matchHistory
+    state.matchHistory.push(JSON.parse(JSON.stringify(matches)));
+
+    // 2. Commit partner and opponent pairs to history
+    matches.forEach(m => {
+      if (!m.teamA || !m.teamB || m.teamA.length < 2 || m.teamB.length < 2) return;
+
+      const keyA = getPartnerKey(m.teamA[0].name, m.teamA[1].name);
+      const keyB = getPartnerKey(m.teamB[0].name, m.teamB[1].name);
+      state.history.push(keyA, keyB);
+
+      // Record opponent matches (four relationships: A0-B0, A0-B1, A1-B0, A1-B1)
+      const op1 = getPartnerKey(m.teamA[0].name, m.teamB[0].name);
+      const op2 = getPartnerKey(m.teamA[0].name, m.teamB[1].name);
+      const op3 = getPartnerKey(m.teamA[1].name, m.teamB[0].name);
+      const op4 = getPartnerKey(m.teamA[1].name, m.teamB[1].name);
+      state.opponentHistory.push(op1, op2, op3, op4);
+
+      // Calculate if match is mixed doubles (2 Males + 2 Females)
+      let males = 0;
+      let females = 0;
+      [...m.teamA, ...m.teamB].forEach(p => {
+        if (p.gender === "Female") females++;
+        else males++;
+      });
+      const isMixed = (males === 2 && females === 2);
+
+      // Update player play-type history counts
+      [...m.teamA, ...m.teamB].forEach(p => {
+        const statePlayer = state.players.find(sp => sp.name === p.name);
+        if (statePlayer) {
+          if (isMixed) {
+            statePlayer.mixedCount = (statePlayer.mixedCount || 0) + 1;
+          } else {
+            statePlayer.sameSexCount = (statePlayer.sameSexCount || 0) + 1;
+          }
+        }
+      });
+    });
+
+    // 3. Constrain history queues using dynamic, court-scaled limits (preserves 6 rounds of history)
+    const partnerLimit = state.maxCourts * 12;
+    const opponentLimit = state.maxCourts * 24;
+
+    if (state.history.length > partnerLimit) {
+      state.history = state.history.slice(-partnerLimit);
+    }
+    if (state.opponentHistory.length > opponentLimit) {
+      state.opponentHistory = state.opponentHistory.slice(-opponentLimit);
+    }
+  }
+
   function triggerMatchGeneration() {
     // If active courts are playing, ask for safety confirmation first
     if (state.activeCourts && state.activeCourts.length > 0) {
@@ -3210,61 +3271,15 @@ function resolveCourtflowHost(input) {
           const nextMatches = JSON.parse(responseJSON);
 
           if (nextMatches && nextMatches.length > 0) {
-            // Archive current active courts before overwriting
+            // 1. Finalize the concluded round (preserving all manual drag-and-drop / player swaps)
             if (state.activeCourts && state.activeCourts.length > 0) {
-              state.matchHistory.push(JSON.parse(JSON.stringify(state.activeCourts)));
+              finalizeRoundMatches_(state.activeCourts);
             }
+
+            // 2. Load the newly generated matches into active courts (in uncommitted/active state)
             state.activeCourts = nextMatches;
-            
-            // Update history buffer and play counts
-            nextMatches.forEach(m => {
-              const keyA = getPartnerKey(m.teamA[0].name, m.teamA[1].name);
-              const keyB = getPartnerKey(m.teamB[0].name, m.teamB[1].name);
-              
-              state.history.push(keyA);
-              state.history.push(keyB);
 
-              // Record opponent matches (four relationships: A0-B0, A0-B1, A1-B0, A1-B1)
-              const op1 = getPartnerKey(m.teamA[0].name, m.teamB[0].name);
-              const op2 = getPartnerKey(m.teamA[0].name, m.teamB[1].name);
-              const op3 = getPartnerKey(m.teamA[1].name, m.teamB[0].name);
-              const op4 = getPartnerKey(m.teamA[1].name, m.teamB[1].name);
-              state.opponentHistory.push(op1, op2, op3, op4);
-
-              // Calculate if match is mixed doubles (2 Males + 2 Females)
-              let males = 0;
-              let females = 0;
-              [...m.teamA, ...m.teamB].forEach(p => {
-                if (p.gender === "Female") females++;
-                else males++;
-              });
-              const isMixed = (males === 2 && females === 2);
-
-              // Update player play-type history counts
-              [...m.teamA, ...m.teamB].forEach(p => {
-                const statePlayer = state.players.find(sp => sp.name === p.name);
-                if (statePlayer) {
-                  if (isMixed) {
-                    statePlayer.mixedCount = (statePlayer.mixedCount || 0) + 1;
-                  } else {
-                    statePlayer.sameSexCount = (statePlayer.sameSexCount || 0) + 1;
-                  }
-                }
-              });
-            });
-
-            // Constrain history queues using dynamic, court-scaled limits (preserves 6 rounds of history)
-            const partnerLimit = state.maxCourts * 12;
-            const opponentLimit = state.maxCourts * 24;
-            
-            if (state.history.length > partnerLimit) {
-              state.history = state.history.slice(-partnerLimit);
-            }
-            if (state.opponentHistory.length > opponentLimit) {
-              state.opponentHistory = state.opponentHistory.slice(-opponentLimit);
-            }
-
-            // Consume force_next overrides locally to match backend state
+            // 3. Consume force_next overrides locally to match backend state
             nextMatches.forEach(m => {
               [...m.teamA, ...m.teamB].forEach(p => {
                 const statePlayer = state.players.find(sp => sp.name === p.name);
@@ -3348,48 +3363,13 @@ function resolveCourtflowHost(input) {
           const newMatch = JSON.parse(responseJSON);
 
           if (newMatch) {
-            // 4. Update partners and opponents history for the new match
-            const keyA = getPartnerKey(newMatch.teamA[0].name, newMatch.teamA[1].name);
-            const keyB = getPartnerKey(newMatch.teamB[0].name, newMatch.teamB[1].name);
-            state.history.push(keyA, keyB);
-
-            const op1 = getPartnerKey(newMatch.teamA[0].name, newMatch.teamB[0].name);
-            const op2 = getPartnerKey(newMatch.teamA[0].name, newMatch.teamB[1].name);
-            const op3 = getPartnerKey(newMatch.teamA[1].name, newMatch.teamB[0].name);
-            const op4 = getPartnerKey(newMatch.teamA[1].name, newMatch.teamB[1].name);
-            state.opponentHistory.push(op1, op2, op3, op4);
-
-            // Update player play-type counts (mixed vs same-sex)
-            let males = 0;
-            let females = 0;
-            [...newMatch.teamA, ...newMatch.teamB].forEach(p => {
-              if (p.gender === "Female") females++;
-              else males++;
-            });
-            const isMixed = (males === 2 && females === 2);
-
-            [...newMatch.teamA, ...newMatch.teamB].forEach(p => {
-              const statePlayer = state.players.find(sp => sp.name === p.name);
-              if (statePlayer) {
-                if (isMixed) {
-                  statePlayer.mixedCount = (statePlayer.mixedCount || 0) + 1;
-                } else {
-                  statePlayer.sameSexCount = (statePlayer.sameSexCount || 0) + 1;
-                }
-              }
-            });
-
-            // Constrain history queues
-            const partnerLimit = state.maxCourts * 12;
-            const opponentLimit = state.maxCourts * 24;
-            if (state.history.length > partnerLimit) {
-              state.history = state.history.slice(-partnerLimit);
-            }
-            if (state.opponentHistory.length > opponentLimit) {
-              state.opponentHistory = state.opponentHistory.slice(-opponentLimit);
+            // 1. Finalize the concluded match on this court before replacing it
+            const outgoingMatch = originalActive.find(m => m.courtId === cId);
+            if (outgoingMatch) {
+              finalizeRoundMatches_([outgoingMatch]);
             }
 
-            // Consume force_next overrides locally to match backend state
+            // 2. Consume force_next overrides locally to match backend state
             [...newMatch.teamA, ...newMatch.teamB].forEach(p => {
               const statePlayer = state.players.find(sp => sp.name === p.name);
               if (statePlayer) {
@@ -3397,8 +3377,10 @@ function resolveCourtflowHost(input) {
               }
             });
 
-            // Replace the old match in the active courts list with the new match
+            // 3. Replace the old match in the active courts list with the new match
             state.activeCourts = originalActive.map(m => m.courtId === cId ? newMatch : m);
+            renderUI();
+            debouncedSync();
           } else {
             // Transaction Rollback
             state.matchHistory.pop();
@@ -3431,9 +3413,9 @@ function resolveCourtflowHost(input) {
       () => {
         showLoadingOverlay("Archiving session logs and resetting...");
         
-        // 1. Archive current active courts before wiping
+        // 1. Finalize current active courts to history before wiping
         if (state.activeCourts && state.activeCourts.length > 0) {
-          state.matchHistory.push(JSON.parse(JSON.stringify(state.activeCourts)));
+          finalizeRoundMatches_(state.activeCourts);
         }
         
         // 2. Write history to spreadsheet first
