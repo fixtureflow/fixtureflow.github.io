@@ -2208,11 +2208,12 @@ function resolveCourtflowHost(input) {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
     height: 100dvh;
     box-sizing: border-box;
     padding: 24px;
-    position: fixed;
     top: 0;
     left: 0;
     z-index: 9999;
@@ -2234,6 +2235,8 @@ function resolveCourtflowHost(input) {
     border: 4px solid var(--splash-loader-bg);
     border-top-color: #0ea5e9;
     border-radius: 50%;
+    margin: 0 auto;
+    display: block;
     z-index: 2;
   }
 
@@ -2241,11 +2244,13 @@ function resolveCourtflowHost(input) {
     font-weight: 500;
     font-size: 13px;
     letter-spacing: 0.08em;
-    margin-top: 16px;
+    margin: 16px auto 0 auto;
     color: var(--splash-text);
     z-index: 2;
     text-transform: uppercase;
     text-align: center;
+    max-width: 85%;
+    display: block;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
@@ -2274,7 +2279,7 @@ function resolveCourtflowHost(input) {
       <div id="status-screen" class="screen-overlay">
         <div class="glow-backdrop"></div>
         <div class="spinner" id="spinner-loader"></div>
-        <div class="loading-text" id="status-text">CONNECTING TO COURTFLOW...</div>
+        <div class="loading-text" id="status-text">CONNECTING TO COURTFLOW (DEV)...</div>
         <div id="offline-panel" class="offline-card" style="display: none;">
           <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; color: #ef4444; font-weight: 700;">Connection Error</h3>
           <p id="offline-error-msg" style="margin: 0 0 16px 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.4;">Unable to connect to club data.</p>
@@ -3836,9 +3841,19 @@ function resolveCourtflowHost(input) {
         initialClubName = resolved.name;
       }
     }
+    let splashText = "CONNECTING TO COURTFLOW...";
+    const normalizedSlug = (clubParam || "").toLowerCase().trim();
+    if (normalizedSlug === "dev" || normalizedSlug === "test" || normalizedSlug === "local") {
+      splashText = "CONNECTING TO COURTFLOW (DEV)...";
+    } else if (normalizedSlug === "demo" || normalizedSlug === "sandbox" || normalizedSlug === "public-demo" || normalizedSlug === "trial") {
+      splashText = "CONNECTING TO COURTFLOW (DEMO)...";
+    } else if (initialClubName) {
+      const upperName = initialClubName.toUpperCase();
+      splashText = upperName.includes("COURTFLOW") ? `CONNECTING TO ${upperName}...` : `CONNECTING TO ${upperName} COURTFLOW...`;
+    }
     const statusText = document.getElementById("status-text");
     if (statusText) {
-      statusText.innerText = initialClubName ? `CONNECTING TO ${initialClubName.toUpperCase()}...` : "CONNECTING TO COURTFLOW...";
+      statusText.innerText = splashText;
     }
     document.title = (initialClubName ? `${initialClubName} - ` : "") + "CourtFlow | FixtureFlow";
 
