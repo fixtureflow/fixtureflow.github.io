@@ -41,6 +41,13 @@
     --bg-rest: rgba(239, 108, 0, 0.1);
     --c-unav: #c62828;
     --bg-unav: rgba(198, 40, 40, 0.1);
+
+    /* Splash Screen Tokens (Light) - Captain Base */
+    --splash-bg: radial-gradient(circle at center, #ffffff 0%, var(--bg) 100%);
+    --splash-glow: rgba(98, 0, 238, 0.12);
+    --splash-loader-bg: rgba(15, 23, 42, 0.08);
+    --splash-loader-accent: var(--primary);
+    --splash-text: var(--text-muted);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -63,6 +70,13 @@
       --border: #333333;
       --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
       --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+
+      /* Splash Screen Tokens (Dark) - Captain Base */
+      --splash-bg: radial-gradient(circle at center, #1c1b22 0%, var(--bg) 100%);
+      --splash-glow: rgba(187, 134, 252, 0.18);
+      --splash-loader-bg: rgba(255, 255, 255, 0.08);
+      --splash-loader-accent: var(--primary);
+      --splash-text: #a0a0a0;
 
       /* Status Colors (Dark) */
       --c-avail: #03dac6;
@@ -733,7 +747,7 @@
     opacity: 0.9;
   }
 
-  /* Connecting Splash Loading Overlay (Standalone Headless PWA) */
+  /* Connecting Splash Loading Overlay (Standalone Headless PWA - Aligned with CourtFlow) */
   .screen-overlay {
     display: flex;
     flex-direction: column;
@@ -748,14 +762,14 @@
     top: 0;
     left: 0;
     z-index: 9999;
-    background: var(--bg);
+    background: var(--splash-bg);
   }
 
   .glow-backdrop {
     position: absolute;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, var(--bg-match) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--splash-glow) 0%, transparent 70%);
     pointer-events: none;
     z-index: 1;
   }
@@ -763,8 +777,8 @@
   #spinner-loader {
     width: 44px;
     height: 44px;
-    border: 4px solid var(--border);
-    border-top-color: var(--primary);
+    border: 4px solid var(--splash-loader-bg);
+    border-top-color: var(--splash-loader-accent, var(--primary));
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto;
@@ -777,12 +791,13 @@
     font-size: 13px;
     letter-spacing: 0.08em;
     margin: 16px auto 0 auto;
-    color: var(--text-muted);
+    color: var(--splash-text);
     z-index: 2;
     text-transform: uppercase;
     text-align: center;
     max-width: 85%;
     display: block;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   .offline-card {
@@ -1353,8 +1368,11 @@ function resolveCourtflowHost(input) {
    * Updates the pre-JS / connecting splash screen text dynamically.
    * Format:
    * - DEV:  CONNECTING TO MOUNT PLEASANT BADMINTON CLUB PLAYER PORTAL (DEV)... (or CONNECTING TO PLAYER PORTAL (DEV)...)
-   * - DEMO: CONNECTING TO PLAYER PORTAL (DEMO)...
-   * - PROD: CONNECTING TO MOUNT PLEASANT BADMINTON CLUB PLAYER PORTAL...
+   * - DEV (Generic): CONNECTING TO [DEV] PLAYER · FIXTUREFLOW...
+   * - DEV (Named):   CONNECTING TO [DEV] PLAYER · MOUNT PLEASANT BADMINTON CLUB...
+   * - DEMO:          CONNECTING TO [DEMO] PLAYER · FIXTUREFLOW...
+   * - PROD (Named):  CONNECTING TO PLAYER · MOUNT PLEASANT BADMINTON CLUB...
+   * - PROD (Generic): CONNECTING TO PLAYER · FIXTUREFLOW...
    * 
    * @param {string} [portalRole]
    * @param {string} [clubName]
@@ -1382,24 +1400,18 @@ function resolveCourtflowHost(input) {
                    (typeof clubName === 'string' && (clubName.toLowerCase().includes('demo') || clubName.toLowerCase().includes('sandbox')));
 
     let envBadge = '';
-    if (isDev) envBadge = ' (DEV)';
-    else if (isDemo) envBadge = ' (DEMO)';
-
-    const roleSuffix = (upperRole.includes('ADMIN') || upperRole.includes('PORTAL')) ? '' : ' PORTAL';
-    let splashText = `CONNECTING TO ${upperRole}${roleSuffix}${envBadge}...`;
+    if (isDev) envBadge = '[DEV] ';
+    else if (isDemo) envBadge = '[DEMO] ';
 
     const isGenericDevName = typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging'));
     const isGenericDemoName = typeof clubName === 'string' && (clubName.toLowerCase() === 'demo' || clubName.toLowerCase().includes('demo sandbox') || clubName.toLowerCase() === 'fixtureflow demo sandbox');
 
+    let targetClub = 'FIXTUREFLOW';
     if (clubName && clubName !== 'Host Club' && !isGenericDevName && !isGenericDemoName) {
-      const upperName = clubName.toUpperCase().trim();
-      if (upperName.includes(upperRole)) {
-        splashText = `CONNECTING TO ${upperName}${envBadge}...`;
-      } else {
-        splashText = `CONNECTING TO ${upperName} ${upperRole}${roleSuffix}${envBadge}...`;
-      }
+      targetClub = clubName.toUpperCase().trim();
     }
 
+    const splashText = `CONNECTING TO ${envBadge}${upperRole} · ${targetClub}...`;
     statusText.textContent = splashText;
   }
 
@@ -2591,7 +2603,7 @@ function resolveCourtflowHost(input) {
 <div class="screen-overlay" id="status-screen">
     <div class="glow-backdrop"></div>
     <div class="spinner" id="spinner-loader"></div>
-    <div class="loading-text" id="status-text">CONNECTING TO CAPTAIN PORTAL (DEV)...</div>
+    <div class="loading-text" id="status-text">CONNECTING TO [DEV] CAPTAIN · FIXTUREFLOW...</div>
     <div class="offline-card" id="offline-panel" style="display: none;">
         <div class="offline-icon" style="font-size: 40px; margin-bottom: 16px;">📶</div>
         <h2 class="offline-title" style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">Connection Lost</h2>
