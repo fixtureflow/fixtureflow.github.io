@@ -3431,7 +3431,7 @@ function handleLogin(e, autoPin = null) {
             if (fullscreenLoading) fullscreenLoading.classList.add('hidden');
 
             const cachedData = localStorage.getItem('ff_cached_portal_data');
-            if (cachedData &amp;&amp; autoPin) {
+            if (cachedData && autoPin) {
                 try {
                     portalData = JSON.parse(cachedData);
                     currentPin = pin;
@@ -3440,7 +3440,7 @@ function handleLogin(e, autoPin = null) {
                 } catch (e) {}
             }
 
-            if (!navigator.onLine &amp;&amp; autoPin) {
+            if (!navigator.onLine && autoPin) {
                 showPlayerOfflineCard();
                 return;
             }
