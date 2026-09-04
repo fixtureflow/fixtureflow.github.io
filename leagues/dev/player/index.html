@@ -786,7 +786,7 @@
     z-index: 2;
   }
 
-  .loading-text {
+  .screen-overlay .loading-text {
     font-weight: 500;
     font-size: 13px;
     letter-spacing: 0.08em;
@@ -2130,7 +2130,8 @@ function resolveCourtflowHost(input) {
         }
     }
 
-    .loading-text {
+    #fullscreen-loading .loading-text,
+    .fullscreen-loading-overlay .loading-text {
         margin-top: 20px;
         font-size: 1.05rem;
         font-weight: 600;
@@ -2141,7 +2142,8 @@ function resolveCourtflowHost(input) {
     }
 
     @media (prefers-color-scheme: dark) {
-        .loading-text {
+        #fullscreen-loading .loading-text,
+        .fullscreen-loading-overlay .loading-text {
             color: #f8fafc;
         }
     }
