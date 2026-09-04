@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="color-scheme" content="light dark">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>FixtureFlow (DEV) | Player Portal (DEV)</title>
+  <title>[DEV] Player · FixtureFlow</title>
   
   <style>
   /* =========================================================================
@@ -1292,8 +1292,13 @@ function resolveCourtflowHost(input) {
   }
 
   /**
-   * Updates browser tab title and mobile home screen bookmark title according to environment.
-   * @param {string} clubName
+   * Updates browser tab title and mobile home screen bookmark title according to environment (Option 2).
+   * Format:
+   * - DEV:  [DEV] Player · Mount Pleasant (or [DEV] Player · FixtureFlow)
+   * - DEMO: [DEMO] Player · FixtureFlow
+   * - PROD: Player Portal · Mount Pleasant (or Player Portal · FixtureFlow)
+   * 
+   * @param {string} [clubName]
    * @param {string} [portalRole]
    * @private
    */
@@ -1302,29 +1307,137 @@ function resolveCourtflowHost(input) {
     if (!role) {
       if (document.title.includes('Player')) role = 'Player';
       else if (document.title.includes('Captain')) role = 'Captain';
-      else if (document.title.includes('Opponent') || document.title.includes('Club')) role = 'Opponent';
+      else if (document.title.includes('Opponent') || document.title.includes('Club')) role = 'Club Admin';
       else role = 'Portal';
     }
+    const roleTitle = (role === 'Club' || role === 'Opponent') ? 'Club Admin' : role;
 
     const isDev = window.location.pathname.includes('/dev/') || 
                   (typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging')));
     const isDemo = typeof clubName === 'string' && (clubName.toLowerCase().includes('demo') || clubName.toLowerCase().includes('sandbox'));
 
-    let envBadge = '';
-    if (isDev) envBadge = ' (DEV)';
-    else if (isDemo) envBadge = ' (DEMO)';
+    const isGenericDevName = typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging'));
+    const isGenericDemoName = typeof clubName === 'string' && (clubName.toLowerCase() === 'demo' || clubName.toLowerCase().includes('demo sandbox') || clubName.toLowerCase() === 'fixtureflow demo sandbox');
 
-    if (clubName) {
-      document.title = `${clubName}${envBadge} - ${role} Portal${envBadge} | FixtureFlow`;
+    let envPrefix = '';
+    let mobileEnv = '';
+    if (isDev) {
+      envPrefix = '[DEV] ';
+      mobileEnv = '[DEV] ';
+    } else if (isDemo) {
+      envPrefix = '[DEMO] ';
+      mobileEnv = '[DEMO] ';
+    }
+
+    if (isDev || isDemo) {
+      let brandAnchor = 'FixtureFlow';
+      if (clubName && clubName !== 'Host Club' && !isGenericDevName && !isGenericDemoName) {
+        brandAnchor = clubName;
+      }
+      document.title = `${envPrefix}${roleTitle} · ${brandAnchor}`;
     } else {
-      document.title = `FixtureFlow${envBadge} | ${role} Portal${envBadge}`;
+      let brandAnchor = 'FixtureFlow';
+      if (clubName && clubName !== 'Host Club') {
+        brandAnchor = clubName;
+      }
+      document.title = `${roleTitle} Portal · ${brandAnchor}`;
     }
 
     const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
     if (appleTitleMeta) {
-      appleTitleMeta.setAttribute('content', `FF ${role}${envBadge}`);
+      appleTitleMeta.setAttribute('content', `${mobileEnv}FF ${roleTitle}`);
     }
   }
+
+  /**
+   * Updates the pre-JS / connecting splash screen text dynamically.
+   * Format:
+   * - DEV:  CONNECTING TO MOUNT PLEASANT BADMINTON CLUB PLAYER PORTAL (DEV)... (or CONNECTING TO PLAYER PORTAL (DEV)...)
+   * - DEMO: CONNECTING TO PLAYER PORTAL (DEMO)...
+   * - PROD: CONNECTING TO MOUNT PLEASANT BADMINTON CLUB PLAYER PORTAL...
+   * 
+   * @param {string} [portalRole]
+   * @param {string} [clubName]
+   * @param {string} [clubSlug]
+   * @private
+   */
+  function updatePortalSplashText_(portalRole, clubName, clubSlug) {
+    const statusText = document.getElementById('status-text');
+    if (!statusText) return;
+
+    let role = portalRole;
+    if (!role) {
+      if (document.title.includes('Player')) role = 'Player';
+      else if (document.title.includes('Captain')) role = 'Captain';
+      else if (document.title.includes('Opponent') || document.title.includes('Club')) role = 'Club Admin';
+      else role = 'Portal';
+    }
+    const roleTitle = (role === 'Club' || role === 'Opponent') ? 'Club Admin' : role;
+    const upperRole = roleTitle.toUpperCase();
+
+    const isDev = window.location.pathname.includes('/dev/') || 
+                  (typeof clubSlug === 'string' && ['dev', 'test', 'local'].includes(clubSlug.toLowerCase())) ||
+                  (typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging')));
+    const isDemo = (typeof clubSlug === 'string' && ['demo', 'sandbox', 'public-demo', 'trial'].includes(clubSlug.toLowerCase())) ||
+                   (typeof clubName === 'string' && (clubName.toLowerCase().includes('demo') || clubName.toLowerCase().includes('sandbox')));
+
+    let envBadge = '';
+    if (isDev) envBadge = ' (DEV)';
+    else if (isDemo) envBadge = ' (DEMO)';
+
+    const roleSuffix = (upperRole.includes('ADMIN') || upperRole.includes('PORTAL')) ? '' : ' PORTAL';
+    let splashText = `CONNECTING TO ${upperRole}${roleSuffix}${envBadge}...`;
+
+    const isGenericDevName = typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging'));
+    const isGenericDemoName = typeof clubName === 'string' && (clubName.toLowerCase() === 'demo' || clubName.toLowerCase().includes('demo sandbox') || clubName.toLowerCase() === 'fixtureflow demo sandbox');
+
+    if (clubName && clubName !== 'Host Club' && !isGenericDevName && !isGenericDemoName) {
+      const upperName = clubName.toUpperCase().trim();
+      if (upperName.includes(upperRole)) {
+        splashText = `CONNECTING TO ${upperName}${envBadge}...`;
+      } else {
+        splashText = `CONNECTING TO ${upperName} ${upperRole}${roleSuffix}${envBadge}...`;
+      }
+    }
+
+    statusText.textContent = splashText;
+  }
+
+  // --- Early Splash & Title Initialization (Zero-Delay Paint) ---
+  (function initPortalBrandingEarly_() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const rawClubParam = urlParams.get('c') || urlParams.get('club') || '';
+      const savedSlug = localStorage.getItem('leagues_dev_pwa_club_slug') || localStorage.getItem('leagues_pwa_club_slug') || '';
+      const savedClubName = localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('leagues_pwa_club_name') || '';
+
+      let initialClubName = savedClubName;
+      const slug = rawClubParam || savedSlug;
+      if (typeof resolveClubHost === 'function' && slug) {
+        const resolved = resolveClubHost(slug);
+        if (resolved && resolved.name) {
+          initialClubName = resolved.name;
+        }
+      }
+
+      let role = 'Portal';
+      const path = (window.location.pathname || '').toLowerCase();
+      if (path.includes('player')) role = 'Player';
+      else if (path.includes('captain')) role = 'Captain';
+      else if (path.includes('club')) role = 'Club Admin';
+
+      updatePortalTabTitle_(initialClubName, role);
+
+      const applySplash = () => updatePortalSplashText_(role, initialClubName, slug);
+      if (document.getElementById('status-text')) {
+        applySplash();
+      } else if (typeof document.addEventListener === 'function') {
+        document.addEventListener('DOMContentLoaded', applySplash);
+      }
+    } catch (e) {
+      console.warn('[PWA] Early branding init error:', e);
+    }
+  })();
 
   /**
    * Hydrates club branding elements across all portals from public club metadata.
@@ -1337,6 +1450,7 @@ function resolveCourtflowHost(input) {
     
     // Update browser tab and mobile title
     updatePortalTabTitle_(name, portalRole);
+    updatePortalSplashText_(portalRole, name);
     
     // Update all elements with class .portal-header-club
     document.querySelectorAll('.portal-header-club').forEach(el => {
@@ -2219,7 +2333,7 @@ function resolveCourtflowHost(input) {
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="FF Player (Dev)">
+  <meta name="apple-mobile-web-app-title" content="[DEV] FF Player">
   <meta name="theme-color" content="#10b981">
   <link rel="manifest" href="manifest.json">
 </head>
@@ -3311,11 +3425,27 @@ function handleLogin(e, autoPin = null) {
         })
         .withFailureHandler(errObj => {
             const statusScreen = document.getElementById('status-screen');
-            if (statusScreen) statusScreen.style.display = 'none';
             if (btn) btn.disabled = false;
             if (btnText) btnText.classList.remove('hidden');
             if (spinner) spinner.classList.add('hidden');
             if (fullscreenLoading) fullscreenLoading.classList.add('hidden');
+
+            const cachedData = localStorage.getItem('ff_cached_portal_data');
+            if (cachedData &amp;&amp; autoPin) {
+                try {
+                    portalData = JSON.parse(cachedData);
+                    currentPin = pin;
+                    initPortalView();
+                    return;
+                } catch (e) {}
+            }
+
+            if (!navigator.onLine &amp;&amp; autoPin) {
+                showPlayerOfflineCard();
+                return;
+            }
+
+            if (statusScreen) statusScreen.style.display = 'none';
             document.getElementById('view-login').classList.remove('hidden');
             if (formContainer) formContainer.classList.remove('hidden');
             if (err) {
@@ -3330,6 +3460,26 @@ function handleLogin(e, autoPin = null) {
             }
         })
         .getPortalData(pin);
+}
+
+function revealPlayerLoginView() {
+    const statusScreen = document.getElementById('status-screen');
+    if (statusScreen) statusScreen.style.display = 'none';
+    const loginView = document.getElementById('view-login');
+    if (loginView) loginView.classList.remove('hidden');
+    const formContainer = document.getElementById('login-form-container');
+    if (formContainer) formContainer.classList.remove('hidden');
+}
+
+function showPlayerOfflineCard() {
+    const spinner = document.getElementById('spinner-loader');
+    const statusTxt = document.getElementById('status-text');
+    const offlinePanel = document.getElementById('offline-panel');
+    const statusScreen = document.getElementById('status-screen');
+    if (spinner) spinner.style.display = 'none';
+    if (statusTxt) statusTxt.style.display = 'none';
+    if (offlinePanel) offlinePanel.style.display = 'block';
+    if (statusScreen) statusScreen.style.display = 'flex';
 }
 
 function initPortalView() {
@@ -3450,8 +3600,7 @@ function logout() {
     localStorage.removeItem('ff_portal_player');
     localStorage.removeItem('ff_cached_portal_data');
     document.getElementById('view-main').classList.add('hidden');
-    document.getElementById('view-login').classList.remove('hidden');
-    document.getElementById('login-form-container').classList.remove('hidden'); // Ensure form is visible again
+    revealPlayerLoginView();
     document.getElementById('pin-input').value = "";
     document.getElementById('save-msg').classList.add('hidden');
     
@@ -3460,8 +3609,8 @@ function logout() {
     portalData = null;
 }
 
-// --- Optimistic Branding Hydration ---
-(function() {
+// --- Boot & Branding Hydration (CourtFlow Network-Gated Model) ---
+(function initPlayerBoot_() {
     const initialClubName = localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('leagues_pwa_club_name');
     const cachedMeta = localStorage.getItem('ff_public_metadata');
     if (cachedMeta) {
@@ -3473,56 +3622,50 @@ function logout() {
         hydrateClubBranding({ clubName: initialClubName }, 'Player');
     }
 
-    if (typeof google !== 'undefined' && google.script && google.script.run && typeof google.script.run.getPublicClubMetadata === 'function') {
-        google.script.run
-            .withSuccessHandler(res => {
-                const meta = (res && res.clubName) ? res : (res && res.data ? res.data : null);
-                if (meta) {
-                    localStorage.setItem('ff_public_metadata', JSON.stringify(meta));
-                    hydrateClubBranding(meta, 'Player');
-                }
-            })
-            .withFailureHandler(err => {
-                console.warn('[PWA] Failed to fetch public club metadata:', err);
-            })
-            .getPublicClubMetadata();
-    }
-})();
-
-// --- Init ---
-// Run synchronously at the end of script to prevent UI flashes where possible
-const storedPin = localStorage.getItem('ff_portal_pin');
-if (storedPin) {
-    // Instantly hide the login view so the user only sees the connecting splash screen
-    const loginView = document.getElementById('view-login');
-    if (loginView) loginView.classList.add('hidden');
-    
-    // Stale-While-Revalidate: Instant render from cached portal data if available
-    const cachedData = localStorage.getItem('ff_cached_portal_data');
-    if (cachedData) {
-        try {
-            portalData = JSON.parse(cachedData);
-            currentPin = storedPin;
-            initPortalView();
-        } catch (err) {
-            console.warn("[PWA] Cache parse error:", err);
-        }
-    } else {
+    const storedPin = localStorage.getItem('ff_portal_pin');
+    if (storedPin) {
+        // Authenticated: Keep splash screen visible while fetching fresh portal data
+        const loginView = document.getElementById('view-login');
+        if (loginView) loginView.classList.add('hidden');
         const fullscreenLoading = document.getElementById('fullscreen-loading');
         const loadingText = document.getElementById('fullscreen-loading-text');
         if (loadingText) loadingText.textContent = 'Connecting to Player Portal...';
         if (fullscreenLoading) fullscreenLoading.classList.remove('hidden');
+
+        const triggerAutoLogin = () => {
+            handleLogin(null, storedPin);
+        };
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', triggerAutoLogin);
+        } else {
+            triggerAutoLogin();
+        }
+    } else {
+        // Unauthenticated: Fetch public metadata before revealing login view (CourtFlow model)
+        if (typeof google !== 'undefined' && google.script && google.script.run && typeof google.script.run.getPublicClubMetadata === 'function') {
+            google.script.run
+                .withSuccessHandler(res => {
+                    const meta = (res && res.clubName) ? res : (res && res.data ? res.data : null);
+                    if (meta) {
+                        localStorage.setItem('ff_public_metadata', JSON.stringify(meta));
+                        hydrateClubBranding(meta, 'Player');
+                    }
+                    revealPlayerLoginView();
+                })
+                .withFailureHandler(err => {
+                    console.warn('[PWA] Failed to fetch public club metadata:', err);
+                    if (!navigator.onLine) {
+                        showPlayerOfflineCard();
+                    } else {
+                        revealPlayerLoginView();
+                    }
+                })
+                .getPublicClubMetadata();
+        } else {
+            revealPlayerLoginView();
+        }
     }
-    
-    window.addEventListener('DOMContentLoaded', () => {
-        handleLogin(null, storedPin);
-    });
-} else {
-    const statusScreen = document.getElementById('status-screen');
-    if (statusScreen) statusScreen.style.display = 'none';
-    const loginView = document.getElementById('view-login');
-    if (loginView) loginView.classList.remove('hidden');
-}
+})();
 
 // --- 6. ANALYTICS ---
 // Fire and forget after UI initialization
