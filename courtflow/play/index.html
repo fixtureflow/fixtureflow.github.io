@@ -2763,7 +2763,20 @@ function resolveCourtflowHost(input) {
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
   }
+
+  /**
+   * Retrieves the active session token from browser storage.
+   * @returns {string|null} The auth token or null if unauthenticated.
+   */
+  function getAuthToken() {
+    try {
+      return localStorage.getItem("courtflow_auth_token") || null;
+    } catch (e) {
+      return null;
+    }
+  }
 </script>
+
 
     <!--
   Client-Side Matchmaking Solver Engine wrappers.
@@ -3445,6 +3458,10 @@ function resolveCourtflowHost(input) {
       "Are you sure you want to reset the current session? This will archive active games and clear all waiting lineups.",
       () => {
         showLoadingOverlay("Archiving session logs and resetting...");
+        if (typeof syncTimeout !== "undefined" && syncTimeout) {
+          clearTimeout(syncTimeout);
+          syncTimeout = null;
+        }
         
         // 1. Finalize current active courts to history before wiping
         if (state.activeCourts && state.activeCourts.length > 0) {
@@ -3458,9 +3475,16 @@ function resolveCourtflowHost(input) {
             google.script.run
               .withSuccessHandler(success => {
                 // Re-fetch initial state
+                const token = getAuthToken();
                 google.script.run
                   .withSuccessHandler(data => {
-                    const payload = JSON.parse(data);
+                    const payload = typeof data === "string" ? JSON.parse(data) : data;
+                    if (payload.authenticated === false) {
+                      localStorage.removeItem("courtflow_auth_token");
+                      showLoginScreen(payload);
+                      hideLoadingOverlay();
+                      return;
+                    }
                     state.players = payload.players || [];
                     state.activeCourts = payload.activeCourts || [];
                     state.history = payload.history || [];
@@ -3485,7 +3509,7 @@ function resolveCourtflowHost(input) {
                     hideLoadingOverlay();
                     showAlertModal("Error", "Failed to fetch initial state: " + err.message);
                   })
-                  .getInitialState();
+                  .getInitialState(token);
               })
               .withFailureHandler(err => {
                 hideLoadingOverlay();
@@ -3857,7 +3881,7 @@ function resolveCourtflowHost(input) {
     }
     document.title = (initialClubName ? `${initialClubName} - ` : "") + "CourtFlow | FixtureFlow";
 
-    const token = localStorage.getItem("courtflow_auth_token") || null;
+    const token = getAuthToken();
     
     // Initial fetch from GAS (combines master roster and persistent state properties)
     google.script.run
@@ -4481,12 +4505,23 @@ function resolveCourtflowHost(input) {
       "Are you sure you want to clear custom settings overrides and restore the spreadsheet default weights? This will reload the application state.",
       () => {
         showLoadingOverlay("Restoring spreadsheet defaults...");
+        if (typeof syncTimeout !== "undefined" && syncTimeout) {
+          clearTimeout(syncTimeout);
+          syncTimeout = null;
+        }
         google.script.run
           .withSuccessHandler(() => {
             // Reload initial state from server
+            const token = getAuthToken();
             google.script.run
               .withSuccessHandler((data) => {
-                const payload = JSON.parse(data);
+                const payload = typeof data === "string" ? JSON.parse(data) : data;
+                if (payload.authenticated === false) {
+                  localStorage.removeItem("courtflow_auth_token");
+                  showLoginScreen(payload);
+                  hideLoadingOverlay();
+                  return;
+                }
                 state.config = payload.config || {};
                 if (!state.config.genderRule) state.config.genderRule = "standard";
                 if (!state.config.matchmakerMode) state.config.matchmakerMode = "balanced";
@@ -4506,7 +4541,7 @@ function resolveCourtflowHost(input) {
                 hideLoadingOverlay();
                 showAlertModal("Error", "Failed to reload initial state: " + err.message);
               })
-              .getInitialState();
+              .getInitialState(token);
           })
           .withFailureHandler((err) => {
             hideLoadingOverlay();
