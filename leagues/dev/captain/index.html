@@ -4,7 +4,7 @@
   <base target="_top">
   <meta name="color-scheme" content="light dark">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>FixtureFlow | Captain Portal (DEV)</title>
+  <title>FixtureFlow (DEV) | Captain Portal (DEV)</title>
   
   <style>
   /* =========================================================================
@@ -922,50 +922,33 @@ function resolveCourtflowHost(input) {
 
 
   // --- Google Apps Script Headless PWA API Mock Wrapper ---
+  function createRunner(successHandler, failureHandler) {
+    const handlers = {
+      withSuccessHandler(fn) {
+        return createRunner(fn, failureHandler);
+      },
+      withFailureHandler(fn) {
+        return createRunner(successHandler, fn);
+      },
+      withUserObject(obj) {
+        return this;
+      }
+    };
+    return new Proxy(handlers, {
+      get(target, propKey) {
+        if (propKey in target) {
+          return target[propKey];
+        }
+        return function(...args) {
+          callHostApi(propKey, args, successHandler, failureHandler);
+        };
+      }
+    });
+  }
+
   const google = window.google = {
     script: {
-      run: {
-        withSuccessHandler(successHandler) {
-          return {
-            withFailureHandler(failureHandler) {
-              return new Proxy({}, {
-                get(target, propKey) {
-                  return function(...args) {
-                    callHostApi(propKey, args, successHandler, failureHandler);
-                  };
-                }
-              });
-            },
-            ...new Proxy({}, {
-              get(target, propKey) {
-                return function(...args) {
-                  callHostApi(propKey, args, successHandler, null);
-                };
-              }
-            })
-          };
-        },
-        withFailureHandler(failureHandler) {
-          return {
-            withSuccessHandler(successHandler) {
-              return new Proxy({}, {
-                get(target, propKey) {
-                  return function(...args) {
-                    callHostApi(propKey, args, successHandler, failureHandler);
-                  };
-                }
-              });
-            }
-          };
-        },
-        ...new Proxy({}, {
-          get(target, propKey) {
-            return function(...args) {
-              callHostApi(propKey, args, null, null);
-            };
-          }
-        })
-      }
+      run: createRunner(null, null)
     }
   };
 
@@ -1023,7 +1006,7 @@ function resolveCourtflowHost(input) {
       return;
     }
 
-    const payload = { action: action };
+    const payload = {};
     if (action === "getPortalData" || action === "authPlayer") {
       payload.pin = args[0];
     } else if (action === "submitPlayerAvailability" || action === "submitAvailability") {
@@ -1042,15 +1025,18 @@ function resolveCourtflowHost(input) {
     } else if (action === "getTimeSlotsForDate") {
       payload.dateStr = args[0];
       payload.settings = args[1];
-    } else if (action === "getAvailableDates" || action === "findAvailableDatesForTeam") {
+    } else if (action === "findAvailableDatesForTeam") {
       payload.teamName = args[0];
-      payload.isHome = args[1];
-      payload.settings = args[2];
-      payload.excludeRowIndex = args[3];
+      payload.isHome = true;
+      payload.excludeRowIndex = (args[1] !== undefined && typeof args[1] === 'number') ? args[1] : -1;
     } else if (action === "findAvailableDatesForAwayMatch") {
       payload.teamName = args[0];
-      payload.settings = args[1];
-      payload.excludeRowIndex = args[2];
+      payload.isHome = false;
+      payload.excludeRowIndex = (args[1] !== undefined && typeof args[1] === 'number') ? args[1] : -1;
+    } else if (action === "getAvailableDates") {
+      payload.teamName = args[0];
+      payload.isHome = args[1] !== undefined ? args[1] : true;
+      payload.excludeRowIndex = args[2] !== undefined ? args[2] : -1;
     } else if (action === "confirmBooking") {
       payload.booking = args[0];
       payload.proposal = args[0];
@@ -1088,6 +1074,11 @@ function resolveCourtflowHost(input) {
       }
     }
 
+    const requestEnvelope = {
+      action: action,
+      payload: payload
+    };
+
     const targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
 
     fetch(targetUrl, {
@@ -1095,7 +1086,7 @@ function resolveCourtflowHost(input) {
       headers: {
         "Content-Type": "text/plain"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(requestEnvelope)
     })
     .then(response => {
       if (!response.ok) {
@@ -1115,8 +1106,6 @@ function resolveCourtflowHost(input) {
       console.error(`API Call failed (${action}):`, err);
       if (failureHandler) {
         failureHandler(err);
-      } else {
-        alert(`Connection error: ${err.message}`);
       }
     });
   }
@@ -1241,22 +1230,27 @@ function resolveCourtflowHost(input) {
   }
 
   /**
-   * Detects device type and logs analytics.
+   * Detects device type and logs analytics safely.
    * @param {string} portalName ('club', 'player', 'captain')
    */
   function detectPortalAnalytics(portalName) {
-    const ua = navigator.userAgent;
-    let deviceType = 'desktop';
-    
-    if (/Mobi|Android|iPhone|iPod/i.test(ua)) {
-      deviceType = 'mobile';
-    } else if (/Tablet|iPad/i.test(ua)) {
-      deviceType = 'tablet';
-    }
+    try {
+      const ua = navigator.userAgent;
+      let deviceType = 'desktop';
+      
+      if (/Mobi|Android|iPhone|iPod/i.test(ua)) {
+        deviceType = 'mobile';
+      } else if (/Tablet|iPad/i.test(ua)) {
+        deviceType = 'tablet';
+      }
 
-    // Fire and forget
-    google.script.run.logAnalytics(portalName, deviceType);
-    console.log('Logged ' + portalName + ' analytics:', deviceType);
+      if (typeof google !== 'undefined' && google.script && google.script.run && typeof google.script.run.logAnalytics === 'function') {
+        google.script.run.logAnalytics(portalName, deviceType);
+      }
+      console.log('Logged ' + portalName + ' analytics:', deviceType);
+    } catch (err) {
+      console.warn('Analytics logging skipped:', err);
+    }
   }
 
   let _loadingOverlayTimeout = null;
@@ -1298,12 +1292,51 @@ function resolveCourtflowHost(input) {
   }
 
   /**
+   * Updates browser tab title and mobile home screen bookmark title according to environment.
+   * @param {string} clubName
+   * @param {string} [portalRole]
+   * @private
+   */
+  function updatePortalTabTitle_(clubName, portalRole) {
+    let role = portalRole;
+    if (!role) {
+      if (document.title.includes('Player')) role = 'Player';
+      else if (document.title.includes('Captain')) role = 'Captain';
+      else if (document.title.includes('Opponent') || document.title.includes('Club')) role = 'Opponent';
+      else role = 'Portal';
+    }
+
+    const isDev = window.location.pathname.includes('/dev/') || 
+                  (typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging')));
+    const isDemo = typeof clubName === 'string' && (clubName.toLowerCase().includes('demo') || clubName.toLowerCase().includes('sandbox'));
+
+    let envBadge = '';
+    if (isDev) envBadge = ' (DEV)';
+    else if (isDemo) envBadge = ' (DEMO)';
+
+    if (clubName) {
+      document.title = `${clubName}${envBadge} - ${role} Portal${envBadge} | FixtureFlow`;
+    } else {
+      document.title = `FixtureFlow${envBadge} | ${role} Portal${envBadge}`;
+    }
+
+    const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if (appleTitleMeta) {
+      appleTitleMeta.setAttribute('content', `FF ${role}${envBadge}`);
+    }
+  }
+
+  /**
    * Hydrates club branding elements across all portals from public club metadata.
    * @param {{ clubName?: string, clubLogoUrl?: string, season?: string, seasonShort?: string }} metadata
+   * @param {string} [portalRole] Optional portal role ('Player', 'Captain', 'Opponent')
    */
-  function hydrateClubBranding(metadata) {
+  function hydrateClubBranding(metadata, portalRole) {
     if (!metadata) return;
     const name = metadata.clubName || 'Host Club';
+    
+    // Update browser tab and mobile title
+    updatePortalTabTitle_(name, portalRole);
     
     // Update all elements with class .portal-header-club
     document.querySelectorAll('.portal-header-club').forEach(el => {
@@ -6607,19 +6640,19 @@ function logout() {
   if (cachedMeta) {
     try {
       const parsed = JSON.parse(cachedMeta);
-      hydrateClubBranding(parsed);
+      hydrateClubBranding(parsed, 'Captain');
     } catch (e) {}
   } else if (initialClubName) {
-    hydrateClubBranding({ clubName: initialClubName });
+    hydrateClubBranding({ clubName: initialClubName }, 'Captain');
   }
 
-  if (typeof google !== 'undefined' && google.script && google.script.run) {
+  if (typeof google !== 'undefined' && google.script && google.script.run && typeof google.script.run.getPublicClubMetadata === 'function') {
     google.script.run
       .withSuccessHandler(res => {
         const meta = (res && res.clubName) ? res : (res && res.data ? res.data : null);
         if (meta) {
           localStorage.setItem('ff_public_metadata', JSON.stringify(meta));
-          hydrateClubBranding(meta);
+          hydrateClubBranding(meta, 'Captain');
         }
       })
       .withFailureHandler(err => {
