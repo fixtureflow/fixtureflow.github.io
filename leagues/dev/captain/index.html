@@ -1322,17 +1322,18 @@ function resolveCourtflowHost(input) {
   }
 
   /**
-   * Updates browser tab title and mobile home screen bookmark title according to environment (Option 2).
+   * Updates browser tab title and mobile home screen bookmark title according to environment.
    * Format:
-   * - DEV:  [DEV] Player · Mount Pleasant (or [DEV] Player · FixtureFlow)
-   * - DEMO: [DEMO] Player · FixtureFlow
-   * - PROD: Player Portal · Mount Pleasant (or Player Portal · FixtureFlow)
+   * - DEV:  [DEV] ${roleTitle} · FixtureFlow
+   * - DEMO: [DEMO] ${roleTitle} · FixtureFlow
+   * - PROD: ${roleTitle} Portal · ${clubName || 'FixtureFlow'}
    * 
    * @param {string} [clubName]
    * @param {string} [portalRole]
+   * @param {string} [clubSlug]
    * @private
    */
-  function updatePortalTabTitle_(clubName, portalRole) {
+  function updatePortalTabTitle_(clubName, portalRole, clubSlug) {
     let role = portalRole;
     if (!role) {
       if (document.title.includes('Player')) role = 'Player';
@@ -1342,34 +1343,28 @@ function resolveCourtflowHost(input) {
     }
     const roleTitle = (role === 'Club' || role === 'Opponent') ? 'Club Admin' : role;
 
-    const isDev = window.location.pathname.includes('/dev/') || 
+    let slug = clubSlug;
+    if (slug === undefined && typeof window !== 'undefined' && window.location && window.location.search) {
+      const urlParams = new URLSearchParams(window.location.search);
+      slug = urlParams.get('c') || urlParams.get('club') || '';
+    }
+    slug = slug || '';
+
+    const isDev = (window.location && window.location.pathname && window.location.pathname.includes('/dev/')) || 
+                  ['dev', 'test', 'local'].includes(slug.toLowerCase()) ||
                   (typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging')));
-    const isDemo = typeof clubName === 'string' && (clubName.toLowerCase().includes('demo') || clubName.toLowerCase().includes('sandbox'));
+    const isDemo = ['demo', 'sandbox', 'public-demo', 'trial'].includes(slug.toLowerCase()) ||
+                   (typeof clubName === 'string' && (clubName.toLowerCase().includes('demo') || clubName.toLowerCase().includes('sandbox')));
 
-    const isGenericDevName = typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging'));
-    const isGenericDemoName = typeof clubName === 'string' && (clubName.toLowerCase() === 'demo' || clubName.toLowerCase().includes('demo sandbox') || clubName.toLowerCase() === 'fixtureflow demo sandbox');
-
-    let envPrefix = '';
     let mobileEnv = '';
     if (isDev) {
-      envPrefix = '[DEV] ';
+      document.title = `[DEV] ${roleTitle} · FixtureFlow`;
       mobileEnv = '[DEV] ';
     } else if (isDemo) {
-      envPrefix = '[DEMO] ';
+      document.title = `[DEMO] ${roleTitle} · FixtureFlow`;
       mobileEnv = '[DEMO] ';
-    }
-
-    if (isDev || isDemo) {
-      let brandAnchor = 'FixtureFlow';
-      if (clubName && clubName !== 'Host Club' && !isGenericDevName && !isGenericDemoName) {
-        brandAnchor = clubName;
-      }
-      document.title = `${envPrefix}${roleTitle} · ${brandAnchor}`;
     } else {
-      let brandAnchor = 'FixtureFlow';
-      if (clubName && clubName !== 'Host Club') {
-        brandAnchor = clubName;
-      }
+      const brandAnchor = (clubName && clubName !== 'Host Club') ? clubName : 'FixtureFlow';
       document.title = `${roleTitle} Portal · ${brandAnchor}`;
     }
 
@@ -1382,12 +1377,9 @@ function resolveCourtflowHost(input) {
   /**
    * Updates the pre-JS / connecting splash screen text dynamically.
    * Format:
-   * - DEV:  CONNECTING TO MOUNT PLEASANT BADMINTON CLUB PLAYER PORTAL (DEV)... (or CONNECTING TO PLAYER PORTAL (DEV)...)
-   * - DEV (Generic): CONNECTING TO [DEV] PLAYER · FIXTUREFLOW...
-   * - DEV (Named):   CONNECTING TO [DEV] PLAYER · MOUNT PLEASANT BADMINTON CLUB...
-   * - DEMO:          CONNECTING TO [DEMO] PLAYER · FIXTUREFLOW...
-   * - PROD (Named):  CONNECTING TO PLAYER · MOUNT PLEASANT BADMINTON CLUB...
-   * - PROD (Generic): CONNECTING TO PLAYER · FIXTUREFLOW...
+   * - DEV:  CONNECTING TO [DEV] ${upperRole} · FIXTUREFLOW...
+   * - DEMO: CONNECTING TO [DEMO] ${upperRole} · FIXTUREFLOW...
+   * - PROD: CONNECTING TO ${upperRole} · ${(clubName || 'FIXTUREFLOW').toUpperCase()}...
    * 
    * @param {string} [portalRole]
    * @param {string} [clubName]
@@ -1408,26 +1400,30 @@ function resolveCourtflowHost(input) {
     const roleTitle = (role === 'Club' || role === 'Opponent') ? 'Club Admin' : role;
     const upperRole = roleTitle.toUpperCase();
 
-    const isDev = window.location.pathname.includes('/dev/') || 
-                  (typeof clubSlug === 'string' && ['dev', 'test', 'local'].includes(clubSlug.toLowerCase())) ||
+    let slug = clubSlug;
+    if (slug === undefined && typeof window !== 'undefined' && window.location && window.location.search) {
+      const urlParams = new URLSearchParams(window.location.search);
+      slug = urlParams.get('c') || urlParams.get('club') || '';
+    }
+    slug = slug || '';
+
+    const isDev = (window.location && window.location.pathname && window.location.pathname.includes('/dev/')) || 
+                  ['dev', 'test', 'local'].includes(slug.toLowerCase()) ||
                   (typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging')));
-    const isDemo = (typeof clubSlug === 'string' && ['demo', 'sandbox', 'public-demo', 'trial'].includes(clubSlug.toLowerCase())) ||
+    const isDemo = ['demo', 'sandbox', 'public-demo', 'trial'].includes(slug.toLowerCase()) ||
                    (typeof clubName === 'string' && (clubName.toLowerCase().includes('demo') || clubName.toLowerCase().includes('sandbox')));
 
-    let envBadge = '';
-    if (isDev) envBadge = '[DEV] ';
-    else if (isDemo) envBadge = '[DEMO] ';
-
-    const isGenericDevName = typeof clubName === 'string' && (clubName.toLowerCase() === 'development / staging' || clubName.toLowerCase() === 'development' || clubName.toLowerCase() === 'staging');
-    const isGenericDemoName = typeof clubName === 'string' && (clubName.toLowerCase() === 'demo' || clubName.toLowerCase().includes('demo sandbox') || clubName.toLowerCase() === 'fixtureflow demo sandbox');
-
-    let targetClub = 'FIXTUREFLOW';
-    if (clubName && clubName !== 'Host Club' && !isGenericDevName && !isGenericDemoName) {
-      targetClub = clubName.toUpperCase().trim();
+    if (isDev) {
+      statusText.textContent = `CONNECTING TO [DEV] ${upperRole} · FIXTUREFLOW...`;
+    } else if (isDemo) {
+      statusText.textContent = `CONNECTING TO [DEMO] ${upperRole} · FIXTUREFLOW...`;
+    } else {
+      let targetClub = 'FIXTUREFLOW';
+      if (clubName && clubName !== 'Host Club') {
+        targetClub = clubName.toUpperCase().trim();
+      }
+      statusText.textContent = `CONNECTING TO ${upperRole} · ${targetClub}...`;
     }
-
-    const splashText = `CONNECTING TO ${envBadge}${upperRole} · ${targetClub}...`;
-    statusText.textContent = splashText;
   }
 
   // --- Early Splash & Title Initialization (Zero-Delay Paint) ---
@@ -1455,7 +1451,7 @@ function resolveCourtflowHost(input) {
       else if (path.includes('captain')) role = 'Captain';
       else if (path.includes('club')) role = 'Club Admin';
 
-      updatePortalTabTitle_(initialClubName, role);
+      updatePortalTabTitle_(initialClubName, role, slug);
 
       const applySplash = () => updatePortalSplashText_(role, initialClubName, slug);
       if (document.getElementById('status-text')) {
