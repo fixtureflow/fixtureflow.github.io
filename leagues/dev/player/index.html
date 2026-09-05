@@ -635,6 +635,8 @@
   .portal-header-group { display: flex; flex-direction: row; align-items: baseline; gap: 6px; }
   .portal-header-club { font-weight: 500; font-size: 1.1rem; margin: 0;}
   .portal-header-title { font-weight: bold; font-size: 1.1rem; margin: 0;}
+  .header-club-logo { display: none; }
+  .header-club-logo[src]:not([src=""]) { display: inline-block; }
   
 
   
@@ -1403,7 +1405,7 @@ function resolveCourtflowHost(input) {
     if (isDev) envBadge = '[DEV] ';
     else if (isDemo) envBadge = '[DEMO] ';
 
-    const isGenericDevName = typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging'));
+    const isGenericDevName = typeof clubName === 'string' && (clubName.toLowerCase() === 'development / staging' || clubName.toLowerCase() === 'development' || clubName.toLowerCase() === 'staging');
     const isGenericDemoName = typeof clubName === 'string' && (clubName.toLowerCase() === 'demo' || clubName.toLowerCase().includes('demo sandbox') || clubName.toLowerCase() === 'fixtureflow demo sandbox');
 
     let targetClub = 'FIXTUREFLOW';
@@ -1423,9 +1425,11 @@ function resolveCourtflowHost(input) {
       const savedSlug = localStorage.getItem('leagues_dev_pwa_club_slug') || localStorage.getItem('leagues_pwa_club_slug') || '';
       const savedClubName = localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('leagues_pwa_club_name') || '';
 
-      let initialClubName = savedClubName;
+      const cfgEl = document.getElementById('ff-config');
+      const cfgClubName = cfgEl && cfgEl.dataset && cfgEl.dataset.clubName ? cfgEl.dataset.clubName : '';
+      let initialClubName = cfgClubName || savedClubName;
       const slug = rawClubParam || savedSlug;
-      if (typeof resolveClubHost === 'function' && slug) {
+      if (typeof resolveClubHost === 'function' && slug && !cfgClubName) {
         const resolved = resolveClubHost(slug);
         if (resolved && resolved.name) {
           initialClubName = resolved.name;
@@ -1475,8 +1479,11 @@ function resolveCourtflowHost(input) {
     const logoContainer = document.getElementById('login-club-logo-container');
     const loginLogo = document.getElementById('login-club-logo');
 
-    if (metadata.clubLogoUrl) {
-      if (loginLogo) loginLogo.src = metadata.clubLogoUrl;
+    const fallbackLogo = (typeof ORIGINAL_HOST_LOGO_URL !== 'undefined' && ORIGINAL_HOST_LOGO_URL) ? ORIGINAL_HOST_LOGO_URL : '';
+    const logoUrl = metadata.clubLogoUrl !== undefined ? metadata.clubLogoUrl : fallbackLogo;
+
+    if (logoUrl) {
+      if (loginLogo) loginLogo.src = logoUrl;
       if (logoContainer) logoContainer.style.display = 'block';
       if (loginTitle) {
         loginTitle.textContent = name;
@@ -1486,7 +1493,7 @@ function resolveCourtflowHost(input) {
 
       // Header logos
       document.querySelectorAll('.header-club-logo').forEach(img => {
-        img.src = metadata.clubLogoUrl;
+        img.src = logoUrl;
         img.style.display = 'inline-block';
       });
     } else {
@@ -1497,7 +1504,9 @@ function resolveCourtflowHost(input) {
         loginTitleLarge.style.display = 'block';
       }
       document.querySelectorAll('.header-club-logo').forEach(img => {
-        img.style.display = 'none';
+        if (!img.getAttribute('src')) {
+          img.style.display = 'none';
+        }
       });
     }
 
@@ -2358,6 +2367,12 @@ function resolveCourtflowHost(input) {
   <link rel="manifest" href="manifest.json">
 </head>
 <body class="safe-area-pt safe-area-pb">
+  <!-- Hidden config container -->
+  <div id="ff-config" style="display: none;"
+       data-portal-type="player"
+       data-club-name=""
+       data-club-logo-url="">
+  </div>
   <div id="app">
     <!-- Overlays -->
     <!-- Connecting Splash Screen (Pre-JS / Initial Load) -->
@@ -2388,14 +2403,14 @@ function resolveCourtflowHost(input) {
     <!-- VIEW 1: LOGIN (PIN SCREEN) -->
 <div id="view-login" class="view-login-container text-center">
     <div style="margin: auto; width: 100%;">
-        <div id="login-club-logo-container" style="margin-bottom: 24px; display: none;">
+        <div id="login-club-logo-container" style="margin-bottom: 24px; ">
             <img id="login-club-logo" src="" alt="Club Logo" style="width: 150px; height: 150px; object-fit: contain; margin: 0 auto; display: block;">
         </div>
-        <h2 id="login-club-title" class="portal-header-club" style="margin-bottom: 8px; font-size: 1.5rem; display: none;">
-            Host Club
+        <h2 id="login-club-title" class="portal-header-club" style="margin-bottom: 8px; font-size: 1.5rem; ">
+            
         </h2>
-        <h1 id="login-club-title-large" class="portal-header-club" style="margin-bottom: 12px; font-size: 2.2rem; line-height: 1.2; color: var(--primary); font-weight: 800; display: block;">
-            Host Club
+        <h1 id="login-club-title-large" class="portal-header-club" style="margin-bottom: 12px; font-size: 2.2rem; line-height: 1.2; color: var(--primary); font-weight: 800; ">
+            
         </h1>
         
         <h3 style="margin-top: 0; color: var(--text-muted); font-weight: normal; font-size: 1.17rem;">Player Availability Portal</h3>
@@ -2426,15 +2441,15 @@ function resolveCourtflowHost(input) {
     <!-- HEADER (Inside Portal) - Desktop Stacked -->
     <header class="portal-header-desktop" style="background: var(--surface); position: sticky; top: 0; z-index: 90; box-shadow: var(--shadow); margin-bottom: 16px; user-select: none; -webkit-user-select: none; cursor: pointer;" onclick="if(typeof handleDeveloperTap === 'function') handleDeveloperTap()">
         <div class="container" style="display: flex; align-items: center; justify-content: center; gap: 12px; padding-top: 12px; padding-bottom: 12px;">
-          <img id="header-club-logo" class="header-club-logo" src="" alt="Logo" style="width: 40px; height: 40px; object-fit: contain; display: none;">
+          <img id="header-club-logo" class="header-club-logo" src="" alt="Logo" style="width: 40px; height: 40px; object-fit: contain;">
           <div class="portal-header-group" style="display: flex; align-items: center; gap: 8px;">
-            <span class="portal-header-club" style="font-weight: 500; color: var(--text);">Host Club</span>
+            <span class="portal-header-club" style="font-weight: 500; color: var(--text);"></span>
             <span style="color: var(--text-muted);">•</span>
             <span class="portal-header-title" style="font-weight: 700; color: var(--text);">Player Portal</span>
             <span style="color: var(--text-muted);">•</span>
             <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
-              <span class="full-season">DDLC Season</span>
-              <span class="short-season">DDLC</span>
+              <span class="full-season">DDLC </span>
+              <span class="short-season">DDLC </span>
             </span>
           </div>
         </div>
@@ -2453,10 +2468,10 @@ function resolveCourtflowHost(input) {
             
             <!-- Left: Logo & Context -->
             <div style="display: flex; align-items: center; gap: 10px;">
-                <img id="header-club-logo-mobile" class="header-club-logo" src="" alt="Logo" style="width: 32px; height: 32px; object-fit: contain; border-radius: 6px; display: none;">
+                <img id="header-club-logo-mobile" class="header-club-logo" src="" alt="Logo" style="width: 32px; height: 32px; object-fit: contain; border-radius: 6px;">
                 <div style="display: flex; flex-direction: column; justify-content: center;">
-                    <span class="portal-header-club" style="font-size: 0.95rem; font-weight: 700; color: var(--on-surface); line-height: 1.1;">Host Club</span>
-                    <span style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.1; font-weight: 500; margin-top: 2px;">Player Portal • <span class="short-season">DDLC</span></span>
+                    <span class="portal-header-club" style="font-size: 0.95rem; font-weight: 700; color: var(--on-surface); line-height: 1.1;"></span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.1; font-weight: 500; margin-top: 2px;">Player Portal • <span class="short-season">DDLC </span></span>
                 </div>
             </div>
 
@@ -3631,9 +3646,14 @@ function logout() {
 
 // --- Boot & Branding Hydration (CourtFlow Network-Gated Model) ---
 (function initPlayerBoot_() {
-    const initialClubName = localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('leagues_pwa_club_name');
+    const cfgEl = document.getElementById('ff-config');
+    const cfgClubName = cfgEl && cfgEl.dataset && cfgEl.dataset.clubName ? cfgEl.dataset.clubName : '';
+    const cfgClubLogo = cfgEl && cfgEl.dataset && cfgEl.dataset.clubLogoUrl ? cfgEl.dataset.clubLogoUrl : '';
+    const initialClubName = cfgClubName || localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('leagues_pwa_club_name');
     const cachedMeta = localStorage.getItem('ff_public_metadata');
-    if (cachedMeta) {
+    if (cfgClubName || cfgClubLogo) {
+        hydrateClubBranding({ clubName: cfgClubName, clubLogoUrl: cfgClubLogo }, 'Player');
+    } else if (cachedMeta) {
         try {
             const parsed = JSON.parse(cachedMeta);
             hydrateClubBranding(parsed, 'Player');
