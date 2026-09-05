@@ -1345,8 +1345,13 @@ function resolveCourtflowHost(input) {
 
     let slug = clubSlug;
     if (slug === undefined && typeof window !== 'undefined' && window.location && window.location.search) {
-      const urlParams = new URLSearchParams(window.location.search);
-      slug = urlParams.get('c') || urlParams.get('club') || '';
+      if (typeof URLSearchParams !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        slug = urlParams.get('c') || urlParams.get('club') || '';
+      } else {
+        const match = window.location.search.match(/[?&](?:c|club)=([^&#]*)/i);
+        slug = match ? decodeURIComponent(match[1]) : '';
+      }
     }
     slug = slug || '';
 
@@ -1402,8 +1407,13 @@ function resolveCourtflowHost(input) {
 
     let slug = clubSlug;
     if (slug === undefined && typeof window !== 'undefined' && window.location && window.location.search) {
-      const urlParams = new URLSearchParams(window.location.search);
-      slug = urlParams.get('c') || urlParams.get('club') || '';
+      if (typeof URLSearchParams !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        slug = urlParams.get('c') || urlParams.get('club') || '';
+      } else {
+        const match = window.location.search.match(/[?&](?:c|club)=([^&#]*)/i);
+        slug = match ? decodeURIComponent(match[1]) : '';
+      }
     }
     slug = slug || '';
 
