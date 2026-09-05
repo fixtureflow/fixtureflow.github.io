@@ -6734,14 +6734,35 @@ function onLoginFailure(error) {
 
     document.getElementById('club-dashboard-view').style.display = 'block';
 
-    // Stale-While-Revalidate: Instant render from cached club fixtures if available
-    const cachedFixtures = localStorage.getItem('ff_cached_club_fixtures_' + clubName) || localStorage.getItem('ff_cached_club_fixtures');
-    if (cachedFixtures) {
-      try {
-        const parsed = JSON.parse(cachedFixtures);
-        renderDashboard(parsed);
-      } catch (err) {
-        console.warn("[PWA] Cache parse error:", err);
+    const tableContainer = document.getElementById('table-container');
+    const noMsg = document.getElementById('no-fixtures-msg');
+    const loadingEl = document.getElementById('dashboard-loading');
+
+    // In Admin Mode (impersonating/swapping clubs), always show loading indicator and bypass stale cache
+    if (isAdmin) {
+      if (tableContainer) tableContainer.style.display = 'none';
+      if (noMsg) noMsg.style.display = 'none';
+      if (loadingEl) {
+        loadingEl.textContent = 'Loading fixtures...';
+        loadingEl.style.display = 'block';
+      }
+    } else {
+      // For standard Club login: Stale-While-Revalidate strictly scoped to this club
+      const cachedFixtures = localStorage.getItem('ff_cached_club_fixtures_' + clubName);
+      if (cachedFixtures) {
+        try {
+          const parsed = JSON.parse(cachedFixtures);
+          renderDashboard(parsed);
+        } catch (err) {
+          console.warn("[PWA] Cache parse error:", err);
+        }
+      } else {
+        if (tableContainer) tableContainer.style.display = 'none';
+        if (noMsg) noMsg.style.display = 'none';
+        if (loadingEl) {
+          loadingEl.textContent = 'Loading fixtures...';
+          loadingEl.style.display = 'block';
+        }
       }
     }
 
@@ -6769,7 +6790,6 @@ function onLoginFailure(error) {
         if (activeClub) {
           localStorage.setItem('ff_cached_club_fixtures_' + activeClub, JSON.stringify(data));
         }
-        localStorage.setItem('ff_cached_club_fixtures', JSON.stringify(data));
       } catch(e) {}
     }
 
@@ -7142,7 +7162,6 @@ function onLoginFailure(error) {
     if (activeClub) {
       localStorage.removeItem('ff_cached_club_fixtures_' + activeClub);
     }
-    localStorage.removeItem('ff_cached_club_fixtures');
     localStorage.removeItem('FF_SESSION_TOKEN');
     localStorage.removeItem('FF_CLUB_NAME');
     localStorage.removeItem('FF_IS_ADMIN');
@@ -7342,7 +7361,10 @@ function onLoginFailure(error) {
     if (noMsg) noMsg.style.display = 'none';
 
     const dashboardLoading = document.getElementById('dashboard-loading');
-    if (dashboardLoading) dashboardLoading.style.display = 'block';
+    if (dashboardLoading) {
+      dashboardLoading.textContent = 'Loading fixtures...';
+      dashboardLoading.style.display = 'block';
+    }
   }
 
   function clearOpponentFields() {
