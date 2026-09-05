@@ -7,8 +7,8 @@
 <html>
   <head>
     <base target="_top">
-    <title>CourtFlow</title>
-    <meta name="apple-mobile-web-app-title" content="CourtFlow">
+    <title>[DEV] CourtFlow · FixtureFlow</title>
+    <meta name="apple-mobile-web-app-title" content="[DEV] CourtFlow">
     <meta name="application-name" content="CourtFlow">
     <meta name="theme-color" content="#080d16">
     <meta name="robots" content="noindex, nofollow">
@@ -2240,7 +2240,7 @@ function resolveCourtflowHost(input) {
     z-index: 2;
   }
 
-  .loading-text {
+  .screen-overlay .loading-text {
     font-weight: 500;
     font-size: 13px;
     letter-spacing: 0.08em;
@@ -2279,7 +2279,7 @@ function resolveCourtflowHost(input) {
       <div id="status-screen" class="screen-overlay">
         <div class="glow-backdrop"></div>
         <div class="spinner" id="spinner-loader"></div>
-        <div class="loading-text" id="status-text">CONNECTING TO COURTFLOW (DEV)...</div>
+        <div class="loading-text" id="status-text">CONNECTING TO [DEV] COURTFLOW · FIXTUREFLOW...</div>
         <div id="offline-panel" class="offline-card" style="display: none;">
           <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; color: #ef4444; font-weight: 700;">Connection Error</h3>
           <p id="offline-error-msg" style="margin: 0 0 16px 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.4;">Unable to connect to club data.</p>
@@ -3738,6 +3738,10 @@ function resolveCourtflowHost(input) {
     const clubTitle = state.config.clubName || payload.clubName || "CourtFlow";
     const brandingH1 = document.querySelector(".branding h1");
     if (brandingH1) brandingH1.innerText = clubTitle;
+    if (clubTitle && clubTitle !== "CourtFlow") {
+      updatePortalTabTitle_(clubTitle);
+      try { localStorage.setItem("pwa_club_name", clubTitle); } catch (e) {}
+    }
 
     // Update branding logo if clubLogoUrl is set
     const logoEl = document.getElementById("club-logo");
@@ -3855,31 +3859,101 @@ function resolveCourtflowHost(input) {
   }
 
   // Initialize UI on window load
+  /**
+   * Updates the browser document title according to Option 2 conventions.
+   * Format:
+   * - DEV (Generic): [DEV] CourtFlow · FixtureFlow
+   * - DEV (Named):   [DEV] CourtFlow · Mount Pleasant
+   * - DEMO (Generic): [DEMO] CourtFlow · FixtureFlow
+   * - DEMO (Named):   [DEMO] CourtFlow · Demo Club
+   * - PROD (Generic): CourtFlow · FixtureFlow
+   * - PROD (Named):   CourtFlow · Mount Pleasant
+   * 
+   * @param {string} [clubName]
+   * @private
+   */
+  function updatePortalTabTitle_(clubName) {
+    const isDev = window.location.pathname.includes("/dev/") ||
+                  (typeof clubName === "string" && (clubName.toLowerCase().includes("development") || clubName.toLowerCase().includes("staging")));
+    const isDemo = typeof clubName === "string" && (clubName.toLowerCase().includes("demo") || clubName.toLowerCase().includes("sandbox"));
+
+    const isGenericDevName = typeof clubName === "string" && (clubName.toLowerCase().includes("development") || clubName.toLowerCase().includes("staging"));
+    const isGenericDemoName = typeof clubName === "string" && (clubName.toLowerCase() === "demo" || clubName.toLowerCase().includes("demo sandbox") || clubName.toLowerCase() === "fixtureflow demo sandbox");
+
+    let envPrefix = "";
+    let mobileEnv = "";
+    if (isDev) {
+      envPrefix = "[DEV] ";
+      mobileEnv = "[DEV] ";
+    } else if (isDemo) {
+      envPrefix = "[DEMO] ";
+      mobileEnv = "[DEMO] ";
+    }
+
+    let brandAnchor = "FixtureFlow";
+    if (clubName && clubName !== "Host Club" && !isGenericDevName && !isGenericDemoName) {
+      brandAnchor = clubName;
+    }
+
+    document.title = `${envPrefix}CourtFlow · ${brandAnchor}`;
+
+    const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if (appleTitleMeta) {
+      appleTitleMeta.setAttribute("content", `${mobileEnv}CourtFlow`);
+    }
+  }
+
+  /**
+   * Updates the pre-JS / connecting splash screen text dynamically.
+   * Format:
+   * - DEV (Generic): CONNECTING TO [DEV] COURTFLOW · FIXTUREFLOW...
+   * - DEV (Named):   CONNECTING TO [DEV] COURTFLOW · MOUNT PLEASANT...
+   * - DEMO (Generic): CONNECTING TO [DEMO] COURTFLOW · FIXTUREFLOW...
+   * - PROD (Named):  CONNECTING TO COURTFLOW · MOUNT PLEASANT...
+   * - PROD (Generic): CONNECTING TO COURTFLOW · FIXTUREFLOW...
+   * 
+   * @param {string} [clubName]
+   * @param {string} [clubSlug]
+   * @private
+   */
+  function updatePortalSplashText_(clubName, clubSlug) {
+    const statusText = document.getElementById("status-text");
+    if (!statusText) return;
+
+    const isDev = window.location.pathname.includes("/dev/") ||
+                  (typeof clubSlug === "string" && ["dev", "test", "local"].includes(clubSlug.toLowerCase())) ||
+                  (typeof clubName === "string" && (clubName.toLowerCase().includes("development") || clubName.toLowerCase().includes("staging")));
+    const isDemo = (typeof clubSlug === "string" && ["demo", "sandbox", "public-demo", "trial"].includes(clubSlug.toLowerCase())) ||
+                   (typeof clubName === "string" && (clubName.toLowerCase().includes("demo") || clubName.toLowerCase().includes("sandbox")));
+
+    let envBadge = "";
+    if (isDev) envBadge = "[DEV] ";
+    else if (isDemo) envBadge = "[DEMO] ";
+
+    const isGenericDevName = typeof clubName === "string" && (clubName.toLowerCase().includes("development") || clubName.toLowerCase().includes("staging"));
+    const isGenericDemoName = typeof clubName === "string" && (clubName.toLowerCase() === "demo" || clubName.toLowerCase().includes("demo sandbox") || clubName.toLowerCase() === "fixtureflow demo sandbox");
+
+    let targetClub = "FIXTUREFLOW";
+    if (clubName && clubName !== "Host Club" && !isGenericDevName && !isGenericDemoName) {
+      targetClub = clubName.toUpperCase().trim();
+    }
+
+    statusText.textContent = `CONNECTING TO ${envBadge}COURTFLOW · ${targetClub}...`;
+  }
+
   window.addEventListener("load", () => {
     const urlParams = new URLSearchParams(window.location.search);
     const clubParam = urlParams.get("c") || urlParams.get("club") || localStorage.getItem("pwa_club_slug") || "";
-    let initialClubName = null;
+    let initialClubName = localStorage.getItem("pwa_club_name") || null;
     if (typeof resolveCourtflowHost === "function" && clubParam) {
       const resolved = resolveCourtflowHost(clubParam);
       if (resolved && resolved.name) {
         initialClubName = resolved.name;
+        try { localStorage.setItem("pwa_club_name", resolved.name); } catch (e) {}
       }
     }
-    let splashText = "CONNECTING TO COURTFLOW...";
-    const normalizedSlug = (clubParam || "").toLowerCase().trim();
-    if (normalizedSlug === "dev" || normalizedSlug === "test" || normalizedSlug === "local") {
-      splashText = "CONNECTING TO COURTFLOW (DEV)...";
-    } else if (normalizedSlug === "demo" || normalizedSlug === "sandbox" || normalizedSlug === "public-demo" || normalizedSlug === "trial") {
-      splashText = "CONNECTING TO COURTFLOW (DEMO)...";
-    } else if (initialClubName) {
-      const upperName = initialClubName.toUpperCase();
-      splashText = upperName.includes("COURTFLOW") ? `CONNECTING TO ${upperName}...` : `CONNECTING TO ${upperName} COURTFLOW...`;
-    }
-    const statusText = document.getElementById("status-text");
-    if (statusText) {
-      statusText.innerText = splashText;
-    }
-    document.title = (initialClubName ? `${initialClubName} - ` : "") + "CourtFlow | FixtureFlow";
+    updatePortalTabTitle_(initialClubName);
+    updatePortalSplashText_(initialClubName, clubParam);
 
     const token = getAuthToken();
     
