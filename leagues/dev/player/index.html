@@ -828,6 +828,10 @@
 </style>
 
   <script>
+  // --- Application Version Stamp ---
+  window.__FF_VERSION__ = "dev-v35";
+  console.log("🏸 FixtureFlow [" + window.__FF_VERSION__ + "] Active");
+
   // --- Central Leagues & CourtFlow Club Registry ---
   /**
  * Fixture Flow - Central Leagues Club Registry
@@ -2386,6 +2390,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
+  <meta name="app-version" content="dev-v35">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-player.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2456,7 +2461,7 @@ function resolveCourtflowHost(input) {
 
     <!-- BRANDING FOOTER (Login View) -->
     <div class="brand-footer login-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v35</span>
 
     </div>
 </div>
@@ -2769,7 +2774,8 @@ function handleDeveloperTap() {
     devTapCount++;
     clearTimeout(devTapTimeout);
     if (devTapCount >= 5) {
-        if (confirm("Developer Mode: Do you want to wipe memory and log out?")) {
+        const ver = (window && window.__FF_VERSION__) ? ` [${window.__FF_VERSION__}]` : (typeof appVersion !== 'undefined' && appVersion ? ` [${appVersion}]` : '');
+        if (confirm(`Developer Mode${ver}: Do you want to wipe memory and log out?`)) {
             logout();
         }
         devTapCount = 0;
