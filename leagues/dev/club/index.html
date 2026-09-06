@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v47";
+  window.__FF_VERSION__ = "dev-v48";
   console.log("%c[FixtureFlow · Club Admin]%c Running version " + window.__FF_VERSION__, "color: #cbd5e1; font-weight: bold;", "color: inherit;");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -2584,7 +2584,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v47">
+  <meta name="app-version" content="dev-v48">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-club.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-club.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -3305,7 +3305,7 @@ function onLoginFailure(error) {
 
     
     <div id="native-app-footer" style="display:none; width: 100%; margin-top: auto;" class="brand-footer login-footer">
-      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v47</span>
+      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v48</span>
 
     </div>
 
@@ -4116,6 +4116,11 @@ function onLoginFailure(error) {
     if (bookingFlow) bookingFlow.style.display = 'none';
     const loading = document.getElementById('global-loading');
     if (loading) loading.style.display = 'none';
+    const pinInput = document.getElementById('pin-input');
+    if (pinInput) {
+      pinInput.value = '';
+      setTimeout(() => pinInput.focus({ preventScroll: true }), 100);
+    }
   }
 
   function showClubOfflineCard() {
@@ -4190,7 +4195,11 @@ function onLoginFailure(error) {
     }
   })();
 
-  window.addEventListener('load', checkSessionAndLoad);
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', checkSessionAndLoad);
+  } else {
+    checkSessionAndLoad();
+  }
 
   function checkSessionAndLoad() {
       try {
