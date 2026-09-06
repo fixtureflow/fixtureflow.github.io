@@ -140,8 +140,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v22";
-  console.log("%c[CourtFlow]%c Running version dev-v22", "color: #38bdf8; font-weight: bold;", "color: inherit;");
+  window.__FF_VERSION__ = "dev-v23";
+  console.log("%c[CourtFlow]%c Running version dev-v23", "color: #38bdf8; font-weight: bold;", "color: inherit;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -2314,7 +2314,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="app-version" content="dev-v22">
+  <meta name="app-version" content="dev-v23">
   <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
   <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
   <link rel="manifest" href="manifest.json">
@@ -2375,7 +2375,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v22</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v23</span>
 
         </div>
       </div>
@@ -2549,7 +2549,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v22</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v23</span>
 
       </div>
 
@@ -3911,7 +3911,7 @@ function resolveCourtflowHost(input) {
     const pinInput = document.getElementById("admin-pin-input");
     if (pinInput) {
       pinInput.value = "";
-      setTimeout(() => pinInput.focus(), 100);
+      setTimeout(() => pinInput.focus({ preventScroll: true }), 100);
     }
     hideLoadingOverlay();
   }
@@ -4106,7 +4106,7 @@ function resolveCourtflowHost(input) {
           }
           if (pinInput) {
             pinInput.value = "";
-            pinInput.focus();
+            pinInput.focus({ preventScroll: true });
           }
         }
       })
