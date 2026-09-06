@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v50";
+  window.__FF_VERSION__ = "dev-v52";
   console.log("%c[FixtureFlow · Captain]%c Running version " + window.__FF_VERSION__, "color: #a78bfa; font-weight: bold;", "color: inherit;");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -2769,7 +2769,7 @@ function resolveCourtflowHost(input) {
 
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v50">
+  <meta name="app-version" content="dev-v52">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-captain.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-captain.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -2836,7 +2836,7 @@ function resolveCourtflowHost(input) {
 
     <!-- Login View -->
     <!-- LOGIN VIEW -->
-<div id="view-login" class="view-login-container text-center ">
+<div id="view-login" style="display:none;" class="view-login-container text-center ">
   <div style="margin: auto; width: 100%;">
     <div id="login-club-logo-container" style="margin-bottom: 24px;">
       <img id="login-club-logo" src="" alt="Club Logo" style="width: 150px; height: 150px; object-fit: contain; margin: 0 auto; display: block;">
@@ -2860,7 +2860,7 @@ function resolveCourtflowHost(input) {
   </div>
   <!-- BRANDING FOOTER (Login View) -->
   <div class="brand-footer login-footer">
-    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v50</span>
+    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v52</span>
 
   </div>
 </div>
@@ -5746,13 +5746,6 @@ const rescheduleFlowEnabled = "" === 'TRUE';
 const postDeadlineRescheduleEnabled = "" === 'TRUE';
 window.activePortalRole = 'Captain';
 window.activeRescheduleContext = 'Captain';
-// Check auto-login immediately to prevent form flash
-if (currentPin) {
-  const formCtr = document.getElementById('login-form-container');
-  if (formCtr) formCtr.classList.add('hidden');
-  const spinner = document.getElementById('login-spinner');
-  if (spinner) spinner.classList.remove('hidden');
-}
 
 // --- DEVELOPER BACKDOOR ---
 let devTapCount = 0;
@@ -6952,7 +6945,11 @@ function onLoginFail(errMsg, isAuto = false) {
   }
 
   if (statusScreen) statusScreen.style.display = 'none';
-  document.getElementById('view-login').classList.remove('hidden');
+  const loginView = document.getElementById('view-login');
+  if (loginView) {
+    loginView.style.display = '';
+    loginView.classList.remove('hidden');
+  }
 
   const errEl = document.getElementById('login-error');
   if (errEl && !isAuto) {
@@ -6984,7 +6981,10 @@ function revealCaptainLoginView() {
   const statusScreen = document.getElementById('status-screen');
   if (statusScreen) statusScreen.style.display = 'none';
   const loginView = document.getElementById('view-login');
-  if (loginView) loginView.classList.remove('hidden');
+  if (loginView) {
+    loginView.style.display = '';
+    loginView.classList.remove('hidden');
+  }
   const formContainer = document.getElementById('login-form-container');
   if (formContainer) formContainer.classList.remove('hidden');
   const pinInput = document.getElementById('pin-input');
@@ -7007,7 +7007,11 @@ function showCaptainOfflineCard() {
 function showDashboard() {
   const statusScreen = document.getElementById('status-screen');
   if (statusScreen) statusScreen.style.display = 'none';
-  document.getElementById('view-login').classList.add('hidden');
+  const loginView = document.getElementById('view-login');
+  if (loginView) {
+    loginView.style.display = 'none';
+    loginView.classList.add('hidden');
+  }
   document.getElementById('view-main').classList.remove('hidden');
   document.getElementById('bottom-nav').classList.remove('hidden');
 
@@ -7101,13 +7105,6 @@ function logout() {
 
   if (currentPin) {
     // Authenticated: Keep splash screen visible while fetching fresh dashboard
-    const loginView = document.getElementById('view-login');
-    if (loginView) loginView.classList.add('hidden');
-    const fullscreenLoading = document.getElementById('fullscreen-loading');
-    const loadingText = document.getElementById('fullscreen-loading-text');
-    if (loadingText) loadingText.textContent = 'Connecting to Captain Portal...';
-    if (fullscreenLoading) fullscreenLoading.classList.remove('hidden');
-
     const triggerAutoLogin = () => {
       attemptLogin({ isAutoLogin: true });
     };

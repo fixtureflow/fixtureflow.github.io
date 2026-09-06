@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v50";
+  window.__FF_VERSION__ = "dev-v52";
   console.log("%c[FixtureFlow · Player]%c Running version " + window.__FF_VERSION__, "color: #10b981; font-weight: bold;", "color: inherit;");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -2510,7 +2510,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v50">
+  <meta name="app-version" content="dev-v52">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-player.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -2555,7 +2555,7 @@ function resolveCourtflowHost(input) {
 
     <!-- View 1: Login (PIN Screen) -->
     <!-- VIEW 1: LOGIN (PIN SCREEN) -->
-<div id="view-login" class="view-login-container text-center ">
+<div id="view-login" style="display:none;" class="view-login-container text-center ">
     <div style="margin: auto; width: 100%;">
         <div id="login-club-logo-container" style="margin-bottom: 24px;">
             <img id="login-club-logo" src="" alt="Club Logo" style="width: 150px; height: 150px; object-fit: contain; margin: 0 auto; display: block;">
@@ -2582,7 +2582,7 @@ function resolveCourtflowHost(input) {
 
     <!-- BRANDING FOOTER (Login View) -->
     <div class="brand-footer login-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v50</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v52</span>
 
     </div>
 </div>
@@ -3595,7 +3595,11 @@ function handleLogin(e, autoPin = null) {
                 localStorage.removeItem('ff_cached_portal_data');
                 const statusScreen = document.getElementById('status-screen');
                 if (statusScreen) statusScreen.style.display = 'none';
-                document.getElementById('view-login').classList.remove('hidden');
+                const loginView = document.getElementById('view-login');
+                if (loginView) {
+                    loginView.style.display = '';
+                    loginView.classList.remove('hidden');
+                }
                 if (formContainer) formContainer.classList.remove('hidden');
                 if (!autoPin && err) {
                     const isCustomSystemMsg = res.error && (res.error.includes('disabled') || res.error.includes('Configuration'));
@@ -3642,7 +3646,11 @@ function handleLogin(e, autoPin = null) {
             }
 
             if (statusScreen) statusScreen.style.display = 'none';
-            document.getElementById('view-login').classList.remove('hidden');
+            const loginView = document.getElementById('view-login');
+            if (loginView) {
+                loginView.style.display = '';
+                loginView.classList.remove('hidden');
+            }
             if (formContainer) formContainer.classList.remove('hidden');
             if (err) {
                 err.textContent = "Network error. Try again.";
@@ -3662,7 +3670,10 @@ function revealPlayerLoginView() {
     const statusScreen = document.getElementById('status-screen');
     if (statusScreen) statusScreen.style.display = 'none';
     const loginView = document.getElementById('view-login');
-    if (loginView) loginView.classList.remove('hidden');
+    if (loginView) {
+        loginView.style.display = '';
+        loginView.classList.remove('hidden');
+    }
     const formContainer = document.getElementById('login-form-container');
     if (formContainer) formContainer.classList.remove('hidden');
     const pinInput = document.getElementById('pin-input');
@@ -3685,7 +3696,11 @@ function showPlayerOfflineCard() {
 function initPortalView() {
     const statusScreen = document.getElementById('status-screen');
     if (statusScreen) statusScreen.style.display = 'none';
-    document.getElementById('view-login').classList.add('hidden');
+    const loginView = document.getElementById('view-login');
+    if (loginView) {
+        loginView.style.display = 'none';
+        loginView.classList.add('hidden');
+    }
     document.getElementById('view-main').classList.remove('hidden');
 
     const macroGroup = document.querySelector('.advanced-macro-group');
@@ -3830,13 +3845,6 @@ function logout() {
     const storedPin = localStorage.getItem('ff_portal_pin');
     if (storedPin) {
         // Authenticated: Keep splash screen visible while fetching fresh portal data
-        const loginView = document.getElementById('view-login');
-        if (loginView) loginView.classList.add('hidden');
-        const fullscreenLoading = document.getElementById('fullscreen-loading');
-        const loadingText = document.getElementById('fullscreen-loading-text');
-        if (loadingText) loadingText.textContent = 'Connecting to Player Portal...';
-        if (fullscreenLoading) fullscreenLoading.classList.remove('hidden');
-
         const triggerAutoLogin = () => {
             handleLogin(null, storedPin);
         };
