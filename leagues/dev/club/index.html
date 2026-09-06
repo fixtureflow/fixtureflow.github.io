@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v48";
+  window.__FF_VERSION__ = "dev-v50";
   console.log("%c[FixtureFlow · Club Admin]%c Running version " + window.__FF_VERSION__, "color: #cbd5e1; font-weight: bold;", "color: inherit;");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -2584,7 +2584,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v48">
+  <meta name="app-version" content="dev-v50">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-club.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-club.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -3305,7 +3305,7 @@ function onLoginFailure(error) {
 
     
     <div id="native-app-footer" style="display:none; width: 100%; margin-top: auto;" class="brand-footer login-footer">
-      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v48</span>
+      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v50</span>
 
     </div>
 
@@ -4922,6 +4922,10 @@ function onLoginFailure(error) {
 
   function initRescheduleModal(context) {
     activeRescheduleContext = context;
+    if (typeof window !== 'undefined') {
+      window.activePortalRole = context;
+      window.activeRescheduleContext = context;
+    }
   }
 
   function buildRescheduleMatchCardHtml(match, context) {
@@ -5128,6 +5132,7 @@ function onLoginFailure(error) {
       if (previewBtn) previewBtn.style.display = 'none';
       if (copyBtn) copyBtn.classList.add('hidden');
 
+      const isCapt = (activeRescheduleContext === 'Captain');
       const homeClub = getActiveClubName();
       const hostTeam = getHostTeamName(match);
       const oppTeam = getOpponentTeamName(match);
@@ -5136,11 +5141,19 @@ function onLoginFailure(error) {
       const secGreeting = typeof formatFriendlyName === 'function' ? formatFriendlyName(secretaryDetails ? secretaryDetails.name : '', `${homeClub} Match Secretary`) : ((secretaryDetails && secretaryDetails.name) ? (secretaryDetails.name.split(' ')[0] || secretaryDetails.name) : 'Match Secretary');
       const oppClub = match.oppClub || match.clubName || 'Opponent Club';
       const dateStr = match.date || '';
-      const subjectRaw = `Manual Reschedule Enquiry: ${oppClub} ${oppTeam} vs ${homeClub} ${hostTeam} (${dateStr})`;
+
+      const hostSide = `${homeClub} ${hostTeam}`.trim();
+      const oppSide = `${oppClub} ${oppTeam}`.trim();
+      const viewerMatchup = isCapt ? `${hostSide} vs ${oppSide}` : `${oppSide} vs ${hostSide}`;
+
+      const subjectRaw = `Manual Reschedule Enquiry: ${viewerMatchup} (${dateStr})`;
       const mailtoHref = `mailto:${secEmail}?subject=${encodeURIComponent(subjectRaw)}`;
 
       window.copyGatekeeperTemplate = function() {
-        const tmpl = `To: ${secEmail}\nSubject: ${subjectRaw}\n\nHi ${secGreeting},\n\nI am writing to request a manual reschedule for our upcoming fixture:\n- Match: ${homeClub} ${hostTeam} vs ${oppClub} ${oppTeam}\n- Scheduled Date: ${dateStr}\n\nReason for request:\n[ Please type your reason and proposed alternative dates here ]\n\nBest regards,\n${oppClub} Match Secretary`;
+        const signOff = isCapt
+          ? (match.captainName ? `${match.captainName} (${hostSide} Captain)` : `${hostSide} Captain`)
+          : `${oppClub} Match Secretary`;
+        const tmpl = `To: ${secEmail}\nSubject: ${subjectRaw}\n\nHi ${secGreeting},\n\nI am writing to request a manual reschedule for our upcoming fixture:\n- Match: ${viewerMatchup}\n- Scheduled Date: ${dateStr}\n\nReason for request:\n[ Please type your reason and proposed alternative dates here ]\n\nBest regards,\n${signOff}`;
         const showSuccess = () => {
           const btn = document.getElementById('gatekeeper-copy-btn');
           const toast = document.getElementById('gatekeeper-copy-toast');
@@ -6083,6 +6096,7 @@ function onLoginFailure(error) {
     
     const method = activeRescheduleSecretary.method;
     const email = activeRescheduleSecretary.email;
+    const phone = activeRescheduleSecretary.phone;
     const hostTeam = getHostTeamName(match);
     const oppTeam = getOpponentTeamName(match);
     const hostClub = getActiveClubName() || 'Host Club';
@@ -6582,56 +6596,104 @@ function onLoginFailure(error) {
     var secPhone = (sec && sec.phone) ? String(sec.phone).trim() : '';
     var secFirstName = typeof formatFriendlyName === 'function' ? formatFriendlyName(secName, 'Match Secretary') : (secName ? secName.split(' ')[0] : 'Match Secretary');
 
+    // 1. Determine Portal Context (Defense-in-depth: activeRescheduleContext, activePortalRole, DOM, captainMap)
+    var isCaptain = Boolean(
+      (typeof activeRescheduleContext !== 'undefined' && activeRescheduleContext === 'Captain') ||
+      (typeof activePortalRole !== 'undefined' && activePortalRole === 'Captain') ||
+      (typeof document !== 'undefined' && document.querySelector && document.querySelector('.portal-header-title') && document.querySelector('.portal-header-title').textContent.includes('Captain')) ||
+      (typeof document !== 'undefined' && document.getElementById && document.getElementById('pinned-actions-container')) ||
+      (typeof appData !== 'undefined' && appData && appData.captainMap && (!match.oppClub || match.oppClub !== match.clubName))
+    );
+
+    // 2. Club & Team Names
     var hostClub = (match && match.hostClub && !match.hostClub.includes('Development / Staging') && match.hostClub !== 'Host Club')
       ? match.hostClub
       : (typeof getHostClubName === 'function' ? getHostClubName() : (typeof getActiveClubName === 'function' ? getActiveClubName(match) : ((typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && !MAIN_CLUB_NAME.includes('Development / Staging')) ? MAIN_CLUB_NAME : 'Host Club')));
     var hostTeam = typeof getHostTeamName === 'function' ? getHostTeamName(match) : (match.ourTeam || '');
     var oppTeam = typeof getOpponentTeamName === 'function' ? getOpponentTeamName(match) : (match.oppTeam || '');
-    var oppClub = match.oppClub || (typeof userClubName !== 'undefined' && userClubName) || 'Visiting Club';
+    var oppClub = (typeof localStorage !== 'undefined' && localStorage.getItem('FF_CLUB_NAME')) || match.oppClub || (typeof userClubName !== 'undefined' && userClubName) || match.clubName || 'Visiting Club';
 
-    var isHome = typeof isHostClubHome === 'function' ? isHostClubHome(match) : true;
-    var homeSide = isHome ? (hostClub + ' ' + hostTeam).trim() : (oppClub + ' ' + oppTeam).trim();
-    var awaySide = isHome ? (oppClub + ' ' + oppTeam).trim() : (hostClub + ' ' + hostTeam).trim();
-    var matchupStr = (homeSide + ' vs ' + awaySide).replace(/\s+/g, ' ').trim();
-    var dateDisplay = match.displayDate || match.date || '';
+    // Helper for club prefix deduplication (e.g. avoid "Ailesbury Ailesbury X5")
+    var formatSide = function(club, team) {
+      var c = String(club || '').trim();
+      var t = String(team || '').trim();
+      if (!t) return c;
+      if (!c) return t;
+      if (t.toUpperCase().indexOf(c.toUpperCase()) === 0) return t;
+      return c + ' ' + t;
+    };
+
+    var hostSide = formatSide(hostClub, hostTeam);
+    var oppSide = formatSide(oppClub, oppTeam);
+
+    // Rule 11.1 & Viewer Perspective: Viewer is ALWAYS first
+    var matchupStr = isCaptain ? (hostSide + ' vs ' + oppSide) : (oppSide + ' vs ' + hostSide);
+    matchupStr = matchupStr.replace(/\s+/g, ' ').trim();
+
+    // 3. Date & Venue
+    var rawDate = match.date || match.displayDate || '';
+    var dateDisplay = '';
+    if (rawDate && /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s+/i.test(String(rawDate))) {
+      dateDisplay = String(rawDate).trim();
+    } else if (typeof formatPortalDate === 'function') {
+      dateDisplay = formatPortalDate(rawDate);
+    } else {
+      dateDisplay = match.displayDate || match.date || '';
+    }
     var timeDisplay = match.time || '';
-    var venueDisplay = (match.venue && match.venue.toLowerCase() !== 'home' && match.venue.toLowerCase() !== 'away')
+    var isHome = typeof isHostClubHome === 'function' ? isHostClubHome(match) : true;
+    var venueDisplay = (match.venue && match.venue.toLowerCase() !== 'home' && match.venue.toLowerCase() !== 'away' && match.venue.toLowerCase() !== 'tbd')
       ? match.venue
       : (isHome ? hostClub : oppClub);
 
+    // 4. Requester Identity
     var reqCaller = '';
-    if (typeof activePortalRole !== 'undefined' && activePortalRole === 'Captain') {
-      reqCaller = match.captainName ? (match.captainName + ' (' + hostClub + ' ' + hostTeam + ' Captain)') : (hostClub + ' ' + hostTeam + ' Captain');
+    if (isCaptain) {
+      var capRaw = match.captainName || '';
+      if (!capRaw && typeof appData !== 'undefined' && appData && appData.captainMap && hostTeam) {
+        var teamKey = String(hostTeam).trim().toUpperCase();
+        if (appData.captainMap[teamKey]) capRaw = appData.captainMap[teamKey].name;
+      }
+      var capName = typeof formatFriendlyName === 'function' ? formatFriendlyName(capRaw, '') : capRaw;
+      if (capName && capName.toLowerCase().indexOf('captain') !== -1) capName = '';
+      reqCaller = capName ? (capName + ' (' + hostSide + ' Captain)') : (hostSide + ' Captain');
     } else {
-      var clubPrefix = (typeof userClubName !== 'undefined' && userClubName) ? userClubName : oppClub;
-      reqCaller = clubPrefix + ' Match Secretary';
+      var contacts = (typeof opponentContactsMap !== 'undefined' && opponentContactsMap && opponentContactsMap[oppClub.toUpperCase()]) ||
+                     (typeof appData !== 'undefined' && appData && appData.opponentContacts && appData.opponentContacts[oppClub.toUpperCase()]);
+      var primary = (contacts && Array.isArray(contacts)) ? (contacts.find(function(c) { return c.isPrimary; }) || contacts[0]) : null;
+      var secRaw = (primary && primary.name) ? primary.name : '';
+      var oppSecName = typeof formatFriendlyName === 'function' ? formatFriendlyName(secRaw, '') : secRaw;
+      if (oppSecName && (oppSecName.toLowerCase().indexOf('secretary') !== -1 || oppSecName.toLowerCase().indexOf('match sec') !== -1)) oppSecName = '';
+      reqCaller = oppSecName ? (oppSecName + ' (' + oppClub + ' Match Secretary)') : (oppClub + ' Match Secretary');
     }
 
+    // 5. WhatsApp Formatted Message
+    var dateTimeStr = dateDisplay + (timeDisplay ? ' @ ' + timeDisplay : '');
     var waLines = [
       'Hi ' + secFirstName + ', this is ' + reqCaller + '.',
       '',
       'I would like to request a reschedule for our upcoming fixture:',
-      'Match: ' + matchupStr,
-      'Date: ' + dateDisplay + (timeDisplay ? ' @ ' + timeDisplay : ''),
-      'Venue: ' + venueDisplay,
       '',
-      'Reason for request:',
-      ''
+      '• *Match:* ' + matchupStr,
+      '• *Date:* ' + dateTimeStr,
+      '• *Venue:* ' + venueDisplay,
+      '',
+      '*Reason for request:*'
     ];
     var waMsg = waLines.join(String.fromCharCode(10));
-    
     var waBase = formatWhatsAppBaseUrl(secPhone);
     var waUrl = waBase ? (waBase + '?text=' + encodeURIComponent(waMsg)) : '';
 
+    // 6. Email Formatted Message
     var emailSubject = 'Reschedule Request: ' + matchupStr + ' (' + dateDisplay + ')';
     var emailLines = [
       'Hi ' + secFirstName + ',',
       '',
       'I would like to request a reschedule for our upcoming fixture:',
       '',
-      '- Match: ' + matchupStr,
-      '- Original Date: ' + dateDisplay + (timeDisplay ? ' @ ' + timeDisplay : ''),
-      '- Venue: ' + venueDisplay,
+      '• Match: ' + matchupStr,
+      '• Original Date: ' + dateTimeStr,
+      '• Venue: ' + venueDisplay,
       '',
       'Reason for request:',
       '',
@@ -6640,7 +6702,6 @@ function onLoginFailure(error) {
       reqCaller
     ];
     var emailBody = emailLines.join(String.fromCharCode(10));
-    
     var emailUrl = secEmail ? ('mailto:' + secEmail + '?subject=' + encodeURIComponent(emailSubject) + '&body=' + encodeURIComponent(emailBody)) : '';
 
     return {
@@ -6950,6 +7011,9 @@ function onLoginFailure(error) {
 
     allFixturesData = data.matches;
     activeSecretaryDetails = data.activeSecretary || null; // [NEW]
+    window.activeSecretaryDetails = activeSecretaryDetails;
+    window.activePortalRole = 'Club';
+    window.activeRescheduleContext = 'Club';
     window.appData = data;
     if (data && data.clubName && typeof updateClubBrandingState === 'function') {
       updateClubBrandingState(data, 'Opponent');
