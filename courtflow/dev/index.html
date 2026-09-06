@@ -140,8 +140,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v25";
-  console.log("%c[CourtFlow]%c Running version dev-v25", "color: #38bdf8; font-weight: bold;", "color: inherit;");
+  window.__FF_VERSION__ = "dev-v27";
+  console.log("%c[CourtFlow]%c Running version dev-v27", "color: #38bdf8; font-weight: bold;", "color: inherit;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -264,10 +264,21 @@ function resolveCourtflowHost(input) {
       body: JSON.stringify(payload)
     })
     .then(response => {
-      if (!response.ok) {
-        throw new Error(`API Error: HTTP status ${response.status}`);
-      }
-      return response.json();
+      return response.text().then(text => {
+        let result;
+        try {
+          result = JSON.parse(text);
+        } catch (parseErr) {
+          if (text.trim().startsWith('<')) {
+            throw new Error('Server returned HTML instead of JSON (Google Apps Script cold-start or session conflict). Please refresh.');
+          }
+          throw new Error('Invalid JSON response: ' + text.slice(0, 100));
+        }
+        if (!response.ok) {
+          throw new Error('API Error: HTTP status ' + response.status);
+        }
+        return result;
+      });
     })
     .then(result => {
       if (!result.success) {
@@ -2314,7 +2325,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="app-version" content="dev-v25">
+  <meta name="app-version" content="dev-v27">
   <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
   <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
   <link rel="manifest" href="manifest.json">
@@ -2375,7 +2386,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v25</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v27</span>
 
         </div>
       </div>
@@ -2549,7 +2560,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v25</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v27</span>
 
       </div>
 
