@@ -140,8 +140,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v27";
-  console.log("%c[CourtFlow]%c Running version dev-v27", "color: #38bdf8; font-weight: bold;", "color: inherit;");
+  window.__FF_VERSION__ = "dev-v29";
+  console.log("%c[CourtFlow]%c Running version dev-v29", "color: #38bdf8; font-weight: bold;", "color: inherit;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -1357,6 +1357,17 @@ function resolveCourtflowHost(input) {
     margin-top: 8px;
   }
 
+  .modal-footer-gap {
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
   .btn-text-action {
     background: none;
     border: none;
@@ -1638,6 +1649,15 @@ function resolveCourtflowHost(input) {
     font-weight: 600;
     font-size: 14px;
     color: var(--text-secondary);
+  }
+
+  .form-label-compact {
+    margin-bottom: 2px;
+  }
+
+  .form-label-clickable {
+    cursor: pointer;
+    user-select: none;
   }
 
   .form-input::placeholder, input::placeholder {
@@ -2322,10 +2342,24 @@ function resolveCourtflowHost(input) {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   }
 
+  .offline-title {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    color: #ef4444;
+    font-weight: 700;
+  }
+
+  .offline-desc {
+    margin: 0 0 16px 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="app-version" content="dev-v27">
+  <meta name="app-version" content="dev-v29">
   <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
   <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
   <link rel="manifest" href="manifest.json">
@@ -2339,8 +2373,8 @@ function resolveCourtflowHost(input) {
         <div class="spinner" id="spinner-loader"></div>
         <div class="loading-text" id="status-text">CONNECTING TO [DEV] COURTFLOW · FIXTUREFLOW...</div>
         <div id="offline-panel" class="offline-card" style="display: none;">
-          <h3 style="margin: 0 0 8px 0; font-size: 1.1rem; color: #ef4444; font-weight: 700;">Connection Error</h3>
-          <p id="offline-error-msg" style="margin: 0 0 16px 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.4;">Unable to connect to club data.</p>
+          <h3 class="offline-title">Connection Error</h3>
+          <p id="offline-error-msg" class="offline-desc">Unable to connect to club data.</p>
           <button class="btn btn-primary" onclick="window.location.reload()" style="padding: 10px 20px; font-size: 0.95rem; font-weight: 600;">RETRY</button>
         </div>
       </div>
@@ -2386,7 +2420,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v27</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v29</span>
 
         </div>
       </div>
@@ -2560,7 +2594,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v27</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v29</span>
 
       </div>
 
@@ -2625,7 +2659,7 @@ function resolveCourtflowHost(input) {
         <div class="modal-body">
           <p id="confirm-modal-message">Are you sure you want to proceed?</p>
         </div>
-        <div class="modal-footer" style="gap: 12px;">
+        <div class="modal-footer modal-footer-gap">
           <button class="btn btn-outline-danger" id="confirm-modal-cancel-btn" onclick="closeConfirmModal()">Cancel</button>
           <button class="btn btn-primary" id="confirm-modal-ok-btn">Confirm</button>
         </div>
@@ -2640,7 +2674,7 @@ function resolveCourtflowHost(input) {
           <h3>Add Guest Player</h3>
         </div>
         <div class="modal-body">
-          <form id="add-guest-form" onsubmit="submitAddGuestForm(event)" style="display: flex; flex-direction: column; gap: 16px;">
+          <form id="add-guest-form" class="modal-form" onsubmit="submitAddGuestForm(event)">
             <!-- Player Name -->
             <div class="form-group">
               <label for="guest-name">Player Name</label>
@@ -2649,7 +2683,7 @@ function resolveCourtflowHost(input) {
             
             <!-- Gender Segmented Toggle -->
             <div class="form-group">
-              <label style="margin-bottom: 2px;">Gender</label>
+              <label class="form-label-compact">Gender</label>
               <div class="segmented-control">
                 <input type="radio" name="guest-gender" id="gender-male-toggle" value="Male" checked style="display: none;" />
                 <label for="gender-male-toggle" class="segment-label">♂ Male</label>
@@ -2673,7 +2707,7 @@ function resolveCourtflowHost(input) {
 
             <!-- Plays Mixed Switch -->
             <div class="form-group" style="flex-direction: row; justify-content: space-between; align-items: center; margin-top: 4px;">
-              <label for="guest-plays-mixed" style="cursor: pointer; user-select: none;">Plays Mixed Doubles</label>
+              <label for="guest-plays-mixed" class="form-label-clickable">Plays Mixed Doubles</label>
               <div class="switch-container">
                 <input type="checkbox" id="guest-plays-mixed" checked />
                 <span class="switch-slider"></span>
@@ -2681,7 +2715,7 @@ function resolveCourtflowHost(input) {
             </div>
 
             <!-- Modal Footer Buttons -->
-            <div class="modal-footer" style="gap: 12px; margin-top: 12px;">
+            <div class="modal-footer modal-footer-gap">
               <button type="button" class="btn btn-outline-danger" onclick="closeAddGuestModal()">Cancel</button>
               <button type="submit" class="btn btn-primary">Add Guest</button>
             </div>
@@ -2871,14 +2905,14 @@ function resolveCourtflowHost(input) {
 </script>
 
     <!--
-  UI Render Engine for the Main Dashboard.
-  Translates client state changes into DOM updates for checked-in lists and court cards.
+  UI Module: Authentication, Theme & Version Management.
+  Handles login gatekeeping, PIN validation, admin logout, theme detection, and tab/splash titles.
 -->
 <script>
   /**
-   * Scoped selectors for DOM element access.
+   * Scoped selectors for DOM element access across UI modules.
    */
-  const UI_SELECTORS = {
+  var UI_SELECTORS = {
     ROSTER_LIST: "roster-list",
     QUEUE_LIST: "queue-list",
     COURTS_GRID: "courts-grid",
@@ -2898,6 +2932,346 @@ function resolveCourtflowHost(input) {
   };
 
   /**
+   * Centralized helper to apply theme, update meta tags, persist if requested, and notify parent container.
+   * @param {string} theme 'dark' | 'light'
+   * @param {boolean} persist Whether to store in localStorage (true on manual toggle)
+   */
+  function applyTheme(theme, persist) {
+    document.documentElement.setAttribute("data-theme", theme);
+    if (persist) {
+      try {
+        localStorage.setItem("clubflow-theme", theme);
+      } catch (e) {}
+    }
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute("content", theme === "dark" ? "#080d16" : "#f0f7fc");
+    }
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'THEME_CHANGE', theme: theme }, '*');
+    }
+  }
+
+  /**
+   * Toggles the UI layout visual theme manually.
+   */
+  function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    applyTheme(newTheme, true);
+  }
+
+  // Set the theme configuration from localStorage or system preference before DOM fully paints
+  (function initTheme() {
+    let savedTheme = null;
+    try {
+      savedTheme = localStorage.getItem("clubflow-theme");
+    } catch (e) {}
+
+    const mql = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+    const systemTheme = mql && mql.matches ? "dark" : "light";
+    const activeTheme = savedTheme || systemTheme;
+    
+    applyTheme(activeTheme, false);
+
+    // Live listener for OS theme shifts when user has not locked in an explicit manual preference
+    if (mql) {
+      const handleSystemThemeChange = function(e) {
+        let manualOverride = null;
+        try {
+          manualOverride = localStorage.getItem("clubflow-theme");
+        } catch (err) {}
+        if (!manualOverride) {
+          applyTheme(e.matches ? "dark" : "light", false);
+        }
+      };
+
+      if (mql.addEventListener) {
+        mql.addEventListener("change", handleSystemThemeChange);
+      } else if (mql.addListener) {
+        mql.addListener(handleSystemThemeChange);
+      }
+    }
+  })();
+
+  function showLoginScreen(payload) {
+    const statusScreen = document.getElementById("status-screen");
+    if (statusScreen) statusScreen.style.display = "none";
+
+    const loginView = document.getElementById("portal-view-login");
+    const mainView = document.getElementById("portal-view-main");
+    const mobileNav = document.getElementById("mobile-nav-bar");
+    
+    if (mainView) mainView.style.display = "none";
+    if (loginView) loginView.style.display = "flex";
+    if (mobileNav) mobileNav.style.display = "none";
+    
+    const clubTitle = (payload && payload.clubName) ? payload.clubName : "CourtFlow";
+    const clubLogo = (payload && payload.clubLogoUrl) ? payload.clubLogoUrl : "";
+    
+    const loginTitleEl = document.getElementById("login-club-title");
+    const loginTitleLargeEl = document.getElementById("login-club-title-large");
+    const logoContainer = document.getElementById("login-club-logo-container") || document.getElementById("login-logo-container");
+    const logoImg = document.getElementById("login-club-logo");
+    
+    if (clubLogo) {
+      if (loginView) {
+        loginView.classList.remove("login-no-logo");
+        loginView.classList.add("login-has-logo");
+      }
+      if (logoImg) logoImg.src = clubLogo;
+      if (logoContainer) logoContainer.style.display = "block";
+      if (loginTitleEl) {
+        loginTitleEl.innerText = clubTitle;
+        loginTitleEl.style.display = "block";
+      }
+      if (loginTitleLargeEl) loginTitleLargeEl.style.display = "none";
+    } else {
+      if (loginView) {
+        loginView.classList.remove("login-has-logo");
+        loginView.classList.add("login-no-logo");
+      }
+      if (logoContainer) logoContainer.style.display = "none";
+      if (loginTitleEl) loginTitleEl.style.display = "none";
+      if (loginTitleLargeEl) {
+        loginTitleLargeEl.innerText = clubTitle;
+        loginTitleLargeEl.style.display = "block";
+      }
+    }
+    
+    const pinInput = document.getElementById("admin-pin-input");
+    if (pinInput) {
+      pinInput.value = "";
+      setTimeout(() => pinInput.focus({ preventScroll: true }), 100);
+    }
+    hideLoadingOverlay();
+  }
+
+  /**
+   * Updates browser tab title and mobile home screen bookmark title according to environment.
+   * Format:
+   * - DEV:  [DEV] CourtFlow · FixtureFlow
+   * - DEMO: [DEMO] CourtFlow · FixtureFlow
+   * - PROD: CourtFlow · ${clubName || 'FixtureFlow'}
+   * 
+   * @param {string} [clubName]
+   * @param {string} [clubSlug]
+   * @private
+   */
+  function updatePortalTabTitle_(clubName, clubSlug) {
+    let slug = clubSlug;
+    if (slug === undefined && typeof window !== "undefined" && window.location && window.location.search) {
+      if (typeof URLSearchParams !== "undefined") {
+        const urlParams = new URLSearchParams(window.location.search);
+        slug = urlParams.get("c") || urlParams.get("club") || "";
+      } else {
+        const match = window.location.search.match(/[?&](?:c|club)=([^&#]*)/i);
+        slug = match ? decodeURIComponent(match[1]) : "";
+      }
+    }
+    slug = slug || "";
+
+    const isDev = (window.location && window.location.pathname && window.location.pathname.includes("/dev/")) ||
+                  ["dev", "test", "local"].includes(slug.toLowerCase()) ||
+                  (typeof clubName === "string" && (clubName.toLowerCase().includes("development") || clubName.toLowerCase().includes("staging")));
+    const isDemo = ["demo", "sandbox", "public-demo", "trial"].includes(slug.toLowerCase()) ||
+                   (typeof clubName === "string" && (clubName.toLowerCase().includes("demo") || clubName.toLowerCase().includes("sandbox")));
+
+    let mobileEnv = "";
+    if (isDev) {
+      document.title = "[DEV] CourtFlow · FixtureFlow";
+      mobileEnv = "[DEV] ";
+    } else if (isDemo) {
+      document.title = "[DEMO] CourtFlow · FixtureFlow";
+      mobileEnv = "[DEMO] ";
+    } else {
+      const brandAnchor = (clubName && clubName !== "Host Club") ? clubName : "FixtureFlow";
+      document.title = `CourtFlow · ${brandAnchor}`;
+    }
+
+    const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if (appleTitleMeta) {
+      appleTitleMeta.setAttribute("content", `${mobileEnv}CourtFlow`);
+    }
+  }
+
+  /**
+   * Updates the pre-JS / connecting splash screen text dynamically.
+   * Format:
+   * - DEV:  CONNECTING TO [DEV] COURTFLOW · FIXTUREFLOW...
+   * - DEMO: CONNECTING TO [DEMO] COURTFLOW · FIXTUREFLOW...
+   * - PROD: CONNECTING TO COURTFLOW · ${(clubName || 'FIXTUREFLOW').toUpperCase()}...
+   * 
+   * @param {string} [clubName]
+   * @param {string} [clubSlug]
+   * @private
+   */
+  function updatePortalSplashText_(clubName, clubSlug) {
+    const statusText = document.getElementById("status-text");
+    if (!statusText) return;
+
+    let slug = clubSlug;
+    if (slug === undefined && typeof window !== "undefined" && window.location && window.location.search) {
+      if (typeof URLSearchParams !== "undefined") {
+        const urlParams = new URLSearchParams(window.location.search);
+        slug = urlParams.get("c") || urlParams.get("club") || "";
+      } else {
+        const match = window.location.search.match(/[?&](?:c|club)=([^&#]*)/i);
+        slug = match ? decodeURIComponent(match[1]) : "";
+      }
+    }
+    slug = slug || "";
+
+    const isDev = (window.location && window.location.pathname && window.location.pathname.includes("/dev/")) ||
+                  ["dev", "test", "local"].includes(slug.toLowerCase()) ||
+                  (typeof clubName === "string" && (clubName.toLowerCase().includes("development") || clubName.toLowerCase().includes("staging")));
+    const isDemo = ["demo", "sandbox", "public-demo", "trial"].includes(slug.toLowerCase()) ||
+                   (typeof clubName === "string" && (clubName.toLowerCase().includes("demo") || clubName.toLowerCase().includes("sandbox")));
+
+    if (isDev) {
+      statusText.textContent = "CONNECTING TO [DEV] COURTFLOW · FIXTUREFLOW...";
+    } else if (isDemo) {
+      statusText.textContent = "CONNECTING TO [DEMO] COURTFLOW · FIXTUREFLOW...";
+    } else {
+      let targetClub = "FIXTUREFLOW";
+      if (clubName && clubName !== "Host Club") {
+        targetClub = clubName.toUpperCase().trim();
+      }
+      statusText.textContent = `CONNECTING TO COURTFLOW · ${targetClub}...`;
+    }
+  }
+
+  function handleAdminLogin(e) {
+    if (e) e.preventDefault();
+    const pinInput = document.getElementById("admin-pin-input");
+    const pin = pinInput ? pinInput.value.trim() : "";
+    const errEl = document.getElementById("login-error-msg");
+    const btn = document.getElementById("admin-login-btn");
+    const btnText = document.getElementById("admin-login-btn-text");
+    const spinner = document.getElementById("admin-login-spinner");
+    const form = document.getElementById("admin-login-form");
+    
+    if (!pin || pin.length !== 4) {
+      if (errEl) {
+        errEl.innerText = "Please enter a 4-digit PIN.";
+        errEl.style.display = "block";
+      }
+      if (form) {
+        form.classList.remove("shake");
+        void form.offsetWidth;
+        form.classList.add("shake");
+      }
+      return;
+    }
+    
+    if (btn) btn.disabled = true;
+    if (btnText) btnText.style.display = "none";
+    if (spinner) spinner.style.display = "inline";
+    if (errEl) errEl.style.display = "none";
+    if (form) form.classList.remove("shake");
+    
+    google.script.run
+      .withSuccessHandler(data => {
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.style.display = "inline";
+        if (spinner) spinner.style.display = "none";
+        
+        const res = typeof data === "string" ? JSON.parse(data) : data;
+        if (res.success) {
+          localStorage.setItem("courtflow_auth_token", res.token);
+          const payload = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+          initializeDashboard(payload);
+        } else {
+          if (errEl) {
+            errEl.innerText = res.error || "Incorrect PIN.";
+            errEl.style.display = "block";
+          }
+          if (form) {
+            form.classList.remove("shake");
+            void form.offsetWidth;
+            form.classList.add("shake");
+          }
+          if (pinInput) {
+            pinInput.value = "";
+            pinInput.focus({ preventScroll: true });
+          }
+        }
+      })
+      .withFailureHandler(err => {
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.style.display = "inline";
+        if (spinner) spinner.style.display = "none";
+        if (errEl) {
+          const raw = err.message || err;
+          const isNetwork = raw && (raw.includes("Network") || raw.includes("server") || raw.includes("Failed to fetch"));
+          errEl.innerText = isNetwork ? ("Authentication failed: " + raw) : "Incorrect PIN.";
+          errEl.style.display = "block";
+        }
+        if (form) {
+          form.classList.remove("shake");
+          void form.offsetWidth;
+          form.classList.add("shake");
+        }
+        if (pinInput) {
+          pinInput.value = "";
+          pinInput.focus({ preventScroll: true });
+        }
+      })
+      .validateAdminPin(pin);
+  }
+
+  function getActiveAppVersion_() {
+    if (typeof window !== "undefined" && window.__FF_VERSION__) {
+      return window.__FF_VERSION__;
+    }
+    const metaEl = typeof document !== "undefined" ? document.querySelector('meta[name="app-version"]') : null;
+    if (metaEl && metaEl.getAttribute("content")) {
+      return metaEl.getAttribute("content");
+    }
+    const badgeEl = typeof document !== "undefined" ? document.getElementById("ff-app-version-badge") : null;
+    if (badgeEl && badgeEl.textContent) {
+      return badgeEl.textContent.replace(/^[\s·]+/, "").trim();
+    }
+    return "v2.0.0";
+  }
+
+  function handleAdminLogout() {
+    const ver = getActiveAppVersion_();
+    const promptMsg = ver 
+      ? `Are you sure you want to log out of CourtFlow [${ver}] on this device?`
+      : `Are you sure you want to log out of CourtFlow on this device?`;
+    if (confirm(promptMsg)) {
+      localStorage.removeItem("courtflow_auth_token");
+      try {
+        sessionStorage.clear();
+        if (typeof caches !== "undefined" && caches.keys) {
+          caches.keys().then(names => {
+            names.forEach(name => caches.delete(name));
+          });
+        }
+      } catch (e) {
+        console.error("Logout cache clearing error:", e);
+      }
+      showLoginScreen({ 
+        clubName: state.config.clubName || "CourtFlow",
+        clubLogoUrl: state.config.clubLogoUrl || ""
+      });
+    }
+  }
+
+  if (typeof window !== "undefined") {
+    window.handleAdminLogout = handleAdminLogout;
+  }
+</script>
+
+    <!--
+  UI Module: Player Roster & Waiting Queue Management.
+  Handles player chips, check-in/out toggles, boost, leaving early, mixed doubles flags, and backup accordion.
+-->
+<script>
+  var activeRosterTab = "members";
+
+  /**
    * Returns the SVG icon string for a player's gender.
    * @param {string} gender - 'Male' or 'Female'.
    * @returns {string} SVG HTML.
@@ -2907,16 +3281,6 @@ function resolveCourtflowHost(input) {
       return `<svg class="gender-icon female" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-label="Female"><circle cx="12" cy="8" r="5"></circle><path d="M12 13v8M9 17h6"></path></svg>`;
     }
     return `<svg class="gender-icon male" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-label="Male"><circle cx="10" cy="14" r="5"></circle><path d="M14 10l6-6M14 4h6v6"></path></svg>`;
-  }
-
-  /**
-   * Refreshes the HTML dashboard layout.
-   */
-  function renderUI() {
-    renderQueueList();
-    renderRosterList();
-    renderCourtsGrid();
-    renderBadges();
   }
 
   /**
@@ -3111,6 +3475,136 @@ function resolveCourtflowHost(input) {
   }
 
   /**
+   * Toggles priority boost state.
+   */
+  function togglePlayerBoost(name, event) {
+    if (event) event.stopPropagation();
+    const p = state.players.find(player => player.name === name);
+    if (p) {
+      p.force_next = !p.force_next;
+      renderUI();
+      debouncedSync();
+    }
+  }
+
+  /**
+   * Toggles player leaving early state.
+   */
+  function togglePlayerLeaveEarly(name, event) {
+    if (event) event.stopPropagation();
+    const p = state.players.find(player => player.name === name);
+    if (p) {
+      p.leaving_early = !p.leaving_early;
+      renderUI();
+      debouncedSync();
+    }
+  }
+
+  /**
+   * Checks in/out a player with on-court checkout verification.
+   */
+  function togglePlayerCheckIn(name) {
+    const p = state.players.find(player => player.name === name);
+    if (p) {
+      if (p.checkedIn && isPlayerOnCourt(name)) {
+        showConfirmModal(
+          "Check Out Playing Player?",
+          `Are you sure you want to check out ${name}? They are currently playing on a court, and will be removed from rotation once their match finishes.`,
+          () => {
+            p.checkedIn = false;
+            renderUI();
+            debouncedSync();
+          }
+        );
+        return;
+      }
+      p.checkedIn = !p.checkedIn;
+      renderUI();
+      debouncedSync();
+    }
+  }
+
+  /**
+   * Toggles plays mixed doubles state.
+   */
+  function togglePlayerPlaysMixed(name, event) {
+    if (event) event.stopPropagation();
+    const p = state.players.find(player => player.name === name);
+    if (p) {
+      p.plays_mixed = !p.plays_mixed;
+      renderUI();
+      
+      // Asynchronously update on spreadsheet
+      google.script.run
+        .withSuccessHandler(success => {
+          console.log(`Plays mixed updated for ${name}:`, success);
+        })
+        .withFailureHandler(err => {
+          showAlertModal("Error", `Failed to update Plays Mixed setting: ${err.message}`);
+          p.plays_mixed = !p.plays_mixed;
+          renderUI();
+        })
+        .updatePlayerPlaysMixed(name, p.plays_mixed);
+        
+      debouncedSync();
+    }
+  }
+
+  /**
+   * Checks in all roster players who are currently checked out.
+   */
+  function checkInAllRoster() {
+    const showGuests = (activeRosterTab === "guests");
+    state.players.forEach(p => {
+      if (!p.checkedIn && (!!p.isGuest === showGuests) && !p.isBackup) {
+        p.checkedIn = true;
+      }
+    });
+    renderUI();
+    debouncedSync();
+  }
+
+  /**
+   * Checks out all checked-in players (clearing the waiting queue).
+   */
+  function checkOutAllPlayers() {
+    state.players.forEach(p => {
+      p.checkedIn = false;
+    });
+    renderUI();
+    debouncedSync();
+  }
+
+  function switchRosterTab(tab) {
+    activeRosterTab = tab;
+    
+    const tabMembers = document.getElementById("tab-members");
+    const tabGuests = document.getElementById("tab-guests");
+    if (tabMembers && tabGuests) {
+      tabMembers.classList.toggle("active", tab === "members");
+      tabGuests.classList.toggle("active", tab === "guests");
+    }
+    
+    const checkInBtn = document.getElementById("btn-checkin-all");
+    if (checkInBtn) {
+      checkInBtn.innerText = tab === "members" ? "Check In All Members" : "Check In All Guests";
+    }
+    
+    const addGuestBtn = document.getElementById("btn-add-guest");
+    if (addGuestBtn) {
+      addGuestBtn.style.display = tab === "guests" ? "inline-block" : "none";
+    }
+    
+    renderRosterList();
+  }
+</script>
+
+    <!--
+  UI Module: Court Management, Match Generation & Interactive Court Grid.
+  Handles court card rendering, round generation, court rotation, deferred history finalization, and drag & drop swapping.
+-->
+<script>
+  /**
    * Renders the active court cards.
    */
   function renderCourtsGrid() {
@@ -3207,52 +3701,6 @@ function resolveCourtflowHost(input) {
     }).join("");
   }
 
-  /**
-   * Centralized helper to apply theme, update meta tags, persist if requested, and notify parent container.
-   * @param {string} theme 'dark' | 'light'
-   * @param {boolean} persist Whether to store in localStorage (true on manual toggle)
-   */
-  function applyTheme(theme, persist) {
-    document.documentElement.setAttribute("data-theme", theme);
-    if (persist) {
-      try {
-        localStorage.setItem("clubflow-theme", theme);
-      } catch (e) {}
-    }
-    const metaTheme = document.querySelector('meta[name="theme-color"]');
-    if (metaTheme) {
-      metaTheme.setAttribute("content", theme === "dark" ? "#080d16" : "#f0f7fc");
-    }
-    if (window.parent !== window) {
-      window.parent.postMessage({ type: 'THEME_CHANGE', theme: theme }, '*');
-    }
-  }
-
-  /**
-   * Toggles the UI layout visual theme manually.
-   */
-  function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
-    applyTheme(newTheme, true);
-  }
-
-  /**
-   * Updates display values when user changes active courts slider inside the settings modal.
-   */
-  function onSettingsCourtSliderInput(val) {
-    const displayEl = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
-    if (displayEl) {
-      displayEl.innerText = val;
-    }
-  }
-
-  /**
-   * Action trigger to run matchmaking algorithm and update local state.
-   */
-  /**
-   * Action trigger to run matchmaking algorithm and update local state.
-   */
   /**
    * Finalizes concluded round matches into matchHistory, partner/opponent memory, and player statistics.
    * Preserves manual drag-and-drop / player swaps made on the courts before the next round begins.
@@ -3513,159 +3961,6 @@ function resolveCourtflowHost(input) {
     }
   }
 
-  /**
-   * Action trigger to reset the entire tournament state.
-   */
-  function triggerSessionReset() {
-    showConfirmModal(
-      "Reset Session?",
-      "Are you sure you want to reset the current session? This will archive active games and clear all waiting lineups.",
-      () => {
-        showLoadingOverlay("Archiving session logs and resetting...");
-        if (typeof syncTimeout !== "undefined" && syncTimeout) {
-          clearTimeout(syncTimeout);
-          syncTimeout = null;
-        }
-        
-        // 1. Finalize current active courts to history before wiping
-        if (state.activeCourts && state.activeCourts.length > 0) {
-          finalizeRoundMatches_(state.activeCourts);
-        }
-        
-        // 2. Write history to spreadsheet first
-        google.script.run
-          .withSuccessHandler(() => {
-            // 3. Clear session properties
-            google.script.run
-              .withSuccessHandler(success => {
-                // Re-fetch initial state
-                const token = getAuthToken();
-                google.script.run
-                  .withSuccessHandler(data => {
-                    const payload = typeof data === "string" ? JSON.parse(data) : data;
-                    if (payload.authenticated === false) {
-                      localStorage.removeItem("courtflow_auth_token");
-                      showLoginScreen(payload);
-                      hideLoadingOverlay();
-                      return;
-                    }
-                    state.players = payload.players || [];
-                    state.activeCourts = payload.activeCourts || [];
-                    state.history = payload.history || [];
-                    state.opponentHistory = payload.opponentHistory || [];
-                    state.maxCourts = payload.maxCourts || 3;
-                    state.matchHistory = []; // Reset local history
-                    state.timestamp = null;
-                    
-                    const bannerEl = document.getElementById("contextual-banner");
-                    if (bannerEl) bannerEl.style.display = "none";
-                    
-                    const slider = document.getElementById(UI_SELECTORS.COURT_SLIDER);
-                    if (slider) slider.value = state.maxCourts;
-                    
-                    const display = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
-                    if (display) display.innerText = state.maxCourts;
-                    
-                    renderUI();
-                    hideLoadingOverlay();
-                  })
-                  .withFailureHandler(err => {
-                    hideLoadingOverlay();
-                    showAlertModal("Error", "Failed to fetch initial state: " + err.message);
-                  })
-                  .getInitialState(token);
-              })
-              .withFailureHandler(err => {
-                hideLoadingOverlay();
-                showAlertModal("Error", "Failed to reset session: " + err.message);
-              })
-              .resetSession();
-          })
-          .withFailureHandler(err => {
-            hideLoadingOverlay();
-            showAlertModal("Logging Error", "Failed to archive match history to spreadsheet: " + err.message);
-          })
-          .saveMatchHistory(JSON.stringify(state.matchHistory));
-      }
-    );
-  }
-
-  /**
-   * Toggles priority boost state.
-   */
-  function togglePlayerBoost(name, event) {
-    if (event) event.stopPropagation();
-    const p = state.players.find(player => player.name === name);
-    if (p) {
-      p.force_next = !p.force_next;
-      renderUI();
-      debouncedSync();
-    }
-  }
-
-  /**
-   * Toggles player leaving early state.
-   */
-  function togglePlayerLeaveEarly(name, event) {
-    if (event) event.stopPropagation();
-    const p = state.players.find(player => player.name === name);
-    if (p) {
-      p.leaving_early = !p.leaving_early;
-      renderUI();
-      debouncedSync();
-    }
-  }
-
-  /**
-   * Checks in/out a player with on-court checkout verification.
-   */
-  function togglePlayerCheckIn(name) {
-    const p = state.players.find(player => player.name === name);
-    if (p) {
-      if (p.checkedIn && isPlayerOnCourt(name)) {
-        showConfirmModal(
-          "Check Out Playing Player?",
-          `Are you sure you want to check out ${name}? They are currently playing on a court, and will be removed from rotation once their match finishes.`,
-          () => {
-            p.checkedIn = false;
-            renderUI();
-            debouncedSync();
-          }
-        );
-        return;
-      }
-      p.checkedIn = !p.checkedIn;
-      renderUI();
-      debouncedSync();
-    }
-  }
-
-  /**
-   * Toggles plays mixed doubles state.
-   */
-  function togglePlayerPlaysMixed(name, event) {
-    if (event) event.stopPropagation();
-    const p = state.players.find(player => player.name === name);
-    if (p) {
-      p.plays_mixed = !p.plays_mixed;
-      renderUI();
-      
-      // Asynchronously update on spreadsheet
-      google.script.run
-        .withSuccessHandler(success => {
-          console.log(`Plays mixed updated for ${name}:`, success);
-        })
-        .withFailureHandler(err => {
-          showAlertModal("Error", `Failed to update Plays Mixed setting: ${err.message}`);
-          p.plays_mixed = !p.plays_mixed;
-          renderUI();
-        })
-        .updatePlayerPlaysMixed(name, p.plays_mixed);
-        
-      debouncedSync();
-    }
-  }
-
   // --- MANUAL PLAYER DRAG & DROP SWAPPING LOGIC ---
   let dragSource = null;
 
@@ -3754,438 +4049,14 @@ function resolveCourtflowHost(input) {
     match.skillSumB = sumB;
     match.skillDiff = Math.abs(sumA - sumB);
   }
+</script>
 
-  // Set the theme configuration from localStorage or system preference before DOM fully paints
-  (function initTheme() {
-    let savedTheme = null;
-    try {
-      savedTheme = localStorage.getItem("clubflow-theme");
-    } catch (e) {}
-
-    const mql = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
-    const systemTheme = mql && mql.matches ? "dark" : "light";
-    const activeTheme = savedTheme || systemTheme;
-    
-    applyTheme(activeTheme, false);
-
-    // Live listener for OS theme shifts when user has not locked in an explicit manual preference
-    if (mql) {
-      const handleSystemThemeChange = function(e) {
-        let manualOverride = null;
-        try {
-          manualOverride = localStorage.getItem("clubflow-theme");
-        } catch (err) {}
-        if (!manualOverride) {
-          applyTheme(e.matches ? "dark" : "light", false);
-        }
-      };
-
-      if (mql.addEventListener) {
-        mql.addEventListener("change", handleSystemThemeChange);
-      } else if (mql.addListener) {
-        mql.addListener(handleSystemThemeChange);
-      }
-    }
-  })();
-
-  function initializeDashboard(payload) {
-    state.players = payload.players || [];
-    state.activeCourts = payload.activeCourts || [];
-    state.history = payload.history || [];
-    state.opponentHistory = payload.opponentHistory || [];
-    state.config = payload.config || {};
-    if (!state.config.genderRule) state.config.genderRule = "standard";
-    if (!state.config.matchmakerMode) state.config.matchmakerMode = "balanced";
-    state.maxCourts = payload.maxCourts || (state.config.maxCourts || 3);
-    
-    // Update branding title if clubName is set
-    const clubTitle = state.config.clubName || payload.clubName || "CourtFlow";
-    const brandingH1 = document.querySelector(".branding h1");
-    if (brandingH1) brandingH1.innerText = clubTitle;
-    if (clubTitle && clubTitle !== "CourtFlow") {
-      updatePortalTabTitle_(clubTitle);
-      try { localStorage.setItem("pwa_club_name", clubTitle); } catch (e) {}
-    }
-
-    // Update branding logo if clubLogoUrl is set
-    const logoEl = document.getElementById("club-logo");
-    if (logoEl) {
-      const logoUrl = state.config.clubLogoUrl || payload.clubLogoUrl;
-      if (logoUrl) {
-        logoEl.src = logoUrl;
-        logoEl.style.display = "block";
-      } else {
-        logoEl.style.display = "none";
-      }
-    }
-    
-    state.matchHistory = payload.matchHistory || [];
-    state.timestamp = payload.timestamp || null;
-    const statusScreen = document.getElementById("status-screen");
-    if (statusScreen) statusScreen.style.display = "none";
-    
-    // Show authenticated view, hide login view, show logout button
-    const loginView = document.getElementById("portal-view-login");
-    const mainView = document.getElementById("portal-view-main");
-    const logoutBtn = document.getElementById("logout-btn");
-    const mobileNav = document.getElementById("mobile-nav-bar");
-    if (loginView) loginView.style.display = "none";
-    if (mainView) mainView.style.display = "flex";
-    if (logoutBtn) logoutBtn.style.display = "flex";
-    if (mobileNav) mobileNav.style.removeProperty("display");
-    
-    // Contextual Banner check (older than 8 hours)
-    let isOldSession = false;
-    const bannerEl = document.getElementById("contextual-banner");
-    if (bannerEl) {
-      if (state.timestamp) {
-        isOldSession = (Date.now() - state.timestamp) > (8 * 60 * 60 * 1000);
-        if (isOldSession) {
-          bannerEl.style.display = "flex";
-        } else {
-          bannerEl.style.display = "none";
-        }
-      } else {
-        bannerEl.style.display = "none";
-      }
-    }
-    
-    // Default tab routing based on empty roster or active session
-    const checkedInCount = state.players.filter(p => p.checkedIn).length;
-    if (checkedInCount === 0 || isOldSession) {
-      switchMobileTab('roster');
-    } else {
-      switchMobileTab('courts');
-    }
-    
-    // Update slider input value and display text
-    const slider = document.getElementById(UI_SELECTORS.COURT_SLIDER);
-    if (slider) {
-      slider.value = state.maxCourts;
-    }
-    
-    const displayEl = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
-    if (displayEl) {
-      displayEl.innerText = state.maxCourts;
-    }
-    
-    renderUI();
-    applyAllPanelCollapseStates();
-    hideLoadingOverlay();
-  }
-
-  function showLoginScreen(payload) {
-    const statusScreen = document.getElementById("status-screen");
-    if (statusScreen) statusScreen.style.display = "none";
-
-    const loginView = document.getElementById("portal-view-login");
-    const mainView = document.getElementById("portal-view-main");
-    const mobileNav = document.getElementById("mobile-nav-bar");
-    
-    if (mainView) mainView.style.display = "none";
-    if (loginView) loginView.style.display = "flex";
-    if (mobileNav) mobileNav.style.display = "none";
-    
-    const clubTitle = (payload && payload.clubName) ? payload.clubName : "CourtFlow";
-    const clubLogo = (payload && payload.clubLogoUrl) ? payload.clubLogoUrl : "";
-    
-    const loginTitleEl = document.getElementById("login-club-title");
-    const loginTitleLargeEl = document.getElementById("login-club-title-large");
-    const logoContainer = document.getElementById("login-club-logo-container") || document.getElementById("login-logo-container");
-    const logoImg = document.getElementById("login-club-logo");
-    
-    if (clubLogo) {
-      if (loginView) {
-        loginView.classList.remove("login-no-logo");
-        loginView.classList.add("login-has-logo");
-      }
-      if (logoImg) logoImg.src = clubLogo;
-      if (logoContainer) logoContainer.style.display = "block";
-      if (loginTitleEl) {
-        loginTitleEl.innerText = clubTitle;
-        loginTitleEl.style.display = "block";
-      }
-      if (loginTitleLargeEl) loginTitleLargeEl.style.display = "none";
-    } else {
-      if (loginView) {
-        loginView.classList.remove("login-has-logo");
-        loginView.classList.add("login-no-logo");
-      }
-      if (logoContainer) logoContainer.style.display = "none";
-      if (loginTitleEl) loginTitleEl.style.display = "none";
-      if (loginTitleLargeEl) {
-        loginTitleLargeEl.innerText = clubTitle;
-        loginTitleLargeEl.style.display = "block";
-      }
-    }
-    
-    const pinInput = document.getElementById("admin-pin-input");
-    if (pinInput) {
-      pinInput.value = "";
-      setTimeout(() => pinInput.focus({ preventScroll: true }), 100);
-    }
-    hideLoadingOverlay();
-  }
-
-  // Initialize UI on window load
-  /**
-   * Updates browser tab title and mobile home screen bookmark title according to environment.
-   * Format:
-   * - DEV:  [DEV] CourtFlow · FixtureFlow
-   * - DEMO: [DEMO] CourtFlow · FixtureFlow
-   * - PROD: CourtFlow · ${clubName || 'FixtureFlow'}
-   * 
-   * @param {string} [clubName]
-   * @param {string} [clubSlug]
-   * @private
-   */
-  function updatePortalTabTitle_(clubName, clubSlug) {
-    let slug = clubSlug;
-    if (slug === undefined && typeof window !== "undefined" && window.location && window.location.search) {
-      if (typeof URLSearchParams !== "undefined") {
-        const urlParams = new URLSearchParams(window.location.search);
-        slug = urlParams.get("c") || urlParams.get("club") || "";
-      } else {
-        const match = window.location.search.match(/[?&](?:c|club)=([^&#]*)/i);
-        slug = match ? decodeURIComponent(match[1]) : "";
-      }
-    }
-    slug = slug || "";
-
-    const isDev = (window.location && window.location.pathname && window.location.pathname.includes("/dev/")) ||
-                  ["dev", "test", "local"].includes(slug.toLowerCase()) ||
-                  (typeof clubName === "string" && (clubName.toLowerCase().includes("development") || clubName.toLowerCase().includes("staging")));
-    const isDemo = ["demo", "sandbox", "public-demo", "trial"].includes(slug.toLowerCase()) ||
-                   (typeof clubName === "string" && (clubName.toLowerCase().includes("demo") || clubName.toLowerCase().includes("sandbox")));
-
-    let mobileEnv = "";
-    if (isDev) {
-      document.title = "[DEV] CourtFlow · FixtureFlow";
-      mobileEnv = "[DEV] ";
-    } else if (isDemo) {
-      document.title = "[DEMO] CourtFlow · FixtureFlow";
-      mobileEnv = "[DEMO] ";
-    } else {
-      const brandAnchor = (clubName && clubName !== "Host Club") ? clubName : "FixtureFlow";
-      document.title = `CourtFlow · ${brandAnchor}`;
-    }
-
-    const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-    if (appleTitleMeta) {
-      appleTitleMeta.setAttribute("content", `${mobileEnv}CourtFlow`);
-    }
-  }
-
-  /**
-   * Updates the pre-JS / connecting splash screen text dynamically.
-   * Format:
-   * - DEV:  CONNECTING TO [DEV] COURTFLOW · FIXTUREFLOW...
-   * - DEMO: CONNECTING TO [DEMO] COURTFLOW · FIXTUREFLOW...
-   * - PROD: CONNECTING TO COURTFLOW · ${(clubName || 'FIXTUREFLOW').toUpperCase()}...
-   * 
-   * @param {string} [clubName]
-   * @param {string} [clubSlug]
-   * @private
-   */
-  function updatePortalSplashText_(clubName, clubSlug) {
-    const statusText = document.getElementById("status-text");
-    if (!statusText) return;
-
-    let slug = clubSlug;
-    if (slug === undefined && typeof window !== "undefined" && window.location && window.location.search) {
-      if (typeof URLSearchParams !== "undefined") {
-        const urlParams = new URLSearchParams(window.location.search);
-        slug = urlParams.get("c") || urlParams.get("club") || "";
-      } else {
-        const match = window.location.search.match(/[?&](?:c|club)=([^&#]*)/i);
-        slug = match ? decodeURIComponent(match[1]) : "";
-      }
-    }
-    slug = slug || "";
-
-    const isDev = (window.location && window.location.pathname && window.location.pathname.includes("/dev/")) ||
-                  ["dev", "test", "local"].includes(slug.toLowerCase()) ||
-                  (typeof clubName === "string" && (clubName.toLowerCase().includes("development") || clubName.toLowerCase().includes("staging")));
-    const isDemo = ["demo", "sandbox", "public-demo", "trial"].includes(slug.toLowerCase()) ||
-                   (typeof clubName === "string" && (clubName.toLowerCase().includes("demo") || clubName.toLowerCase().includes("sandbox")));
-
-    if (isDev) {
-      statusText.textContent = "CONNECTING TO [DEV] COURTFLOW · FIXTUREFLOW...";
-    } else if (isDemo) {
-      statusText.textContent = "CONNECTING TO [DEMO] COURTFLOW · FIXTUREFLOW...";
-    } else {
-      let targetClub = "FIXTUREFLOW";
-      if (clubName && clubName !== "Host Club") {
-        targetClub = clubName.toUpperCase().trim();
-      }
-      statusText.textContent = `CONNECTING TO COURTFLOW · ${targetClub}...`;
-    }
-  }
-
-  window.addEventListener("load", () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const clubParam = urlParams.get("c") || urlParams.get("club") || localStorage.getItem("pwa_club_slug") || "";
-    let initialClubName = localStorage.getItem("pwa_club_name") || null;
-    if (typeof resolveCourtflowHost === "function" && clubParam) {
-      const resolved = resolveCourtflowHost(clubParam);
-      if (resolved && resolved.name) {
-        initialClubName = resolved.name;
-        try { localStorage.setItem("pwa_club_name", resolved.name); } catch (e) {}
-      }
-    }
-    updatePortalTabTitle_(initialClubName);
-    updatePortalSplashText_(initialClubName, clubParam);
-
-    const token = getAuthToken();
-    
-    // Initial fetch from GAS (combines master roster and persistent state properties)
-    google.script.run
-      .withSuccessHandler(data => {
-        const payload = typeof data === "string" ? JSON.parse(data) : data;
-        if (payload.authenticated === false) {
-          localStorage.removeItem("courtflow_auth_token");
-          showLoginScreen(payload);
-        } else {
-          initializeDashboard(payload);
-        }
-      })
-      .withFailureHandler(err => {
-        hideLoadingOverlay();
-        const statusScreen = document.getElementById("status-screen");
-        const spinner = document.getElementById("spinner-loader");
-        const statusTxt = document.getElementById("status-text");
-        const offlinePanel = document.getElementById("offline-panel");
-        const errorMsgEl = document.getElementById("offline-error-msg");
-        if (spinner) spinner.style.display = "none";
-        if (statusTxt) statusTxt.style.display = "none";
-        if (errorMsgEl) errorMsgEl.innerText = "Failed to load club state: " + err.message;
-        if (offlinePanel) offlinePanel.style.display = "block";
-        if (statusScreen) statusScreen.style.display = "flex";
-      })
-      .getInitialState(token);
-  });
-
-  function handleAdminLogin(e) {
-    if (e) e.preventDefault();
-    const pinInput = document.getElementById("admin-pin-input");
-    const pin = pinInput ? pinInput.value.trim() : "";
-    const errEl = document.getElementById("login-error-msg");
-    const btn = document.getElementById("admin-login-btn");
-    const btnText = document.getElementById("admin-login-btn-text");
-    const spinner = document.getElementById("admin-login-spinner");
-    const form = document.getElementById("admin-login-form");
-    
-    if (!pin || pin.length !== 4) {
-      if (errEl) {
-        errEl.innerText = "Please enter a 4-digit PIN.";
-        errEl.style.display = "block";
-      }
-      if (form) {
-        form.classList.remove("shake");
-        void form.offsetWidth;
-        form.classList.add("shake");
-      }
-      return;
-    }
-    
-    if (btn) btn.disabled = true;
-    if (btnText) btnText.style.display = "none";
-    if (spinner) spinner.style.display = "inline";
-    if (errEl) errEl.style.display = "none";
-    if (form) form.classList.remove("shake");
-    
-    google.script.run
-      .withSuccessHandler(data => {
-        if (btn) btn.disabled = false;
-        if (btnText) btnText.style.display = "inline";
-        if (spinner) spinner.style.display = "none";
-        
-        const res = typeof data === "string" ? JSON.parse(data) : data;
-        if (res.success) {
-          localStorage.setItem("courtflow_auth_token", res.token);
-          const payload = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
-          initializeDashboard(payload);
-        } else {
-          if (errEl) {
-            errEl.innerText = res.error || "Incorrect PIN.";
-            errEl.style.display = "block";
-          }
-          if (form) {
-            form.classList.remove("shake");
-            void form.offsetWidth;
-            form.classList.add("shake");
-          }
-          if (pinInput) {
-            pinInput.value = "";
-            pinInput.focus({ preventScroll: true });
-          }
-        }
-      })
-      .withFailureHandler(err => {
-        if (btn) btn.disabled = false;
-        if (btnText) btnText.style.display = "inline";
-        if (spinner) spinner.style.display = "none";
-        if (errEl) {
-          const raw = err.message || err;
-          const isNetwork = raw && (raw.includes("Network") || raw.includes("server") || raw.includes("Failed to fetch"));
-          errEl.innerText = isNetwork ? ("Authentication failed: " + raw) : "Incorrect PIN.";
-          errEl.style.display = "block";
-        }
-        if (form) {
-          form.classList.remove("shake");
-          void form.offsetWidth;
-          form.classList.add("shake");
-        }
-        if (pinInput) {
-          pinInput.value = "";
-          pinInput.focus({ preventScroll: true });
-        }
-      })
-      .validateAdminPin(pin);
-  }
-
-  function getActiveAppVersion_() {
-    if (typeof window !== "undefined" && window.__FF_VERSION__) {
-      return window.__FF_VERSION__;
-    }
-    const metaEl = typeof document !== "undefined" ? document.querySelector('meta[name="app-version"]') : null;
-    if (metaEl && metaEl.getAttribute("content")) {
-      return metaEl.getAttribute("content");
-    }
-    const badgeEl = typeof document !== "undefined" ? document.getElementById("ff-app-version-badge") : null;
-    if (badgeEl && badgeEl.textContent) {
-      return badgeEl.textContent.replace(/^[\s·]+/, "").trim();
-    }
-    return "v2.0.0";
-  }
-
-  function handleAdminLogout() {
-    const ver = getActiveAppVersion_();
-    const promptMsg = ver 
-      ? `Are you sure you want to log out of CourtFlow [${ver}] on this device?`
-      : `Are you sure you want to log out of CourtFlow on this device?`;
-    if (confirm(promptMsg)) {
-      localStorage.removeItem("courtflow_auth_token");
-      try {
-        sessionStorage.clear();
-        if (typeof caches !== "undefined" && caches.keys) {
-          caches.keys().then(names => {
-            names.forEach(name => caches.delete(name));
-          });
-        }
-      } catch (e) {
-        console.error("Logout cache clearing error:", e);
-      }
-      showLoginScreen({ 
-        clubName: state.config.clubName || "CourtFlow",
-        clubLogoUrl: state.config.clubLogoUrl || ""
-      });
-    }
-  }
-
-  if (typeof window !== "undefined") {
-    window.handleAdminLogout = handleAdminLogout;
-  }
+    <!--
+  UI Module: Modal Dialogs, Loading Overlay, Panel Collapse & Matchmaking Settings.
+  Handles custom alerts, confirm prompts, add-guest workflow, settings sliders, and session reset procedures.
+-->
+<script>
+  let confirmCallback = null;
 
   /**
    * Opens the custom alert modal with a title and message.
@@ -4218,33 +4089,6 @@ function resolveCourtflowHost(input) {
       }, 250);
     }
   }
-
-  /**
-   * Checks in all roster players who are currently checked out.
-   */
-  function checkInAllRoster() {
-    const showGuests = (activeRosterTab === "guests");
-    state.players.forEach(p => {
-      if (!p.checkedIn && (!!p.isGuest === showGuests) && !p.isBackup) {
-        p.checkedIn = true;
-      }
-    });
-    renderUI();
-    debouncedSync();
-  }
-
-  /**
-   * Checks out all checked-in players (clearing the waiting queue).
-   */
-  function checkOutAllPlayers() {
-    state.players.forEach(p => {
-      p.checkedIn = false;
-    });
-    renderUI();
-    debouncedSync();
-  }
-
-  let confirmCallback = null;
 
   /**
    * Opens the custom confirm modal with a title, message, and callback.
@@ -4308,7 +4152,6 @@ function resolveCourtflowHost(input) {
     }
   }
 
-  var activeRosterTab = "members";
   var collapsedPanels = {
     courts: false,
     queue: false,
@@ -4323,29 +4166,6 @@ function resolveCourtflowHost(input) {
     }
   } catch (e) {
     console.warn("Failed to load collapse preferences", e);
-  }
-
-  function switchRosterTab(tab) {
-    activeRosterTab = tab;
-    
-    const tabMembers = document.getElementById("tab-members");
-    const tabGuests = document.getElementById("tab-guests");
-    if (tabMembers && tabGuests) {
-      tabMembers.classList.toggle("active", tab === "members");
-      tabGuests.classList.toggle("active", tab === "guests");
-    }
-    
-    const checkInBtn = document.getElementById("btn-checkin-all");
-    if (checkInBtn) {
-      checkInBtn.innerText = tab === "members" ? "Check In All Members" : "Check In All Guests";
-    }
-    
-    const addGuestBtn = document.getElementById("btn-add-guest");
-    if (addGuestBtn) {
-      addGuestBtn.style.display = tab === "guests" ? "inline-block" : "none";
-    }
-    
-    renderRosterList();
   }
 
   function togglePanelCollapse(panelId) {
@@ -4377,21 +4197,6 @@ function resolveCourtflowHost(input) {
 
   function applyAllPanelCollapseStates() {
     ['courts', 'queue', 'roster'].forEach(applyPanelCollapseState);
-  }
-
-  // Override standard browser alert and bind ok button
-  if (typeof window !== "undefined") {
-    window.alert = function(msg) {
-      showAlertModal("Attention", msg);
-    };
-
-    const okBtn = document.getElementById("confirm-modal-ok-btn");
-    if (okBtn) {
-      okBtn.addEventListener("click", () => {
-        if (confirmCallback) confirmCallback();
-        closeConfirmModal();
-      });
-    }
   }
 
   /**
@@ -4503,6 +4308,16 @@ function resolveCourtflowHost(input) {
     }
   }
 
+  /**
+   * Updates display values when user changes active courts slider inside the settings modal.
+   */
+  function onSettingsCourtSliderInput(val) {
+    const displayEl = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
+    if (displayEl) {
+      displayEl.innerText = val;
+    }
+  }
+
   const WEIGHT_MAPPINGS = {
     skill: {
       toUI: (w) => Math.round(w / 0.5),
@@ -4568,12 +4383,11 @@ function resolveCourtflowHost(input) {
    */
   function closeSettingsModal() {
     const modalEl = document.getElementById(UI_SELECTORS.SETTINGS_MODAL);
-    if (modalEl) {
-      modalEl.classList.remove("show");
-      setTimeout(() => {
-        modalEl.style.display = "none";
-      }, 250);
-    }
+    if (!modalEl) return;
+    modalEl.classList.remove("show");
+    setTimeout(() => {
+      modalEl.style.display = "none";
+    }, 250);
   }
 
   /**
@@ -4758,6 +4572,244 @@ function resolveCourtflowHost(input) {
       }
     );
   }
+
+  /**
+   * Action trigger to reset the entire tournament state.
+   */
+  function triggerSessionReset() {
+    showConfirmModal(
+      "Reset Session?",
+      "Are you sure you want to reset the current session? This will archive active games and clear all waiting lineups.",
+      () => {
+        showLoadingOverlay("Archiving session logs and resetting...");
+        if (typeof syncTimeout !== "undefined" && syncTimeout) {
+          clearTimeout(syncTimeout);
+          syncTimeout = null;
+        }
+        
+        // 1. Finalize current active courts to history before wiping
+        if (state.activeCourts && state.activeCourts.length > 0) {
+          finalizeRoundMatches_(state.activeCourts);
+        }
+        
+        // 2. Write history to spreadsheet first
+        google.script.run
+          .withSuccessHandler(() => {
+            // 3. Clear session properties
+            google.script.run
+              .withSuccessHandler(success => {
+                // Re-fetch initial state
+                const token = getAuthToken();
+                google.script.run
+                  .withSuccessHandler(data => {
+                    const payload = typeof data === "string" ? JSON.parse(data) : data;
+                    if (payload.authenticated === false) {
+                      localStorage.removeItem("courtflow_auth_token");
+                      showLoginScreen(payload);
+                      hideLoadingOverlay();
+                      return;
+                    }
+                    state.players = payload.players || [];
+                    state.activeCourts = payload.activeCourts || [];
+                    state.history = payload.history || [];
+                    state.opponentHistory = payload.opponentHistory || [];
+                    state.maxCourts = payload.maxCourts || 3;
+                    state.matchHistory = []; // Reset local history
+                    state.timestamp = null;
+                    
+                    const bannerEl = document.getElementById("contextual-banner");
+                    if (bannerEl) bannerEl.style.display = "none";
+                    
+                    const slider = document.getElementById(UI_SELECTORS.COURT_SLIDER);
+                    if (slider) slider.value = state.maxCourts;
+                    
+                    const display = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
+                    if (display) display.innerText = state.maxCourts;
+                    
+                    renderUI();
+                    hideLoadingOverlay();
+                  })
+                  .withFailureHandler(err => {
+                    hideLoadingOverlay();
+                    showAlertModal("Error", "Failed to fetch initial state: " + err.message);
+                  })
+                  .getInitialState(token);
+              })
+              .withFailureHandler(err => {
+                hideLoadingOverlay();
+                showAlertModal("Error", "Failed to reset session: " + err.message);
+              })
+              .resetSession();
+          })
+          .withFailureHandler(err => {
+            hideLoadingOverlay();
+            showAlertModal("Logging Error", "Failed to archive match history to spreadsheet: " + err.message);
+          })
+          .saveMatchHistory(JSON.stringify(state.matchHistory));
+      }
+    );
+  }
+</script>
+
+    <!--
+  UI Coordinator & Application Bootstrap Engine.
+  Orchestrates UI partials (Auth, Roster, Courts, Modals), handles initial state load, and coordinates DOM ready events.
+-->
+<script>
+  /**
+   * Refreshes the HTML dashboard layout.
+   */
+  function renderUI() {
+    renderQueueList();
+    renderRosterList();
+    renderCourtsGrid();
+    renderBadges();
+  }
+
+  function initializeDashboard(payload) {
+    state.players = payload.players || [];
+    state.activeCourts = payload.activeCourts || [];
+    state.history = payload.history || [];
+    state.opponentHistory = payload.opponentHistory || [];
+    state.config = payload.config || {};
+    if (!state.config.genderRule) state.config.genderRule = "standard";
+    if (!state.config.matchmakerMode) state.config.matchmakerMode = "balanced";
+    state.maxCourts = payload.maxCourts || (state.config.maxCourts || 3);
+    
+    // Update branding title if clubName is set
+    const clubTitle = state.config.clubName || payload.clubName || "CourtFlow";
+    const brandingH1 = document.querySelector(".branding h1");
+    if (brandingH1) brandingH1.innerText = clubTitle;
+    if (clubTitle && clubTitle !== "CourtFlow") {
+      updatePortalTabTitle_(clubTitle);
+      try { localStorage.setItem("pwa_club_name", clubTitle); } catch (e) {}
+    }
+
+    // Update branding logo if clubLogoUrl is set
+    const logoEl = document.getElementById("club-logo");
+    if (logoEl) {
+      const logoUrl = state.config.clubLogoUrl || payload.clubLogoUrl;
+      if (logoUrl) {
+        logoEl.src = logoUrl;
+        logoEl.style.display = "block";
+      } else {
+        logoEl.style.display = "none";
+      }
+    }
+    
+    state.matchHistory = payload.matchHistory || [];
+    state.timestamp = payload.timestamp || null;
+    const statusScreen = document.getElementById("status-screen");
+    if (statusScreen) statusScreen.style.display = "none";
+    
+    // Show authenticated view, hide login view, show logout button
+    const loginView = document.getElementById("portal-view-login");
+    const mainView = document.getElementById("portal-view-main");
+    const logoutBtn = document.getElementById("logout-btn");
+    const mobileNav = document.getElementById("mobile-nav-bar");
+    if (loginView) loginView.style.display = "none";
+    if (mainView) mainView.style.display = "flex";
+    if (logoutBtn) logoutBtn.style.display = "flex";
+    if (mobileNav) mobileNav.style.removeProperty("display");
+    
+    // Contextual Banner check (older than 8 hours)
+    let isOldSession = false;
+    const bannerEl = document.getElementById("contextual-banner");
+    if (bannerEl) {
+      if (state.timestamp) {
+        isOldSession = (Date.now() - state.timestamp) > (8 * 60 * 60 * 1000);
+        if (isOldSession) {
+          bannerEl.style.display = "flex";
+        } else {
+          bannerEl.style.display = "none";
+        }
+      } else {
+        bannerEl.style.display = "none";
+      }
+    }
+    
+    // Default tab routing based on empty roster or active session
+    const checkedInCount = state.players.filter(p => p.checkedIn).length;
+    if (checkedInCount === 0 || isOldSession) {
+      switchMobileTab('roster');
+    } else {
+      switchMobileTab('courts');
+    }
+    
+    // Update slider input value and display text
+    const slider = document.getElementById(UI_SELECTORS.COURT_SLIDER);
+    if (slider) {
+      slider.value = state.maxCourts;
+    }
+    
+    const displayEl = document.getElementById(UI_SELECTORS.COURT_DISPLAY);
+    if (displayEl) {
+      displayEl.innerText = state.maxCourts;
+    }
+    
+    renderUI();
+    applyAllPanelCollapseStates();
+    hideLoadingOverlay();
+  }
+
+  // Override standard browser alert and bind ok button
+  if (typeof window !== "undefined") {
+    window.alert = function(msg) {
+      showAlertModal("Attention", msg);
+    };
+
+    const okBtn = document.getElementById("confirm-modal-ok-btn");
+    if (okBtn) {
+      okBtn.addEventListener("click", () => {
+        if (confirmCallback) confirmCallback();
+        closeConfirmModal();
+      });
+    }
+  }
+
+  // Initialize UI on window load
+  window.addEventListener("load", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const clubParam = urlParams.get("c") || urlParams.get("club") || localStorage.getItem("pwa_club_slug") || "";
+    let initialClubName = localStorage.getItem("pwa_club_name") || null;
+    if (typeof resolveCourtflowHost === "function" && clubParam) {
+      const resolved = resolveCourtflowHost(clubParam);
+      if (resolved && resolved.name) {
+        initialClubName = resolved.name;
+        try { localStorage.setItem("pwa_club_name", resolved.name); } catch (e) {}
+      }
+    }
+    updatePortalTabTitle_(initialClubName);
+    updatePortalSplashText_(initialClubName, clubParam);
+
+    const token = getAuthToken();
+    
+    // Initial fetch from GAS (combines master roster and persistent state properties)
+    google.script.run
+      .withSuccessHandler(data => {
+        const payload = typeof data === "string" ? JSON.parse(data) : data;
+        if (payload.authenticated === false) {
+          localStorage.removeItem("courtflow_auth_token");
+          showLoginScreen(payload);
+        } else {
+          initializeDashboard(payload);
+        }
+      })
+      .withFailureHandler(err => {
+        hideLoadingOverlay();
+        const statusScreen = document.getElementById("status-screen");
+        const spinner = document.getElementById("spinner-loader");
+        const statusTxt = document.getElementById("status-text");
+        const offlinePanel = document.getElementById("offline-panel");
+        const errorMsgEl = document.getElementById("offline-error-msg");
+        if (spinner) spinner.style.display = "none";
+        if (statusTxt) statusTxt.style.display = "none";
+        if (errorMsgEl) errorMsgEl.innerText = "Failed to load club state: " + err.message;
+        if (offlinePanel) offlinePanel.style.display = "block";
+        if (statusScreen) statusScreen.style.display = "flex";
+      })
+      .getInitialState(token);
+  });
 
   /**
    * Switches active tab on mobile devices by updating classes on the app container.
