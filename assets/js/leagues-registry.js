@@ -61,13 +61,14 @@ function resolveClubHost(input) {
     }
   }
 
-  // 3. Fallback: Raw Google Apps Script deployment hash (e.g. starts with AKfy or is long hash)
-  if (input.startsWith('AKfy') || input.length >= 25) {
+  // 3. Fallback: Raw Google Apps Script deployment hash (strictly validated format)
+  const trimmed = input.trim();
+  if (/^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmed)) {
     return {
       slug: 'custom',
       name: 'Custom Club',
       shortName: 'Club',
-      hostId: input.trim()
+      hostId: trimmed
     };
   }
 
@@ -106,13 +107,14 @@ function resolveCourtflowHost(input) {
     }
   }
 
-  // 3. Fallback: Raw Google Apps Script deployment hash
-  if (input.startsWith('AKfy') || input.length >= 25) {
+  // 3. Fallback: Raw Google Apps Script deployment hash (strictly validated format)
+  const trimmedCf = input.trim();
+  if (/^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmedCf)) {
     return {
       slug: 'custom',
       name: 'Custom Club',
       shortName: 'Club',
-      hostId: input.trim()
+      hostId: trimmedCf
     };
   }
 
