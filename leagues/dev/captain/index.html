@@ -845,7 +845,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v44";
+  window.__FF_VERSION__ = "dev-v45";
   console.log("%c[FixtureFlow · Captain]%c Running version " + window.__FF_VERSION__, "color: #a78bfa; font-weight: bold;", "color: inherit;");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -2739,11 +2739,29 @@ function resolveCourtflowHost(input) {
       display: none;
     }
   }
+
+  /* Captain Portal Ambient Spotlight Glow */
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg-glow: radial-gradient(circle at 50% 10%, rgba(98, 0, 238, 0.05) 0%, var(--bg) 60%);
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-glow: radial-gradient(circle at 50% 10%, rgba(187, 134, 252, 0.08) 0%, var(--bg) 60%);
+    }
+  }
+
+  body {
+    background-image: var(--bg-glow);
+    background-attachment: fixed;
+  }
 </style>
 
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v44">
+  <meta name="app-version" content="dev-v45">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-captain.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-captain.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -2834,7 +2852,7 @@ function resolveCourtflowHost(input) {
   </div>
   <!-- BRANDING FOOTER (Login View) -->
   <div class="brand-footer login-footer">
-    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v44</span>
+    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v45</span>
 
   </div>
 </div>
