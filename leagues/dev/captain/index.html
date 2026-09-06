@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v57";
+  window.__FF_VERSION__ = "dev-v59";
   console.log("%c[FixtureFlow · Captain]%c Running version " + window.__FF_VERSION__, "background: #7c3aed; color: #ffffff; border: 1px solid #8b5cf6; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -920,13 +920,14 @@ function resolveClubHost(input) {
     }
   }
 
-  // 3. Fallback: Raw Google Apps Script deployment hash (e.g. starts with AKfy or is long hash)
-  if (input.startsWith('AKfy') || input.length >= 25) {
+  // 3. Fallback: Raw Google Apps Script deployment hash (strictly validated format)
+  const trimmed = input.trim();
+  if (/^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmed)) {
     return {
       slug: 'custom',
       name: 'Custom Club',
       shortName: 'Club',
-      hostId: input.trim()
+      hostId: trimmed
     };
   }
 
@@ -965,13 +966,14 @@ function resolveCourtflowHost(input) {
     }
   }
 
-  // 3. Fallback: Raw Google Apps Script deployment hash
-  if (input.startsWith('AKfy') || input.length >= 25) {
+  // 3. Fallback: Raw Google Apps Script deployment hash (strictly validated format)
+  const trimmedCf = input.trim();
+  if (/^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmedCf)) {
     return {
       slug: 'custom',
       name: 'Custom Club',
       shortName: 'Club',
-      hostId: input.trim()
+      hostId: trimmedCf
     };
   }
 
@@ -1013,7 +1015,8 @@ function resolveCourtflowHost(input) {
   function callHostApi(action, args, successHandler, failureHandler) {
     const urlParams = new URLSearchParams(window.location.search);
     const rawClubParam = urlParams.get('c') || urlParams.get('club') || '';
-    let hostId = urlParams.get('h');
+    const rawHostParam = urlParams.get('h');
+    let hostId = null;
     let clubName = '';
     let clubShort = '';
 
@@ -1023,16 +1026,26 @@ function resolveCourtflowHost(input) {
         hostId = resolved.hostId;
         clubName = resolved.name;
         clubShort = resolved.shortName || '';
-        localStorage.setItem('leagues_dev_pwa_host_id', hostId);
-        localStorage.setItem('leagues_dev_pwa_club_name', clubName);
-        localStorage.setItem('leagues_dev_pwa_club_short', clubShort);
-        localStorage.setItem('leagues_dev_pwa_club_slug', resolved.slug);
+        if (resolved.slug !== 'custom') {
+          localStorage.setItem('leagues_dev_pwa_host_id', hostId);
+          localStorage.setItem('leagues_dev_pwa_club_name', clubName);
+          localStorage.setItem('leagues_dev_pwa_club_short', clubShort);
+          localStorage.setItem('leagues_dev_pwa_club_slug', resolved.slug);
+        }
       }
     }
 
-    if (urlParams.get('h')) {
-      hostId = urlParams.get('h');
-      localStorage.setItem('leagues_dev_pwa_host_id', hostId);
+    if (rawHostParam) {
+      const trimmedHost = rawHostParam.trim();
+      if (/^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmedHost)) {
+        hostId = trimmedHost;
+        console.warn("%c[FixtureFlow · Testing]%c Connecting via Custom Testing Host ID: " + hostId, "background: #d97706; color: #ffffff; padding: 2px 6px; border-radius: 3px; font-weight: 600;", "color: inherit; margin-left: 4px;");
+      } else {
+        const invalidHostErr = "Configuration Error: Invalid custom host parameter format.";
+        console.error(invalidHostErr);
+        if (failureHandler) failureHandler(new Error(invalidHostErr));
+        return;
+      }
     }
 
     if (!hostId) {
@@ -1076,10 +1089,10 @@ function resolveCourtflowHost(input) {
     } else if (action === "validateOpponentPin" || action === "authOpponent") {
       payload.pin = args[0];
     } else if (action === "getClubPortalBootstrapData") {
-      payload.token = args[0] || (typeof activeSessionToken !== 'undefined' ? activeSessionToken : (localStorage.getItem('FF_SESSION_TOKEN') || localStorage.getItem('ff_club_session_token')));
+      payload.token = args[0] || (typeof activeSessionToken !== 'undefined' ? activeSessionToken : (localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN')));
     } else if (action === "getClubFixtures") {
       payload.clubName = args[0];
-      payload.token = args[1] || (typeof activeSessionToken !== 'undefined' ? activeSessionToken : (localStorage.getItem('FF_SESSION_TOKEN') || localStorage.getItem('ff_club_session_token')));
+      payload.token = args[1] || (typeof activeSessionToken !== 'undefined' ? activeSessionToken : (localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN')));
     } else if (action === "getTimeSlotsForDate") {
       payload.dateStr = args[0];
       payload.settings = args[1];
@@ -1139,44 +1152,77 @@ function resolveCourtflowHost(input) {
 
     const targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
 
-    fetch(targetUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain"
-      },
-      body: JSON.stringify(requestEnvelope)
-    })
-    .then(response => {
-      return response.text().then(text => {
-        let result;
-        try {
-          result = JSON.parse(text);
-        } catch (parseErr) {
-          if (text.trim().startsWith('<')) {
-            throw new Error('Server returned HTML instead of JSON (Google Apps Script cold-start or session conflict). Please refresh.');
+    function executeFetch(attemptNumber) {
+      const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      const timeoutId = controller ? setTimeout(() => controller.abort(), 20000) : null;
+
+      const fetchOptions = {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain"
+        },
+        body: JSON.stringify(requestEnvelope)
+      };
+      if (controller) {
+        fetchOptions.signal = controller.signal;
+      }
+
+      fetch(targetUrl, fetchOptions)
+      .then(response => {
+        if (timeoutId) clearTimeout(timeoutId);
+        return response.text().then(text => {
+          let result;
+          try {
+            result = JSON.parse(text);
+          } catch (parseErr) {
+            if (text.trim().startsWith('<')) {
+              throw new Error('Server returned HTML instead of JSON (Google Apps Script cold-start or session conflict). Please refresh.');
+            }
+            throw new Error('Invalid JSON response: ' + text.slice(0, 100));
           }
-          throw new Error('Invalid JSON response: ' + text.slice(0, 100));
+          if (!response.ok) {
+            throw new Error('API Error: HTTP status ' + response.status);
+          }
+          return result;
+        });
+      })
+      .then(result => {
+        if (!result.success) {
+          throw new Error(result.error || "Unknown server error");
         }
-        if (!response.ok) {
-          throw new Error('API Error: HTTP status ' + response.status);
+        if (successHandler) {
+          successHandler(result.data !== undefined ? result.data : result);
         }
-        return result;
+      })
+      .catch(err => {
+        if (timeoutId) clearTimeout(timeoutId);
+        const isAbort = err && err.name === 'AbortError';
+        const isTransient = isAbort || (err && err.message && (
+          err.message.includes('cold-start') || 
+          err.message.includes('Failed to fetch') || 
+          err.message.includes('NetworkError') ||
+          err.message.includes('503')
+        ));
+
+        if (attemptNumber < 2 && isTransient) {
+          console.warn(`%c[FixtureFlow · Network]%c Transient hiccup on ${action}. Retrying in 1.5s (attempt 2/2)...`, "background: #3b82f6; color: #ffffff; padding: 2px 6px; border-radius: 3px; font-weight: 600;", "color: inherit; margin-left: 4px;");
+          setTimeout(() => {
+            executeFetch(attemptNumber + 1);
+          }, 1500);
+          return;
+        }
+
+        const friendlyErr = isAbort 
+          ? new Error('Request timed out (20s). Google Apps Script took too long to respond. Please try again.')
+          : err;
+        console.error(`API Call failed (${action}):`, friendlyErr);
+        if (failureHandler) {
+          failureHandler(friendlyErr);
+        }
       });
-    })
-    .then(result => {
-      if (!result.success) {
-        throw new Error(result.error || "Unknown server error");
-      }
-      if (successHandler) {
-        successHandler(result.data !== undefined ? result.data : result);
-      }
-    })
-    .catch(err => {
-      console.error(`API Call failed (${action}):`, err);
-      if (failureHandler) {
-        failureHandler(err);
-      }
-    });
+    }
+
+    executeFetch(1);
   }
 
   /**
@@ -1704,7 +1750,7 @@ function resolveCourtflowHost(input) {
     }
     if (typeof localStorage !== 'undefined') {
       try {
-        const cached = localStorage.getItem('ff_public_metadata');
+        const cached = localStorage.getItem('ff_shared_public_metadata') || localStorage.getItem('ff_public_metadata');
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed && parsed.clubName) return parsed.clubName;
@@ -2780,7 +2826,7 @@ function resolveCourtflowHost(input) {
 
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v57">
+  <meta name="app-version" content="dev-v59">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-captain.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-captain.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -2871,7 +2917,7 @@ function resolveCourtflowHost(input) {
   </div>
   <!-- BRANDING FOOTER (Login View) -->
   <div class="brand-footer login-footer">
-    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v57</span>
+    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v59</span>
 
   </div>
 </div>
@@ -3905,7 +3951,7 @@ function resolveCourtflowHost(input) {
       perspective = match.homeAway || match.venueRole || 'N/A';
       badgeClass = perspective.toLowerCase() === 'home' ? 'home' : 'away';
     } else {
-      const userClubName = (typeof localStorage !== 'undefined' && localStorage.getItem('FF_CLUB_NAME')) || match.clubName || 'Team';
+      const userClubName = (typeof localStorage !== 'undefined' && (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME'))) || match.clubName || 'Team';
       team1 = userClubName + ' ' + (match.ourTeam || '');
       team2 = match.opponent || 
               (match.oppClub && match.oppClub !== userClubName ? match.oppClub + ' ' + (match.oppTeam || '') : '') || 
@@ -3976,7 +4022,7 @@ function resolveCourtflowHost(input) {
       }
     } else {
       // Opponent/Club Portal context: Look up currently logged in club's emails first
-      const userClubName = localStorage.getItem('FF_CLUB_NAME');
+      const userClubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
       if (userClubName && typeof clubEmailMap !== 'undefined') {
         const lookupKey = userClubName.toUpperCase();
         if (clubEmailMap[lookupKey]) {
@@ -4775,7 +4821,7 @@ function resolveCourtflowHost(input) {
 
         const isClubPortal = (typeof renderDashboard === 'function');
         if (isClubPortal) {
-          const clubName = localStorage.getItem('FF_CLUB_NAME');
+          const clubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
           if (clubName) {
             google.script.run
               .withSuccessHandler(function(newData) {
@@ -4790,7 +4836,7 @@ function resolveCourtflowHost(input) {
             finishSuccessUI();
           }
         } else {
-          const activePin = (typeof currentPin !== 'undefined' && currentPin) || localStorage.getItem('captain_pin');
+          const activePin = (typeof currentPin !== 'undefined' && currentPin) || localStorage.getItem('ff_captain_pin') || localStorage.getItem('captain_pin');
           if (activePin && typeof renderMatches === 'function') {
             google.script.run
               .withSuccessHandler(function(newData) {
@@ -4855,7 +4901,7 @@ function resolveCourtflowHost(input) {
           }, 600);
         };
 
-        const pin = localStorage.getItem('captain_pin');
+        const pin = localStorage.getItem('ff_captain_pin') || localStorage.getItem('captain_pin');
         if (pin && typeof renderMatches === 'function') {
           google.script.run
             .withSuccessHandler(function(response) {
@@ -4974,7 +5020,7 @@ function resolveCourtflowHost(input) {
       }
     } else {
       // Opponent initiating reschedule -> If SemiAuto target Host Club Captain, else Host Sec
-      const userClubName = localStorage.getItem('FF_CLUB_NAME') || oppClubName;
+      const userClubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || oppClubName;
       let rawOppSecName = '';
       if (userClubName && typeof opponentContactsMap !== 'undefined' && opponentContactsMap[userClubName.toUpperCase()]) {
         const contacts = opponentContactsMap[userClubName.toUpperCase()];
@@ -5458,7 +5504,7 @@ function resolveCourtflowHost(input) {
             if (overlayText) overlayText.textContent = '✨ Success! Refreshing dashboard...';
             if (isClubPortal) {
               // Club Portal Refresh
-              const clubName = localStorage.getItem('FF_CLUB_NAME');
+              const clubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
               if (clubName) {
                 google.script.run
                   .withSuccessHandler(function(newData) {
@@ -5474,7 +5520,7 @@ function resolveCourtflowHost(input) {
               }
             } else {
               // Captain Portal Refresh
-              const activePin = (typeof currentPin !== 'undefined' && currentPin) || localStorage.getItem('captain_pin');
+              const activePin = (typeof currentPin !== 'undefined' && currentPin) || localStorage.getItem('ff_captain_pin') || localStorage.getItem('captain_pin');
               if (activePin) {
                 google.script.run
                   .withSuccessHandler(function(newData) {
@@ -5568,7 +5614,7 @@ function resolveCourtflowHost(input) {
       : (typeof getHostClubName === 'function' ? getHostClubName() : (typeof getActiveClubName === 'function' ? getActiveClubName(match) : ((typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && !MAIN_CLUB_NAME.includes('Development / Staging')) ? MAIN_CLUB_NAME : 'Host Club')));
     var hostTeam = typeof getHostTeamName === 'function' ? getHostTeamName(match) : (match.ourTeam || '');
     var oppTeam = typeof getOpponentTeamName === 'function' ? getOpponentTeamName(match) : (match.oppTeam || '');
-    var oppClub = (typeof localStorage !== 'undefined' && localStorage.getItem('FF_CLUB_NAME')) || match.oppClub || (typeof userClubName !== 'undefined' && userClubName) || match.clubName || 'Visiting Club';
+    var oppClub = (typeof localStorage !== 'undefined' && (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME'))) || match.oppClub || (typeof userClubName !== 'undefined' && userClubName) || match.clubName || 'Visiting Club';
 
     // Helper for club prefix deduplication (e.g. avoid "Ailesbury Ailesbury X5")
     var formatSide = function(club, team) {
@@ -5746,7 +5792,7 @@ function resolveCourtflowHost(input) {
   <script>
 // --- STATE ---
 let appData = null;
-let currentPin = localStorage.getItem('captain_pin') || '';
+let currentPin = localStorage.getItem('ff_captain_pin') || localStorage.getItem('captain_pin') || '';
 let selectedTeam = 'ALL';
 let selectedMonth = 'CURRENT';
 let guestPlayers = new Set();
@@ -6906,11 +6952,11 @@ function onLoginSuccess(data) {
   }
   const pinInput = document.getElementById('pin-input');
   currentPin = (pinInput ? pinInput.value.trim() : '') || currentPin;
-  localStorage.setItem('captain_pin', currentPin);
-  localStorage.setItem('ff_cached_captain_data', JSON.stringify(appData));
+  localStorage.setItem('ff_captain_pin', currentPin);
+  localStorage.setItem('ff_captain_cached_data', JSON.stringify(appData));
   
   // Restore saved team if available and valid
-  const savedTeam = localStorage.getItem('ff_captain_team');
+  const savedTeam = localStorage.getItem('ff_captain_selected_team') || localStorage.getItem('ff_captain_team');
   if (savedTeam && appData.teams && (savedTeam === 'ALL' || appData.teams[savedTeam])) {
       selectedTeam = savedTeam;
   } else {
@@ -6932,14 +6978,14 @@ function onLoginFail(errMsg, isAuto = false) {
   if (fullscreenLoading) fullscreenLoading.classList.add('hidden');
 
   if (isAuto) {
-    const cachedData = localStorage.getItem('ff_cached_captain_data');
+    const cachedData = localStorage.getItem('ff_captain_cached_data') || localStorage.getItem('ff_cached_captain_data');
     if (cachedData) {
       try {
         appData = JSON.parse(cachedData);
         if (appData && appData.clubName && typeof updateClubBrandingState === 'function') {
           updateClubBrandingState(appData, 'Captain');
         }
-        const savedTeam = localStorage.getItem('ff_captain_team');
+        const savedTeam = localStorage.getItem('ff_captain_selected_team') || localStorage.getItem('ff_captain_team');
         if (savedTeam && appData.teams && (savedTeam === 'ALL' || appData.teams[savedTeam])) {
           selectedTeam = savedTeam;
         } else {
@@ -6978,7 +7024,9 @@ function onLoginFail(errMsg, isAuto = false) {
     formContainer.classList.add('shake');
   }
 
+  localStorage.removeItem('ff_captain_pin');
   localStorage.removeItem('captain_pin');
+  localStorage.removeItem('ff_captain_cached_data');
   localStorage.removeItem('ff_cached_captain_data');
   currentPin = '';
   const pinInput = document.getElementById('pin-input');
@@ -7065,8 +7113,11 @@ function switchTab(tabName) {
 }
 
 function logout() {
+  localStorage.removeItem('ff_captain_pin');
   localStorage.removeItem('captain_pin');
+  localStorage.removeItem('ff_captain_selected_team');
   localStorage.removeItem('ff_captain_team'); // Clear saved team
+  localStorage.removeItem('ff_captain_cached_data');
   localStorage.removeItem('ff_cached_captain_data');
   currentPin = '';
   appData = null;
@@ -7102,7 +7153,7 @@ function logout() {
   const cfgClubName = cfgEl && cfgEl.dataset && cfgEl.dataset.clubName ? cfgEl.dataset.clubName : '';
   const cfgClubLogo = cfgEl && cfgEl.dataset && cfgEl.dataset.clubLogoUrl ? cfgEl.dataset.clubLogoUrl : '';
   const initialClubName = cfgClubName || localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('leagues_pwa_club_name');
-  const cachedMeta = localStorage.getItem('ff_public_metadata');
+  const cachedMeta = localStorage.getItem('ff_shared_public_metadata') || localStorage.getItem('ff_public_metadata');
   if (cfgClubName || cfgClubLogo) {
     hydrateClubBranding({ clubName: cfgClubName, clubLogoUrl: cfgClubLogo }, 'Captain');
   } else if (cachedMeta) {
@@ -7131,7 +7182,7 @@ function logout() {
         .withSuccessHandler(res => {
           const meta = (res && res.clubName) ? res : (res && res.data ? res.data : null);
           if (meta) {
-            localStorage.setItem('ff_public_metadata', JSON.stringify(meta));
+            localStorage.setItem('ff_shared_public_metadata', JSON.stringify(meta));
             hydrateClubBranding(meta, 'Captain');
           }
           revealCaptainLoginView();
