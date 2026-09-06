@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v46";
+  window.__FF_VERSION__ = "dev-v47";
   console.log("%c[FixtureFlow · Captain]%c Running version " + window.__FF_VERSION__, "color: #a78bfa; font-weight: bold;", "color: inherit;");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -2769,7 +2769,7 @@ function resolveCourtflowHost(input) {
 
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v46">
+  <meta name="app-version" content="dev-v47">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-captain.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-captain.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -2860,7 +2860,7 @@ function resolveCourtflowHost(input) {
   </div>
   <!-- BRANDING FOOTER (Login View) -->
   <div class="brand-footer login-footer">
-    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v46</span>
+    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v47</span>
 
   </div>
 </div>
@@ -6913,7 +6913,7 @@ function onLoginFail(errMsg, isAuto = false) {
   const pinInput = document.getElementById('pin-input');
   if (pinInput) {
     pinInput.value = '';
-    pinInput.focus();
+    pinInput.focus({ preventScroll: true });
   }
 }
 
@@ -6924,6 +6924,10 @@ function revealCaptainLoginView() {
   if (loginView) loginView.classList.remove('hidden');
   const formContainer = document.getElementById('login-form-container');
   if (formContainer) formContainer.classList.remove('hidden');
+  const pinInput = document.getElementById('pin-input');
+  if (pinInput) {
+    setTimeout(() => pinInput.focus({ preventScroll: true }), 100);
+  }
 }
 
 function showCaptainOfflineCard() {
