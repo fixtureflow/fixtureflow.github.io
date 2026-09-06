@@ -42,6 +42,14 @@
     --c-unav: #c62828;
     --bg-unav: rgba(198, 40, 40, 0.1);
 
+    /* Venue Badges (Light) */
+    --badge-home-bg: #e0f7fa;
+    --badge-home-color: #006064;
+    --badge-home-border: #b2ebf2;
+    --badge-away-bg: #fce4ec;
+    --badge-away-color: #880e4f;
+    --badge-away-border: #f8bbd0;
+
     /* Splash Screen Tokens (Light) - Captain Base */
     --splash-bg: radial-gradient(circle at center, #ffffff 0%, var(--bg) 100%);
     --splash-glow: rgba(98, 0, 238, 0.12);
@@ -87,6 +95,14 @@
       --bg-rest: rgba(255, 183, 77, 0.15);
       --c-unav: #cf6679;
       --bg-unav: rgba(207, 102, 121, 0.15);
+
+      /* Venue Badges (Dark) */
+      --badge-home-bg: rgba(0, 151, 167, 0.2);
+      --badge-home-color: #84ffff;
+      --badge-home-border: #00838f;
+      --badge-away-bg: rgba(194, 24, 91, 0.2);
+      --badge-away-color: #ff80ab;
+      --badge-away-border: #ad1457;
     }
   }
 
@@ -829,7 +845,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v40";
+  window.__FF_VERSION__ = "dev-v42";
   console.log("🏸 FixtureFlow [" + window.__FF_VERSION__ + "] Active");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -1800,22 +1816,24 @@ function resolveCourtflowHost(input) {
   }
 
   .badge {
-    padding: 4px 8px;
+    padding: 2px 6px;
     border-radius: 4px;
     background: var(--border);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     font-weight: bold;
   }
 
   .badge.home {
-    background: var(--bg-avail);
-    color: var(--c-avail);
+    background-color: var(--badge-home-bg);
+    color: var(--badge-home-color);
+    border: 1px solid var(--badge-home-border);
   }
 
   .badge.away {
-    background: var(--bg-match);
-    color: var(--c-match);
+    background-color: var(--badge-away-bg);
+    color: var(--badge-away-color);
+    border: 1px solid var(--badge-away-border);
   }
 
   .badge.match-type {
@@ -2725,7 +2743,7 @@ function resolveCourtflowHost(input) {
 
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v40">
+  <meta name="app-version" content="dev-v42">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-captain.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-captain.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -2816,7 +2834,7 @@ function resolveCourtflowHost(input) {
   </div>
   <!-- BRANDING FOOTER (Login View) -->
   <div class="brand-footer login-footer">
-    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v40</span>
+    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v42</span>
 
   </div>
 </div>
