@@ -139,6 +139,10 @@ function resolveCourtflowHost(input) {
 }
 
 
+  // Version Observability
+  window.__FF_VERSION__ = "dev-v15";
+  console.log("%c[CourtFlow]%c Running version dev-v15", "color: #10b981; font-weight: bold;", "color: inherit;");
+
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
   const google = {
@@ -2268,6 +2272,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="app-version" content="dev-v15">
   <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
   <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
   <link rel="manifest" href="manifest.json">
@@ -2328,7 +2333,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v15</span>
 
         </div>
       </div>
@@ -2499,6 +2504,12 @@ function resolveCourtflowHost(input) {
         </div>
 
       </main>
+
+      <!-- BRANDING FOOTER (Main View) -->
+      <div class="brand-footer main-footer">
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v15</span>
+
+      </div>
 
       <!-- Mobile Bottom Navigation Bar (Authenticated Session Only) -->
       <nav class="mobile-nav-bar" id="mobile-nav-bar" style="display: none;">
@@ -4075,14 +4086,47 @@ function resolveCourtflowHost(input) {
       .validateAdminPin(pin);
   }
 
+  function getActiveAppVersion_() {
+    if (typeof window !== "undefined" && window.__FF_VERSION__) {
+      return window.__FF_VERSION__;
+    }
+    const metaEl = typeof document !== "undefined" ? document.querySelector('meta[name="app-version"]') : null;
+    if (metaEl && metaEl.getAttribute("content")) {
+      return metaEl.getAttribute("content");
+    }
+    const badgeEl = typeof document !== "undefined" ? document.getElementById("ff-app-version-badge") : null;
+    if (badgeEl && badgeEl.textContent) {
+      return badgeEl.textContent.replace(/^[\s·]+/, "").trim();
+    }
+    return "v2.0.0";
+  }
+
   function handleAdminLogout() {
-    if (confirm("Are you sure you want to log out of CourtFlow on this device?")) {
+    const ver = getActiveAppVersion_();
+    const promptMsg = ver 
+      ? `Are you sure you want to log out of CourtFlow [${ver}] on this device?`
+      : `Are you sure you want to log out of CourtFlow on this device?`;
+    if (confirm(promptMsg)) {
       localStorage.removeItem("courtflow_auth_token");
+      try {
+        sessionStorage.clear();
+        if (typeof caches !== "undefined" && caches.keys) {
+          caches.keys().then(names => {
+            names.forEach(name => caches.delete(name));
+          });
+        }
+      } catch (e) {
+        console.error("Logout cache clearing error:", e);
+      }
       showLoginScreen({ 
         clubName: state.config.clubName || "CourtFlow",
         clubLogoUrl: state.config.clubLogoUrl || ""
       });
     }
+  }
+
+  if (typeof window !== "undefined") {
+    window.handleAdminLogout = handleAdminLogout;
   }
 
   /**
