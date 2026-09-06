@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v52";
+  window.__FF_VERSION__ = "dev-v54";
   console.log("%c[FixtureFlow · Player]%c Running version " + window.__FF_VERSION__, "color: #10b981; font-weight: bold;", "color: inherit;");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -1147,10 +1147,21 @@ function resolveCourtflowHost(input) {
       body: JSON.stringify(requestEnvelope)
     })
     .then(response => {
-      if (!response.ok) {
-        throw new Error(`API Error: HTTP status ${response.status}`);
-      }
-      return response.json();
+      return response.text().then(text => {
+        let result;
+        try {
+          result = JSON.parse(text);
+        } catch (parseErr) {
+          if (text.trim().startsWith('<')) {
+            throw new Error('Server returned HTML instead of JSON (Google Apps Script cold-start or session conflict). Please refresh.');
+          }
+          throw new Error('Invalid JSON response: ' + text.slice(0, 100));
+        }
+        if (!response.ok) {
+          throw new Error('API Error: HTTP status ' + response.status);
+        }
+        return result;
+      });
     })
     .then(result => {
       if (!result.success) {
@@ -2510,7 +2521,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v52">
+  <meta name="app-version" content="dev-v54">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-player.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -2582,7 +2593,7 @@ function resolveCourtflowHost(input) {
 
     <!-- BRANDING FOOTER (Login View) -->
     <div class="brand-footer login-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v52</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v54</span>
 
     </div>
 </div>
