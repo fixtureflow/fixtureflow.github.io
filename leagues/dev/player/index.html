@@ -829,7 +829,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v38";
+  window.__FF_VERSION__ = "dev-v40";
   console.log("🏸 FixtureFlow [" + window.__FF_VERSION__ + "] Active");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -1494,15 +1494,41 @@ function resolveCourtflowHost(input) {
       if (metadata.clubLogoUrl !== undefined) window.FF_STATE.clubLogoUrl = metadata.clubLogoUrl;
       if (metadata.season) window.FF_STATE.season = metadata.season;
       if (metadata.seasonShort) window.FF_STATE.seasonShort = metadata.seasonShort;
+      if (metadata.email) window.FF_STATE.email = metadata.email;
+
+      // Safe window attachment for legacy runtime consumers
+      if (metadata.clubName) {
+        window.MAIN_CLUB_NAME = metadata.clubName;
+        window.ORIGINAL_HOST_CLUB_NAME = metadata.clubName;
+      }
+      if (metadata.clubLogoUrl !== undefined) {
+        window.ORIGINAL_HOST_LOGO_URL = metadata.clubLogoUrl;
+      }
+      if (metadata.email) {
+        window.MAIN_CLUB_EMAIL = metadata.email;
+      }
     }
 
-    // 2. Synchronize legacy runtime globals
+    // 2. Synchronize legacy runtime globals defensively
     if (metadata.clubName) {
-      if (typeof MAIN_CLUB_NAME !== 'undefined') MAIN_CLUB_NAME = metadata.clubName;
-      if (typeof ORIGINAL_HOST_CLUB_NAME !== 'undefined') ORIGINAL_HOST_CLUB_NAME = metadata.clubName;
+      try {
+        if (typeof MAIN_CLUB_NAME !== 'undefined') MAIN_CLUB_NAME = metadata.clubName;
+      } catch (e) {}
+      try {
+        if (typeof ORIGINAL_HOST_CLUB_NAME !== 'undefined') ORIGINAL_HOST_CLUB_NAME = metadata.clubName;
+      } catch (e) {}
     }
-    if (metadata.clubLogoUrl && typeof ORIGINAL_HOST_LOGO_URL !== 'undefined') {
-      ORIGINAL_HOST_LOGO_URL = metadata.clubLogoUrl;
+    if (metadata.clubLogoUrl) {
+      try {
+        if (typeof ORIGINAL_HOST_LOGO_URL !== 'undefined') {
+          ORIGINAL_HOST_LOGO_URL = metadata.clubLogoUrl;
+        }
+      } catch (e) {}
+    }
+    if (metadata.email) {
+      try {
+        if (typeof MAIN_CLUB_EMAIL !== 'undefined') MAIN_CLUB_EMAIL = metadata.email;
+      } catch (e) {}
     }
 
     // 3. Update localStorage cache with live authoritative club name
@@ -2460,9 +2486,10 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v38">
+  <meta name="app-version" content="dev-v40">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-player.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="[DEV] FF Player">
@@ -2531,7 +2558,7 @@ function resolveCourtflowHost(input) {
 
     <!-- BRANDING FOOTER (Login View) -->
     <div class="brand-footer login-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v38</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v40</span>
 
     </div>
 </div>

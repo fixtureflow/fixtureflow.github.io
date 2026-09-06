@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-club-dev-cache-v38';
+const CACHE_NAME = 'ff-club-dev-cache-v40';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
