@@ -829,7 +829,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v36";
+  window.__FF_VERSION__ = "dev-v38";
   console.log("🏸 FixtureFlow [" + window.__FF_VERSION__ + "] Active");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -1487,6 +1487,32 @@ function resolveCourtflowHost(input) {
     if (!metadata) return;
     const name = metadata.clubName || 'Host Club';
     
+    // 1. Central In-Memory State
+    if (typeof window !== 'undefined') {
+      window.FF_STATE = window.FF_STATE || {};
+      if (metadata.clubName) window.FF_STATE.clubName = metadata.clubName;
+      if (metadata.clubLogoUrl !== undefined) window.FF_STATE.clubLogoUrl = metadata.clubLogoUrl;
+      if (metadata.season) window.FF_STATE.season = metadata.season;
+      if (metadata.seasonShort) window.FF_STATE.seasonShort = metadata.seasonShort;
+    }
+
+    // 2. Synchronize legacy runtime globals
+    if (metadata.clubName) {
+      if (typeof MAIN_CLUB_NAME !== 'undefined') MAIN_CLUB_NAME = metadata.clubName;
+      if (typeof ORIGINAL_HOST_CLUB_NAME !== 'undefined') ORIGINAL_HOST_CLUB_NAME = metadata.clubName;
+    }
+    if (metadata.clubLogoUrl && typeof ORIGINAL_HOST_LOGO_URL !== 'undefined') {
+      ORIGINAL_HOST_LOGO_URL = metadata.clubLogoUrl;
+    }
+
+    // 3. Update localStorage cache with live authoritative club name
+    if (typeof localStorage !== 'undefined' && metadata.clubName) {
+      try {
+        localStorage.setItem('leagues_pwa_club_name', metadata.clubName);
+        localStorage.setItem('leagues_dev_pwa_club_name', metadata.clubName);
+      } catch (e) {}
+    }
+
     // Update browser tab and mobile title
     updatePortalTabTitle_(name, portalRole);
     updatePortalSplashText_(portalRole, name);
@@ -1592,6 +1618,50 @@ function resolveCourtflowHost(input) {
       return m.ourTeam || '';
     }
     return m.oppTeam || '';
+  }
+
+  /**
+   * Returns the authoritative host club name from active state, cache, or fallback.
+   * @returns {string}
+   */
+  function getHostClubName() {
+    if (typeof window !== 'undefined' && window.FF_STATE && window.FF_STATE.clubName) {
+      return window.FF_STATE.clubName;
+    }
+    if (typeof appData !== 'undefined' && appData && appData.clubName) {
+      return appData.clubName;
+    }
+    if (typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && MAIN_CLUB_NAME !== 'Host Club' && !MAIN_CLUB_NAME.includes('Development / Staging')) {
+      return MAIN_CLUB_NAME;
+    }
+    if (typeof ORIGINAL_HOST_CLUB_NAME !== 'undefined' && ORIGINAL_HOST_CLUB_NAME && ORIGINAL_HOST_CLUB_NAME !== 'Host Club' && !ORIGINAL_HOST_CLUB_NAME.includes('Development / Staging')) {
+      return ORIGINAL_HOST_CLUB_NAME;
+    }
+    const headerEl = typeof document !== 'undefined' ? document.querySelector('.portal-header-club') : null;
+    if (headerEl && headerEl.textContent && headerEl.textContent.trim() && headerEl.textContent.trim() !== 'Host Club') {
+      return headerEl.textContent.trim();
+    }
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('ff_public_metadata');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.clubName) return parsed.clubName;
+        }
+      } catch (e) {}
+    }
+    return 'Host Club';
+  }
+
+  /**
+   * Unified state hydrator for club branding across all portals.
+   * Synchronizes in-memory state, storage cache, and visual DOM.
+   * @param {{ clubName?: string, clubLogoUrl?: string, season?: string, seasonShort?: string }} metadata
+   * @param {string} [portalRole]
+   */
+  function updateClubBrandingState(metadata, portalRole) {
+    if (!metadata) return;
+    hydrateClubBranding(metadata, portalRole);
   }
 </script>
 
@@ -2629,7 +2699,7 @@ function resolveCourtflowHost(input) {
 
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v36">
+  <meta name="app-version" content="dev-v38">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-captain.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-captain.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2719,7 +2789,7 @@ function resolveCourtflowHost(input) {
   </div>
   <!-- BRANDING FOOTER (Login View) -->
   <div class="brand-footer login-footer">
-    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v36</span>
+    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v38</span>
 
   </div>
 </div>
@@ -3287,12 +3357,22 @@ function resolveCourtflowHost(input) {
 
   <!-- Global Scripts -->
   <script>
-  function getActiveClubName() {
-    return (typeof ORIGINAL_HOST_CLUB_NAME !== 'undefined' && ORIGINAL_HOST_CLUB_NAME) ? ORIGINAL_HOST_CLUB_NAME :
-           (typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME) ? MAIN_CLUB_NAME :
-           (document.getElementById('ff-config') && document.getElementById('ff-config').dataset ? document.getElementById('ff-config').dataset.clubName : null) ||
-           (document.querySelector('.portal-header-club') ? document.querySelector('.portal-header-club').textContent.trim() : null) ||
-           (typeof appData !== 'undefined' && appData && appData.clubName ? appData.clubName : null) ||
+  function getActiveClubName(match) {
+    if (match && match.hostClub && !match.hostClub.includes('Development / Staging') && match.hostClub !== 'Host Club') {
+      return match.hostClub;
+    }
+    if (typeof activeRescheduleMatch !== 'undefined' && activeRescheduleMatch && activeRescheduleMatch.hostClub && !activeRescheduleMatch.hostClub.includes('Development / Staging') && activeRescheduleMatch.hostClub !== 'Host Club') {
+      return activeRescheduleMatch.hostClub;
+    }
+    if (typeof getHostClubName === 'function') {
+      const name = getHostClubName();
+      if (name && name !== 'Host Club') return name;
+    }
+    return (typeof window !== 'undefined' && window.FF_STATE && window.FF_STATE.clubName) ? window.FF_STATE.clubName :
+           (typeof appData !== 'undefined' && appData && appData.clubName) ? appData.clubName :
+           (typeof document !== 'undefined' && document.querySelector && document.querySelector('.portal-header-club') ? document.querySelector('.portal-header-club').textContent.trim() : null) ||
+           (typeof ORIGINAL_HOST_CLUB_NAME !== 'undefined' && ORIGINAL_HOST_CLUB_NAME && !ORIGINAL_HOST_CLUB_NAME.includes('Development / Staging') && ORIGINAL_HOST_CLUB_NAME !== 'Host Club' ? ORIGINAL_HOST_CLUB_NAME : null) ||
+           (typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && !MAIN_CLUB_NAME.includes('Development / Staging') && MAIN_CLUB_NAME !== 'Host Club' ? MAIN_CLUB_NAME : null) ||
            'Host Club';
   }
 
@@ -3725,7 +3805,8 @@ function resolveCourtflowHost(input) {
       (document.querySelector('.portal-header-title') && document.querySelector('.portal-header-title').textContent.includes('Captain')) ||
       document.getElementById('pinned-actions-container')
     );
-    const mainClubName = typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME ? MAIN_CLUB_NAME : 'Host Club';
+    const hostClub = (match && match.hostClub) || getActiveClubName() || 'Host Club';
+    const mainClubName = hostClub;
     
     let team1 = '';
     let team2 = '';
@@ -3738,11 +3819,11 @@ function resolveCourtflowHost(input) {
       perspective = match.homeAway || match.venueRole || 'N/A';
       badgeClass = perspective.toLowerCase() === 'home' ? 'home' : 'away';
     } else {
-      const userClubName = localStorage.getItem('FF_CLUB_NAME') || mainClubName || 'Team';
+      const userClubName = (typeof localStorage !== 'undefined' && localStorage.getItem('FF_CLUB_NAME')) || match.clubName || 'Team';
       team1 = userClubName + ' ' + (match.ourTeam || '');
       team2 = match.opponent || 
-              (match.oppClub ? match.oppClub + ' ' + (match.oppTeam || '') : '') || 
-              (mainClubName + ' ' + (match.oppTeam || '')) || 
+              (match.oppClub && match.oppClub !== userClubName ? match.oppClub + ' ' + (match.oppTeam || '') : '') || 
+              (hostClub + ' ' + (match.oppTeam || '')) || 
               'Opponent';
       perspective = match.venueRole || match.homeAway || 'N/A';
       badgeClass = perspective.toLowerCase() === 'home' ? 'home' : 'away';
@@ -3750,12 +3831,11 @@ function resolveCourtflowHost(input) {
     
     const dateToDisplay = match.date ? formatPortalDate(match.date) : (match.displayDate || 'TBD');
     const timeStr = match.time || 'TBD';
-    const isHome = perspective.toLowerCase() === 'home' || isHostClubHome(match);
-    const hostClub = getActiveClubName() || 'Host Club';
+    const isHostHome = isHostClubHome(match);
     const oppClubName = match.oppClub || match.clubName || (match.opponent && String(match.opponent).includes(' - ') ? match.opponent.split(' - ')[0].trim() : (match.opponent || 'Opponent'));
     const venueStr = (match.venue && match.venue.toLowerCase() !== 'home' && match.venue.toLowerCase() !== 'away') 
       ? match.venue 
-      : (isHome ? hostClub : oppClubName);
+      : (isHostHome ? hostClub : oppClubName);
     const matchType = match.matchType || match.leagueCup || 'Match';
     
     return `
@@ -3926,7 +4006,7 @@ function resolveCourtflowHost(input) {
       const homeClub = getActiveClubName();
       const hostTeam = getHostTeamName(match);
       const oppTeam = getOpponentTeamName(match);
-      const secEmail = (secretaryDetails && secretaryDetails.email) ? secretaryDetails.email : (window.MAIN_CLUB_EMAIL || 'primary@mountpleasant.com');
+      const secEmail = (secretaryDetails && secretaryDetails.email) ? secretaryDetails.email : ((typeof window !== 'undefined' && window.MAIN_CLUB_EMAIL) ? window.MAIN_CLUB_EMAIL : '');
       const secName = (secretaryDetails && secretaryDetails.name) ? secretaryDetails.name : 'Match Secretary';
       const secGreeting = typeof formatFriendlyName === 'function' ? formatFriendlyName(secretaryDetails ? secretaryDetails.name : '', `${homeClub} Match Secretary`) : ((secretaryDetails && secretaryDetails.name) ? (secretaryDetails.name.split(' ')[0] || secretaryDetails.name) : 'Match Secretary');
       const oppClub = match.oppClub || match.clubName || 'Opponent Club';
@@ -5006,7 +5086,7 @@ function resolveCourtflowHost(input) {
       const rawReason = match.activeRequestReason || 'No reason specified.';
 
       if (strategy === 'GUEST_SELECTION_STRATEGY') {
-        const hostName = (typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME ? MAIN_CLUB_NAME : 'Host Club');
+        const hostName = typeof getActiveClubName === 'function' ? getActiveClubName() : ((typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && !MAIN_CLUB_NAME.includes('Development / Staging')) ? MAIN_CLUB_NAME : 'Host Club');
         if (labelEl) labelEl.textContent = hostName + "'s Reason:";
         if (reasonEl) reasonEl.innerHTML = `<div>${rawReason}</div>`;
         const approveBtnOverview = document.querySelector('#rrv-step-overview .btn-primary');
@@ -5080,7 +5160,8 @@ function resolveCourtflowHost(input) {
         let firstSelectableIndex = -1;
         const isHomeRev = isHostClubHome(match);
         let html = '';
-        const titleText = isGuest ? `📅 ${(typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME ? MAIN_CLUB_NAME : 'Host Club')} Proposed Dates (Select One):` : '📅 Opponent Proposed Dates (Live Verified):';
+        const hostClubTitle = typeof getActiveClubName === 'function' ? getActiveClubName() : ((typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && !MAIN_CLUB_NAME.includes('Development / Staging')) ? MAIN_CLUB_NAME : 'Host Club');
+        const titleText = isGuest ? `📅 ${hostClubTitle} Proposed Dates (Select One):` : '📅 Opponent Proposed Dates (Live Verified):';
         html += `<div style="font-weight:600; font-size:0.9rem; margin-bottom:8px; color:var(--on-surface);">${titleText}</div><div style="display:flex; flex-direction:column; gap:6px;">`;
 
         datesList.forEach((d, idx) => {
@@ -5376,15 +5457,22 @@ function resolveCourtflowHost(input) {
     var secPhone = (sec && sec.phone) ? String(sec.phone).trim() : '';
     var secFirstName = typeof formatFriendlyName === 'function' ? formatFriendlyName(secName, 'Match Secretary') : (secName ? secName.split(' ')[0] : 'Match Secretary');
 
-    var hostClub = (typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME) ? MAIN_CLUB_NAME : 'Mount Pleasant';
+    var hostClub = (match && match.hostClub && !match.hostClub.includes('Development / Staging') && match.hostClub !== 'Host Club')
+      ? match.hostClub
+      : (typeof getHostClubName === 'function' ? getHostClubName() : (typeof getActiveClubName === 'function' ? getActiveClubName(match) : ((typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && !MAIN_CLUB_NAME.includes('Development / Staging')) ? MAIN_CLUB_NAME : 'Host Club')));
     var hostTeam = typeof getHostTeamName === 'function' ? getHostTeamName(match) : (match.ourTeam || '');
     var oppTeam = typeof getOpponentTeamName === 'function' ? getOpponentTeamName(match) : (match.oppTeam || '');
     var oppClub = match.oppClub || (typeof userClubName !== 'undefined' && userClubName) || 'Visiting Club';
 
-    var matchupStr = (hostClub + ' ' + hostTeam + ' vs ' + oppClub + ' ' + oppTeam).replace(/\s+/g, ' ').trim();
+    var isHome = typeof isHostClubHome === 'function' ? isHostClubHome(match) : true;
+    var homeSide = isHome ? (hostClub + ' ' + hostTeam).trim() : (oppClub + ' ' + oppTeam).trim();
+    var awaySide = isHome ? (oppClub + ' ' + oppTeam).trim() : (hostClub + ' ' + hostTeam).trim();
+    var matchupStr = (homeSide + ' vs ' + awaySide).replace(/\s+/g, ' ').trim();
     var dateDisplay = match.displayDate || match.date || '';
     var timeDisplay = match.time || '';
-    var venueDisplay = match.venue || 'TBC';
+    var venueDisplay = (match.venue && match.venue.toLowerCase() !== 'home' && match.venue.toLowerCase() !== 'away')
+      ? match.venue
+      : (isHome ? hostClub : oppClub);
 
     var reqCaller = '';
     if (typeof activePortalRole !== 'undefined' && activePortalRole === 'Captain') {
@@ -6675,6 +6763,9 @@ function onLoginSuccess(data) {
   }
 
   appData = data.data;
+  if (appData && appData.clubName && typeof updateClubBrandingState === 'function') {
+    updateClubBrandingState(appData, 'Captain');
+  }
   const pinInput = document.getElementById('pin-input');
   currentPin = (pinInput ? pinInput.value.trim() : '') || currentPin;
   localStorage.setItem('captain_pin', currentPin);
@@ -6707,6 +6798,9 @@ function onLoginFail(errMsg, isAuto = false) {
     if (cachedData) {
       try {
         appData = JSON.parse(cachedData);
+        if (appData && appData.clubName && typeof updateClubBrandingState === 'function') {
+          updateClubBrandingState(appData, 'Captain');
+        }
         const savedTeam = localStorage.getItem('ff_captain_team');
         if (savedTeam && appData.teams && (savedTeam === 'ALL' || appData.teams[savedTeam])) {
           selectedTeam = savedTeam;

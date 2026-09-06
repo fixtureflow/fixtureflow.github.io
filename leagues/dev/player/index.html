@@ -829,7 +829,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v36";
+  window.__FF_VERSION__ = "dev-v38";
   console.log("🏸 FixtureFlow [" + window.__FF_VERSION__ + "] Active");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -1487,6 +1487,32 @@ function resolveCourtflowHost(input) {
     if (!metadata) return;
     const name = metadata.clubName || 'Host Club';
     
+    // 1. Central In-Memory State
+    if (typeof window !== 'undefined') {
+      window.FF_STATE = window.FF_STATE || {};
+      if (metadata.clubName) window.FF_STATE.clubName = metadata.clubName;
+      if (metadata.clubLogoUrl !== undefined) window.FF_STATE.clubLogoUrl = metadata.clubLogoUrl;
+      if (metadata.season) window.FF_STATE.season = metadata.season;
+      if (metadata.seasonShort) window.FF_STATE.seasonShort = metadata.seasonShort;
+    }
+
+    // 2. Synchronize legacy runtime globals
+    if (metadata.clubName) {
+      if (typeof MAIN_CLUB_NAME !== 'undefined') MAIN_CLUB_NAME = metadata.clubName;
+      if (typeof ORIGINAL_HOST_CLUB_NAME !== 'undefined') ORIGINAL_HOST_CLUB_NAME = metadata.clubName;
+    }
+    if (metadata.clubLogoUrl && typeof ORIGINAL_HOST_LOGO_URL !== 'undefined') {
+      ORIGINAL_HOST_LOGO_URL = metadata.clubLogoUrl;
+    }
+
+    // 3. Update localStorage cache with live authoritative club name
+    if (typeof localStorage !== 'undefined' && metadata.clubName) {
+      try {
+        localStorage.setItem('leagues_pwa_club_name', metadata.clubName);
+        localStorage.setItem('leagues_dev_pwa_club_name', metadata.clubName);
+      } catch (e) {}
+    }
+
     // Update browser tab and mobile title
     updatePortalTabTitle_(name, portalRole);
     updatePortalSplashText_(portalRole, name);
@@ -1592,6 +1618,50 @@ function resolveCourtflowHost(input) {
       return m.ourTeam || '';
     }
     return m.oppTeam || '';
+  }
+
+  /**
+   * Returns the authoritative host club name from active state, cache, or fallback.
+   * @returns {string}
+   */
+  function getHostClubName() {
+    if (typeof window !== 'undefined' && window.FF_STATE && window.FF_STATE.clubName) {
+      return window.FF_STATE.clubName;
+    }
+    if (typeof appData !== 'undefined' && appData && appData.clubName) {
+      return appData.clubName;
+    }
+    if (typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && MAIN_CLUB_NAME !== 'Host Club' && !MAIN_CLUB_NAME.includes('Development / Staging')) {
+      return MAIN_CLUB_NAME;
+    }
+    if (typeof ORIGINAL_HOST_CLUB_NAME !== 'undefined' && ORIGINAL_HOST_CLUB_NAME && ORIGINAL_HOST_CLUB_NAME !== 'Host Club' && !ORIGINAL_HOST_CLUB_NAME.includes('Development / Staging')) {
+      return ORIGINAL_HOST_CLUB_NAME;
+    }
+    const headerEl = typeof document !== 'undefined' ? document.querySelector('.portal-header-club') : null;
+    if (headerEl && headerEl.textContent && headerEl.textContent.trim() && headerEl.textContent.trim() !== 'Host Club') {
+      return headerEl.textContent.trim();
+    }
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('ff_public_metadata');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.clubName) return parsed.clubName;
+        }
+      } catch (e) {}
+    }
+    return 'Host Club';
+  }
+
+  /**
+   * Unified state hydrator for club branding across all portals.
+   * Synchronizes in-memory state, storage cache, and visual DOM.
+   * @param {{ clubName?: string, clubLogoUrl?: string, season?: string, seasonShort?: string }} metadata
+   * @param {string} [portalRole]
+   */
+  function updateClubBrandingState(metadata, portalRole) {
+    if (!metadata) return;
+    hydrateClubBranding(metadata, portalRole);
   }
 </script>
 
@@ -2390,7 +2460,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v36">
+  <meta name="app-version" content="dev-v38">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-player.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2461,7 +2531,7 @@ function resolveCourtflowHost(input) {
 
     <!-- BRANDING FOOTER (Login View) -->
     <div class="brand-footer login-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v36</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v38</span>
 
     </div>
 </div>
@@ -3465,6 +3535,9 @@ function handleLogin(e, autoPin = null) {
                 localStorage.setItem('ff_portal_pin', pin); // Save Memory
                 localStorage.setItem('ff_cached_portal_data', JSON.stringify(res.data)); // Stale-While-Revalidate cache
                 portalData = res.data;
+                if (portalData && portalData.clubName && typeof updateClubBrandingState === 'function') {
+                    updateClubBrandingState(portalData, 'Player');
+                }
                 initPortalView();
             } else {
                 localStorage.removeItem('ff_portal_pin'); // Clear invalid memory
@@ -3503,6 +3576,9 @@ function handleLogin(e, autoPin = null) {
             if (cachedData && autoPin) {
                 try {
                     portalData = JSON.parse(cachedData);
+                    if (portalData && portalData.clubName && typeof updateClubBrandingState === 'function') {
+                        updateClubBrandingState(portalData, 'Player');
+                    }
                     currentPin = pin;
                     initPortalView();
                     return;

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-captain-dev-cache-v36';
+const CACHE_NAME = 'ff-captain-dev-cache-v38';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
