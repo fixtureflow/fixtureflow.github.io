@@ -140,8 +140,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v30";
-  console.log("%c[CourtFlow]%c Running version dev-v30", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "dev-v31";
+  console.log("%c[CourtFlow]%c Running version dev-v31", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -194,7 +194,7 @@ function resolveCourtflowHost(input) {
     }
   };
 
-  function callHostApi(action, args, successHandler, failureHandler) {
+  function callHostApi(action, args, successHandler, failureHandler, isRetry = false) {
     const urlParams = new URLSearchParams(window.location.search);
     const clubParam = urlParams.get('c') || urlParams.get('club') || '';
     let hostId = urlParams.get('h');
@@ -269,7 +269,15 @@ function resolveCourtflowHost(input) {
         try {
           result = JSON.parse(text);
         } catch (parseErr) {
-          if (text.trim().startsWith('<')) {
+          const isHtml = text.trim().startsWith('<');
+          if (isHtml && !isRetry && action === "getInitialState") {
+            console.warn("%c[CourtFlow]%c Apps Script cold-start detected. Retrying getInitialState in 800ms...", "background: #0284c7; color: #ffffff; border-radius: 3px; padding: 2px 5px; font-size: 11px;", "color: inherit; margin-left: 4px;");
+            setTimeout(() => {
+              callHostApi(action, args, successHandler, failureHandler, true);
+            }, 800);
+            return null;
+          }
+          if (isHtml) {
             throw new Error('Server returned HTML instead of JSON (Google Apps Script cold-start or session conflict). Please refresh.');
           }
           throw new Error('Invalid JSON response: ' + text.slice(0, 100));
@@ -281,6 +289,7 @@ function resolveCourtflowHost(input) {
       });
     })
     .then(result => {
+      if (!result) return;
       if (!result.success) {
         throw new Error(result.error || "Unknown server error");
       }
@@ -2359,7 +2368,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="app-version" content="dev-v30">
+  <meta name="app-version" content="dev-v31">
   <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
   <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
   <link rel="manifest" href="manifest.json">
@@ -2420,7 +2429,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v30</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v31</span>
 
         </div>
       </div>
@@ -2594,7 +2603,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v30</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v31</span>
 
       </div>
 
@@ -4841,6 +4850,78 @@ function resolveCourtflowHost(input) {
   let syncTimeout = null;
 
   /**
+   * Executes immediate session state sync to cloud.
+   * Clears debounced timer and binds interactive retry on failure.
+   */
+  function triggerSyncNow() {
+    if (syncTimeout) {
+      clearTimeout(syncTimeout);
+      syncTimeout = null;
+    }
+
+    const statusEl = document.getElementById("sync-status");
+    if (statusEl) {
+      statusEl.className = "sync-dot amber";
+      statusEl.title = "Saving changes to cloud...";
+      statusEl.style.cursor = "default";
+      statusEl.onclick = null;
+    }
+
+    const playCounts = {};
+    if (state && Array.isArray(state.players)) {
+      state.players.forEach(p => {
+        playCounts[p.name] = {
+          mixed: p.mixedCount || 0,
+          sameSex: p.sameSexCount || 0
+        };
+      });
+    }
+
+    const payload = {
+      checkedIn: state && state.players ? state.players.filter(p => p.checkedIn).map(p => p.name) : [],
+      activeCourts: (state && state.activeCourts) || [],
+      history: (state && state.history) || {},
+      opponentHistory: (state && state.opponentHistory) || {},
+      maxCourts: (state && state.maxCourts) || 4,
+      playCounts: playCounts,
+      guests: state && state.players ? state.players.filter(p => p.isSessionGuest).map(p => ({
+        name: p.name,
+        skill: p.skill,
+        gender: p.gender,
+        plays_mixed: p.plays_mixed
+      })) : [],
+      matchHistory: (state && state.matchHistory) || [],
+      leavingEarly: state && state.players ? state.players.filter(p => p.leaving_early).map(p => p.name) : [],
+      boosted: state && state.players ? state.players.filter(p => p.force_next).map(p => p.name) : [],
+      config: (state && state.config) || {},
+      timestamp: Date.now()
+    };
+
+    google.script.run
+      .withSuccessHandler(success => {
+        console.log("Session state synced: ", success);
+        if (statusEl) {
+          statusEl.className = "sync-dot green";
+          statusEl.title = "All changes saved to cloud";
+          statusEl.style.cursor = "default";
+          statusEl.onclick = null;
+        }
+      })
+      .withFailureHandler(err => {
+        console.error("Session state sync failed: ", err);
+        if (statusEl) {
+          statusEl.className = "sync-dot red";
+          statusEl.title = "Sync failed: " + (err && err.message ? err.message : "Network error") + ". Click to retry.";
+          statusEl.style.cursor = "pointer";
+          statusEl.onclick = function() {
+            triggerSyncNow();
+          };
+        }
+      })
+      .saveSessionState(JSON.stringify(payload));
+  }
+
+  /**
    * Debounces saving session state to prevent flooding Apps Script properties quotas.
    */
   function debouncedSync() {
@@ -4852,57 +4933,12 @@ function resolveCourtflowHost(input) {
 
     if (syncTimeout) clearTimeout(syncTimeout);
     syncTimeout = setTimeout(() => {
-      if (statusEl) {
-        statusEl.className = "sync-dot amber";
-        statusEl.title = "Saving changes to cloud...";
-      }
-
-      const playCounts = {};
-      state.players.forEach(p => {
-        playCounts[p.name] = {
-          mixed: p.mixedCount || 0,
-          sameSex: p.sameSexCount || 0
-        };
-      });
-
-      const payload = {
-        checkedIn: state.players.filter(p => p.checkedIn).map(p => p.name),
-        activeCourts: state.activeCourts,
-        history: state.history,
-        opponentHistory: state.opponentHistory,
-        maxCourts: state.maxCourts,
-        playCounts: playCounts,
-        guests: state.players.filter(p => p.isSessionGuest).map(p => ({
-          name: p.name,
-          skill: p.skill,
-          gender: p.gender,
-          plays_mixed: p.plays_mixed
-        })),
-        matchHistory: state.matchHistory,
-        leavingEarly: state.players.filter(p => p.leaving_early).map(p => p.name),
-        boosted: state.players.filter(p => p.force_next).map(p => p.name),
-        config: state.config,
-        timestamp: Date.now()
-      };
-      
-      google.script.run
-        .withSuccessHandler(success => {
-          console.log("Session state synced: ", success);
-          if (statusEl) {
-            statusEl.className = "sync-dot green";
-            statusEl.title = "All changes saved to cloud";
-          }
-        })
-        .withFailureHandler(err => {
-          console.error("Session state sync failed: ", err);
-          if (statusEl) {
-            statusEl.className = "sync-dot red";
-            statusEl.title = "Sync failed: " + err.message + ". Retrying on next action...";
-          }
-        })
-        .saveSessionState(JSON.stringify(payload));
+      triggerSyncNow();
     }, 1000);
   }
+
+  window.triggerSyncNow = triggerSyncNow;
+  window.debouncedSync = debouncedSync;
 </script>
 
   
