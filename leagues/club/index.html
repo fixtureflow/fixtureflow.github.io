@@ -853,7 +853,8 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "v2.6.0";
+  window.__FF_VERSION__ = "v2.7.0";
+  window.__FF_STORAGE_PREFIX__ = "leagues_pwa_";
   console.log("%c[FixtureFlow · Club Admin]%c Running version " + window.__FF_VERSION__, "background: #0f172a; color: #ffffff; border: 1px solid #334155; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // --- Central Leagues & CourtFlow Club Registry ---
@@ -1066,19 +1067,22 @@ function resolveCourtflowHost(input) {
     const payload = {};
     if (action === "getPortalData" || action === "authPlayer") {
       payload.pin = args[0];
+      payload.token = args[0];
     } else if (action === "submitPlayerAvailability" || action === "submitAvailability") {
       payload.pin = args[0];
+      payload.token = args[0];
       payload.payload = args[1];
     } else if (action === "getCaptainDashboardData" || action === "authCaptain") {
       payload.pin = args[0];
+      payload.token = args[0];
       payload.settings = args[1];
     } else if (action === "validateOpponentPin" || action === "authOpponent") {
       payload.pin = args[0];
     } else if (action === "getClubPortalBootstrapData") {
-      payload.token = args[0] || (typeof activeSessionToken !== 'undefined' ? activeSessionToken : (localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN')));
+      payload.token = args[0] || (typeof activeSessionToken !== 'undefined' ? activeSessionToken : ((typeof getPortalStorage === 'function' ? getPortalStorage('club_session_token') : null) || localStorage.getItem('leagues_pwa_club_session_token') || localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN')));
     } else if (action === "getClubFixtures") {
       payload.clubName = args[0];
-      payload.token = args[1] || (typeof activeSessionToken !== 'undefined' ? activeSessionToken : (localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN')));
+      payload.token = args[1] || (typeof activeSessionToken !== 'undefined' ? activeSessionToken : ((typeof getPortalStorage === 'function' ? getPortalStorage('club_session_token') : null) || localStorage.getItem('leagues_pwa_club_session_token') || localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN')));
     } else if (action === "getTimeSlotsForDate") {
       payload.dateStr = args[0];
       payload.settings = args[1];
@@ -1174,6 +1178,12 @@ function resolveCourtflowHost(input) {
       })
       .then(result => {
         if (!result.success) {
+          if (result.code === 'AUTH_REQUIRED' || (result.error && (result.error.includes('Unauthorized') || result.error.includes('AUTH_REQUIRED')))) {
+            console.warn('[FixtureFlow · Auth] Received AUTH_REQUIRED. Evicting session and resetting login view.');
+            if (typeof handleAuthRequired_ === 'function') {
+              handleAuthRequired_();
+            }
+          }
           throw new Error(result.error || "Unknown server error");
         }
         if (successHandler) {
@@ -1684,6 +1694,7 @@ function resolveCourtflowHost(input) {
     if (!m) return true;
     if (m.homeAway !== undefined) return String(m.homeAway).toUpperCase() === 'HOME';
     if (m.venueRole !== undefined) return String(m.venueRole).toUpperCase() === 'AWAY';
+    if (m.isHome !== undefined) return m.isHome === true;
     return true;
   }
 
@@ -1747,6 +1758,61 @@ function resolveCourtflowHost(input) {
   }
 
   /**
+   * Resolves the active user club name using a robust memory-first hierarchy:
+   * 1. The fixture payload itself (match.clubName || match.oppClub)
+   * 2. In-memory application state (window.FF_STATE.activeClub)
+   * 3. Scoped storage fallback (getPortalStorage('club_active_name'))
+   * 4. Legacy storage fallback (localStorage.getItem('ff_club_active_name'))
+   * @param {Object|null} [match=null] - Optional fixture object
+   * @param {string} [fallback=''] - Optional fallback string
+   * @returns {string}
+   */
+  function getActiveUserClubName(match = null, fallback = '') {
+    if (match && typeof match === 'object') {
+      if (match.clubName && match.clubName !== 'Opponent' && match.clubName !== 'Visiting Club') return match.clubName;
+      if (match.oppClub && match.oppClub !== 'Opponent' && match.oppClub !== 'Visiting Club') return match.oppClub;
+    }
+    if (typeof window !== 'undefined' && window.FF_STATE && window.FF_STATE.activeClub) {
+      return window.FF_STATE.activeClub;
+    }
+    if (typeof getPortalStorage === 'function') {
+      const val = getPortalStorage('club_active_name');
+      if (val) return val;
+    }
+    if (typeof localStorage !== 'undefined') {
+      const val = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
+      if (val) return val;
+    }
+    return fallback || 'Opponent';
+  }
+
+  /**
+   * Synchronizes active club selection across in-memory state and scoped storage.
+   * @param {string} clubName
+   */
+  function setActiveUserClubName(clubName) {
+    if (!clubName) return;
+    if (typeof window !== 'undefined') {
+      window.FF_STATE = window.FF_STATE || {};
+      window.FF_STATE.activeClub = clubName;
+    }
+    if (typeof setPortalStorage === 'function') {
+      setPortalStorage('club_active_name', clubName);
+    } else if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('ff_club_active_name', clubName);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    window.isHostClubHome = isHostClubHome;
+    window.getHostTeamName = getHostTeamName;
+    window.getOpponentTeamName = getOpponentTeamName;
+    window.getHostClubName = getHostClubName;
+    window.getActiveUserClubName = getActiveUserClubName;
+    window.setActiveUserClubName = setActiveUserClubName;
+  }
+
+  /**
    * Unified state hydrator for club branding across all portals.
    * Synchronizes in-memory state, storage cache, and visual DOM.
    * @param {{ clubName?: string, clubLogoUrl?: string, season?: string, seasonShort?: string }} metadata
@@ -1755,6 +1821,161 @@ function resolveCourtflowHost(input) {
   function updateClubBrandingState(metadata, portalRole) {
     if (!metadata) return;
     hydrateClubBranding(metadata, portalRole);
+  }
+
+  // --- Unified Portal Storage Isolation & Auth Lifecycle ---
+  /**
+   * Resolves the environment-scoped storage prefix (leagues_dev_pwa_ vs leagues_pwa_ / ff_dev_ vs ff_).
+   * @returns {string}
+   */
+  function getPortalStoragePrefix() {
+    if (typeof window !== 'undefined' && window.__FF_STORAGE_PREFIX__) {
+      return window.__FF_STORAGE_PREFIX__;
+    }
+    const isDev = (typeof window !== 'undefined' && window.location && (
+      (window.location.pathname && window.location.pathname.includes('/dev/')) ||
+      (window.location.search && window.location.search.includes('c=dev'))
+    ));
+    return isDev ? 'leagues_dev_pwa_' : 'leagues_pwa_';
+  }
+
+  /**
+   * Reads a key from localStorage using environment-scoped prefix, falling back to legacy keys.
+   * @param {string} key 
+   * @returns {string|null}
+   */
+  function getPortalStorage(key) {
+    if (typeof localStorage === 'undefined') return null;
+    try {
+      const prefix = getPortalStoragePrefix();
+      let val = localStorage.getItem(prefix + key);
+      if (val !== null) return val;
+      const isDev = prefix.includes('dev');
+      val = isDev ? localStorage.getItem('ff_dev_' + key) : localStorage.getItem('ff_' + key);
+      if (val !== null) return val;
+      val = localStorage.getItem('ff_' + key);
+      if (val !== null) return val;
+      return localStorage.getItem(key);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Persists a key to localStorage using environment-scoped prefix.
+   * @param {string} key 
+   * @param {string} value 
+   */
+  function setPortalStorage(key, value) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      const prefix = getPortalStoragePrefix();
+      localStorage.setItem(prefix + key, value);
+      const isDev = prefix.includes('dev');
+      if (isDev) {
+        localStorage.setItem('ff_dev_' + key, value);
+      } else {
+        localStorage.setItem('ff_' + key, value);
+      }
+    } catch (e) {}
+  }
+
+  /**
+   * Evicts a key from localStorage across scoped, prefixed, and legacy names.
+   * @param {string} key 
+   */
+  function removePortalStorage(key) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      const prefix = getPortalStoragePrefix();
+      localStorage.removeItem(prefix + key);
+      localStorage.removeItem('ff_dev_' + key);
+      localStorage.removeItem('ff_' + key);
+      localStorage.removeItem(key);
+    } catch (e) {}
+  }
+
+  /**
+   * Global self-healing handler when an API returns AUTH_REQUIRED.
+   * Evicts active sessions and restores the initial PIN login screen.
+   */
+  function handleAuthRequired_() {
+    console.warn('[FixtureFlow · Auth] AUTH_REQUIRED detected. Evicting session and resetting login screen.');
+    removePortalStorage('club_session_token');
+    removePortalStorage('club_is_admin');
+    removePortalStorage('club_active_name');
+    removePortalStorage('club_admin_impersonate_list');
+    removePortalStorage('player_session_token');
+    removePortalStorage('player_pin');
+    removePortalStorage('captain_session_token');
+    removePortalStorage('captain_pin');
+
+    if (typeof handleLogout === 'function') {
+      handleLogout();
+    } else {
+      const loginView = document.getElementById('view-login') || document.getElementById('login-screen') || document.getElementById('login-view');
+      if (loginView) loginView.style.display = 'block';
+      const dashView = document.getElementById('club-dashboard-view') || document.getElementById('dashboard-view');
+      if (dashView) dashView.style.display = 'none';
+      const statusScreen = document.getElementById('status-screen');
+      if (statusScreen) statusScreen.style.display = 'none';
+      const globalLoading = document.getElementById('global-loading');
+      if (globalLoading) globalLoading.style.display = 'none';
+    }
+
+    const errDiv = document.getElementById('login-error') || document.getElementById('error-message');
+    if (errDiv) {
+      errDiv.textContent = 'Session expired or invalid. Please re-enter your PIN.';
+      errDiv.style.display = 'block';
+    }
+  }
+
+  /**
+   * Safely decodes a Base64 string into UTF-8 text across Browser and Node environments.
+   * @param {string} b64 
+   * @returns {string}
+   */
+  function safeBase64Decode_(b64) {
+    if (typeof atob === 'function') {
+      return atob(b64);
+    }
+    if (typeof Buffer !== 'undefined') {
+      return Buffer.from(b64, 'base64').toString('utf8');
+    }
+    return '';
+  }
+
+  /**
+   * Safely extracts and parses the JSON payload portion of an HMAC session token without verifying signature.
+   * Cryptographic verification is strictly enforced by the server on every request.
+   * @param {string|null} token - The signed token string (<payload>.<signature>)
+   * @returns {Object|null} The parsed payload or null if malformed.
+   */
+  function parseSessionTokenPayload_(token) {
+    if (!token || typeof token !== 'string') return null;
+    const parts = token.split('.');
+    if (parts.length !== 2) return null;
+    try {
+      const json = safeBase64Decode_(parts[0]);
+      if (!json) return null;
+      return JSON.parse(json);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Checks if the active session token belongs to System Admin.
+   * Eliminates client-side privilege escalation by deriving admin status from the signed token payload.
+   * @param {string|null} [customToken=null] - Optional token to evaluate.
+   * @returns {boolean} True if token exists and payload.c === 'System Admin'.
+   */
+  function isSystemAdminSession_(customToken = null) {
+    const token = customToken || ((typeof getPortalStorage === 'function') ? getPortalStorage('club_session_token') : null) || (typeof localStorage !== 'undefined' ? (localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN')) : null);
+    if (!token) return false;
+    const payload = parseSessionTokenPayload_(token);
+    if (!payload) return false;
+    return payload.c === 'System Admin';
   }
 </script>
 
@@ -2627,7 +2848,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="v2.6.0">
+  <meta name="app-version" content="v2.7.0">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-club.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-club.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -3257,11 +3478,19 @@ function onLoginSuccess(result) {
   console.log("[Login] Processing result:", result);
   if (result && result.success) {
     // Save Token
-    localStorage.setItem('ff_club_session_token', result.token);
+    if (typeof setPortalStorage === 'function') {
+      setPortalStorage('club_session_token', result.token);
+    } else {
+      localStorage.setItem('ff_club_session_token', result.token);
+    }
 
           if (result.isMaster) {
             // System Admin: Halt and request Club selection
-            localStorage.setItem('ff_club_admin_impersonate_list', JSON.stringify(result.availableClubs || []));
+            if (typeof setPortalStorage === 'function') {
+              setPortalStorage('club_admin_impersonate_list', JSON.stringify(result.availableClubs || []));
+            } else {
+              localStorage.setItem('ff_club_admin_impersonate_list', JSON.stringify(result.availableClubs || []));
+            }
 
             const loginForm = document.getElementById('login-form');
             if (loginForm) loginForm.style.display = 'none';
@@ -3279,8 +3508,12 @@ function onLoginSuccess(result) {
             document.getElementById('admin-impersonation-view').style.display = 'block';
           } else {
             // Normal Club: Ensure any lingering Admin state is revoked
-            localStorage.removeItem('ff_club_is_admin');
-            localStorage.removeItem('FF_IS_ADMIN');
+            if (typeof removePortalStorage === 'function') {
+              removePortalStorage('club_is_admin');
+            } else {
+              localStorage.removeItem('ff_club_is_admin');
+              localStorage.removeItem('FF_IS_ADMIN');
+            }
             completeLogin(result.clubName);
           }
         } else {
@@ -3293,12 +3526,22 @@ function onLoginSuccess(result) {
         const selectedClub = document.getElementById('admin-club-select').value;
         if (!selectedClub) return;
 
-        localStorage.setItem('ff_club_is_admin', 'true');
+        if (typeof setPortalStorage === 'function') {
+          setPortalStorage('club_is_admin', 'true');
+        } else {
+          localStorage.setItem('ff_club_is_admin', 'true');
+        }
         completeLogin(selectedClub);
       }
 
       function completeLogin(clubName) {
-        localStorage.setItem('ff_club_active_name', clubName || 'Unknown');
+        if (typeof setActiveUserClubName === 'function') {
+          setActiveUserClubName(clubName || 'Unknown');
+        } else if (typeof setPortalStorage === 'function') {
+          setPortalStorage('club_active_name', clubName || 'Unknown');
+        } else {
+          localStorage.setItem('ff_club_active_name', clubName || 'Unknown');
+        }
 
         // Switch View
         document.getElementById('view-login').style.display = 'none';
@@ -3349,7 +3592,7 @@ function onLoginFailure(error) {
 
     
     <div id="native-app-footer" style="display:none; width: 100%; margin-top: auto;" class="brand-footer login-footer">
-      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.6.0</span>
+      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.7.0</span>
 
     </div>
 
@@ -3904,7 +4147,7 @@ function onLoginFailure(error) {
     const rateLimitOverlay = document.getElementById('rate-limit-error-overlay');
     if (rateLimitOverlay) rateLimitOverlay.classList.add('hidden');
 
-    const clubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
+    const clubName = (typeof getActiveUserClubName === 'function' ? getActiveUserClubName() : '') || localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
     if (clubName && typeof initializeApp === 'function') {
       // Logged In: Refresh Dashboard
       // Explicitly hide the stale table so it doesn't "flash" while waiting for the async fetch
@@ -3961,7 +4204,7 @@ function onLoginFailure(error) {
     populateContextBanner(match, mode, hostMode, banner);
 
     // Foundational Refactor: Bypass dropdown selection entirely!
-    const loggedInClub = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
+    const loggedInClub = (typeof getActiveUserClubName === 'function' ? getActiveUserClubName(match) : '') || localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
     
     // Fill the hidden fields used by findDates() directly
     document.getElementById('club-input').value = loggedInClub;
@@ -4046,7 +4289,7 @@ function onLoginFailure(error) {
       ...opts
     };
     const mainClubName = MAIN_CLUB_NAME;
-    const userClubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
+    const userClubName = (typeof getActiveUserClubName === 'function' ? getActiveUserClubName(match) : '') || localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
     const isHome = String(match.venueRole || '').toUpperCase() === 'HOME' || match.isHome === true;
     const badgeClass = isHome ? 'home' : 'away';
     const perspective = isHome ? 'Home' : 'Away';
@@ -4247,9 +4490,16 @@ function onLoginFailure(error) {
 
   function checkSessionAndLoad() {
       try {
-        const token = localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN');
-        const clubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
-        const isAdmin = (localStorage.getItem('ff_club_is_admin') || localStorage.getItem('FF_IS_ADMIN')) === 'true';
+        const token = (typeof getPortalStorage === 'function') ? getPortalStorage('club_session_token') : (localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN'));
+        const clubName = (typeof getActiveUserClubName === 'function')
+          ? getActiveUserClubName(null, '')
+          : ((typeof getPortalStorage === 'function') ? getPortalStorage('club_active_name') : (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME')));
+        if (clubName && typeof setActiveUserClubName === 'function') {
+          setActiveUserClubName(clubName);
+        }
+        const isAdmin = (typeof isSystemAdminSession_ === 'function') 
+          ? isSystemAdminSession_() 
+          : (((typeof getPortalStorage === 'function' ? getPortalStorage('club_is_admin') : null) || localStorage.getItem('ff_club_is_admin') || localStorage.getItem('FF_IS_ADMIN')) === 'true');
 
         if (token && !clubName && isAdmin) {
           // Admin swapped club: Load Login view securely
@@ -4330,10 +4580,16 @@ function onLoginFailure(error) {
   function loadInitialData() {
     const errorDiv = document.getElementById('error-message');
     function onDataLoadFailure(error) {
-      console.error("Failed to load initial data:", error.message);
+      console.error("Failed to load initial data:", error ? error.message : error);
+      if (error && error.message && (error.message.includes('Unauthorized') || error.message.includes('AUTH_REQUIRED') || error.message.includes('token'))) {
+        if (typeof handleAuthRequired_ === 'function') {
+          handleAuthRequired_();
+          return;
+        }
+      }
       if (errorDiv) {
         errorDiv.style.display = 'block';
-        errorDiv.textContent = "Error loading page data: " + error.message + ". Please refresh the page.";
+        errorDiv.textContent = "Error loading page data: " + (error ? error.message : "Server error") + ". Please refresh the page.";
       }
     }
 
@@ -4549,6 +4805,7 @@ function onLoginFailure(error) {
     if (!m) return true;
     if (m.homeAway !== undefined) return String(m.homeAway).toUpperCase() === 'HOME';
     if (m.venueRole !== undefined) return String(m.venueRole).toUpperCase() === 'AWAY';
+    if (m.isHome !== undefined) return m.isHome === true;
     return true;
   }
 
@@ -4992,7 +5249,7 @@ function onLoginFailure(error) {
       perspective = match.homeAway || match.venueRole || 'N/A';
       badgeClass = perspective.toLowerCase() === 'home' ? 'home' : 'away';
     } else {
-      const userClubName = (typeof localStorage !== 'undefined' && (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME'))) || match.clubName || 'Team';
+      const userClubName = (typeof getActiveUserClubName === 'function' ? getActiveUserClubName(match, 'Team') : '') || (typeof localStorage !== 'undefined' && (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME'))) || match.clubName || 'Team';
       team1 = userClubName + ' ' + (match.ourTeam || '');
       team2 = match.opponent || 
               (match.oppClub && match.oppClub !== userClubName ? match.oppClub + ' ' + (match.oppTeam || '') : '') || 
@@ -5063,7 +5320,7 @@ function onLoginFailure(error) {
       }
     } else {
       // Opponent/Club Portal context: Look up currently logged in club's emails first
-      const userClubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
+      const userClubName = (typeof getActiveUserClubName === 'function' ? getActiveUserClubName(match) : '') || localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
       if (userClubName && typeof clubEmailMap !== 'undefined') {
         const lookupKey = userClubName.toUpperCase();
         if (clubEmailMap[lookupKey]) {
@@ -5862,7 +6119,7 @@ function onLoginFailure(error) {
 
         const isClubPortal = (typeof renderDashboard === 'function');
         if (isClubPortal) {
-          const clubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
+          const clubName = (typeof getActiveUserClubName === 'function' ? getActiveUserClubName() : '') || localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
           if (clubName) {
             google.script.run
               .withSuccessHandler(function(newData) {
@@ -6061,7 +6318,7 @@ function onLoginFailure(error) {
       }
     } else {
       // Opponent initiating reschedule -> If SemiAuto target Host Club Captain, else Host Sec
-      const userClubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || oppClubName;
+      const userClubName = (typeof getActiveUserClubName === 'function' ? getActiveUserClubName(match, oppClubName) : '') || localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || oppClubName;
       let rawOppSecName = '';
       if (userClubName && typeof opponentContactsMap !== 'undefined' && opponentContactsMap[userClubName.toUpperCase()]) {
         const contacts = opponentContactsMap[userClubName.toUpperCase()];
@@ -6545,7 +6802,7 @@ function onLoginFailure(error) {
             if (overlayText) overlayText.textContent = '✨ Success! Refreshing dashboard...';
             if (isClubPortal) {
               // Club Portal Refresh
-              const clubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
+              const clubName = (typeof getActiveUserClubName === 'function' ? getActiveUserClubName() : '') || localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
               if (clubName) {
                 google.script.run
                   .withSuccessHandler(function(newData) {
@@ -6655,7 +6912,7 @@ function onLoginFailure(error) {
       : (typeof getHostClubName === 'function' ? getHostClubName() : (typeof getActiveClubName === 'function' ? getActiveClubName(match) : ((typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && !MAIN_CLUB_NAME.includes('Development / Staging')) ? MAIN_CLUB_NAME : 'Host Club')));
     var hostTeam = typeof getHostTeamName === 'function' ? getHostTeamName(match) : (match.ourTeam || '');
     var oppTeam = typeof getOpponentTeamName === 'function' ? getOpponentTeamName(match) : (match.oppTeam || '');
-    var oppClub = (typeof localStorage !== 'undefined' && (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME'))) || match.oppClub || (typeof userClubName !== 'undefined' && userClubName) || match.clubName || 'Visiting Club';
+    var oppClub = (typeof getActiveUserClubName === 'function' ? getActiveUserClubName(match, 'Visiting Club') : '') || (typeof localStorage !== 'undefined' && (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME'))) || match.oppClub || (typeof userClubName !== 'undefined' && userClubName) || match.clubName || 'Visiting Club';
 
     // Helper for club prefix deduplication (e.g. avoid "Ailesbury Ailesbury X5")
     var formatSide = function(club, team) {
@@ -6923,7 +7180,12 @@ function onLoginFailure(error) {
    * @param {string} clubName
    */
   function initializeApp(clubName) {
-    const isAdmin = (localStorage.getItem('ff_club_is_admin') || localStorage.getItem('FF_IS_ADMIN')) === 'true';
+    if (clubName && typeof setActiveUserClubName === 'function') {
+      setActiveUserClubName(clubName);
+    }
+    const isAdmin = (typeof isSystemAdminSession_ === 'function') 
+      ? isSystemAdminSession_() 
+      : (((typeof getPortalStorage === 'function' ? getPortalStorage('club_is_admin') : null) || localStorage.getItem('ff_club_is_admin') || localStorage.getItem('FF_IS_ADMIN')) === 'true');
 
     // The true App Header remains statically Your Club (Host Identity).
     // Context is injected directly into the Workspace Card nested inside the header block.
@@ -7037,7 +7299,7 @@ function onLoginFailure(error) {
 
     if (data && data.matches && data.matches.length > 0) {
       try {
-        const activeClub = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || '';
+        const activeClub = (typeof getActiveUserClubName === 'function' ? getActiveUserClubName(data.matches[0]) : '') || localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || '';
         if (activeClub) {
           localStorage.setItem('ff_club_cached_fixtures_' + activeClub, JSON.stringify(data));
         }
@@ -7054,6 +7316,10 @@ function onLoginFailure(error) {
     noMsg.style.display = 'none';
 
     allFixturesData = data.matches;
+    if (data.matches && data.matches.length > 0 && typeof setActiveUserClubName === 'function') {
+      const matchClub = data.matches[0].clubName || data.matches[0].oppClub;
+      if (matchClub) setActiveUserClubName(matchClub);
+    }
     activeSecretaryDetails = data.activeSecretary || null; // [NEW]
     window.activeSecretaryDetails = activeSecretaryDetails;
     window.activePortalRole = 'Club';
@@ -7132,7 +7398,7 @@ function onLoginFailure(error) {
           pCard.className = 'club-pinned-card';
           
           const mainClubName = typeof getHostClubName === 'function' ? getHostClubName() : ((typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && !MAIN_CLUB_NAME.includes('Development / Staging')) ? MAIN_CLUB_NAME : (pMatch.hostClub || 'Host Club'));
-          const userClubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || 'Opponent';
+          const userClubName = (typeof getActiveUserClubName === 'function') ? getActiveUserClubName(pMatch) : (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || 'Opponent');
           let venueStr = pMatch.venue || 'TBD';
           if (pMatch.venueRole === 'HOME' && venueStr === 'TBD') venueStr = userClubName;
           else if (pMatch.venueRole === 'AWAY' && venueStr === 'TBD') venueStr = mainClubName;
@@ -7187,7 +7453,7 @@ function onLoginFailure(error) {
 
       visibleCount++;
       const mainClubName = typeof getHostClubName === 'function' ? getHostClubName() : ((typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && !MAIN_CLUB_NAME.includes('Development / Staging')) ? MAIN_CLUB_NAME : (match.hostClub || 'Host Club'));
-      const userClubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || 'Opponent';
+      const userClubName = (typeof getActiveUserClubName === 'function') ? getActiveUserClubName(match) : (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || 'Opponent');
 
       // Formatting Venue
       let venueStr = match.venue || 'TBD';
@@ -7324,7 +7590,7 @@ function onLoginFailure(error) {
           rowClass = 'clickable-row';
           chevronHtml = ''; // Handled inline above
         } else {
-          const userClubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || 'Opponent';
+          const userClubName = (typeof getActiveUserClubName === 'function') ? getActiveUserClubName(match) : (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || 'Opponent');
           const subject = encodeURIComponent(`Fixture Enquiry: ${userClubName} ${match.ourTeam} vs ${MAIN_CLUB_NAME} ${match.oppTeam}`);
           const rawSecName = activeSecretaryDetails ? activeSecretaryDetails.name : '';
           const secFirstName = typeof formatFriendlyName === 'function' ? formatFriendlyName(rawSecName, 'Host Match Secretary') : (rawSecName ? rawSecName.split(' ')[0] : 'Host');
@@ -7409,6 +7675,12 @@ function onLoginFailure(error) {
   }
 
   function onDashboardError(e) {
+    if (e && e.message && (e.message.includes('Unauthorized') || e.message.includes('AUTH_REQUIRED') || e.message.includes('token'))) {
+      if (typeof handleAuthRequired_ === 'function') {
+        handleAuthRequired_();
+        return;
+      }
+    }
     const statusScreen = document.getElementById('status-screen');
     if (statusScreen) statusScreen.style.display = 'none';
     document.getElementById('dashboard-loading').textContent = "Error loading data. Please refresh.";
@@ -7416,10 +7688,16 @@ function onLoginFailure(error) {
   }
 
   function handleLogout() {
-    const activeClub = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || '';
+    const activeClub = (typeof getPortalStorage === 'function' ? getPortalStorage('club_active_name') : null) || localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || '';
     if (activeClub) {
       localStorage.removeItem('ff_club_cached_fixtures_' + activeClub);
       localStorage.removeItem('ff_cached_club_fixtures_' + activeClub);
+    }
+    if (typeof removePortalStorage === 'function') {
+      removePortalStorage('club_session_token');
+      removePortalStorage('club_active_name');
+      removePortalStorage('club_is_admin');
+      removePortalStorage('club_admin_impersonate_list');
     }
     localStorage.removeItem('ff_club_session_token');
     localStorage.removeItem('FF_SESSION_TOKEN');
@@ -7611,6 +7889,9 @@ function onLoginFailure(error) {
   }
 
   function _flushGlobalState() {
+    if (typeof window !== 'undefined' && window.FF_STATE) {
+      window.FF_STATE.activeClub = null;
+    }
     clubEmailMap = {};
     homeFixtureMap = {};
     awayFixtureMap = {};
@@ -7652,7 +7933,7 @@ function onLoginFailure(error) {
 
     const data = {
       ourTeam: activeMatch ? activeMatch.oppTeam : (ourTeamSelect ? ourTeamSelect.value : ''),
-      club: activeMatch ? (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME')) : (clubInput ? clubInput.value : ''),
+      club: activeMatch ? ((typeof getActiveUserClubName === 'function' ? getActiveUserClubName(activeMatch) : '') || localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME')) : (clubInput ? clubInput.value : ''),
       theirTeam: activeMatch ? activeMatch.ourTeam : (theirTeamInput ? theirTeamInput.value : ''),
       matchType: activeMatch ? activeMatch.matchType : (matchTypeInput ? matchTypeInput.value : ''),
       email: emailInput ? emailInput.value.trim() : '',
@@ -7723,7 +8004,7 @@ function onLoginFailure(error) {
     const headers = ["Date", "Day", "Time", "Event", "Div", "Sctn", "League / Cup", "Your Club", "Team No.", "v", "Home / Away", "Opposition Club", "Opp Team", "Venue / Hall", "Match Status"];
     let csvContent = headers.join(",") + "\r\n";
 
-    const userClubName = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || 'Opponent';
+    const userClubName = (typeof getActiveUserClubName === 'function') ? getActiveUserClubName() : (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME') || 'Opponent');
     const mainClubName = typeof getHostClubName === 'function' ? getHostClubName() : ((typeof MAIN_CLUB_NAME !== 'undefined' && !MAIN_CLUB_NAME.includes('Development / Staging')) ? MAIN_CLUB_NAME : 'Host Club');
 
     filtered.forEach(m => {
