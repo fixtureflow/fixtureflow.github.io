@@ -1,11 +1,11 @@
-const CACHE_NAME = 'ff-captain-cache-v2.6.0';
+const CACHE_NAME = 'ff-courtflow-dev-cache-v32';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   '/assets/js/leagues-registry.js',
-  '/assets/images/leagues/icon-captain.png',
-  '/assets/images/leagues/icon-captain.svg'
+  '/assets/images/courtflow/icon-courtflow.svg',
+  '/assets/images/courtflow/icon-courtflow.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -43,10 +43,11 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseClone);
           });
+          return response;
         }
-        return response;
+        return caches.match(event.request, { ignoreSearch: true });
       }).catch(() => {
-        return caches.match(event.request);
+        return caches.match(event.request, { ignoreSearch: true });
       })
     );
   }

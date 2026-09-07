@@ -1,8 +1,11 @@
-const CACHE_NAME = 'ff-club-cache-v1';
+const CACHE_NAME = 'ff-club-cache-v2.6.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  '/assets/js/leagues-registry.js',
+  '/assets/images/leagues/icon-club.png',
+  '/assets/images/leagues/icon-club.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -34,29 +37,16 @@ self.addEventListener('fetch', (event) => {
 
   if (url.origin === self.location.origin) {
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          fetch(event.request).then((response) => {
-            if (response && response.status === 200) {
-              const responseClone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, responseClone);
-              });
-            }
-          }).catch(() => {});
-          
-          return cachedResponse;
+      fetch(event.request).then((response) => {
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
         }
-
-        return fetch(event.request).then((response) => {
-          if (response && response.status === 200) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
-          }
-          return response;
-        });
+        return response;
+      }).catch(() => {
+        return caches.match(event.request);
       })
     );
   }

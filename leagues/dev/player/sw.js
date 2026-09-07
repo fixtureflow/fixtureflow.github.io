@@ -1,11 +1,11 @@
-const CACHE_NAME = 'ff-captain-cache-v2.6.0';
+const CACHE_NAME = 'ff-player-dev-cache-v67';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   '/assets/js/leagues-registry.js',
-  '/assets/images/leagues/icon-captain.png',
-  '/assets/images/leagues/icon-captain.svg'
+  '/assets/images/leagues/icon-player.png',
+  '/assets/images/leagues/icon-player.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -21,7 +21,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName !== CACHE_NAME && cacheName.startsWith('ff-player-dev-cache-')) {
             return caches.delete(cacheName);
           }
         })

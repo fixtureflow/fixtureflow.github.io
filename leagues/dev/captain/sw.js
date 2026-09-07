@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-captain-cache-v2.6.0';
+const CACHE_NAME = 'ff-captain-dev-cache-v67';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -21,7 +21,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName !== CACHE_NAME && cacheName.startsWith('ff-captain-dev-cache-')) {
             return caches.delete(cacheName);
           }
         })

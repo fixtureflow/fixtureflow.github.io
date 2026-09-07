@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Member Privacy Notice (Template) | FixtureFlow</title>
+    <meta name="description" content="A turnkey, GDPR-compliant privacy notice template designed for sports clubs and volunteer Match Secretaries using FixtureFlow.">
+    
+    <!-- OpenGraph Metadata -->
+    <meta property="og:title" content="Club Member Privacy Notice (Template) | FixtureFlow">
+    <meta property="og:description" content="Turnkey GDPR privacy notice template for sports clubs and Match Secretaries.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fixtureflow.github.io/club-privacy-template.html">
+    <meta property="og:image" content="https://fixtureflow.github.io/ddlc/assets/card-fixtureflow.png">
+    
+    <!-- Shared Master Assets -->
+    <link rel="stylesheet" href="/assets/css/style.css?v=1.3">
+    <script src="/assets/js/script.js" defer></script>
+    <link rel="icon" type="image/svg+xml" href="/assets/images/brand/web/favicon.svg">
+    <link rel="canonical" href="https://fixtureflow.github.io/club-privacy-template.html">
+    <meta name="theme-color" content="#0b1329">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        .doc-section {
+            padding: 140px 0 80px 0;
+            position: relative;
+        }
+        .doc-container {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+        .doc-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .doc-title {
+            font-family: var(--font-display);
+            font-size: 2.6rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+        .doc-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 680px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        .action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-container);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 20px 28px;
+            margin-bottom: 28px;
+            gap: 16px;
+            flex-wrap: wrap;
+            box-shadow: var(--shadow-subtle);
+        }
+        .action-text {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+        .template-box {
+            background: var(--bg-container);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid var(--color-primary-glow);
+            border-radius: 20px;
+            padding: 44px;
+            box-shadow: var(--shadow-premium);
+            margin-bottom: 32px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            position: relative;
+        }
+        .template-box h2 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 28px 0 12px 0;
+            letter-spacing: -0.4px;
+        }
+        .template-box h2:first-of-type {
+            margin-top: 0;
+        }
+        .template-box p {
+            margin-bottom: 16px;
+        }
+        .template-box ul {
+            margin-bottom: 20px;
+            padding-left: 24px;
+        }
+        .template-box li {
+            margin-bottom: 8px;
+        }
+        .placeholder {
+            background: rgba(217, 119, 6, 0.15);
+            color: #d97706;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .badge {
+            background: var(--color-primary-glow);
+            color: var(--color-primary);
+            border: 1px solid var(--border-glass);
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+        .btn-copy {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--color-primary);
+            color: #ffffff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        .btn-copy:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-1px);
+        }
+        .copy-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 99px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        .copy-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Header Navigation -->
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="/" class="logo">
+                <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
+                    <defs>
+                        <linearGradient id="logo-badge-grad-template-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="30%" stop-color="var(--logo-gradient-start, #a78bfa)"/>
+                            <stop offset="100%" stop-color="var(--logo-gradient-end, #10b981)"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-template-nav)"/>
+                    <g transform="scale(0.6)">
+                        <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+                    </g>
+                </svg>
+                <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/ddlc/"><span class="desktop-label">League Coordinator</span><span class="mobile-label">Leagues</span></a></li>
+                <li><a href="/courtflow/"><span class="desktop-label">Queue Manager</span><span class="mobile-label">Socials</span></a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" aria-label="Toggle light/dark theme">
+                    <!-- Loaded dynamically by script.js -->
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. Main Content Section -->
+    <section class="doc-section">
+        <div class="container doc-container">
+            
+            <div class="doc-header">
+                <span class="badge">Match Secretary Resource</span>
+                <h1 class="doc-title">Club Member Privacy Notice (Template)</h1>
+                <p class="doc-subtitle">
+                    A ready-to-use GDPR privacy notice template. Match Secretaries and Club Committees can link directly to this page or copy and customize the text below for member emails, registration forms, or WhatsApp availability broadcasts.
+                </p>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="action-bar">
+                <div class="action-text">
+                    <strong>💡 How to use this:</strong><br>
+                    Replace the orange bracketed tags (<span class="placeholder">[Your Club Name]</span>) with your club details.
+                </div>
+                <button class="btn-copy" id="copy-btn" onclick="copyTemplateText()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    Copy Clean Text
+                </button>
+            </div>
+
+            <!-- The Turnkey Boilerplate Content -->
+            <div class="template-box" id="template-content">
+                <div style="border-bottom: 1px solid var(--border-glass); padding-bottom: 20px; margin-bottom: 24px;">
+                    <h2 style="margin: 0 0 6px 0; font-size: 1.6rem; color: var(--text-primary);">Data Privacy Notice for League Fixture & Club Night Players</h2>
+                    <span style="font-size: 0.9rem; color: var(--text-muted);">Issued by <span class="placeholder">[Your Club Name]</span> &bull; Season <span class="placeholder">[2026/2027]</span></span>
+                </div>
+
+                <h2>1. Introduction & Data Controller</h2>
+                <p>
+                    <span class="placeholder">[Your Club Name]</span> ("the Club", "we", or "us") is committed to protecting your privacy. When you represent our club in league fixtures, cup competitions, or attend our social club night sessions, we collect and process limited personal information to organize match fixtures, schedule team squads, and manage fair court rotations.
+                </p>
+                <p>
+                    For the purposes of the General Data Protection Regulation (GDPR / UK GDPR), <span class="placeholder">[Your Club Name]</span> is the <strong>Data Controller</strong> responsible for your personal data.
+                </p>
+
+                <h2>2. What Personal Information We Collect</h2>
+                <p>We collect only the minimal information strictly required to run competitive teams and social nights:</p>
+                <ul>
+                    <li><strong>Identity Details:</strong> Your full name and competition division / grading band.</li>
+                    <li><strong>Contact Information:</strong> Your mobile phone number (for team captain WhatsApp groups) and/or email address.</li>
+                    <li><strong>Match Availability:</strong> Dates you have marked as available, unavailable, or preferred for upcoming fixtures.</li>
+                </ul>
+
+                <h2>3. Why We Collect It & Lawful Basis</h2>
+                <p>Under GDPR Article 6, we process your information on the following legal bases:</p>
+                <ul>
+                    <li><strong>Performance of Club Membership & Legitimate Interests:</strong> To select squads, prevent team walkovers, avoid double-booking courts, communicate match times, and ensure fair court queues during social club nights.</li>
+                    <li><strong>Consent:</strong> When you voluntarily submit your upcoming match unavailabilities or substitute preferences via the Player Portal.</li>
+                </ul>
+
+                <h2>4. Where Your Data Is Stored & How It Is Protected</h2>
+                <p>
+                    Your data is stored securely within <span class="placeholder">[Your Club Name]</span>'s official, access-controlled <strong>Google Workspace (Google Drive & Google Sheets)</strong> account.
+                </p>
+                <p>
+                    To automate date matching and avoid hundreds of manual WhatsApp messages, we utilize <strong>FixtureFlow</strong> software running directly within our club's Google Sheets environment.
+                </p>
+                <ul>
+                    <li><strong>Zero External Databases:</strong> FixtureFlow does not store, harvest, or copy your personal information into any external central database. All fixture rosters and contact entries remain strictly inside our club's Google Workspace custody.</li>
+                    <li><strong>Encrypted Connections:</strong> Any interaction with our club's self-serve portals (e.g. submitting your availability) occurs over end-to-end encrypted HTTPS connections directly to our club script.</li>
+                </ul>
+
+                <h2>5. Who We Share Your Data With</h2>
+                <p>We never sell, rent, or commercialize your personal data. Sharing is strictly limited to fixture management:</p>
+                <ul>
+                    <li><strong>Team Captains:</strong> To see who is available to play on specific fixture dates.</li>
+                    <li><strong>Opposition Match Secretaries:</strong> Only designated <em>Team Captains'</em> contact details are shared with opponent clubs for match night coordination. Individual player contact numbers and general availability records are never shared with opposing clubs.</li>
+                </ul>
+
+                <h2>6. Retention & Your "Right to Be Forgotten"</h2>
+                <p>
+                    We retain player availability data only for the duration of the active sporting season (<span class="placeholder">[e.g. September to May]</span>). At the end of the season, historical rosters are archived or cleared in accordance with club policy.
+                </p>
+                <p>
+                    Under GDPR, you have the right to:
+                </p>
+                <ul>
+                    <li><strong>Access:</strong> Request a copy of the availability and contact data we hold for you.</li>
+                    <li><strong>Rectification:</strong> Correct any incorrect contact details or match availability.</li>
+                    <li><strong>Erasure ("Right to Be Forgotten"):</strong> Request that your contact details and player record be removed from our team spreadsheets at any time by notifying the Match Secretary.</li>
+                </ul>
+
+                <h2>7. Contact & Inquiries</h2>
+                <p>
+                    If you have questions about this notice, want to update your details, or wish to exercise your data rights, please contact our volunteer match coordination team:
+                </p>
+                <p>
+                    <strong><span class="placeholder">[Your Club Name]</span> Match Secretary</strong><br>
+                    Name: <span class="placeholder">[Secretary Name]</span><br>
+                    Email: <span class="placeholder">[matchsecretary@yourclub.com]</span><br>
+                    Phone / WhatsApp: <span class="placeholder">[Contact Number]</span>
+                </p>
+            </div>
+
+            <!-- Return Link -->
+            <div style="text-align: center; margin-top: 32px;">
+                <a href="/privacy.html" style="color: var(--color-primary); font-weight: 600; text-decoration: underline;">&larr; View FixtureFlow Platform Privacy Policy</a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Toast Notification -->
+    <div class="copy-toast" id="copy-toast">✨ Template text copied to clipboard!</div>
+
+    <!-- 3. Unified Footer -->
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <a href="/" class="logo">
+                    <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
+                        <defs>
+                            <linearGradient id="logo-badge-grad-template-footer" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="30%" stop-color="var(--logo-gradient-start, #a78bfa)"/>
+                                <stop offset="100%" stop-color="var(--logo-gradient-end, #10b981)"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-template-footer)"/>
+                        <g transform="scale(0.6)">
+                            <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+                        </g>
+                    </svg>
+                    <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
+                </a>
+                <span class="footer-tagline">Less club admin, more time on the court.</span>
+                <span class="footer-badge-text">Built for racket clubs everywhere.</span>
+            </div>
+            <div class="footer-meta">
+                <span>&copy; 2026 FixtureFlow. All rights reserved.</span>
+                <span style="opacity: 0.8;"><a href="/privacy.html" style="color: inherit; text-decoration: underline;">Privacy Policy</a> &bull; <a href="/club-privacy-template.html" style="color: inherit; text-decoration: underline;">Club Notice Template</a></span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function copyTemplateText() {
+            const templateEl = document.getElementById('template-content');
+            if (!templateEl) return;
+
+            // Clone to extract text without extra whitespace
+            const textToCopy = templateEl.innerText.trim();
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const toast = document.getElementById('copy-toast');
+                if (toast) {
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 2500);
+                }
+                const btn = document.getElementById('copy-btn');
+                if (btn) {
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = '✔ Copied!';
+                    setTimeout(() => btn.innerHTML = originalHtml, 2000);
+                }
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+    </script>
+
+</body>
+</html>

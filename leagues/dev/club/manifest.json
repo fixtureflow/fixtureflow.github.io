@@ -1,10 +1,10 @@
 {
-  "name": "FixtureFlow: Club Admin",
-  "short_name": "FF Fixtures",
-  "start_url": "/leagues/club/",
+  "name": "FixtureFlow: Opponent Portal (Dev)",
+  "short_name": "FF Opponent (Dev)",
+  "start_url": "/leagues/dev/club/?c=dev",
   "display": "standalone",
   "background_color": "#0b1329",
-  "theme_color": "#0f172a",
+  "theme_color": "#38bdf8",
   "orientation": "any",
   "icons": [
     {

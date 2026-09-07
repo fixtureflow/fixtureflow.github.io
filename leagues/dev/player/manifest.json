@@ -1,7 +1,7 @@
 {
-  "name": "FixtureFlow: Player Portal",
-  "short_name": "FF Player",
-  "start_url": "/leagues/player/",
+  "name": "FixtureFlow: Player Portal (Dev)",
+  "short_name": "FF Player (Dev)",
+  "start_url": "/leagues/dev/player/?c=dev",
   "display": "standalone",
   "background_color": "#0b1329",
   "theme_color": "#10b981",

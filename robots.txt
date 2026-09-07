@@ -1,3 +1,6 @@
 User-agent: *
-Disallow: /courtflow/
+Disallow: /courtflow/play/
+Disallow: /courtflow/dev/
 Disallow: /leagues/
+
+Sitemap: https://fixtureflow.github.io/sitemap.xml

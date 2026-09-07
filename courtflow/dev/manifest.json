@@ -1,10 +1,10 @@
 {
-  "name": "FixtureFlow: CourtFlow",
-  "short_name": "CourtFlow",
-  "start_url": "/courtflow/play/",
+  "name": "FixtureFlow: CourtFlow (Dev)",
+  "short_name": "CourtFlow Dev",
+  "start_url": "/courtflow/dev/",
   "display": "standalone",
   "background_color": "#0b1329",
-  "theme_color": "#10b981",
+  "theme_color": "#0ea5e9",
   "orientation": "any",
   "icons": [
     {

@@ -24,11 +24,10 @@
     
     <link rel="stylesheet" href="/assets/css/style.css?v=1.3">
     <link rel="stylesheet" href="portals.css?v=1.3">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="mask-icon" href="/favicon.svg" color="#10b981">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/brand/web/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/brand/ios/apple-touch-icon.png">
+    <link rel="manifest" href="/assets/images/brand/android/site.webmanifest">
+    <link rel="mask-icon" href="/assets/images/brand/web/favicon.svg" color="#10b981">
     <link rel="canonical" href="https://fixtureflow.github.io/ddlc/">
     <meta name="theme-color" content="#0b0f19">
     
@@ -37,8 +36,27 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="League Coord">
     
-    <!-- Custom Typographic Gradient Brand Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='50' fill='url(%23g)'/><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23a78bfa'/><stop offset='100%' stop-color='%2310b981'/></linearGradient><text x='50%' y='65%' font-family='Outfit, sans-serif' font-size='48' font-weight='800' fill='%23ffffff' text-anchor='middle'>FF</text></svg>">
+    <!-- Master Brand Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/assets/images/brand/web/favicon.svg">
+    
+    <!-- Structured JSON-LD Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "FixtureFlow League Coordinator",
+      "alternateName": "DDLC",
+      "url": "https://fixtureflow.github.io/ddlc/",
+      "description": "Multi-portal league fixture scheduling, captain roster nominations, and player availability management for sports clubs.",
+      "operatingSystem": "All",
+      "applicationCategory": "SportsApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      }
+    }
+    </script>
 </head>
 <body>
 
@@ -49,7 +67,7 @@
                 <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
                     <defs>
                         <linearGradient id="logo-badge-grad-ddlc-nav" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="40%" stop-color="var(--logo-gradient-start, #a78bfa)"/>
+                            <stop offset="30%" stop-color="var(--logo-gradient-start, #a78bfa)"/>
                             <stop offset="100%" stop-color="var(--logo-gradient-end, #10b981)"/>
                         </linearGradient>
                     </defs>
@@ -501,7 +519,7 @@
                             <div>Demo PIN: <span style="color: var(--text-primary); font-family: monospace; font-weight: 700;">1234</span></div>
                         </div>
                         
-                        <a href="https://script.google.com/macros/s/AKfycbyywJCewiYxRoJxkuJh7zZTCrKc4TzGezZKiu4jfRHkmPzEQKDLgfqkZc7PHo_B9NmL/exec" target="_blank" class="btn btn-opponent">
+                        <a href="/leagues/club/?c=demo" target="_blank" class="btn btn-opponent">
                             Launch Opponent Portal
                         </a>
                     </div>
@@ -695,7 +713,7 @@
                             <div>Demo PIN: <span style="color: var(--text-primary); font-family: monospace; font-weight: 700;">1234</span></div>
                         </div>
                         
-                        <a href="https://script.google.com/macros/s/AKfycbyywJCewiYxRoJxkuJh7zZTCrKc4TzGezZKiu4jfRHkmPzEQKDLgfqkZc7PHo_B9NmL/exec?view=captain" target="_blank" class="btn btn-captain">
+                        <a href="/leagues/captain/?c=demo" target="_blank" class="btn btn-captain">
                             Launch Captain Portal
                         </a>
                     </div>
@@ -898,7 +916,7 @@
                             <div>Squad PIN: <span style="color: var(--text-primary); font-family: monospace; font-weight: 700;">1234</span></div>
                         </div>
                         
-                        <a href="https://script.google.com/macros/s/AKfycbyywJCewiYxRoJxkuJh7zZTCrKc4TzGezZKiu4jfRHkmPzEQKDLgfqkZc7PHo_B9NmL/exec?view=player" target="_blank" class="btn btn-player">
+                        <a href="/leagues/player/?c=demo" target="_blank" class="btn btn-player">
                             Launch Player Portal
                         </a>
                     </div>
@@ -968,7 +986,7 @@
                     <svg class="brand-icon" width="20" height="20" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 5px; flex-shrink: 0; vertical-align: middle;">
                         <defs>
                             <linearGradient id="logo-badge-grad-ddlc-footer" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="40%" stop-color="var(--logo-gradient-start, #a78bfa)"/>
+                                <stop offset="30%" stop-color="var(--logo-gradient-start, #a78bfa)"/>
                                 <stop offset="100%" stop-color="var(--logo-gradient-end, #10b981)"/>
                             </linearGradient>
                         </defs>
@@ -985,7 +1003,7 @@
             <!-- Right Column: Meta Info -->
             <div class="footer-meta">
                 <span>&copy; 2026 FixtureFlow. All rights reserved.</span>
-                <span style="opacity: 0.8;">Powered by Google Sheets & Apps Script</span>
+                <span style="opacity: 0.8;"><a href="/privacy.html" style="color: inherit; text-decoration: underline;">Privacy Policy</a> &bull; <a href="/club-privacy-template.html" style="color: inherit; text-decoration: underline;">Club Notice Template</a> &bull; Powered by Google Sheets &amp; Apps Script</span>
             </div>
         </div>
     </footer>

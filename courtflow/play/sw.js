@@ -1,8 +1,11 @@
-const CACHE_NAME = 'ff-courtflow-cache-v1';
+const CACHE_NAME = 'ff-courtflow-cache-v2.0.1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  '/assets/js/leagues-registry.js',
+  '/assets/images/courtflow/icon-courtflow.svg',
+  '/assets/images/courtflow/icon-courtflow.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -34,29 +37,17 @@ self.addEventListener('fetch', (event) => {
 
   if (url.origin === self.location.origin) {
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          fetch(event.request).then((response) => {
-            if (response && response.status === 200) {
-              const responseClone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, responseClone);
-              });
-            }
-          }).catch(() => {});
-          
-          return cachedResponse;
-        }
-
-        return fetch(event.request).then((response) => {
-          if (response && response.status === 200) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
-          }
+      fetch(event.request).then((response) => {
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
           return response;
-        });
+        }
+        return caches.match(event.request, { ignoreSearch: true });
+      }).catch(() => {
+        return caches.match(event.request, { ignoreSearch: true });
       })
     );
   }
