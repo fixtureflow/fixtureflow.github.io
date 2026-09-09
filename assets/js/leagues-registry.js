@@ -17,8 +17,8 @@ const CLUBS_REGISTRY = {
     name: "FixtureFlow Demo Sandbox",
     shortName: "Demo",
     aliases: ["sandbox", "public-demo", "trial"],
-    hostId: "AKfycbyu8_pzD00dxoGzd-Tc4kTlCuy7TPqaeVQ04paaL3AUQ0Fdjl4l5kOyfd6ysw71lAiM4A",
-    courtflowHostId: "AKfycby0rMt1SZnw51B1GVQag4PqdtZcHyv9str1acKacg4TJQKM4Ms1M_y6azjZuGzIcTu9"
+    hostId: "AKfycbzvMO_qUlpPVp94C9sm5-HBJn46nQ7rjD-fKiBirJKI5Rt4mN6NeDsgeb7MMGBYDQhv",
+    courtflowHostId: "AKfycbw5gdRNPrfMS-sf8D9gyDmio77r_GAuxECsjWTztiaPKjYUdws7lcTgP_-y0jcP6Q2E8g"
   },
   "dev": {
     name: "Development / Staging",

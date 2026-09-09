@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "v2.7.0";
+  window.__FF_VERSION__ = "v2.8.0";
   window.__FF_STORAGE_PREFIX__ = "leagues_pwa_";
   console.log("%c[FixtureFlow · Captain]%c Running version " + window.__FF_VERSION__, "background: #7c3aed; color: #ffffff; border: 1px solid #8b5cf6; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -877,8 +877,8 @@ const CLUBS_REGISTRY = {
     name: "FixtureFlow Demo Sandbox",
     shortName: "Demo",
     aliases: ["sandbox", "public-demo", "trial"],
-    hostId: "AKfycbyu8_pzD00dxoGzd-Tc4kTlCuy7TPqaeVQ04paaL3AUQ0Fdjl4l5kOyfd6ysw71lAiM4A",
-    courtflowHostId: "AKfycby0rMt1SZnw51B1GVQag4PqdtZcHyv9str1acKacg4TJQKM4Ms1M_y6azjZuGzIcTu9"
+    hostId: "AKfycbzvMO_qUlpPVp94C9sm5-HBJn46nQ7rjD-fKiBirJKI5Rt4mN6NeDsgeb7MMGBYDQhv",
+    courtflowHostId: "AKfycbw5gdRNPrfMS-sf8D9gyDmio77r_GAuxECsjWTztiaPKjYUdws7lcTgP_-y0jcP6Q2E8g"
   },
   "dev": {
     name: "Development / Staging",
@@ -1055,6 +1055,20 @@ function resolveCourtflowHost(input) {
       clubShort = localStorage.getItem('leagues_pwa_club_short') || '';
     }
 
+    
+    // PROD Environment Default Resolution (Mount Pleasant fallback)
+    if (!rawClubParam && !hostId && typeof resolveClubHost === 'function') {
+      const prodResolved = resolveClubHost('mount-pleasant');
+      if (prodResolved) {
+        hostId = prodResolved.hostId;
+        clubName = prodResolved.name;
+        clubShort = prodResolved.shortName || '';
+        localStorage.setItem('leagues_pwa_host_id', hostId);
+        localStorage.setItem('leagues_pwa_club_name', clubName);
+        localStorage.setItem('leagues_pwa_club_short', clubShort);
+        localStorage.setItem('leagues_pwa_club_slug', prodResolved.slug);
+      }
+    }
     
 
     if (!hostId) {
@@ -1522,13 +1536,12 @@ function resolveCourtflowHost(input) {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const rawClubParam = urlParams.get('c') || urlParams.get('club') || '';
-      const savedSlug = localStorage.getItem('leagues_dev_pwa_club_slug') || localStorage.getItem('leagues_pwa_club_slug') || '';
-      const savedClubName = localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('leagues_pwa_club_name') || '';
+      const savedClubName = typeof getPortalStorage === 'function' ? getPortalStorage('club_name') : null;
 
       const cfgEl = document.getElementById('ff-config');
       const cfgClubName = cfgEl && cfgEl.dataset && cfgEl.dataset.clubName ? cfgEl.dataset.clubName : '';
-      let initialClubName = cfgClubName || savedClubName;
-      const slug = rawClubParam || savedSlug;
+      let initialClubName = cfgClubName || savedClubName || '';
+      const slug = rawClubParam || '';
       if (typeof resolveClubHost === 'function' && slug && !cfgClubName) {
         const resolved = resolveClubHost(slug);
         if (resolved && resolved.name) {
@@ -1609,10 +1622,9 @@ function resolveCourtflowHost(input) {
     }
 
     // 3. Update localStorage cache with live authoritative club name
-    if (typeof localStorage !== 'undefined' && metadata.clubName) {
+    if (typeof setPortalStorage === 'function' && metadata.clubName) {
       try {
-        localStorage.setItem('leagues_pwa_club_name', metadata.clubName);
-        localStorage.setItem('leagues_dev_pwa_club_name', metadata.clubName);
+        setPortalStorage('club_name', metadata.clubName);
       } catch (e) {}
     }
 
@@ -1745,9 +1757,9 @@ function resolveCourtflowHost(input) {
     if (headerEl && headerEl.textContent && headerEl.textContent.trim() && headerEl.textContent.trim() !== 'Host Club') {
       return headerEl.textContent.trim();
     }
-    if (typeof localStorage !== 'undefined') {
+    if (typeof getPortalStorage === 'function') {
       try {
-        const cached = localStorage.getItem('ff_shared_public_metadata') || localStorage.getItem('ff_public_metadata');
+        const cached = getPortalStorage('shared_public_metadata');
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed && parsed.clubName) return parsed.clubName;
@@ -1762,7 +1774,6 @@ function resolveCourtflowHost(input) {
    * 1. The fixture payload itself (match.clubName || match.oppClub)
    * 2. In-memory application state (window.FF_STATE.activeClub)
    * 3. Scoped storage fallback (getPortalStorage('club_active_name'))
-   * 4. Legacy storage fallback (localStorage.getItem('ff_club_active_name'))
    * @param {Object|null} [match=null] - Optional fixture object
    * @param {string} [fallback=''] - Optional fallback string
    * @returns {string}
@@ -1777,10 +1788,6 @@ function resolveCourtflowHost(input) {
     }
     if (typeof getPortalStorage === 'function') {
       const val = getPortalStorage('club_active_name');
-      if (val) return val;
-    }
-    if (typeof localStorage !== 'undefined') {
-      const val = localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME');
       if (val) return val;
     }
     return fallback || 'Opponent';
@@ -1798,8 +1805,6 @@ function resolveCourtflowHost(input) {
     }
     if (typeof setPortalStorage === 'function') {
       setPortalStorage('club_active_name', clubName);
-    } else if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('ff_club_active_name', clubName);
     }
   }
 
@@ -1825,69 +1830,75 @@ function resolveCourtflowHost(input) {
 
   // --- Unified Portal Storage Isolation & Auth Lifecycle ---
   /**
-   * Resolves the environment-scoped storage prefix (leagues_dev_pwa_ vs leagues_pwa_ / ff_dev_ vs ff_).
+   * Resolves the environment- and tenant-scoped storage prefix (ff_{env}_{slug}_).
    * @returns {string}
    */
   function getPortalStoragePrefix() {
-    if (typeof window !== 'undefined' && window.__FF_STORAGE_PREFIX__) {
-      return window.__FF_STORAGE_PREFIX__;
+    var isDev = false;
+    var rawClub = "";
+
+    if (typeof window !== "undefined" && window.location) {
+      if (window.location.pathname && window.location.pathname.includes("/dev/")) {
+        isDev = true;
+      }
+      if (window.location.search) {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get("c") === "dev") isDev = true;
+        rawClub = (params.get("c") || params.get("club") || "").trim().toLowerCase();
+      }
     }
-    const isDev = (typeof window !== 'undefined' && window.location && (
-      (window.location.pathname && window.location.pathname.includes('/dev/')) ||
-      (window.location.search && window.location.search.includes('c=dev'))
-    ));
-    return isDev ? 'leagues_dev_pwa_' : 'leagues_pwa_';
+
+    var env = isDev ? "dev" : "prod";
+    var slug = rawClub;
+
+    if (slug && typeof resolveClubHost === "function") {
+      var resolved = resolveClubHost(slug);
+      if (resolved && resolved.slug) {
+        slug = resolved.slug;
+      }
+    }
+
+    if (!slug) {
+      slug = isDev ? "dev" : "mount-pleasant";
+    }
+
+    return "ff_" + env + "_" + slug + "_";
   }
 
   /**
-   * Reads a key from localStorage using environment-scoped prefix, falling back to legacy keys.
+   * Reads a key from localStorage using tenant-scoped prefix.
    * @param {string} key 
    * @returns {string|null}
    */
   function getPortalStorage(key) {
     if (typeof localStorage === 'undefined') return null;
     try {
-      const prefix = getPortalStoragePrefix();
-      let val = localStorage.getItem(prefix + key);
-      if (val !== null) return val;
-      const isDev = prefix.includes('dev');
-      val = isDev ? localStorage.getItem('ff_dev_' + key) : localStorage.getItem('ff_' + key);
-      if (val !== null) return val;
-      val = localStorage.getItem('ff_' + key);
-      if (val !== null) return val;
-      return localStorage.getItem(key);
+      return localStorage.getItem(getPortalStoragePrefix() + key);
     } catch (e) {
       return null;
     }
   }
 
   /**
-   * Persists a key to localStorage using environment-scoped prefix.
+   * Persists a key to localStorage using tenant-scoped prefix.
    * @param {string} key 
    * @param {string} value 
    */
   function setPortalStorage(key, value) {
     if (typeof localStorage === 'undefined') return;
     try {
-      const prefix = getPortalStoragePrefix();
-      localStorage.setItem(prefix + key, value);
-      const isDev = prefix.includes('dev');
-      if (isDev) {
-        localStorage.setItem('ff_dev_' + key, value);
-      } else {
-        localStorage.setItem('ff_' + key, value);
-      }
+      localStorage.setItem(getPortalStoragePrefix() + key, value);
     } catch (e) {}
   }
 
   /**
-   * Evicts a key from localStorage across scoped, prefixed, and legacy names.
+   * Evicts a key from localStorage across scoped and legacy names.
    * @param {string} key 
    */
   function removePortalStorage(key) {
     if (typeof localStorage === 'undefined') return;
     try {
-      const prefix = getPortalStoragePrefix();
+      var prefix = getPortalStoragePrefix();
       localStorage.removeItem(prefix + key);
       localStorage.removeItem('ff_dev_' + key);
       localStorage.removeItem('ff_' + key);
@@ -1912,6 +1923,8 @@ function resolveCourtflowHost(input) {
 
     if (typeof handleLogout === 'function') {
       handleLogout();
+    } else if (typeof logout === 'function') {
+      logout();
     } else {
       const loginView = document.getElementById('view-login') || document.getElementById('login-screen') || document.getElementById('login-view');
       if (loginView) loginView.style.display = 'block';
@@ -1971,7 +1984,7 @@ function resolveCourtflowHost(input) {
    * @returns {boolean} True if token exists and payload.c === 'System Admin'.
    */
   function isSystemAdminSession_(customToken = null) {
-    const token = customToken || ((typeof getPortalStorage === 'function') ? getPortalStorage('club_session_token') : null) || (typeof localStorage !== 'undefined' ? (localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN')) : null);
+    const token = customToken || ((typeof getPortalStorage === 'function') ? getPortalStorage('club_session_token') : null);
     if (!token) return false;
     const payload = parseSessionTokenPayload_(token);
     if (!payload) return false;
@@ -3033,7 +3046,7 @@ function resolveCourtflowHost(input) {
 
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="v2.7.0">
+  <meta name="app-version" content="v2.8.0">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-captain.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-captain.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -3124,7 +3137,7 @@ function resolveCourtflowHost(input) {
   </div>
   <!-- BRANDING FOOTER (Login View) -->
   <div class="brand-footer login-footer">
-    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.7.0</span>
+    Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.8.0</span>
 
   </div>
 </div>
@@ -5044,7 +5057,7 @@ function resolveCourtflowHost(input) {
             finishSuccessUI();
           }
         } else {
-          const activePin = (typeof currentPin !== 'undefined' && currentPin) || localStorage.getItem('ff_captain_pin') || localStorage.getItem('captain_pin');
+          const activePin = (typeof currentPin !== 'undefined' && currentPin) || (typeof getPortalStorage === 'function' ? (getPortalStorage('captain_session_token') || getPortalStorage('captain_pin')) : null) || localStorage.getItem('ff_captain_pin') || localStorage.getItem('captain_pin');
           if (activePin && typeof renderMatches === 'function') {
             google.script.run
               .withSuccessHandler(function(newData) {
@@ -5109,7 +5122,7 @@ function resolveCourtflowHost(input) {
           }, 600);
         };
 
-        const pin = localStorage.getItem('ff_captain_pin') || localStorage.getItem('captain_pin');
+        const pin = (typeof currentPin !== 'undefined' && currentPin) || (typeof getPortalStorage === 'function' ? (getPortalStorage('captain_session_token') || getPortalStorage('captain_pin')) : null) || localStorage.getItem('ff_captain_pin') || localStorage.getItem('captain_pin');
         if (pin && typeof renderMatches === 'function') {
           google.script.run
             .withSuccessHandler(function(response) {
@@ -5728,7 +5741,7 @@ function resolveCourtflowHost(input) {
               }
             } else {
               // Captain Portal Refresh
-              const activePin = (typeof currentPin !== 'undefined' && currentPin) || localStorage.getItem('ff_captain_pin') || localStorage.getItem('captain_pin');
+              const activePin = (typeof currentPin !== 'undefined' && currentPin) || (typeof getPortalStorage === 'function' ? (getPortalStorage('captain_session_token') || getPortalStorage('captain_pin')) : null) || localStorage.getItem('ff_captain_pin') || localStorage.getItem('captain_pin');
               if (activePin) {
                 google.script.run
                   .withSuccessHandler(function(newData) {
@@ -6001,14 +6014,14 @@ function resolveCourtflowHost(input) {
 // --- STATE ---
 let appData = null;
 let currentPin = (typeof getPortalStorage === 'function') 
-  ? (getPortalStorage('captain_session_token') || getPortalStorage('captain_pin') || localStorage.getItem('ff_captain_pin') || '') 
-  : (localStorage.getItem('ff_captain_pin') || localStorage.getItem('captain_pin') || '');
+  ? (getPortalStorage('captain_session_token') || getPortalStorage('captain_pin') || '') 
+  : '';
 let selectedTeam = 'ALL';
 let selectedMonth = 'CURRENT';
 let guestPlayers = new Set();
 let selectedCalendarDate = null;
 let currentAvailabilityMode = 'away'; // 'away' (player only) or 'home' (player + court capacity)
-let MAIN_CLUB_NAME = "" || (typeof window !== 'undefined' && (localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('leagues_pwa_club_name') || 'Mount Pleasant'));
+let MAIN_CLUB_NAME = "" || (typeof window !== 'undefined' && ((typeof getPortalStorage === 'function' ? getPortalStorage('club_name') : null) || 'Mount Pleasant'));
 const rescheduleFlowEnabled = "" === 'TRUE';
 const postDeadlineRescheduleEnabled = "" === 'TRUE';
 window.activePortalRole = 'Captain';
@@ -6068,6 +6081,9 @@ function openTeamPicker() {
 
 function onTeamFilterChange(newTeam) {
   selectedTeam = newTeam;
+  if (typeof setPortalStorage === 'function') {
+    setPortalStorage('captain_selected_team', newTeam);
+  }
   localStorage.setItem('ff_captain_team', newTeam);
   guestPlayers.clear(); // Clear guests on team switch per user request
   
@@ -7162,14 +7178,16 @@ function onLoginSuccess(data) {
   }
   const pinInput = document.getElementById('pin-input');
   currentPin = (data && data.token) ? data.token : ((pinInput ? pinInput.value.trim() : '') || currentPin);
-  if (data && data.token) {
-    setPortalStorage('captain_session_token', data.token);
+  if (typeof setPortalStorage === 'function') {
+    if (data && data.token) {
+      setPortalStorage('captain_session_token', data.token);
+    }
+    setPortalStorage('captain_pin', (pinInput ? pinInput.value.trim() : '') || currentPin);
+    setPortalStorage('captain_cached_data', JSON.stringify(appData));
   }
-  setPortalStorage('captain_cached_data', JSON.stringify(appData));
-  localStorage.setItem('ff_captain_pin', (pinInput ? pinInput.value.trim() : '') || currentPin);
   
   // Restore saved team if available and valid
-  const savedTeam = localStorage.getItem('ff_captain_selected_team') || localStorage.getItem('ff_captain_team');
+  const savedTeam = typeof getPortalStorage === 'function' ? getPortalStorage('captain_selected_team') : (localStorage.getItem('ff_captain_selected_team') || localStorage.getItem('ff_captain_team'));
   if (savedTeam && appData.teams && (savedTeam === 'ALL' || appData.teams[savedTeam])) {
       selectedTeam = savedTeam;
   } else {
@@ -7191,14 +7209,14 @@ function onLoginFail(errMsg, isAuto = false) {
   if (fullscreenLoading) fullscreenLoading.classList.add('hidden');
 
   if (isAuto) {
-    const cachedData = localStorage.getItem('ff_captain_cached_data') || localStorage.getItem('ff_cached_captain_data');
+    const cachedData = typeof getPortalStorage === 'function' ? getPortalStorage('captain_cached_data') : (localStorage.getItem('ff_captain_cached_data') || localStorage.getItem('ff_cached_captain_data'));
     if (cachedData) {
       try {
         appData = JSON.parse(cachedData);
         if (appData && appData.clubName && typeof updateClubBrandingState === 'function') {
           updateClubBrandingState(appData, 'Captain');
         }
-        const savedTeam = localStorage.getItem('ff_captain_selected_team') || localStorage.getItem('ff_captain_team');
+        const savedTeam = typeof getPortalStorage === 'function' ? getPortalStorage('captain_selected_team') : (localStorage.getItem('ff_captain_selected_team') || localStorage.getItem('ff_captain_team'));
         if (savedTeam && appData.teams && (savedTeam === 'ALL' || appData.teams[savedTeam])) {
           selectedTeam = savedTeam;
         } else {
@@ -7237,6 +7255,11 @@ function onLoginFail(errMsg, isAuto = false) {
     formContainer.classList.add('shake');
   }
 
+  if (typeof removePortalStorage === 'function') {
+    removePortalStorage('captain_session_token');
+    removePortalStorage('captain_pin');
+    removePortalStorage('captain_cached_data');
+  }
   localStorage.removeItem('ff_captain_pin');
   localStorage.removeItem('captain_pin');
   localStorage.removeItem('ff_captain_cached_data');
@@ -7329,6 +7352,8 @@ function logout() {
   if (typeof removePortalStorage === 'function') {
     removePortalStorage('captain_session_token');
     removePortalStorage('captain_pin');
+    removePortalStorage('captain_selected_team');
+    removePortalStorage('captain_cached_data');
   }
   localStorage.removeItem('ff_captain_pin');
   localStorage.removeItem('captain_pin');
@@ -7369,8 +7394,8 @@ function logout() {
   const cfgEl = document.getElementById('ff-config');
   const cfgClubName = cfgEl && cfgEl.dataset && cfgEl.dataset.clubName ? cfgEl.dataset.clubName : '';
   const cfgClubLogo = cfgEl && cfgEl.dataset && cfgEl.dataset.clubLogoUrl ? cfgEl.dataset.clubLogoUrl : '';
-  const initialClubName = cfgClubName || localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('leagues_pwa_club_name');
-  const cachedMeta = localStorage.getItem('ff_shared_public_metadata') || localStorage.getItem('ff_public_metadata');
+  const initialClubName = cfgClubName || (typeof getPortalStorage === 'function' ? getPortalStorage('club_name') : null) || localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('leagues_pwa_club_name');
+  const cachedMeta = (typeof getPortalStorage === 'function' ? getPortalStorage('shared_public_metadata') : null) || localStorage.getItem('ff_shared_public_metadata') || localStorage.getItem('ff_public_metadata');
   if (cfgClubName || cfgClubLogo) {
     hydrateClubBranding({ clubName: cfgClubName, clubLogoUrl: cfgClubLogo }, 'Captain');
   } else if (cachedMeta) {
@@ -7399,7 +7424,9 @@ function logout() {
         .withSuccessHandler(res => {
           const meta = (res && res.clubName) ? res : (res && res.data ? res.data : null);
           if (meta) {
-            localStorage.setItem('ff_shared_public_metadata', JSON.stringify(meta));
+            if (typeof setPortalStorage === 'function') {
+              setPortalStorage('shared_public_metadata', JSON.stringify(meta));
+            }
             hydrateClubBranding(meta, 'Captain');
           }
           revealCaptainLoginView();

@@ -36,7 +36,7 @@ const CLUBS_REGISTRY = {
     name: "FixtureFlow Demo Sandbox",
     shortName: "Demo",
     aliases: ["sandbox", "public-demo", "trial"],
-    hostId: "AKfycbyu8_pzD00dxoGzd-Tc4kTlCuy7TPqaeVQ04paaL3AUQ0Fdjl4l5kOyfd6ysw71lAiM4A",
+    hostId: "AKfycbxMAObsiqZV-Ni9b3AYxrFwrLRx9Vpe_8JkoFMWkDxvnapF6CgAUDR0pBe7iosEfFZk",
     courtflowHostId: "AKfycby0rMt1SZnw51B1GVQag4PqdtZcHyv9str1acKacg4TJQKM4Ms1M_y6azjZuGzIcTu9"
   },
   "dev": {
@@ -142,8 +142,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v32";
-  console.log("%c[CourtFlow]%c Running version dev-v32", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "dev-v49";
+  console.log("%c[CourtFlow]%c Running version dev-v49", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -199,32 +199,45 @@ function resolveCourtflowHost(input) {
   function callHostApi(action, args, successHandler, failureHandler, isRetry = false) {
     const urlParams = new URLSearchParams(window.location.search);
     const clubParam = urlParams.get('c') || urlParams.get('club') || '';
-    let hostId = urlParams.get('h');
-    let roleView = urlParams.get('view') || localStorage.getItem('pwa_role_view');
+    const rawH = urlParams.get('h');
+    let hostId = null;
 
-    if (clubParam && typeof resolveCourtflowHost === 'function') {
-      const resolved = resolveCourtflowHost(clubParam);
-      if (resolved && resolved.hostId) {
-        hostId = resolved.hostId;
-        localStorage.setItem('pwa_host_id', hostId);
-        localStorage.setItem('pwa_club_slug', clubParam);
+    // Strict GAS deployment hash validation (ADR-11)
+    const HASH_REGEX = /^[A-Za-z0-9_-]{25,}$/;
+    if (rawH) {
+      if (HASH_REGEX.test(rawH)) {
+        hostId = rawH;
+        localStorage.setItem('cf_dev_host_id', hostId);
+        if (urlParams.get('view')) {
+          localStorage.setItem('cf_dev_role_view', urlParams.get('view'));
+        }
+      } else {
+        console.warn("[Security] Malicious or invalid deployment hash rejected (?h=):", rawH);
       }
     }
 
-    if (urlParams.get('h')) {
-      localStorage.setItem('pwa_host_id', urlParams.get('h'));
-      if (urlParams.get('view')) {
-        localStorage.setItem('pwa_role_view', urlParams.get('view'));
+    let roleView = urlParams.get('view') || localStorage.getItem('cf_dev_role_view');
+
+    if (clubParam && typeof resolveCourtflowHost === 'function') {
+      const resolved = resolveCourtflowHost(clubParam);
+      if (resolved && resolved.hostId && HASH_REGEX.test(resolved.hostId)) {
+        hostId = resolved.hostId;
+        localStorage.setItem('cf_dev_host_id', hostId);
+        localStorage.setItem('cf_dev_club_slug', clubParam);
       }
     }
 
     if (!hostId) {
-      hostId = localStorage.getItem('pwa_host_id');
+      const storedHostId = localStorage.getItem('cf_dev_host_id');
+      if (storedHostId && HASH_REGEX.test(storedHostId)) {
+        hostId = storedHostId;
+      }
     }
 
     if (!hostId && typeof resolveCourtflowHost === 'function') {
-      const defaultResolved = resolveCourtflowHost('dev');
-      if (defaultResolved && defaultResolved.hostId) {
+      const defaultSlug = 'dev';
+      const defaultResolved = resolveCourtflowHost(defaultSlug);
+      if (defaultResolved && defaultResolved.hostId && HASH_REGEX.test(defaultResolved.hostId)) {
         hostId = defaultResolved.hostId;
       }
     }
@@ -2370,7 +2383,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="app-version" content="dev-v32">
+  <meta name="app-version" content="dev-v49">
   <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
   <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
   <link rel="manifest" href="manifest.json">
@@ -2431,7 +2444,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v32</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v49</span>
 
         </div>
       </div>
@@ -2605,7 +2618,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v32</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v49</span>
 
       </div>
 
@@ -2874,15 +2887,72 @@ function resolveCourtflowHost(input) {
   }
 
   /**
+   * Resolves the tenant-scoped storage key for CourtFlow.
+   * Format: cf_{env}_{clubSlug}_{key}
+   * @param {string} key
+   * @returns {string}
+   */
+  function getCourtflowStorageKey(key) {
+    var isDev = false;
+    var rawClub = "";
+
+    if (typeof window !== "undefined" && window.location) {
+      if (window.location.pathname && window.location.pathname.includes("/dev/")) {
+        isDev = true;
+      }
+      if (window.location.search) {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get("c") === "dev") isDev = true;
+        rawClub = (params.get("c") || params.get("club") || "").trim().toLowerCase();
+      }
+    }
+
+    var env = isDev ? "dev" : "prod";
+    var slug = rawClub;
+
+    if (slug && typeof resolveCourtflowHost === "function") {
+      var resolved = resolveCourtflowHost(slug);
+      if (resolved && resolved.slug) {
+        slug = resolved.slug;
+      }
+    }
+
+    if (!slug) {
+      slug = isDev ? "dev" : "mount-pleasant";
+    }
+
+    return "cf_" + env + "_" + slug + "_" + key;
+  }
+
+  /**
    * Retrieves the active session token from browser storage.
    * @returns {string|null} The auth token or null if unauthenticated.
    */
   function getAuthToken() {
     try {
-      return localStorage.getItem("courtflow_auth_token") || null;
+      return localStorage.getItem(getCourtflowStorageKey("auth_token")) || null;
     } catch (e) {
       return null;
     }
+  }
+
+  /**
+   * Persists the active session token to browser storage.
+   * @param {string} token
+   */
+  function setAuthToken(token) {
+    try {
+      localStorage.setItem(getCourtflowStorageKey("auth_token"), token);
+    } catch (e) {}
+  }
+
+  /**
+   * Evicts the active session token from browser storage.
+   */
+  function removeAuthToken() {
+    try {
+      localStorage.removeItem(getCourtflowStorageKey("auth_token"));
+    } catch (e) {}
   }
 </script>
 
@@ -3189,7 +3259,11 @@ function resolveCourtflowHost(input) {
         
         const res = typeof data === "string" ? JSON.parse(data) : data;
         if (res.success) {
-          localStorage.setItem("courtflow_auth_token", res.token);
+          if (typeof setAuthToken === "function") {
+            setAuthToken(res.token);
+          } else {
+            localStorage.setItem("cf_dev_auth_token", res.token);
+          }
           const payload = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
           initializeDashboard(payload);
         } else {
@@ -3243,7 +3317,7 @@ function resolveCourtflowHost(input) {
     if (badgeEl && badgeEl.textContent) {
       return badgeEl.textContent.replace(/^[\s·]+/, "").trim();
     }
-    return "v2.0.0";
+    return "v2.2.0";
   }
 
   function handleAdminLogout() {
@@ -3252,7 +3326,10 @@ function resolveCourtflowHost(input) {
       ? `Are you sure you want to log out of CourtFlow [${ver}] on this device?`
       : `Are you sure you want to log out of CourtFlow on this device?`;
     if (confirm(promptMsg)) {
-      localStorage.removeItem("courtflow_auth_token");
+      if (typeof removeAuthToken === "function") {
+        removeAuthToken();
+      }
+      localStorage.removeItem("cf_dev_auth_token");
       try {
         sessionStorage.clear();
         if (typeof caches !== "undefined" && caches.keys) {
@@ -4530,7 +4607,8 @@ function resolveCourtflowHost(input) {
               .withSuccessHandler((data) => {
                 const payload = typeof data === "string" ? JSON.parse(data) : data;
                 if (payload.authenticated === false) {
-                  localStorage.removeItem("courtflow_auth_token");
+                  if (typeof removeAuthToken === "function") removeAuthToken();
+                  localStorage.removeItem("cf_dev_auth_token");
                   showLoginScreen(payload);
                   hideLoadingOverlay();
                   return;
@@ -4615,7 +4693,8 @@ function resolveCourtflowHost(input) {
                   .withSuccessHandler(data => {
                     const payload = typeof data === "string" ? JSON.parse(data) : data;
                     if (payload.authenticated === false) {
-                      localStorage.removeItem("courtflow_auth_token");
+                      if (typeof removeAuthToken === "function") removeAuthToken();
+                      localStorage.removeItem("cf_dev_auth_token");
                       showLoginScreen(payload);
                       hideLoadingOverlay();
                       return;
@@ -4693,7 +4772,7 @@ function resolveCourtflowHost(input) {
     if (brandingH1) brandingH1.innerText = clubTitle;
     if (clubTitle && clubTitle !== "CourtFlow") {
       updatePortalTabTitle_(clubTitle);
-      try { localStorage.setItem("pwa_club_name", clubTitle); } catch (e) {}
+      try { localStorage.setItem("cf_dev_club_name", clubTitle); } catch (e) {}
     }
 
     // Update branding logo if clubLogoUrl is set
@@ -4781,13 +4860,13 @@ function resolveCourtflowHost(input) {
   // Initialize UI on window load
   window.addEventListener("load", () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const clubParam = urlParams.get("c") || urlParams.get("club") || localStorage.getItem("pwa_club_slug") || "";
-    let initialClubName = localStorage.getItem("pwa_club_name") || null;
+    const clubParam = urlParams.get("c") || urlParams.get("club") || localStorage.getItem("cf_dev_club_slug") || "";
+    let initialClubName = localStorage.getItem("cf_dev_club_name") || null;
     if (typeof resolveCourtflowHost === "function" && clubParam) {
       const resolved = resolveCourtflowHost(clubParam);
       if (resolved && resolved.name) {
         initialClubName = resolved.name;
-        try { localStorage.setItem("pwa_club_name", resolved.name); } catch (e) {}
+        try { localStorage.setItem("cf_dev_club_name", resolved.name); } catch (e) {}
       }
     }
     updatePortalTabTitle_(initialClubName);
@@ -4800,7 +4879,8 @@ function resolveCourtflowHost(input) {
       .withSuccessHandler(data => {
         const payload = typeof data === "string" ? JSON.parse(data) : data;
         if (payload.authenticated === false) {
-          localStorage.removeItem("courtflow_auth_token");
+          if (typeof removeAuthToken === "function") removeAuthToken();
+          localStorage.removeItem("cf_dev_auth_token");
           showLoginScreen(payload);
         } else {
           initializeDashboard(payload);
