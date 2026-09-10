@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v87";
+  window.__FF_VERSION__ = "dev-v99";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Player]%c Running version " + window.__FF_VERSION__, "background: #059669; color: #ffffff; border: 1px solid #10b981; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -870,8 +870,8 @@ const CLUBS_REGISTRY = {
     name: "Mount Pleasant Badminton Club",
     shortName: "MP",
     aliases: ["mp", "mpbc", "mountpleasant", "mount_pleasant"],
-    hostId: "AKfycbzBielTidLGX-XUrA1OTuInVocRPjAxhqZbyUx7LQnb5jA1Pp_a_8SE1IVyuoePlgpu",
-    courtflowHostId: "AKfycbw9lPuih5TieELN_fnrT5mbtmAGoj-h18jiZEQdS2u3oVyw_P0uLpw8F69mPOLLMeVWSA"
+    hostId: "AKfycbwytXb33k1qFxppC6VF_HJhHfg9TrQ4vUNSWFFrzlN-_-OMfaA1lSfjC5YUt-8viMvo",
+    courtflowHostId: "AKfycbx_LtOWLocI6-J_apimSsoVrHSS3Mc419OnGnYlnz5e6nf4gCYacOMbxcrpILCDdjRyfg"
   },
   "demo": {
     name: "FixtureFlow Demo Sandbox",
@@ -884,8 +884,8 @@ const CLUBS_REGISTRY = {
     name: "Development / Staging",
     shortName: "Dev",
     aliases: ["test", "local"],
-    hostId: "AKfycbykF0uy5JkbSYIxY-dJVE9bdjcRZJ7pnX6zNdTikEalLF0cweGJ4es4j9R5HcxXRwGB",
-    courtflowHostId: "AKfycbzQ8ZrOQic6xPG7jIYEQ1r75nJXOPyK0DJ6vymqngIt1tsFBcc7ilENjwirSoWyqJpo"
+    hostId: "AKfycbyBNsvDMn81v0WQoYO1Hm0xt6t6wUDH-iBvnwH0RgEVzi_magEqZxtO_Nk4aZUiQ6ys6Q",
+    courtflowHostId: "AKfycbyYadCqcW4iMp5QZcsTu74lhJJz8zL_ba65SKxMWZ7ycpaDsWBYYCbm2ocqH_gsCXl1"
   }
 };
 
@@ -1158,7 +1158,7 @@ function resolveCourtflowHost(input) {
 
     function executeFetch(attemptNumber) {
       const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-      const timeoutId = controller ? setTimeout(() => controller.abort(), 20000) : null;
+      const timeoutId = controller ? setTimeout(() => controller.abort(), 30000) : null;
 
       const fetchOptions = {
         method: "POST",
@@ -1223,7 +1223,7 @@ function resolveCourtflowHost(input) {
         }
 
         const friendlyErr = isAbort 
-          ? new Error('Request timed out (20s). Google Apps Script took too long to respond. Please try again.')
+          ? new Error('Request timed out (30s). Google Apps Script took too long to respond. Please try again.')
           : err;
         console.error(`API Call failed (${action}):`, friendlyErr);
         if (failureHandler) {
@@ -2787,7 +2787,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v87">
+  <meta name="app-version" content="dev-v99">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-player.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -2859,7 +2859,7 @@ function resolveCourtflowHost(input) {
 
     <!-- BRANDING FOOTER (Login View) -->
     <div class="brand-footer login-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v87</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v99</span>
 
     </div>
 </div>

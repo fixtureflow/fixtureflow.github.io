@@ -10,8 +10,8 @@ const CLUBS_REGISTRY = {
     name: "Mount Pleasant Badminton Club",
     shortName: "MP",
     aliases: ["mp", "mpbc", "mountpleasant", "mount_pleasant"],
-    hostId: "AKfycbzBielTidLGX-XUrA1OTuInVocRPjAxhqZbyUx7LQnb5jA1Pp_a_8SE1IVyuoePlgpu",
-    courtflowHostId: "AKfycbw9lPuih5TieELN_fnrT5mbtmAGoj-h18jiZEQdS2u3oVyw_P0uLpw8F69mPOLLMeVWSA"
+    hostId: "AKfycbwytXb33k1qFxppC6VF_HJhHfg9TrQ4vUNSWFFrzlN-_-OMfaA1lSfjC5YUt-8viMvo",
+    courtflowHostId: "AKfycbx_LtOWLocI6-J_apimSsoVrHSS3Mc419OnGnYlnz5e6nf4gCYacOMbxcrpILCDdjRyfg"
   },
   "demo": {
     name: "FixtureFlow Demo Sandbox",
@@ -24,8 +24,8 @@ const CLUBS_REGISTRY = {
     name: "Development / Staging",
     shortName: "Dev",
     aliases: ["test", "local"],
-    hostId: "AKfycbykF0uy5JkbSYIxY-dJVE9bdjcRZJ7pnX6zNdTikEalLF0cweGJ4es4j9R5HcxXRwGB",
-    courtflowHostId: "AKfycbzQ8ZrOQic6xPG7jIYEQ1r75nJXOPyK0DJ6vymqngIt1tsFBcc7ilENjwirSoWyqJpo"
+    hostId: "AKfycbyBNsvDMn81v0WQoYO1Hm0xt6t6wUDH-iBvnwH0RgEVzi_magEqZxtO_Nk4aZUiQ6ys6Q",
+    courtflowHostId: "AKfycbyYadCqcW4iMp5QZcsTu74lhJJz8zL_ba65SKxMWZ7ycpaDsWBYYCbm2ocqH_gsCXl1"
   }
 };
 
