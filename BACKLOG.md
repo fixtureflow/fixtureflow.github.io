@@ -15,3 +15,7 @@
 ### 2. Future Deployment Cadence Hardening
 - **Objective**: Prevent future commit bombardment in this repository.
 - **Action**: Update `.husky/post-commit` in `ddlc-dev` and `courtflow-dev` to run `npm run pwa:build` (local compile) on checkpoint commits, and only run `npm run pwa:publish` (push to GitHub Pages) when a feature is ready for physical device testing.
+
+### 3. OpenGraph Social Share Preview Cards
+- **Objective**: Add OpenGraph metadata tags (`og:title`, `og:description`, `og:image`, `og:url`, `twitter:card`) to public marketing pages (`index.html`, `courtflow/index.html`, `ddlc/index.html`).
+- **Benefit**: Displays branded rich preview cards with custom banner thumbnails and descriptions when sharing links on WhatsApp, iMessage, and social channels.
