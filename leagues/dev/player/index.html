@@ -855,7 +855,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v108";
+  window.__FF_VERSION__ = "dev-v109";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Player]%c Running version " + window.__FF_VERSION__, "background: #059669; color: #ffffff; border: 1px solid #10b981; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -1023,28 +1023,59 @@ function resolveCourtflowHost(input) {
     let clubName = '';
     let clubShort = '';
 
+    // Format is not authorisation. /^AKfy[a-zA-Z0-9_-]{20,}$/ is satisfied by any
+    // string of the right shape, so honouring one on trust lets a link to this
+    // genuine origin repoint the app at someone else's Apps Script and collect the
+    // PINs typed into it. Only a host the compiled registry vouches for is trusted.
+    function isRegisteredHost(candidate) {
+      if (!candidate || !/^AKfy[a-zA-Z0-9_-]{20,}$/.test(candidate)) return false;
+      if (typeof CLUBS_REGISTRY !== 'object' || !CLUBS_REGISTRY) return false;
+      return Object.keys(CLUBS_REGISTRY).some(function(slug) {
+        return CLUBS_REGISTRY[slug] && CLUBS_REGISTRY[slug].hostId === candidate;
+      });
+    }
+
+    // Unregistered hosts are a testing affordance, not a feature. DEV honours them
+    // for the current page load only; PROD refuses them outright.
+    const ALLOW_UNREGISTERED_HOSTS = true;
+
     if (rawClubParam && typeof resolveClubHost === 'function') {
       const resolved = resolveClubHost(rawClubParam);
       if (resolved && resolved.hostId) {
-        hostId = resolved.hostId;
-        clubName = resolved.name;
-        clubShort = resolved.shortName || '';
-        if (resolved.slug !== 'custom') {
-          localStorage.setItem('leagues_dev_pwa_host_id', hostId);
-          localStorage.setItem('leagues_dev_pwa_club_name', clubName);
-          localStorage.setItem('leagues_dev_pwa_club_short', clubShort);
-          localStorage.setItem('leagues_dev_pwa_club_slug', resolved.slug);
+        // resolveClubHost falls back to slug 'custom' for any well-formed hash, so a
+        // resolved result is not by itself evidence that the club is known.
+        if (isRegisteredHost(resolved.hostId)) {
+          hostId = resolved.hostId;
+          clubName = resolved.name;
+          clubShort = resolved.shortName || '';
+          if (resolved.slug !== 'custom') {
+            localStorage.setItem('leagues_dev_pwa_host_id', hostId);
+            localStorage.setItem('leagues_dev_pwa_club_name', clubName);
+            localStorage.setItem('leagues_dev_pwa_club_short', clubShort);
+            localStorage.setItem('leagues_dev_pwa_club_slug', resolved.slug);
+          }
+        } else if (ALLOW_UNREGISTERED_HOSTS) {
+          hostId = resolved.hostId; // session only, never persisted
+          clubName = resolved.name;
+          clubShort = resolved.shortName || '';
+          console.warn("[FixtureFlow · Testing] Session-only connection to an unregistered club:", rawClubParam);
+        } else {
+          console.warn("[Security] Rejected club parameter that is not in the club registry (?c=):", rawClubParam);
         }
       }
     }
 
     if (rawHostParam) {
       const trimmedHost = rawHostParam.trim();
-      if (/^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmedHost)) {
+      if (isRegisteredHost(trimmedHost)) {
+        // Registered, but still treated as a testing override: not persisted, so it
+        // does not silently become the club this device talks to from now on.
+        hostId = trimmedHost;
+      } else if (ALLOW_UNREGISTERED_HOSTS && /^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmedHost)) {
         hostId = trimmedHost;
         console.warn("%c[FixtureFlow · Testing]%c Connecting via Custom Testing Host ID: " + hostId, "background: #d97706; color: #ffffff; padding: 2px 6px; border-radius: 3px; font-weight: 600;", "color: inherit; margin-left: 4px;");
       } else {
-        const invalidHostErr = "Configuration Error: Invalid custom host parameter format.";
+        const invalidHostErr = "Configuration Error: host parameter is not a registered deployment.";
         console.error(invalidHostErr);
         if (failureHandler) failureHandler(new Error(invalidHostErr));
         return;
@@ -1052,9 +1083,17 @@ function resolveCourtflowHost(input) {
     }
 
     if (!hostId) {
-      hostId = localStorage.getItem('leagues_dev_pwa_host_id');
-      clubName = localStorage.getItem('leagues_dev_pwa_club_name') || '';
-      clubShort = localStorage.getItem('leagues_dev_pwa_club_short') || '';
+      const storedHostId = localStorage.getItem('leagues_dev_pwa_host_id');
+      if (isRegisteredHost(storedHostId)) {
+        hostId = storedHostId;
+        clubName = localStorage.getItem('leagues_dev_pwa_club_name') || '';
+        clubShort = localStorage.getItem('leagues_dev_pwa_club_short') || '';
+      } else if (storedHostId) {
+        // A client poisoned by an older build must not stay poisoned.
+        console.warn("[Security] Discarding a stored host that is not in the club registry.");
+        localStorage.removeItem('leagues_dev_pwa_host_id');
+        localStorage.removeItem('leagues_dev_pwa_club_slug');
+      }
     }
 
     
@@ -2804,7 +2843,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v108">
+  <meta name="app-version" content="dev-v109">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-player.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
@@ -2877,7 +2916,7 @@ function resolveCourtflowHost(input) {
 
     <!-- BRANDING FOOTER (Login View) -->
     <div class="brand-footer login-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v108</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v109</span>
 
     </div>
 </div>
