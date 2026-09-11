@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v106";
+  window.__FF_VERSION__ = "dev-v107";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Player]%c Running version " + window.__FF_VERSION__, "background: #059669; color: #ffffff; border: 1px solid #10b981; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -2638,7 +2638,17 @@ function resolveCourtflowHost(input) {
     
     .btn-save { width: 100%; background: var(--on-surface); color: var(--surface); font-weight: 800; padding: 20px; border-radius: 16px; transition: all 0.2s; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 1.125rem; margin: 0;}
     .btn-save:active { transform: scale(0.98); }
-    .save-footer { padding: 0; border: none; margin: 16px auto 32px auto; width: 100%; max-width: 600px; box-sizing: border-box; }
+    .save-footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0;
+        border: none;
+        margin: 16px auto 32px auto;
+        width: 100%;
+        max-width: 600px;
+        box-sizing: border-box;
+    }
     
     .logout-row { display: flex; align-items: center; justify-content: center; gap: 16px; padding-top: 16px; }
     .link-btn { background: none; border: none; font-size: 0.875rem; color: var(--on-bg); opacity: 0.6; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; transition: opacity 0.2s; padding: 0; margin: 0;}
@@ -2648,41 +2658,36 @@ function resolveCourtflowHost(input) {
 
     .hidden { display: none !important; }
 
-    .floating-action-pill {
-        position: fixed;
-        bottom: 24px;
-        left: 50%;
-        transform: translateX(-50%);
+    .range-cancel-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
         background: var(--on-surface);
         color: var(--surface);
         padding: 8px 16px;
         border-radius: 9999px;
         font-size: 0.95rem;
         font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-        z-index: 100;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+        margin-bottom: 12px;
+        opacity: 1;
+        max-height: 50px;
+        transform: translateY(0);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         user-select: none;
         -webkit-user-select: none;
         white-space: nowrap;
     }
-    @media (min-width: 601px) {
-        .floating-action-pill {
-            top: 20px;
-            bottom: auto;
-            left: 50%;
-            right: auto;
-            transform: translateX(-50%);
-            z-index: 100;
-        }
-        .floating-action-pill.pill-hidden {
-            transform: translate(-50%, -100px) scale(0.9) !important;
-            opacity: 0;
-            pointer-events: none;
-        }
+    .range-cancel-pill.pill-hidden {
+        opacity: 0;
+        max-height: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        transform: translateY(-8px) scale(0.95);
+        pointer-events: none;
+        overflow: hidden;
     }
     .pill-cancel-btn {
         background: rgba(255,255,255,0.15);
@@ -2705,9 +2710,8 @@ function resolveCourtflowHost(input) {
     .pill-cancel-btn:hover { background: rgba(255,0,0,0.15); }
     .pill-cancel-btn:active { transform: scale(0.95); }
     .pill-hidden {
-        transform: translate(-50%, 150px) scale(0.9) !important;
-        opacity: 0;
-        pointer-events: none;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
     
     /* Accessibility utilities */
@@ -2798,7 +2802,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v106">
+  <meta name="app-version" content="dev-v107">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-player.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
@@ -2871,7 +2875,7 @@ function resolveCourtflowHost(input) {
 
     <!-- BRANDING FOOTER (Login View) -->
     <div class="brand-footer login-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v106</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v107</span>
 
     </div>
 </div>
@@ -3041,14 +3045,14 @@ function resolveCourtflowHost(input) {
         </div>
     </div>
 
-    <!-- Floating Action Pill -->
-    <div id="range-cancel-pill" class="floating-action-pill pill-hidden">
-        <span style="display: flex; align-items: center; gap: 6px;">🗓 Selecting Range...</span> 
-        <div class="pill-cancel-btn" onclick="cancelRangeAnchor(event)">✖ Cancel</div>
-    </div>
-
     <!-- STEP 4: Save (Positioned cleanly outside calendar-card) -->
     <div id="player-save-footer" class="save-footer desktop-sticky-save hidden">
+        <!-- Range Cancel Pill (Stacked directly above save button) -->
+        <div id="range-cancel-pill" class="range-cancel-pill pill-hidden">
+            <span style="display: flex; align-items: center; gap: 6px;">🗓 Selecting Range...</span> 
+            <div class="pill-cancel-btn" onclick="cancelRangeAnchor(event)">✖ Cancel</div>
+        </div>
+
         <button id="save-btn" onclick="submitAvailability()" class="btn btn-submit btn-block" style="padding: 14px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
             <span id="save-btn-text" style="font-weight: 800;">SAVE MY AVAILABILITY</span>
             <div id="save-spinner" class="ff-spinner hidden" style="width: 20px; height: 20px; border-width: 3px; margin: 0; border-left-color: white;"></div>
