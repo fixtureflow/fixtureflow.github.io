@@ -142,8 +142,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v65";
-  console.log("%c[CourtFlow]%c Running version dev-v65", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "dev-v66";
+  console.log("%c[CourtFlow]%c Running version dev-v66", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -257,11 +257,16 @@ function resolveCourtflowHost(input) {
     }
     if (action === "saveSessionState") {
       payload.payload = args[0];
+      payload.token = args[1] || null;
     } else if (action === "saveMatchHistory") {
       payload.matchHistoryJSON = args[0];
+      payload.token = args[1] || null;
     } else if (action === "updatePlayerPlaysMixed") {
       payload.name = args[0];
       payload.playsMixed = args[1];
+      payload.token = args[2] || null;
+    } else if (action === "resetSession" || action === "clearSettingsOverride") {
+      payload.token = args[0] || null;
     } else if (action === "calculateNextRound") {
       payload.statePayloadJSON = args[0];
     } else if (action === "calculateMatchForCourt") {
@@ -2399,7 +2404,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="app-version" content="dev-v65">
+  <meta name="app-version" content="dev-v66">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
   <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
@@ -2461,7 +2466,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v65</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v66</span>
 
         </div>
       </div>
@@ -2635,7 +2640,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v65</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v66</span>
 
       </div>
 
@@ -3649,7 +3654,7 @@ function resolveCourtflowHost(input) {
           p.plays_mixed = !p.plays_mixed;
           renderUI();
         })
-        .updatePlayerPlaysMixed(name, p.plays_mixed);
+        .updatePlayerPlaysMixed(name, p.plays_mixed, getAuthToken());
         
       debouncedSync();
     }
@@ -4655,7 +4660,7 @@ function resolveCourtflowHost(input) {
             hideLoadingOverlay();
             showAlertModal("Error", "Failed to clear settings overrides: " + err.message);
           })
-          .clearSettingsOverride();
+          .clearSettingsOverride(getAuthToken());
       }
     );
   }
@@ -4746,13 +4751,13 @@ function resolveCourtflowHost(input) {
                 hideLoadingOverlay();
                 showAlertModal("Error", "Failed to reset session: " + err.message);
               })
-              .resetSession();
+              .resetSession(getAuthToken());
           })
           .withFailureHandler(err => {
             hideLoadingOverlay();
             showAlertModal("Logging Error", "Failed to archive match history to spreadsheet: " + err.message);
           })
-          .saveMatchHistory(JSON.stringify(state.matchHistory));
+          .saveMatchHistory(JSON.stringify(state.matchHistory), getAuthToken());
       }
     );
   }
@@ -5017,7 +5022,7 @@ function resolveCourtflowHost(input) {
           };
         }
       })
-      .saveSessionState(JSON.stringify(payload));
+      .saveSessionState(JSON.stringify(payload), getAuthToken());
   }
 
   /**
