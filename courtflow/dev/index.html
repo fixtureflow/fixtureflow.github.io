@@ -142,8 +142,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v66";
-  console.log("%c[CourtFlow]%c Running version dev-v66", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "dev-v67";
+  console.log("%c[CourtFlow]%c Running version dev-v67", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -204,15 +204,40 @@ function resolveCourtflowHost(input) {
 
     // Strict GAS deployment hash validation (ADR-11)
     const HASH_REGEX = /^[A-Za-z0-9_-]{25,}$/;
+
+    // Format is not authorisation. Every 25-character string satisfies HASH_REGEX,
+    // so honouring one on trust means a link to this genuine origin can repoint the
+    // app at someone else's Apps Script and collect the PINs typed into it. Only a
+    // host the compiled registry vouches for is allowed to be remembered.
+    function isRegisteredHost(candidate) {
+      if (!candidate || !HASH_REGEX.test(candidate)) return false;
+      if (typeof CLUBS_REGISTRY !== 'object' || !CLUBS_REGISTRY) return false;
+      return Object.keys(CLUBS_REGISTRY).some(function(slug) {
+        return CLUBS_REGISTRY[slug] && CLUBS_REGISTRY[slug].courtflowHostId === candidate;
+      });
+    }
+
+    // Unregistered hosts are a testing affordance, not a feature. They are honoured
+    // for the current page load only, never written to storage, and never in PROD.
+    const ALLOW_UNREGISTERED_HOSTS = true;
+
+    function rememberHost(candidate, slug) {
+      localStorage.setItem('cf_dev_host_id', candidate);
+      if (slug) localStorage.setItem('cf_dev_club_slug', slug);
+    }
+
     if (rawH) {
-      if (HASH_REGEX.test(rawH)) {
+      if (isRegisteredHost(rawH)) {
         hostId = rawH;
-        localStorage.setItem('cf_dev_host_id', hostId);
+        rememberHost(hostId, null);
         if (urlParams.get('view')) {
           localStorage.setItem('cf_dev_role_view', urlParams.get('view'));
         }
+      } else if (ALLOW_UNREGISTERED_HOSTS && HASH_REGEX.test(rawH)) {
+        hostId = rawH; // session only: deliberately not persisted
+        console.warn("[CourtFlow · Testing] Session-only connection to an unregistered host:", rawH);
       } else {
-        console.warn("[Security] Malicious or invalid deployment hash rejected (?h=):", rawH);
+        console.warn("[Security] Rejected deployment hash that is not in the club registry (?h=):", rawH);
       }
     }
 
@@ -220,17 +245,28 @@ function resolveCourtflowHost(input) {
 
     if (clubParam && typeof resolveCourtflowHost === 'function') {
       const resolved = resolveCourtflowHost(clubParam);
-      if (resolved && resolved.hostId && HASH_REGEX.test(resolved.hostId)) {
+      // resolveCourtflowHost falls back to slug 'custom' for any well-formed hash,
+      // so a resolved result is not by itself evidence that the club is known.
+      if (resolved && isRegisteredHost(resolved.hostId)) {
         hostId = resolved.hostId;
-        localStorage.setItem('cf_dev_host_id', hostId);
-        localStorage.setItem('cf_dev_club_slug', clubParam);
+        rememberHost(hostId, resolved.slug);
+      } else if (resolved && ALLOW_UNREGISTERED_HOSTS && HASH_REGEX.test(resolved.hostId)) {
+        hostId = resolved.hostId; // session only
+        console.warn("[CourtFlow · Testing] Session-only connection to an unregistered club:", clubParam);
+      } else {
+        console.warn("[Security] Rejected club parameter that is not in the club registry (?c=):", clubParam);
       }
     }
 
     if (!hostId) {
       const storedHostId = localStorage.getItem('cf_dev_host_id');
-      if (storedHostId && HASH_REGEX.test(storedHostId)) {
+      if (isRegisteredHost(storedHostId)) {
         hostId = storedHostId;
+      } else if (storedHostId) {
+        // A client poisoned before this check existed must not stay poisoned.
+        console.warn("[Security] Discarding a stored host that is not in the club registry.");
+        localStorage.removeItem('cf_dev_host_id');
+        localStorage.removeItem('cf_dev_club_slug');
       }
     }
 
@@ -2404,7 +2440,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="app-version" content="dev-v66">
+  <meta name="app-version" content="dev-v67">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
   <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
@@ -2466,7 +2502,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v66</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v67</span>
 
         </div>
       </div>
@@ -2640,7 +2676,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v66</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v67</span>
 
       </div>
 
