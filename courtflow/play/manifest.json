@@ -4,7 +4,7 @@
   "start_url": "/courtflow/play/",
   "display": "standalone",
   "background_color": "#0b1329",
-  "theme_color": "#10b981",
+  "theme_color": "#38bdf8",
   "orientation": "any",
   "icons": [
     {
