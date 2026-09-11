@@ -142,8 +142,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v62";
-  console.log("%c[CourtFlow]%c Running version dev-v62", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "dev-v64";
+  console.log("%c[CourtFlow]%c Running version dev-v64", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -271,14 +271,23 @@ function resolveCourtflowHost(input) {
 
     const targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
     
-    fetch(targetUrl, {
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timeoutId = controller ? setTimeout(() => controller.abort(), 30000) : null;
+
+    const fetchOptions = {
       method: "POST",
       headers: {
         "Content-Type": "text/plain"
       },
       body: JSON.stringify(payload)
-    })
+    };
+    if (controller) {
+      fetchOptions.signal = controller.signal;
+    }
+
+    fetch(targetUrl, fetchOptions)
     .then(response => {
+      if (timeoutId) clearTimeout(timeoutId);
       return response.text().then(text => {
         let result;
         try {
@@ -313,11 +322,16 @@ function resolveCourtflowHost(input) {
       }
     })
     .catch(err => {
-      console.error(`API Call failed (${action}):`, err);
+      if (timeoutId) clearTimeout(timeoutId);
+      const isAbort = err && err.name === 'AbortError';
+      const friendlyErr = isAbort
+        ? new Error('Request timed out (30s). Google Apps Script took too long to respond. Please try again.')
+        : err;
+      console.error(`API Call failed (${action}):`, friendlyErr);
       if (failureHandler) {
-        failureHandler(err);
+        failureHandler(friendlyErr);
       } else {
-        alert(`Connection error: ${err.message}`);
+        alert(`Connection error: ${friendlyErr.message}`);
       }
     });
   }
@@ -2383,7 +2397,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="app-version" content="dev-v62">
+  <meta name="app-version" content="dev-v64">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
   <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
@@ -2445,7 +2459,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v62</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v64</span>
 
         </div>
       </div>
@@ -2619,7 +2633,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v62</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v64</span>
 
       </div>
 
