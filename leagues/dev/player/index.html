@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v104";
+  window.__FF_VERSION__ = "dev-v105";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Player]%c Running version " + window.__FF_VERSION__, "background: #059669; color: #ffffff; border: 1px solid #10b981; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -2035,18 +2035,19 @@ function resolveCourtflowHost(input) {
             max-width: 380px;
         }
         .desktop-sticky-save {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            z-index: 50;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            position: static;
+            margin: 32px auto 40px auto;
+            width: 100%;
+            max-width: 440px;
+            z-index: 1;
+            box-shadow: none;
             border-radius: 12px;
-            background: var(--surface);
-            padding: 12px;
-            border: 1px solid var(--border);
+            background: transparent;
+            padding: 0;
+            border: none;
+            transform: none;
+            left: auto;
+            bottom: auto;
         }
     }
     .month-grid {
@@ -2670,7 +2671,15 @@ function resolveCourtflowHost(input) {
     }
     @media (min-width: 601px) {
         .floating-action-pill {
-            bottom: 100px;
+            bottom: 32px;
+            right: 32px;
+            left: auto;
+            transform: none;
+        }
+        .floating-action-pill.pill-hidden {
+            transform: translateY(120px) scale(0.9) !important;
+            opacity: 0;
+            pointer-events: none;
         }
     }
     .pill-cancel-btn {
@@ -2787,7 +2796,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v104">
+  <meta name="app-version" content="dev-v105">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-player.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
@@ -2860,7 +2869,7 @@ function resolveCourtflowHost(input) {
 
     <!-- BRANDING FOOTER (Login View) -->
     <div class="brand-footer login-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v104</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v105</span>
 
     </div>
 </div>
