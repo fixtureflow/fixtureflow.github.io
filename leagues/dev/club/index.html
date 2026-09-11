@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v103";
+  window.__FF_VERSION__ = "dev-v104";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Club Admin]%c Running version " + window.__FF_VERSION__, "background: #0f172a; color: #ffffff; border: 1px solid #334155; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -2861,7 +2861,8 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v103">
+  <meta name="app-version" content="dev-v104">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-club.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-club.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -3594,7 +3595,7 @@ function onLoginFailure(error) {
 
     
     <div id="native-app-footer" style="display:none; width: 100%; margin-top: auto;" class="brand-footer login-footer">
-      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v103</span>
+      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v104</span>
 
     </div>
 
@@ -7425,17 +7426,20 @@ function onLoginFailure(error) {
           const payload = btoa(encodeURIComponent(JSON.stringify(pMatch)));
           const isAwaitingRebook = (pMatch.activeRequestStatus === 'Awaiting Rebooking');
           
+          const esc = (typeof escapeHtml === 'function') ? escapeHtml : function(s) { return s || ''; };
+          const pOppDisplay = esc(pMatch.opponent || (mainClubName + ' ' + pMatch.oppTeam));
+
           pCard.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 6px;">
               <div style="font-size: 0.8rem; font-weight: 700; color: var(--warning); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
                 <span>${isAwaitingRebook ? '⚠️ ACTION REQUIRED: RESCHEDULE APPROVED' : '⚠️ ACTION REQUIRED: RESCHEDULE PROPOSED'}</span>
               </div>
               <div style="font-size: 1.15rem; font-weight: 700; color: var(--on-surface);">
-                ${userClubName} ${pMatch.ourTeam} <span style="opacity: 0.5; font-size: 0.85em;">vs</span> ${pMatch.opponent || (mainClubName + ' ' + pMatch.oppTeam)}
+                ${esc(userClubName)} ${esc(pMatch.ourTeam)} <span style="opacity: 0.5; font-size: 0.85em;">vs</span> ${pOppDisplay}
               </div>
               <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
-                <span class="badge ${pMatch.venueRole.toLowerCase()}">${pMatch.venueRole}</span>
-                <span class="badge match-type">${pMatch.matchType || 'Match'}</span>
+                <span class="badge ${esc(pMatch.venueRole.toLowerCase())}">${esc(pMatch.venueRole)}</span>
+                <span class="badge match-type">${esc(pMatch.matchType || 'Match')}</span>
                 ${historyBadge}
                 <span>📍 ${venueStr}</span>
                 <span>📅 ${datetimeStr}</span>
@@ -7626,16 +7630,17 @@ function onLoginFailure(error) {
 
       const badgeHtml = `<span class="badge ${match.venueRole.toLowerCase()}">${match.venueRole}</span>`;
 
-      const oppDisplay = match.opponent || (mainClubName + ' ' + match.oppTeam);
-      const desktopMatchup = `<strong>${userClubName} ${match.ourTeam}</strong> <span style="opacity:0.6; font-size:0.85em;">vs</span><br><span class="desktop-team-opponent">${oppDisplay}</span>`;
+      const esc = (typeof escapeHtml === 'function') ? escapeHtml : function(s) { return s || ''; };
+      const oppDisplay = esc(match.opponent || (mainClubName + ' ' + match.oppTeam));
+      const desktopMatchup = `<strong>${esc(userClubName)} ${esc(match.ourTeam)}</strong> <span style="opacity:0.6; font-size:0.85em;">vs</span><br><span class="desktop-team-opponent">${oppDisplay}</span>`;
       let statusBarClass = match.actionStatus === 'ACTION_NEEDED' ? 'feed-action-bar action-needed' : 'feed-action-bar';
-      const feedBadgeHtml = `<span class="badge ${match.venueRole.toLowerCase()}">${match.venueRole}</span>`;
+      const feedBadgeHtml = `<span class="badge ${esc(match.venueRole.toLowerCase())}">${esc(match.venueRole)}</span>`;
       let cleanDate = datetimeStr.replace(/<br>/g, ' • ');
 
       tr.innerHTML = `
       <!-- DESKTOP CELLS -->
       <td class="desktop-feed-cell" data-label="Matchup">${desktopMatchup}</td>
-      <td class="desktop-feed-cell" data-label="Comp">${match.matchType || '-'}</td>
+      <td class="desktop-feed-cell" data-label="Comp">${esc(match.matchType || '-')}</td>
       <td class="desktop-feed-cell" data-label="H/A">${badgeHtml}</td>
       <td class="desktop-feed-cell" data-label="Venue">📍 <span style="font-size: 0.9em;">${venueStr}</span></td>
       <td class="desktop-feed-cell" data-label="Date">📅 <span style="font-size: 0.9em; display: inline-block; vertical-align: top; margin-left: 4px;">${datetimeStr}</span></td>
@@ -7650,7 +7655,7 @@ function onLoginFailure(error) {
       <td class="mobile-feed-card">
         <div class="feed-card-header">
           <div class="feed-card-teams">
-            <div class="feed-team-row">${userClubName} ${match.ourTeam}</div>
+            <div class="feed-team-row">${esc(userClubName)} ${esc(match.ourTeam)}</div>
             <div class="feed-team-row opponent">${oppDisplay}</div>
           </div>
           <div class="feed-badge-container">
@@ -7658,7 +7663,7 @@ function onLoginFailure(error) {
           </div>
         </div>
         <div class="feed-meta-row">
-          <span>${match.matchType || 'Match'}</span>
+          <span>${esc(match.matchType || 'Match')}</span>
           <span class="feed-meta-dot">•</span>
           <span>📅 ${cleanDate}</span>
         </div>
