@@ -853,7 +853,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v105";
+  window.__FF_VERSION__ = "dev-v106";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Player]%c Running version " + window.__FF_VERSION__, "background: #059669; color: #ffffff; border: 1px solid #10b981; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -2638,7 +2638,7 @@ function resolveCourtflowHost(input) {
     
     .btn-save { width: 100%; background: var(--on-surface); color: var(--surface); font-weight: 800; padding: 20px; border-radius: 16px; transition: all 0.2s; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 1.125rem; margin: 0;}
     .btn-save:active { transform: scale(0.98); }
-    .save-footer { padding-top: 16px; border-top: 1px solid var(--border); margin-top: 16px; }
+    .save-footer { padding: 0; border: none; margin: 16px auto 32px auto; width: 100%; max-width: 600px; box-sizing: border-box; }
     
     .logout-row { display: flex; align-items: center; justify-content: center; gap: 16px; padding-top: 16px; }
     .link-btn { background: none; border: none; font-size: 0.875rem; color: var(--on-bg); opacity: 0.6; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; transition: opacity 0.2s; padding: 0; margin: 0;}
@@ -2663,7 +2663,7 @@ function resolveCourtflowHost(input) {
         align-items: center;
         gap: 12px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-        z-index: 60;
+        z-index: 100;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         user-select: none;
         -webkit-user-select: none;
@@ -2671,13 +2671,15 @@ function resolveCourtflowHost(input) {
     }
     @media (min-width: 601px) {
         .floating-action-pill {
-            bottom: 32px;
-            right: 32px;
-            left: auto;
-            transform: none;
+            top: 20px;
+            bottom: auto;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            z-index: 100;
         }
         .floating-action-pill.pill-hidden {
-            transform: translateY(120px) scale(0.9) !important;
+            transform: translate(-50%, -100px) scale(0.9) !important;
             opacity: 0;
             pointer-events: none;
         }
@@ -2796,7 +2798,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v105">
+  <meta name="app-version" content="dev-v106">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-player.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
@@ -2869,7 +2871,7 @@ function resolveCourtflowHost(input) {
 
     <!-- BRANDING FOOTER (Login View) -->
     <div class="brand-footer login-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v105</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v106</span>
 
     </div>
 </div>
@@ -3036,23 +3038,24 @@ function resolveCourtflowHost(input) {
                 </div>
             </div>
 
-            <!-- Floating Action Pill -->
-            <div id="range-cancel-pill" class="floating-action-pill pill-hidden">
-                <span style="display: flex; align-items: center; gap: 6px;">🗓 Selecting Range...</span> 
-                <div class="pill-cancel-btn" onclick="cancelRangeAnchor(event)">✖ Cancel</div>
-            </div>
-
-            <!-- STEP 4: Save -->
-            <div class="save-footer desktop-sticky-save">
-                <button id="save-btn" onclick="submitAvailability()" class="btn btn-submit btn-block" style="padding: 14px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <span id="save-btn-text" style="font-weight: 800;">SAVE MY AVAILABILITY</span>
-                    <div id="save-spinner" class="ff-spinner hidden" style="width: 20px; height: 20px; border-width: 3px; margin: 0; border-left-color: white;"></div>
-                </button>
-                <p id="save-msg" class="hidden text-center mt-4 text-sm font-medium"></p>
-            </div>
-
         </div>
     </div>
+
+    <!-- Floating Action Pill -->
+    <div id="range-cancel-pill" class="floating-action-pill pill-hidden">
+        <span style="display: flex; align-items: center; gap: 6px;">🗓 Selecting Range...</span> 
+        <div class="pill-cancel-btn" onclick="cancelRangeAnchor(event)">✖ Cancel</div>
+    </div>
+
+    <!-- STEP 4: Save (Positioned cleanly outside calendar-card) -->
+    <div id="player-save-footer" class="save-footer desktop-sticky-save hidden">
+        <button id="save-btn" onclick="submitAvailability()" class="btn btn-submit btn-block" style="padding: 14px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <span id="save-btn-text" style="font-weight: 800;">SAVE MY AVAILABILITY</span>
+            <div id="save-spinner" class="ff-spinner hidden" style="width: 20px; height: 20px; border-width: 3px; margin: 0; border-left-color: white;"></div>
+        </button>
+        <p id="save-msg" class="hidden text-center mt-4 text-sm font-medium"></p>
+    </div>
+
     </div>
     
     <!-- BRANDING FOOTER (Portal View) REMOVED FOR OPTION A -->
@@ -4072,6 +4075,8 @@ function processPlayerSelection(playerName) {
     
     ff_pickerClose();
     document.getElementById('calendar-card').classList.remove('hidden');
+    const saveFooter = document.getElementById('player-save-footer');
+    if (saveFooter) saveFooter.classList.remove('hidden');
     
     // Show sticky profile strip
     // Desktop logic
@@ -4109,6 +4114,8 @@ function clearPlayerMemory() {
     if (pCard) pCard.classList.remove('hidden');
     const cCard = document.getElementById('calendar-card');
     if (cCard) cCard.classList.add('hidden');
+    const saveFooterEl = document.getElementById('player-save-footer');
+    if (saveFooterEl) saveFooterEl.classList.add('hidden');
     const dStrip = document.getElementById('desktop-sticky-player-strip');
     if (dStrip) dStrip.classList.add('hidden');
     const mStrip = document.getElementById('mobile-sticky-player-strip');

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-player-dev-cache-v105';
+const CACHE_NAME = 'ff-player-dev-cache-v106';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
