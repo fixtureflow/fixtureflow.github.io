@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="color-scheme" content="light dark">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>[DEV] Player · FixtureFlow</title>
   
   <style>
@@ -646,7 +646,9 @@
   
   .search-wrapper { position: relative; }
   .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--on-bg); opacity: 0.5; width: 20px; height: 20px; pointer-events: none; }
-  .search-input { width: 100%; padding: 12px 16px 12px 40px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--on-surface); outline: none; transition: all 0.2s; box-sizing: border-box; margin: 0; height: auto;}
+  /* font-size must stay >= 16px: iOS Safari auto-zooms on focus below that,
+     and pinch-zoom is now enabled (no maximum-scale lock) for WCAG 1.4.4. */
+  .search-input { width: 100%; padding: 12px 16px 12px 40px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--on-surface); font-size: 1rem; outline: none; transition: all 0.2s; box-sizing: border-box; margin: 0; height: auto;}
   .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(98, 0, 238, 0.2); }
   
   .picker-list { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
@@ -853,7 +855,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v107";
+  window.__FF_VERSION__ = "dev-v108";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Player]%c Running version " + window.__FF_VERSION__, "background: #059669; color: #ffffff; border: 1px solid #10b981; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -2802,7 +2804,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v107">
+  <meta name="app-version" content="dev-v108">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-player.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
@@ -2875,7 +2877,7 @@ function resolveCourtflowHost(input) {
 
     <!-- BRANDING FOOTER (Login View) -->
     <div class="brand-footer login-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v107</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v108</span>
 
     </div>
 </div>
