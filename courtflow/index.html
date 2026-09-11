@@ -3,7 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://fixtureflow.github.io https://*.googleusercontent.com https://drive.google.com; connect-src 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://fixtureflow.github.io https://*.googleusercontent.com https://drive.google.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self';">
+
+    <!-- Zero-Flash Theme Initialization: Detects Saved Preference or System OS Before Paint -->
+    <script>
+        (function () {
+            try {
+                var theme = localStorage.getItem('theme');
+                if (!theme) {
+                    var hour = new Date().getHours();
+                    theme = (window.matchMedia('(prefers-color-scheme: dark)').matches || hour >= 19 || hour < 7) ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { /* Non-fatal: script.js re-applies the theme on DOMContentLoaded */ }
+        })();
+    </script>
+
     <title>CourtFlow | Stress-Free Social Play & Court Queue Manager</title>
     <meta name="description" content="Take the stress out of busy racket sports club social nights. Easily coordinate court queues, balance doubles matches by skill, and rotate players fairly.">
     
@@ -15,7 +30,7 @@
     <meta property="og:image" content="https://fixtureflow.github.io/ddlc/assets/card-fixtureflow.png">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="628">
+    <meta property="og:image:height" content="633">
     
     <!-- Twitter Metadata -->
     <meta name="twitter:card" content="summary_large_image">
@@ -52,12 +67,7 @@
       "url": "https://fixtureflow.github.io/courtflow/",
       "description": "Stress-free social play and court queue manager for racket sports clubs.",
       "operatingSystem": "All",
-      "applicationCategory": "SportsApplication",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "EUR"
-      }
+      "applicationCategory": "SportsApplication"
     }
     </script>
     
@@ -524,6 +534,8 @@
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
 
     <!-- 1. Sticky Navigation Header -->
     <header class="nav-header">
@@ -543,7 +555,7 @@
                 </svg>
                 <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
             </a>
-            <ul class="nav-links">
+            <ul class="nav-links" role="navigation" aria-label="Primary">
                 <li><a href="../ddlc/"><span class="desktop-label">League Coordinator</span><span class="mobile-label">Leagues</span></a></li>
                 <li><a href="#" class="active"><span class="desktop-label">Queue Manager</span><span class="mobile-label">Socials</span></a></li>
             </ul>
@@ -555,6 +567,8 @@
             </div>
         </div>
     </header>
+
+    <main id="main-content">
 
     <!-- 2. Hero Section with Ambient Glows -->
     <section class="hero-section">
@@ -1065,15 +1079,15 @@
                     <form class="waitlist-form" id="waitlist-form">
                         <div>
                             <label for="name">Your Name</label>
-                            <input type="text" id="name" name="name" class="form-input" placeholder="e.g., Alex Smith" required>
+                            <input type="text" id="name" name="name" class="form-input" autocomplete="name" placeholder="e.g., Alex Smith" required>
                         </div>
                         <div>
                             <label for="club">Club Name</label>
-                            <input type="text" id="club" name="club" class="form-input" placeholder="e.g., Dublin Racket Club" required>
+                            <input type="text" id="club" name="club" class="form-input" autocomplete="organization" placeholder="e.g., Dublin Racket Club" required>
                         </div>
                         <div class="form-group-full">
                             <label for="email">Email Address</label>
-                            <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required>
+                            <input type="email" id="email" name="email" class="form-input" autocomplete="email" placeholder="you@example.com" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Join the Waiting List</button>
                         <span style="display: block; text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
@@ -1103,6 +1117,8 @@
     </section>
 
     <!-- 6. Footer -->
+    </main>
+
     <footer class="main-footer">
         <div class="container footer-content">
             <!-- Left Column: Brand Stack -->

@@ -489,7 +489,7 @@
 
 .btn-player {
     background-color: var(--color-player) !important;
-    color: #ffffff !important; /* Stark white against emerald background */
+    color: var(--bg-app) !important; /* Inverts with the theme: white-on-mint failed AA in dark mode (2.54:1) */
     box-shadow: var(--color-player-glow) 0px 10px 20px;
     border: 1px solid var(--color-player) !important;
 }

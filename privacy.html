@@ -3,7 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://fixtureflow.github.io https://*.googleusercontent.com https://drive.google.com; connect-src 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://fixtureflow.github.io https://*.googleusercontent.com https://drive.google.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self';">
+
+    <!-- Zero-Flash Theme Initialization: Detects Saved Preference or System OS Before Paint -->
+    <script>
+        (function () {
+            try {
+                var theme = localStorage.getItem('theme');
+                if (!theme) {
+                    var hour = new Date().getHours();
+                    theme = (window.matchMedia('(prefers-color-scheme: dark)').matches || hour >= 19 || hour < 7) ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { /* Non-fatal: script.js re-applies the theme on DOMContentLoaded */ }
+        })();
+    </script>
+
     <title>Privacy Policy | FixtureFlow</title>
     <meta name="description" content="FixtureFlow Privacy Policy. Learn about our decentralized, privacy-first architecture powered by Google Sheets.">
     
@@ -152,6 +167,8 @@
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
 
     <!-- 1. Header Navigation -->
     <header class="main-header">
@@ -171,7 +188,7 @@
                 </svg>
                 <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
             </a>
-            <ul class="nav-links">
+            <ul class="nav-links" role="navigation" aria-label="Primary">
                 <li><a href="/ddlc/"><span class="desktop-label">League Coordinator</span><span class="mobile-label">Leagues</span></a></li>
                 <li><a href="/courtflow/"><span class="desktop-label">Queue Manager</span><span class="mobile-label">Socials</span></a></li>
             </ul>
@@ -182,6 +199,8 @@
             </div>
         </div>
     </header>
+
+    <main id="main-content">
 
     <!-- 2. Main Content Section -->
     <section class="doc-section">
@@ -293,6 +312,8 @@
     </section>
 
     <!-- 3. Unified Footer -->
+    </main>
+
     <footer class="main-footer">
         <div class="container footer-content">
             <div class="footer-brand">
