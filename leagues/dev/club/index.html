@@ -855,7 +855,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v111";
+  window.__FF_VERSION__ = "dev-v112";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Club Admin]%c Running version " + window.__FF_VERSION__, "background: #0f172a; color: #ffffff; border: 1px solid #334155; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -1242,12 +1242,28 @@ function resolveCourtflowHost(input) {
             result = JSON.parse(text);
           } catch (parseErr) {
             if (text.trim().startsWith('<')) {
-              throw new Error('Server returned HTML instead of JSON (Google Apps Script cold-start or session conflict). Please refresh.');
+              // Google served an HTML page where JSON was expected. That means
+              // the club host script failed, timed out, or its response could
+              // not be retrieved - it is not a parsing problem, and it is not
+              // automatically a cold start. Name the real status: labelling
+              // every one of these a "cold-start" is precisely how a hard
+              // transport fault stayed hidden behind a reassuring badge.
+              const htmlErr = new Error('Server returned HTML instead of JSON (HTTP ' + response.status + '). The club host script failed or took too long to respond.');
+              htmlErr.httpStatus = response.status;
+              // Worth exactly one retry whatever the status: a genuine Apps
+              // Script cold start arrives as HTTP 200 carrying a login page,
+              // so status alone cannot separate it from a hard failure. The
+              // retry policy is therefore unchanged - only the diagnosis is.
+              htmlErr.retryable = true;
+              throw htmlErr;
             }
-            throw new Error('Invalid JSON response: ' + text.slice(0, 100));
+            throw new Error('Invalid JSON response (HTTP ' + response.status + '): ' + text.slice(0, 100));
           }
           if (!response.ok) {
-            throw new Error('API Error: HTTP status ' + response.status);
+            const httpErr = new Error('API Error: HTTP status ' + response.status);
+            httpErr.httpStatus = response.status;
+            httpErr.retryable = (response.status >= 500 || response.status === 429);
+            throw httpErr;
           }
           return result;
         });
@@ -1269,15 +1285,25 @@ function resolveCourtflowHost(input) {
       .catch(err => {
         if (timeoutId) clearTimeout(timeoutId);
         const isAbort = err && err.name === 'AbortError';
-        const isTransient = isAbort || (err && err.message && (
-          err.message.includes('cold-start') || 
-          err.message.includes('Failed to fetch') || 
-          err.message.includes('NetworkError') ||
-          err.message.includes('503')
+        // Retryability is decided by the status the server actually returned,
+        // not by searching our own error text for a word we chose ourselves.
+        // The previous version matched 'cold-start' - a phrase it had just
+        // attached to *every* HTML response - so a permanent transport fault
+        // was indistinguishable from a genuine slow start, and got the same
+        // soothing blue badge.
+        const isTransient = isAbort || (err && (
+          err.retryable === true ||
+          (err.message && (
+            err.message.includes('Failed to fetch') ||
+            err.message.includes('NetworkError')
+          ))
         ));
 
         if (attemptNumber < 2 && isTransient) {
-          console.warn(`%c[FixtureFlow · Network]%c Transient hiccup on ${action}. Retrying in 1.5s (attempt 2/2)...`, "background: #3b82f6; color: #ffffff; padding: 2px 6px; border-radius: 3px; font-weight: 600;", "color: inherit; margin-left: 4px;");
+          const retryReason = isAbort
+            ? 'timed out after 30s'
+            : (err && err.httpStatus ? 'HTTP ' + err.httpStatus : ((err && err.message) ? err.message.slice(0, 60) : 'unknown cause'));
+          console.warn(`%c[FixtureFlow · Network]%c ${action} failed (${retryReason}). Retrying in 1.5s (attempt 2/2)...`, "background: #3b82f6; color: #ffffff; padding: 2px 6px; border-radius: 3px; font-weight: 600;", "color: inherit; margin-left: 4px;");
           setTimeout(() => {
             executeFetch(attemptNumber + 1);
           }, 1500);
@@ -2923,7 +2949,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v111">
+  <meta name="app-version" content="dev-v112">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-club.svg">
   <link rel="apple-touch-icon" href="/assets/images/leagues/icon-club.png">
@@ -3657,7 +3683,7 @@ function onLoginFailure(error) {
 
     
     <div id="native-app-footer" style="display:none; width: 100%; margin-top: auto;" class="brand-footer login-footer">
-      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v111</span>
+      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v112</span>
 
     </div>
 
