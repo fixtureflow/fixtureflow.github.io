@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://fixtureflow.github.io https://*.googleusercontent.com https://drive.google.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'self'; form-action 'self';">
+
+    <!-- Zero-Flash Theme Initialization: Detects Saved Preference or System OS Before Paint -->
+    <script>
+        (function () {
+            try {
+                var theme = localStorage.getItem('theme');
+                if (!theme) {
+                    var hour = new Date().getHours();
+                    theme = (window.matchMedia('(prefers-color-scheme: dark)').matches || hour >= 19 || hour < 7) ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { /* Non-fatal: script.js re-applies the theme on DOMContentLoaded */ }
+        })();
+    </script>
+
+    <title>CourtFlow | Stress-Free Social Play & Court Queue Manager</title>
+    <meta name="description" content="Take the stress out of busy racket sports club social nights. Easily coordinate court queues, balance doubles matches by skill, and rotate players fairly.">
+    
+    <!-- OpenGraph Metadata -->
+    <meta property="og:title" content="CourtFlow | Stress-Free Social Play & Court Queue Manager">
+    <meta property="og:description" content="Take the stress out of busy racket sports club social nights. Easily coordinate court queues, balance doubles matches by skill, and rotate players fairly.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fixtureflow.github.io/courtflow/">
+    <meta property="og:image" content="https://fixtureflow.github.io/ddlc/assets/card-fixtureflow.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="633">
+    
+    <!-- Twitter Metadata -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CourtFlow | Stress-Free Social Play & Court Queue Manager">
+    <meta name="twitter:description" content="Take the stress out of busy racket sports club social nights. Easily coordinate court queues, balance doubles matches by skill, and rotate players fairly.">
+    <meta name="twitter:image" content="https://fixtureflow.github.io/ddlc/assets/card-fixtureflow.png">
+    
+    <!-- Shared Master Assets -->
+    <link rel="stylesheet" href="/assets/css/style.css?v=1.3">
+    <script src="/assets/js/script.js" defer></script>
+    <link rel="icon" type="image/svg+xml" href="/assets/images/brand/web/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/brand/web/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/brand/ios/apple-touch-icon.png">
+    <link rel="manifest" href="/assets/images/brand/android/site.webmanifest">
+    <link rel="mask-icon" href="/assets/images/brand/web/favicon.svg" color="#38bdf8">
+    <link rel="canonical" href="https://fixtureflow.github.io/courtflow/">
+    <meta name="theme-color" content="#080d16">
+    
+    <!-- iOS Standalone Web App Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CourtFlow">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Structured JSON-LD Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "CourtFlow",
+      "url": "https://fixtureflow.github.io/courtflow/",
+      "description": "Stress-free social play and court queue manager for racket sports clubs.",
+      "operatingSystem": "All",
+      "applicationCategory": "SportsApplication"
+    }
+    </script>
+    
+    <style>
+        /* --- COURTFLOW SPECIFIC COLOR OVERRIDES --- */
+        :root {
+            --color-primary: #38bdf8; /* Electric Sky Blue */
+            --color-primary-hover: #0ea5e9;
+            --color-primary-glow: rgba(56, 189, 248, 0.22);
+            /* Keep logo sky blue gradient */
+            --logo-gradient-start: #38bdf8;
+            --logo-gradient-end: #0ea5e9;
+            --color-active: #10b981; /* Mint for active courts & ready states */
+            --color-active-glow: rgba(16, 185, 129, 0.15);
+        }
+        [data-theme="light"] {
+            --color-primary: #0369a1; /* Darkened Cerulean for WCAG 2.1 AA 5.22:1 contrast */
+            --color-primary-hover: #075985;
+            --color-primary-glow: rgba(3, 105, 161, 0.15);
+            --logo-gradient-start: #0369a1;
+            --logo-gradient-end: #075985;
+            --color-active: #047857;
+            --color-active-glow: rgba(4, 120, 87, 0.1);
+        }
+
+        /* --- LAYOUT OVERRIDES --- */
+        .hero-section {
+            position: relative;
+            padding: 160px 0 80px 0;
+            text-align: center;
+            overflow: hidden;
+        }
+        .hero-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .badge {
+            background: var(--color-primary-glow);
+            color: var(--color-primary);
+            border: 1px solid var(--border-glass);
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -1.8px;
+            max-width: 800px;
+            background: linear-gradient(135deg, var(--text-primary) 30%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+        .hero-description {
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+            max-width: 680px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* --- PLAYGROUND INTERACTIVE MOCKUP --- */
+        .playground-section {
+            padding: 20px 0 80px 0;
+        }
+        .playground-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .mockup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+            background: var(--border-glass);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+        }
+        .window-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .window-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .window-dot.red { background: #ff5f56; }
+        .window-dot.yellow { background: #ffbd2e; }
+        .window-dot.green { background: #27c93f; }
+        
+        .mockup-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        /* Mockup Grid Area */
+        .mockup-body {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            min-height: 440px;
+            background: var(--bg-app);
+            border-radius: 24px;
+            border: 1px solid var(--border-glass);
+            overflow: hidden;
+        }
+        
+        /* Sidebar: Queue */
+        .mockup-sidebar {
+            padding: 20px;
+            border-left: 1px solid var(--border-subtle);
+            background: var(--bg-glass);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .sidebar-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+        .queue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .player-chip {
+            padding: 8px 12px;
+            background: var(--bg-container);
+            border: 1px solid var(--border-glass);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: default;
+            user-select: none;
+            transition: var(--transition-smooth);
+        }
+        .player-chip:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 4px 12px var(--color-primary-glow);
+        }
+        .player-chip.checked-out {
+            opacity: 0.4;
+            cursor: pointer;
+        }
+        .skill-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+        /* Color skill ratings */
+        .skill-1 { background: #be123c; color: #fff; } /* Elite - Rose */
+        .skill-2 { background: #d97706; color: #fff; } /* High - Amber */
+        .skill-3 { background: #0284c7; color: #fff; } /* Medium - Sky */
+        .skill-4 { background: #059669; color: #fff; } /* Recreational - Emerald */
+        .skill-5 { background: #4b5563; color: #fff; } /* Beginner - Grey */
+
+        /* Main Workspace: Active Courts */
+        .mockup-main {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .round-indicator {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+        
+        /* Custom Sandbox Simulation Classes */
+        .simulation-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            min-height: 480px;
+            background: var(--bg-app);
+            border-radius: 24px;
+            border: 1px solid var(--border-glass);
+            overflow: hidden;
+            padding: 24px;
+            gap: 24px;
+        }
+        .courts-layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .mockup-actions-bar {
+            grid-column: span 2;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: rgba(15, 23, 42, 0.15);
+            border-top: 1px solid var(--border-glass);
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            margin: 0 -24px -24px -24px;
+            z-index: 10;
+        }
+        
+        .courts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            flex-grow: 1;
+        }
+        .court-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: var(--transition-smooth);
+        }
+        .court-card.active {
+            border-top: 3px solid var(--color-primary);
+        }
+        .court-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+        .court-slot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            text-align: center;
+        }
+        .team-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .team-header {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+        .court-slot {
+            height: 36px;
+            background: var(--border-subtle);
+            border: 1px dashed var(--border-glass);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+        }
+        .court-slot.drag-over {
+            border-color: var(--color-primary);
+            background: var(--color-primary-glow);
+        }
+        .court-average-badge {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            align-self: center;
+            margin-top: 4px;
+        }
+        
+        /* Action buttons in Mockup */
+        .mockup-actions {
+            grid-column: span 2;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: auto;
+            border-top: 1px solid var(--border-subtle);
+            padding: 16px 24px;
+            background: rgba(15, 23, 42, 0.15);
+        }
+        
+        /* Sandbox Lockdown Overlay */
+        .sandbox-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(8, 9, 13, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 30px;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .sandbox-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* --- MARKETING / VALUE SECTIONS --- */
+        .marketing-section {
+            padding: 80px 0;
+            border-top: 1px solid var(--border-glass);
+        }
+        /* Tab switcher layout inherited globally from .glass-tabs in /assets/css/style.css */
+        .tab-content {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .tab-content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+        .tab-text h3 {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        .tab-text p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .tab-features {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .tab-features li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .tab-features li svg {
+            color: var(--color-primary);
+        }
+        
+        /* --- WAITLIST SECTION --- */
+        /* Waitlist styling inherited globally from /assets/css/style.css */
+        
+        footer {
+            padding: 60px 0;
+            border-top: 1px solid var(--border-glass);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* --- MOBILE MEDIA QUERIES --- */
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 120px 0 40px 0;
+            }
+            .hero-title {
+                font-size: 2.4rem;
+                letter-spacing: -1.2px;
+            }
+            .hero-description {
+                font-size: 1.05rem;
+            }
+            .mockup-body {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+            .simulation-grid {
+                grid-template-columns: 1fr;
+                padding: 16px;
+                gap: 16px;
+                min-height: auto;
+            }
+            .courts-layout-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .mockup-actions-bar {
+                grid-column: span 1;
+                margin: 0 -16px -16px -16px;
+                padding: 12px 16px;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .mockup-actions-bar a {
+                width: 100%;
+                text-align: center;
+            }
+            .mockup-sidebar {
+                border-left: none;
+                border-top: 1px solid var(--border-subtle);
+                max-height: 300px;
+            }
+            .queue-list {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                max-height: 220px;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .player-chip {
+                flex-shrink: 0;
+            }
+            .tab-content.active {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            /* Waitlist mobile overrides inherited globally */
+            /* Tab switcher mobile overrides inherited globally */
+            .mockup-actions {
+                grid-column: span 1;
+                justify-content: center;
+                padding: 16px 20px;
+                background: rgba(15, 23, 42, 0.25);
+            }
+        }
+        @keyframes syncMove {
+            0% { left: -20px; }
+            100% { left: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+
+    <!-- 1. Sticky Navigation Header -->
+    <header class="nav-header">
+        <div class="container nav-container">
+            <a href="../" class="logo">
+                <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
+                    <defs>
+                        <linearGradient id="logo-badge-grad-courtflow-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="30%" stop-color="var(--logo-gradient-start, #38bdf8)"/>
+                            <stop offset="100%" stop-color="var(--logo-gradient-end, #0ea5e9)"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-courtflow-nav)"/>
+                    <g transform="scale(0.6)">
+                        <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+                    </g>
+                </svg>
+                <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
+            </a>
+            <ul class="nav-links" role="navigation" aria-label="Primary">
+                <li><a href="../ddlc/"><span class="desktop-label">League Coordinator</span><span class="mobile-label">Leagues</span></a></li>
+                <li><a href="#" class="active"><span class="desktop-label">Queue Manager</span><span class="mobile-label">Socials</span></a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" aria-label="Toggle light/dark theme">
+                    <!-- Loaded dynamically by script.js -->
+                </button>
+                <a href="#waitlist" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">Join Waitlist</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content">
+
+    <!-- 2. Hero Section with Ambient Glows -->
+    <section class="hero-section">
+        <div class="glow-container">
+            <div class="glow-circle courtflow-glow-1"></div>
+            <div class="glow-circle courtflow-glow-2"></div>
+        </div>
+        <div class="container hero-container animate-fade-in">
+            <h1 class="hero-title">Run smooth social nights without the whiteboard chaos.</h1>
+            <p class="hero-description">
+                Free your club organizers from magnetic boards, dry-wipe markers, and queue complaints. Match players fairly by skill, manage wait queues, and optimize court rotations without the hassle.
+            </p>
+            <div class="hero-cta-group" style="display: flex; gap: 16px; justify-content: center; margin-top: 28px;">
+                <a href="#waitlist" class="btn btn-primary">Join Waitlist</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Interactive Social Matchmaker Preview -->
+    <section class="playground-section" id="preview">
+        <div class="container" style="margin-bottom: 40px;">
+            <div class="section-header" style="text-align: center; max-width: 600px; margin: 0 auto;">
+                <span class="badge">Interactive Preview</span>
+                <h2 class="section-title" style="font-family: var(--font-display); font-size: 2.6rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; background: linear-gradient(135deg, var(--text-primary) 30%, var(--text-secondary) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Designed to run itself</h2>
+                <p class="section-description" style="color: var(--text-secondary); font-size: 1.15rem;">Experience the queue rotation and player matching board in real-time below.</p>
+            </div>
+        </div>
+        <div class="container playground-container">
+            
+            <div class="interactive-mockup glass-panel" style="position: relative;">
+                
+                <!-- Simulation Work Area -->
+                <div class="simulation-grid">
+                    
+                    <!-- Left Column: Session Mgmt + Active Courts -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        
+                        <!-- Session Management Card -->
+                        <div style="background: var(--bg-container); border: 1px solid var(--border-glass); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-subtle); display: flex; flex-direction: column; gap: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0; font-family: var(--font-display);">Session Management</h3>
+                                <div style="display: flex; align-items: center; gap: 10px; font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">
+                                    <span>Active Courts: 2</span>
+                                    <!-- Slider Custom Design -->
+                                    <div style="position: relative; width: 80px; height: 5px; background: var(--border-subtle); border-radius: 99px;">
+                                        <div style="position: absolute; left: 0; top: 0; width: 50%; height: 100%; background: var(--color-primary); border-radius: 99px;"></div>
+                                        <div style="position: absolute; left: 50%; top: -4px; width: 13px; height: 13px; border-radius: 50%; background: var(--color-primary); transform: translateX(-50%);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <button style="background: var(--color-primary); color: #ffffff; border: none; padding: 8px 20px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: background 0.2s;" onclick="return false;">Generate Next Round</button>
+                                <a href="#" style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-decoration: underline; text-underline-offset: 3px;" onclick="return false;">Reset Session</a>
+                            </div>
+                        </div>
+
+                        <!-- Active Courts Card -->
+                        <div style="background: var(--bg-container); border: 1px solid var(--border-glass); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-subtle); display: flex; flex-direction: column; gap: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--color-primary); padding-left: 10px; height: 20px;">
+                                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0; font-family: var(--font-display);">Active Courts</h3>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                            
+                            <div class="courts-layout-grid">
+                                
+                                <!-- Court 1 -->
+                                <div style="border: 1px solid var(--border-subtle); border-top: 4px solid var(--color-active, #10b981); border-radius: 12px; padding: 16px; background: var(--bg-app); display: flex; flex-direction: column; gap: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="background: var(--color-active, #10b981); color: #ffffff; font-size: 0.7rem; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 1;">01</span>
+                                            <span style="font-weight: 800; font-size: 0.9rem; color: var(--color-active, #10b981);">Court 1</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary); background: var(--border-subtle); padding: 2px 6px; border-radius: 4px;">Diff: 0</span>
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Double Slots layout -->
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <!-- Team A -->
+                                        <div style="background: var(--bg-container); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                            <div>
+                                                <div style="font-size: 0.8rem; font-weight: 700; color: #ec4899; margin-bottom: 2px;">♀ Mia J.</div>
+                                                <span style="font-size: 0.65rem; font-weight: 600; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 4px; border-radius: 3px;">Div 4</span>
+                                            </div>
+                                            <div>
+                                                <div style="font-size: 0.8rem; font-weight: 700; color: #ec4899; margin-bottom: 2px;">♀ Sarah L.</div>
+                                                <span style="font-size: 0.65rem; font-weight: 600; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 4px; border-radius: 3px;">Div 2</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Sum details -->
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 8px; font-size: 0.65rem; font-weight: 700; color: var(--text-muted);">
+                                            <span style="background: var(--border-subtle); padding: 1px 6px; border-radius: 4px; color: var(--text-secondary);">Sum: 6</span>
+                                            <span style="font-weight: 600; font-size: 0.6rem;">VS</span>
+                                            <span style="background: var(--border-subtle); padding: 1px 6px; border-radius: 4px; color: var(--text-secondary);">Sum: 6</span>
+                                        </div>
+
+                                        <!-- Team B -->
+                                        <div style="background: var(--bg-container); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                            <div>
+                                                <div style="font-size: 0.8rem; font-weight: 700; color: #ec4899; margin-bottom: 2px;">♀ Emma W.</div>
+                                                <span style="font-size: 0.65rem; font-weight: 600; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 4px; border-radius: 3px;">Div 3</span>
+                                            </div>
+                                            <div>
+                                                <div style="font-size: 0.8rem; font-weight: 700; color: #ec4899; margin-bottom: 2px;">♀ Lisa T.</div>
+                                                <span style="font-size: 0.65rem; font-weight: 600; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 4px; border-radius: 3px;">Div 3</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Court 2 -->
+                                <div style="border: 1px solid var(--border-subtle); border-top: 4px solid var(--color-primary); border-radius: 12px; padding: 16px; background: var(--bg-app); display: flex; flex-direction: column; gap: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="background: var(--color-primary); color: #ffffff; font-size: 0.7rem; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 1;">02</span>
+                                            <span style="font-weight: 800; font-size: 0.9rem; color: var(--color-primary);">Court 2</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary); background: var(--border-subtle); padding: 2px 6px; border-radius: 4px;">Diff: 0</span>
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Double Slots layout -->
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <!-- Team A -->
+                                        <div style="background: var(--bg-container); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                            <div>
+                                                <div style="font-size: 0.8rem; font-weight: 700; color: #3b82f6; margin-bottom: 2px;">♂ Ryan G.</div>
+                                                <span style="font-size: 0.65rem; font-weight: 600; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 4px; border-radius: 3px;">Div 4</span>
+                                            </div>
+                                            <div>
+                                                <div style="font-size: 0.8rem; font-weight: 700; color: #3b82f6; margin-bottom: 2px;">♂ Conor M.</div>
+                                                <span style="font-size: 0.65rem; font-weight: 600; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 4px; border-radius: 3px;">Div 2</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Sum details -->
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 8px; font-size: 0.65rem; font-weight: 700; color: var(--text-muted);">
+                                            <span style="background: var(--border-subtle); padding: 1px 6px; border-radius: 4px; color: var(--text-secondary);">Sum: 6</span>
+                                            <span style="font-weight: 600; font-size: 0.6rem;">VS</span>
+                                            <span style="background: var(--border-subtle); padding: 1px 6px; border-radius: 4px; color: var(--text-secondary);">Sum: 6</span>
+                                        </div>
+
+                                        <!-- Team B -->
+                                        <div style="background: var(--bg-container); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                            <div>
+                                                <div style="font-size: 0.8rem; font-weight: 700; color: #3b82f6; margin-bottom: 2px;">♂ Liam O.</div>
+                                                <span style="font-size: 0.65rem; font-weight: 600; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 4px; border-radius: 3px;">Div 4</span>
+                                            </div>
+                                            <div>
+                                                <div style="font-size: 0.8rem; font-weight: 700; color: #3b82f6; margin-bottom: 2px;">♂ David F.</div>
+                                                <span style="font-size: 0.65rem; font-weight: 600; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 4px; border-radius: 3px;">Div 2</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Waiting Queue sidebar -->
+                    <div style="background: var(--bg-container); border: 1px solid var(--border-glass); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-subtle); display: flex; flex-direction: column; gap: 16px; height: 100%;">
+                        <div style="border-left: 3px solid var(--color-primary); padding-left: 10px; display: flex; flex-direction: column; gap: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0; font-family: var(--font-display);">Waiting Queue</h3>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+                                <span style="font-size: 0.7rem; font-weight: 700; color: var(--color-active, #10b981); background: var(--color-active-glow, rgba(16, 185, 129, 0.15)); border: 1px solid var(--border-glass); padding: 3px 10px; border-radius: 99px;">4 waiting (8 on court)</span>
+                                <a href="#" style="font-size: 0.75rem; color: var(--text-secondary); text-decoration: underline; text-underline-offset: 2px;" onclick="return false;">Check Out All</a>
+                            </div>
+                        </div>
+                        
+                        <div class="queue-list" style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 360px; padding-right: 4px;">
+                            
+                            <!-- Waiting Row 1 (Green Tint) -->
+                            <div style="border: 1px solid var(--color-success); background: var(--color-success-bg); border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="color: #3b82f6; font-size: 1rem; font-weight: 700;">♂</span>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary);">Alex P.</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 500;">Div 4</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fcd34d; padding: 2px 6px; border-radius: 4px; font-family: monospace;">MX</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Waiting Row 2 (Green Tint) -->
+                            <div style="border: 1px solid var(--color-success); background: var(--color-success-bg); border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="color: #3b82f6; font-size: 1rem; font-weight: 700;">♂</span>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary);">Taylor S.</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 500;">Div 4</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fcd34d; padding: 2px 6px; border-radius: 4px; font-family: monospace;">MX</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Waiting Row 3 (Green Tint) -->
+                            <div style="border: 1px solid var(--color-success); background: var(--color-success-bg); border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="color: #ec4899; font-size: 1rem; font-weight: 700;">♀</span>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary);">Chloe K.</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 500;">Div 2</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fcd34d; padding: 2px 6px; border-radius: 4px; font-family: monospace;">MX</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+
+                            <!-- Waiting Row 4 (Green Tint) -->
+                            <div style="border: 1px solid var(--color-success); background: var(--color-success-bg); border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="color: #3b82f6; font-size: 1rem; font-weight: 700;">♂</span>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary);">Conor M.</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 500;">Div 2</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fcd34d; padding: 2px 6px; border-radius: 4px; font-family: monospace;">MX</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+
+                            <!-- Non-waiting Checked-in (Grey Borders) -->
+                            <div style="border: 1px solid var(--border-glass); background: var(--bg-app); border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; opacity: 0.75;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="color: #ec4899; font-size: 1rem; font-weight: 700;">♀</span>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary);">Emma W.</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 500;">Div 4</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 500; color: var(--text-muted); background: var(--border-subtle); padding: 2px 6px; border-radius: 4px; font-family: monospace;">MX</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+
+                            <div style="border: 1px solid var(--border-glass); background: var(--bg-app); border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; opacity: 0.75;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="color: #ec4899; font-size: 1rem; font-weight: 700;">♀</span>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary);">Sarah L.</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 500;">Div 3</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 500; color: var(--text-muted); background: var(--border-subtle); padding: 2px 6px; border-radius: 4px; font-family: monospace;">MX</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+
+                            <div style="border: 1px solid var(--border-glass); background: var(--bg-app); border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; opacity: 0.75;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="color: #ec4899; font-size: 1rem; font-weight: 700;">♀</span>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary);">Mia J.</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 500;">Div 3</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.65rem; font-weight: 500; color: var(--text-muted); background: var(--border-subtle); padding: 2px 6px; border-radius: 4px; font-family: monospace;">MX</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Screen Recording Walkthrough Placeholder -->
+                    <div class="mockup-actions-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 22px; background: rgba(15, 23, 42, 0.45); border: 1px dashed var(--border-glass); border-radius: 12px; margin-top: 8px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 240px;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-glass); display: flex; align-items: center; justify-content: center; color: var(--color-primary); flex-shrink: 0;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </div>
+                            <div style="text-align: left;">
+                                <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">Full Session Screen Recording Walkthrough</div>
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">Watch live club night check-ins, court rotation algorithms, and TV display casting in action.</div>
+                            </div>
+                        </div>
+                        <span style="display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: var(--text-secondary); white-space: nowrap;">Soon to Come</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. Marketing Component Journey Tabs -->
+    <section class="marketing-section">
+        <div class="container">
+            <div class="tabs-anchor" style="height: 0px; margin: 0; padding: 0; overflow: hidden;"></div>
+            <div class="glass-tabs">
+                <button class="tab-btn active" data-tab="check-in">
+                    <span class="desktop-label">Roster Check-In</span>
+                    <span class="mobile-label">Roster</span>
+                </button>
+                <button class="tab-btn" data-tab="matchmaker">
+                    <span class="desktop-label">Heuristics Engine</span>
+                    <span class="mobile-label">Matches</span>
+                </button>
+                <button class="tab-btn" data-tab="persistence">
+                    <span class="desktop-label">Properties Sync</span>
+                    <span class="mobile-label">Sync</span>
+                </button>
+            </div>
+
+            <!-- Tab 1: Check-in -->
+            <div class="tab-content active" id="tab-check-in">
+                <div class="tab-text">
+                    <h3>Zero-friction check-in</h3>
+                    <p>
+                        Match secretaries or volunteers simply tap on player name chips as members walk into the hall. Checked-in players are dynamically queued based on check-in timestamp.
+                    </p>
+                    <ul class="tab-features">
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Dynamic guest additions directly from mobile UI</li>
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Auto-sorting based on benched round count</li>
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Gender tags to control mixed doubles allocations</li>
+                    </ul>
+                </div>
+                <div class="tab-visual glass-panel" style="padding: 24px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; gap: 12px;">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-align: center;">Interactive Expected Roster</div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 320px; width: 100%; margin: 0 auto;">
+                        
+                        <!-- Checked-In (Green border) -->
+                        <div style="border: 1px solid var(--color-success); background: var(--color-success-bg); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="color: #3b82f6; font-size: 1rem; font-weight: 700;">♂</span>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary);">Jane D.</div>
+                                    <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 500;">Div 2</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 0.65rem; font-weight: 700; color: #137333; background: #e6f4ea; border: 1px solid #ceead6; padding: 2px 6px; border-radius: 4px;">Checked In</span>
+                            </div>
+                        </div>
+
+                        <!-- Checked-In 2 (Green border) -->
+                        <div style="border: 1px solid var(--color-success); background: var(--color-success-bg); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="color: #ec4899; font-size: 1rem; font-weight: 700;">♀</span>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-primary);">Claire L.</div>
+                                    <div style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 500;">Div 1</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 0.65rem; font-weight: 700; color: #137333; background: #e6f4ea; border: 1px solid #ceead6; padding: 2px 6px; border-radius: 4px;">Checked In</span>
+                            </div>
+                        </div>
+
+                        <!-- Expected / Checked-out -->
+                        <div style="border: 1px dashed var(--border-glass); background: var(--bg-app); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; opacity: 0.85;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="color: var(--text-muted); font-size: 1rem; font-weight: 700;">♂</span>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.8rem; color: var(--text-muted);">David S.</div>
+                                    <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 500;">Div 3</div>
+                                </div>
+                            </div>
+                            <button style="border: 1px solid var(--color-primary); background: transparent; color: var(--color-primary); font-size: 0.65rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; cursor: pointer;">Tap to Check In</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Matchmaker -->
+            <div class="tab-content" id="tab-matchmaker">
+                <div class="tab-text">
+                    <h3>Heuristic Doubles Solver</h3>
+                    <p>
+                        No more hand-picking matches. The engine takes waiting players from the bench, groups them, and calculates optimal, balanced doubles pairings.
+                    </p>
+                    <ul class="tab-features">
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Minimizes skill delta between Team A & Team B</li>
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Enforces mixed doubles split restrictions</li>
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Prevents repeat pairings with history queues</li>
+                    </ul>
+                </div>
+                <div class="tab-visual glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: center; gap: 12px;">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-align: center;">Heuristic Match Balance</div>
+                    <div style="border: 1px solid var(--border-subtle); border-top: 4px solid var(--color-primary); border-radius: 12px; padding: 14px; background: var(--bg-app); max-width: 300px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="background: var(--color-primary); color: #ffffff; font-size: 0.7rem; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">01</span>
+                                <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Court 1</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 4px; font-size: 0.7rem; color: var(--color-primary); font-weight: 700;">
+                                <span>Diff: 0</span>
+                                <span style="font-size: 0.6rem; font-weight: 500; color: var(--text-muted);">(Optimal)</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Stacked Team Slots -->
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <!-- Team A -->
+                            <div style="background: var(--bg-container); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 6px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.75rem; color: #ec4899;">♀ Alice K.</div>
+                                    <span style="font-size: 0.6rem; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 3px; border-radius: 2px;">Div 3</span>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.75rem; color: #ec4899;">♀ Sarah M.</div>
+                                    <span style="font-size: 0.6rem; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 3px; border-radius: 2px;">Div 3</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Middle divider with balance VS sums -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px; font-size: 0.6rem; font-weight: 700; color: var(--text-muted);">
+                                <span style="background: var(--border-subtle); padding: 1px 4px; border-radius: 3px; color: var(--text-secondary);">Sum: 6</span>
+                                <span style="font-weight: 600; font-size: 0.55rem;">VS</span>
+                                <span style="background: var(--border-subtle); padding: 1px 4px; border-radius: 3px; color: var(--text-secondary);">Sum: 6</span>
+                            </div>
+
+                            <!-- Team B -->
+                            <div style="background: var(--bg-container); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 6px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.75rem; color: #3b82f6;">♂ John D.</div>
+                                    <span style="font-size: 0.6rem; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 3px; border-radius: 2px;">Div 3</span>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.75rem; color: #3b82f6;">♂ Dave B.</div>
+                                    <span style="font-size: 0.6rem; color: var(--text-secondary); background: var(--border-subtle); padding: 1px 3px; border-radius: 2px;">Div 3</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Persistence -->
+            <div class="tab-content" id="tab-persistence">
+                <div class="tab-text">
+                    <h3>Lag-free properties sync</h3>
+                    <p>
+                        To ensure zero lagging during busy social play nights, all matches and queue data are processed client-side and synchronized back to Apps Script properties Service.
+                    </p>
+                    <ul class="tab-features">
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 1-second debounce state mirroring</li>
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Safe recovery on browser refresh/disconnect</li>
+                        <li><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Isolated document locks per tenant</li>
+                    </ul>
+                </div>
+                <div class="tab-visual glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: center; gap: 12px; min-height: 200px;">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-align: center;">Properties sync pipeline</div>
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 320px; margin: 0 auto; padding: 16px; background: var(--bg-app); border: 1px solid var(--border-glass); border-radius: 12px; position: relative;">
+                        <!-- Local Client -->
+                        <div style="text-align: center; z-index: 1;">
+                            <div style="font-size: 1.3rem; margin-bottom: 4px;">💻</div>
+                            <div style="font-weight: 700; font-size: 0.75rem; color: var(--text-primary);">Browser</div>
+                            <div style="font-size: 0.6rem; color: var(--text-muted);">Local State</div>
+                        </div>
+                        
+                        <!-- Sync Pipeline Connector -->
+                        <div style="flex: 1; margin: 0 16px; position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <span style="font-size: 0.55rem; color: var(--color-primary); font-weight: 700; font-family: monospace;">syncing...</span>
+                            <div style="width: 100%; height: 2px; background: var(--border-glass); position: relative; border-radius: 1px; overflow: hidden;">
+                                <div style="position: absolute; left: -20px; top: 0; width: 20px; height: 100%; background: linear-gradient(90deg, transparent, var(--color-primary)); animation: syncMove 1.8s infinite linear;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cloud Sheets -->
+                        <div style="text-align: center; z-index: 1;">
+                            <div style="font-size: 1.3rem; margin-bottom: 4px;">📊</div>
+                            <div style="font-weight: 700; font-size: 0.75rem; color: var(--text-primary);">Apps Script</div>
+                            <div style="font-size: 0.6rem; color: var(--text-muted);">Properties</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Dedicated Waitlist Form -->
+    <section class="waitlist-section" id="waitlist">
+        <div class="container">
+            <div class="waitlist-card glass-panel">
+                <div class="form-container">
+                    <h2>Join the Waiting List</h2>
+                    <p>
+                        CourtFlow is launching soon as a premium subscription for racket clubs. Register your interest below to secure your spot in our next onboarding cohort and lock in early-adopter pricing.
+                    </p>
+                    <form class="waitlist-form" id="waitlist-form">
+                        <div>
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" name="name" class="form-input" autocomplete="name" placeholder="e.g., Alex Smith" required>
+                        </div>
+                        <div>
+                            <label for="club">Club Name</label>
+                            <input type="text" id="club" name="club" class="form-input" autocomplete="organization" placeholder="e.g., Dublin Racket Club" required>
+                        </div>
+                        <div class="form-group-full">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-input" autocomplete="email" placeholder="you@example.com" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Join the Waiting List</button>
+                        <span style="display: block; text-align: center; margin-top: 10px;">
+                            <!-- Live region: must stay in the DOM and rendered at all times so screen
+                                 readers announce updates. Empty it contributes no height, so the
+                                 layout below is unchanged until there is something to say. -->
+                            <span id="waitlist-status" role="status" aria-live="polite" style="display: block; font-size: 0.85rem; font-weight: 600; line-height: 1.45;"></span>
+                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">Built directly on Google Sheets. You keep complete control of your data.</span>
+                            <span style="display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 6px;">By joining, you agree we may contact you about the launch. See our <a href="/privacy.html" style="color: inherit; text-decoration: underline;">Privacy Policy</a>.</span>
+                        </span>
+                    </form>
+                </div>
+                
+                <!-- Success Survey View -->
+                <div class="success-survey" style="display: none; text-align: center; animation: fadeIn 0.4s ease forwards; flex-direction: column; gap: 16px; align-items: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 8px;">🎉</div>
+                    <h2 style="margin-bottom: 8px;">You're on the Waiting List!</h2>
+                    <p style="color: var(--text-secondary); font-size: 1.05rem; max-width: 440px; margin: 0 auto 12px auto; line-height: 1.5;">
+                        We onboard new clubs in limited cohorts to ensure a smooth transition. While we finalize your release group, <strong>what yearly price feels fair for your club?</strong>
+                    </p>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+                        <button class="btn btn-secondary price-btn" data-price="under-100" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 99px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center;">Under €100/yr</button>
+                        <button class="btn btn-secondary price-btn" data-price="100-200" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 99px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center;">€100 - €200/yr</button>
+                        <button class="btn btn-secondary price-btn" data-price="200-plus" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 99px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center;">€200+/yr</button>
+                    </div>
+                    
+                    <span class="survey-thanks" style="display: none; font-size: 0.9rem; color: var(--color-primary); font-weight: 700; margin-top: 8px;">
+                        ✓ Thank you! We will use this to calibrate our cohort plans.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. Footer -->
+    </main>
+
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <!-- Left Column: Brand Stack -->
+            <div class="footer-brand">
+                <a href="../" class="logo">
+                    <svg class="brand-icon" width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; flex-shrink: 0; vertical-align: middle;">
+                        <defs>
+                            <linearGradient id="logo-badge-grad-courtflow-footer" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="30%" stop-color="var(--logo-gradient-start, #38bdf8)"/>
+                                <stop offset="100%" stop-color="var(--logo-gradient-end, #0ea5e9)"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="60" height="60" rx="30" fill="url(#logo-badge-grad-courtflow-footer)"/>
+                        <g transform="scale(0.6)">
+                            <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+                        </g>
+                    </svg>
+                    <span class="logo-fixture">Fixture</span><span class="logo-flow">Flow</span>
+                </a>
+                <span class="footer-tagline">Frictionless court queues and balanced play.</span>
+                <span class="footer-badge-text">Built for Social Night Organizers.</span>
+            </div>
+            <!-- Right Column: Meta Info -->
+            <div class="footer-meta">
+                <span>&copy; 2026 FixtureFlow. All rights reserved.</span>
+                <span style="opacity: 0.8;"><a href="/privacy.html" style="color: inherit; text-decoration: underline;">Privacy Policy</a> &bull; <a href="/club-privacy-template.html" style="color: inherit; text-decoration: underline;">Club Notice Template</a> &bull; Powered by Google Sheets &amp; Apps Script</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- --- INTERACTIVE SANDBOX JS SIMULATION ENGINE --- -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- MARKETING JOURNEY TAB SWITCHER ---
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetTab = btn.getAttribute('data-tab');
+
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+
+                    btn.classList.add('active');
+                    const contentElement = document.getElementById(`tab-${targetTab}`);
+                    if (contentElement) {
+                        contentElement.classList.add('active');
+                    }
+
+                    // Smooth scroll to the top of the tabs anchor to keep content in context
+                    const tabsAnchor = document.querySelector('.tabs-anchor');
+                    if (tabsAnchor) {
+                        const offset = 70; // Keep space for sticky navbar
+                        const bodyRect = document.body.getBoundingClientRect().top;
+                        const elementRect = tabsAnchor.getBoundingClientRect().top;
+                        const elementPosition = elementRect - bodyRect;
+                        const offsetPosition = elementPosition - offset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // --- CRM WEBHOOK WAITLIST FORM SUBMIT ---
+            // Shares an endpoint, and a sheet, with the DDLC marketing form. Keep the
+            // two implementations in step: this one drifted once already and spent a
+            // release reporting success for submissions that were never stored.
+            const WAITLIST_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwjTqvUCCOr_nDYBLuInJJzIli_wbU7LWZA4lNSKsD5TEGHuY1iUaKvI5b2C9vs-Alo/exec';
+            const SUPPORT_EMAIL = 'fixtureflow.ddlc@gmail.com';
+
+            const waitlistForm = document.getElementById('waitlist-form');
+            if (waitlistForm) {
+                const statusEl = document.getElementById('waitlist-status');
+
+                // Every message shown to a visitor is written here, never taken from the
+                // response. The webhook returns String(err) as the message for SERVER_ERROR,
+                // and raw exception text must not end up on screen.
+                const ERROR_COPY = {
+                    LOCK_TIMEOUT: 'Our server was busy and your details were not saved. Please try again.',
+                    VALIDATION_ERROR: 'Please check your name, club and email address, then try again.'
+                };
+                const GENERIC_FAILURE = 'Something went wrong at our end and your details were not saved. Please try again, or email ' + SUPPORT_EMAIL + '.';
+                // Delivery outcome unknown: the row may or may not exist. This must not claim
+                // failure (which invites a duplicate signup) nor success (the bug being fixed).
+                const UNCONFIRMED = 'We could not confirm your signup. If you do not hear from us, email ' + SUPPORT_EMAIL + ' and we will add you manually.';
+
+                const setStatus = (message, tone) => {
+                    if (!statusEl) return;
+                    statusEl.textContent = message || '';
+                    statusEl.style.color = tone === 'error' ? 'var(--color-alert)' : 'var(--color-primary)';
+                    statusEl.style.marginBottom = message ? '10px' : '';
+                };
+
+                const showSurvey = (userEmail) => {
+                    const parentCard = waitlistForm.closest('.waitlist-card');
+                    const formContainer = parentCard ? parentCard.querySelector('.form-container') : null;
+                    const successSurvey = parentCard ? parentCard.querySelector('.success-survey') : null;
+
+                    // The entry is saved either way, so a missing survey view must still be
+                    // reported as the success it is rather than leaving the form mid-submit.
+                    if (!formContainer || !successSurvey) return false;
+
+                    formContainer.style.display = 'none';
+                    successSurvey.style.display = 'flex';
+
+                    const priceBtns = successSurvey.querySelectorAll('.price-btn');
+                    priceBtns.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const selectedPrice = btn.getAttribute('data-price');
+
+                            // Log budget choice in background sheet. Deliberately fire-and-forget:
+                            // this is optional feedback and a failure here is not actionable by
+                            // the visitor, who has already been added to the list.
+                            const p = new URLSearchParams();
+                            p.append('email', userEmail);
+                            p.append('budget', "CourtFlow: " + selectedPrice);
+
+                            fetch(WAITLIST_ENDPOINT, {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                redirect: 'follow',
+                                credentials: 'omit',
+                                body: p
+                            });
+
+                            priceBtns.forEach(b => b.disabled = true);
+                            const thanksSpan = successSurvey.querySelector('.survey-thanks');
+                            if (thanksSpan) thanksSpan.style.display = 'block';
+                        });
+                    });
+
+                    return true;
+                };
+
+                // Captured once: reading this inside the handler would treat whatever the
+                // button currently says as its "original" label.
+                const submitBtn = waitlistForm.querySelector('button[type="submit"]');
+                const submitLabel = submitBtn ? submitBtn.textContent : '';
+                const restoreButton = () => {
+                    if (!submitBtn) return;
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = submitLabel;
+                };
+
+                waitlistForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    setStatus('');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = 'Registering...';
+                    }
+
+                    const queryParams = new URLSearchParams();
+                    const formData = new FormData(waitlistForm);
+                    const userEmail = formData.get('email');
+                    queryParams.append('name', formData.get('name'));
+                    queryParams.append('email', userEmail);
+                    // Explicitly tag context as CourtFlow interest
+                    queryParams.append('club', formData.get('club') + " (CourtFlow Interest)");
+
+                    // mode: 'cors' rather than 'no-cors'. An opaque response is unreadable, so
+                    // the old code showed the success view even when the server replied
+                    // LOCK_TIMEOUT and wrote no row — the lead vanished silently.
+                    //
+                    // This is safe because a URLSearchParams body sends
+                    // application/x-www-form-urlencoded with no custom headers, making it a CORS
+                    // simple request: no OPTIONS preflight, which Apps Script cannot answer.
+                    // Both the 302 and the final response carry access-control-allow-origin: *,
+                    // and the page CSP already lists script.google.com and
+                    // script.googleusercontent.com under connect-src.
+                    fetch(WAITLIST_ENDPOINT, {
+                        method: 'POST',
+                        mode: 'cors',
+                        redirect: 'follow',
+                        credentials: 'omit',
+                        body: queryParams
+                    })
+                        .then((res) => {
+                            if (!res.ok) throw new Error('HTTP ' + res.status);
+                            return res.json();
+                        })
+                        .then(
+                            (payload) => {
+                                if (payload && payload.result === 'success') {
+                                    if (!showSurvey(userEmail)) {
+                                        restoreButton();
+                                        setStatus("You're on the waiting list. Thank you!", 'ok');
+                                    }
+                                    return;
+                                }
+
+                                const code = payload && payload.error ? payload.error.code : '';
+                                restoreButton();
+                                setStatus(ERROR_COPY[code] || GENERIC_FAILURE, 'error');
+                            },
+                            // Reached on a network failure, a non-2xx status, or a body that is
+                            // not JSON. Handled as the second argument to then() rather than a
+                            // trailing catch() so that a DOM error while rendering the success
+                            // view cannot also trigger a failure message.
+                            (err) => {
+                                console.error('Waitlist submission could not be confirmed:', err);
+                                restoreButton();
+                                setStatus(UNCONFIRMED, 'error');
+                            }
+                        );
+                });
+            }
+        });
+    </script>
+</body>
+</html>
