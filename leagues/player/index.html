@@ -1,0 +1,4402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Player Portal · FixtureFlow</title>
+  
+  <style>
+  /* =========================================================================
+     1. DESIGN TOKENS (VARIABLES)
+     ========================================================================= */
+  :root {
+    color-scheme: light dark;
+    /* --- LIGHT THEME --- */
+    --bg: #f8f6fc; /* Subtle purple tint for Captain Portal */
+    --surface: #ffffff;
+    --primary: #6200ee;
+    --primary-hover: #3700b3;
+    --on-primary: #ffffff;
+    --secondary: #018786;
+    --error: #b00020;
+    --success: #00897b;
+    --warning: #ef6c00;
+    
+    --on-bg: #1d1d1f;
+    --on-surface: #1d1d1f;
+    --text-muted: #6e6e73;
+    --text: var(--on-surface);
+    
+    --border: #d2d2d7;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+    /* Elevated surfaces (modal/dialog cards).
+     *
+     * A modal card is painted on top of its own scrim, so it needs a colour the
+     * scrim does not already occupy. Portals are free to tint --surface to match
+     * their brand; where that tint collides with the scrim the card disappears
+     * entirely (the Club portal's Obsidian #0f172a card sat on an
+     * rgba(15,23,42,0.88) scrim — the same colour, so it had no visible edge).
+     *
+     * These default to the plain surface with no edge, so a portal that has no
+     * collision renders exactly as before. A portal that does collide overrides
+     * them to lift the card clear of its scrim.
+     */
+    --surface-elevated: var(--surface);
+    --surface-edge: transparent;
+    --shadow-modal: 0 20px 45px -12px rgba(0, 0, 0, 0.25);
+
+    /* Status Colors (Light) */
+    --c-avail: #00897b;
+    --bg-avail: rgba(0, 137, 123, 0.1);
+    --c-match: #3b82f6;
+    --bg-match: rgba(59, 130, 246, 0.1);
+    --c-rest: #ef6c00;
+    --bg-rest: rgba(239, 108, 0, 0.1);
+    --c-unav: #c62828;
+    --bg-unav: rgba(198, 40, 40, 0.1);
+
+    /* Venue Badges (Light) */
+    --badge-home-bg: #e0f7fa;
+    --badge-home-color: #006064;
+    --badge-home-border: #b2ebf2;
+    --badge-away-bg: #fce4ec;
+    --badge-away-color: #880e4f;
+    --badge-away-border: #f8bbd0;
+
+    /* Splash Screen Tokens (Light) - Captain Base */
+    --splash-bg: radial-gradient(circle at center, #ffffff 0%, var(--bg) 100%);
+    --splash-glow: rgba(98, 0, 238, 0.12);
+    --splash-loader-bg: rgba(15, 23, 42, 0.08);
+    --splash-loader-accent: var(--primary);
+    --splash-text: var(--text-muted);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      /* --- DARK THEME --- */
+      --bg: #131216; /* Subtle warm tint for Captain Portal */
+      --surface: #1e1e1e;
+      --primary: #bb86fc;
+      --primary-hover: #dfbcf9;
+      --on-primary: #000000;
+      --secondary: #03dac6;
+      --error: #cf6679;
+      --success: #03dac6;
+      --warning: #ffb74d;
+      
+      --on-bg: #e0e0e0;
+      --on-surface: #ffffff;
+      --text-muted: #a0a0a0;
+      
+      --border: #333333;
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+      /* Deeper than the light equivalent: a 25%-black shadow is invisible
+       * against a dark scrim, which is why modal cards previously read as
+       * floating text rather than as a panel. */
+      --shadow-modal: 0 24px 50px -12px rgba(0, 0, 0, 0.75);
+
+      /* Splash Screen Tokens (Dark) - Captain Base */
+      --splash-bg: radial-gradient(circle at center, #1c1b22 0%, var(--bg) 100%);
+      --splash-glow: rgba(187, 134, 252, 0.18);
+      --splash-loader-bg: rgba(255, 255, 255, 0.08);
+      --splash-loader-accent: var(--primary);
+      --splash-text: #a0a0a0;
+
+      /* Status Colors (Dark) */
+      --c-avail: #03dac6;
+      --bg-avail: rgba(3, 218, 198, 0.15);
+      --c-match: #60a5fa;
+      --bg-match: rgba(96, 165, 250, 0.15);
+      --c-rest: #ffb74d;
+      --bg-rest: rgba(255, 183, 77, 0.15);
+      --c-unav: #cf6679;
+      --bg-unav: rgba(207, 102, 121, 0.15);
+
+      /* Venue Badges (Dark) */
+      --badge-home-bg: rgba(0, 151, 167, 0.2);
+      --badge-home-color: #84ffff;
+      --badge-home-border: #00838f;
+      --badge-away-bg: rgba(194, 24, 91, 0.2);
+      --badge-away-color: #ff80ab;
+      --badge-away-border: #ad1457;
+    }
+  }
+
+  /* =========================================================================
+     2. GLOBAL RESETS & BASE HTML
+     ========================================================================= */
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scrollbar-gutter: stable; /* Modern scrollbar gutter to prevent layout shift */
+  }
+
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg);
+    color: var(--on-bg);
+    line-height: 1.4;
+    border-top: 4px solid var(--primary);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--on-surface);
+    margin-top: 0;
+    line-height: 1.2;
+  }
+  
+  a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+  }
+
+  /* =========================================================================
+     3. LAYOUT & CONTAINERS
+     ========================================================================= */
+  .container {
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Wide container specifically for Desktop Dashboards (Data Tables) */
+  .container-wide {
+    width: 100%;
+    max-width: 1050px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+  
+  .team-select-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 16px auto 16px auto; /* Balanced 16px top and bottom margin */
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+
+  /* =========================================================================
+     4. TYPOGRAPHY & TEXT UTILITIES
+     ========================================================================= */
+  .text-center { text-align: center; }
+  .text-left { text-align: left; }
+  .text-right { text-align: right; }
+  .text-muted { color: var(--text-muted); }
+  .font-bold { font-weight: bold; }
+  .font-semibold { font-weight: 600; }
+  .text-sm { font-size: 0.875rem; }
+  .text-lg { font-size: 1.125rem; }
+  .text-xl { font-size: 1.25rem; }
+  .text-2xl { font-size: 1.5rem; }
+
+  /* =========================================================================
+     5. COMPONENT CLASSES (BEM-Lite)
+     ========================================================================= */
+     
+  /* Forms & Inputs */
+  .ff-input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    font-size: 1rem;
+    background-color: var(--surface);
+    color: var(--on-surface);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .ff-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(98, 0, 238, 0.25);
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .ff-input:focus {
+       box-shadow: 0 0 0 3px rgba(187, 134, 252, 0.25);
+    }
+  }
+
+  .ff-select {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    font-size: 1rem;
+    background-color: var(--surface);
+    color: var(--on-surface);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .ff-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(98, 0, 238, 0.25);
+  }
+
+  .ff-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  
+  .ff-fieldset {
+    border: none;
+    border-radius: 12px;
+    padding: 25px;
+    background-color: var(--surface);
+    margin: 0;
+    margin-bottom: 25px;
+    box-shadow: var(--shadow-sm);
+  }
+  .ff-legend {
+    font-weight: 700;
+    padding: 0 10px;
+    font-size: 1.2rem;
+    color: var(--on-surface);
+    margin-bottom: 10px;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-block;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    appearance: none;
+    -webkit-appearance: none;
+    text-decoration: none;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .btn:disabled, .btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .btn-primary {
+    background-color: var(--primary);
+    color: #ffffff;
+  }
+  
+  .btn-submit {
+    background-color: var(--success);
+    color: #ffffff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .btn-primary {
+      color: #121212;
+    }
+    .btn-submit {
+      color: #121212;
+    }
+    /* --border is tuned for dividers on a page background, where it only has to
+     * separate two similar tones. As a button outline on a dark card it is far
+     * too faint to read as a control at all: the Club portal's #1e293b border
+     * on an Obsidian card left "Close" looking like plain text. Outline the
+     * button against the card instead of against the page. */
+    .btn-secondary {
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+  }
+
+  /* Use opacity/color transition for hover per UI/UX rules */
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    color: var(--on-surface);
+    border-color: var(--border);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--bg);
+    border-color: var(--primary);
+  }
+
+  .btn-danger {
+    background-color: var(--error);
+    color: #ffffff;
+  }
+  
+  .btn-danger:hover:not(:disabled) {
+    background-color: #d32f2f;
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn-block {
+    display: block;
+    width: 100%;
+  }
+
+  /* Cards */
+  .card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .match-card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
+  }
+  @media (max-width: 600px) {
+    .card, .match-card {
+      padding: 16px;
+    }
+  }
+
+  /* Status Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .badge-avail { background-color: var(--bg-avail); color: var(--c-avail); }
+  .badge-match { background-color: var(--bg-match); color: var(--c-match); }
+  .badge-rest  { background-color: var(--bg-rest); color: var(--c-rest); }
+  .badge-unav  { background-color: var(--bg-unav); color: var(--c-unav); }
+  
+  .badge-neutral { 
+    background-color: rgba(241, 243, 244, 0.8); 
+    color: var(--text-muted); 
+    border: 1px solid var(--border); 
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .badge-neutral {
+      background-color: rgba(255, 255, 255, 0.1); 
+    }
+  }
+
+  /* App Header & Structure */
+  .app-container {
+    max-width: 1050px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-bottom: 80px;
+  }
+
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: var(--surface);
+    width: 100%;
+    padding: 15px 20px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .app-logo {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .app-title {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  /* Footer */
+  .app-footer {
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--surface);
+    z-index: 100;
+  }
+
+  .view-login-container {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .brand-footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 0.85rem;
+    color: var(--on-bg);
+    opacity: 0.5;
+    width: 100%;
+  }
+
+  .brand-footer a {
+    color: inherit;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .brand-footer a:hover {
+    text-decoration: underline;
+  }
+
+  .brand-footer strong {
+    font-weight: 700;
+  }
+
+  .login-footer {
+    margin-top: auto;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  .dashboard-footer {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  /* =========================================================================
+     6. UTILITIES & LAYOUT
+     ========================================================================= */
+  .d-none { display: none !important; }
+  .d-flex { display: flex; }
+  .d-block { display: block; }
+  .d-inline-block { display: inline-block; }
+  
+  .align-items-center { align-items: center; }
+  .justify-content-center { justify-content: center; }
+  .justify-content-between { justify-content: space-between; }
+  
+  .gap-2 { gap: 0.5rem; }
+  .gap-3 { gap: 1rem; }
+  .gap-4 { gap: 1.5rem; }
+  
+  .mt-2 { margin-top: 0.5rem; }
+  .mt-3 { margin-top: 1rem; }
+  .mt-4 { margin-top: 1.5rem; }
+  .mb-2 { margin-bottom: 0.5rem; }
+  .mb-3 { margin-bottom: 1rem; }
+  .mb-4 { margin-bottom: 1.5rem; }
+  
+  .p-3 { padding: 1rem; }
+  .p-4 { padding: 1.5rem; }
+  
+  .w-100 { width: 100%; }
+
+  /* Error States */
+  .input-error {
+    border-color: var(--error) !important;
+  }
+  .input-error:focus {
+    box-shadow: 0 0 0 3px rgba(176, 0, 32, 0.25) !important;
+  }
+  .error-text,
+  .error-msg {
+    color: var(--error, #ef4444);
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-top: 12px;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  @keyframes ff-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+  .shake {
+    animation: ff-shake 0.35s ease-in-out;
+  }
+  
+  /* Loading States */
+  .loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .loading-spinner {
+        border: 3px solid rgba(18,18,18,.3);
+        border-top-color: #121212;
+    }
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Messages */
+  .alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+  }
+  
+  .alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile Overrides */
+  .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    .app-header {
+      padding: 10px 15px;
+      gap: 10px;
+    }
+    .app-logo {
+      height: 40px;
+    }
+    .app-title {
+      font-size: 1.2rem;
+    }
+    .app-container {
+      padding: 15px;
+      padding-bottom: 70px;
+    }
+  }
+  .ff-spinner {
+    border: 4px solid rgba(150, 150, 150, 0.2);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: var(--primary);
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* =========================================================================
+     7. PICKER MODAL COMPONENT
+     ========================================================================= */
+  .picker-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: flex-end; justify-content: center; padding: 16px; padding-bottom: 0; transition: opacity 0.3s; }
+  @media (min-width: 601px) { .picker-overlay { align-items: center; padding-bottom: 16px; } }
+  .picker-modal { background: var(--surface); width: 100%; max-width: 450px; height: 80vh; max-height: 600px; border-radius: 16px 16px 0 0; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border); }
+  @media (min-width: 601px) { .picker-modal { border-radius: 16px; } }
+  .picker-header-block { padding: 16px; border-bottom: 1px solid var(--border); background: var(--bg); }
+  .picker-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .picker-title-text { font-weight: bold; font-size: 1.125rem; color: var(--on-surface); margin: 0; }
+  .picker-close-btn { appearance: none; background: none; border: none; padding: 8px; margin-right: -8px; color: var(--on-bg); opacity: 0.5; cursor: pointer; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+  .picker-close-btn:hover { opacity: 1; background: var(--border); }
+  
+  .search-wrapper { position: relative; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--on-bg); opacity: 0.5; width: 20px; height: 20px; pointer-events: none; }
+  /* font-size must stay >= 16px: iOS Safari auto-zooms on focus below that,
+     and pinch-zoom is now enabled (no maximum-scale lock) for WCAG 1.4.4. */
+  .search-input { width: 100%; padding: 12px 16px 12px 40px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--on-surface); font-size: 1rem; outline: none; transition: all 0.2s; box-sizing: border-box; margin: 0; height: auto;}
+  .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(98, 0, 238, 0.2); }
+  
+  .picker-list { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+  .picker-list-btn { width: 100%; text-align: left; padding: 16px 20px; border: none; border-bottom: 1px solid var(--border); background: transparent; font-weight: 500; color: var(--on-surface); cursor: pointer; transition: background 0.2s; outline: none; font-size: 1rem; margin: 0; display: block; box-sizing: border-box; }
+  .picker-list-btn:hover, .picker-list-btn:focus { background: var(--bg); }
+
+  /* =========================================================================
+     8. RESPONSIVE HEADERS
+     ========================================================================= */
+  .portal-header-group { display: flex; flex-direction: row; align-items: baseline; gap: 6px; }
+  .portal-header-club { font-weight: 500; font-size: 1.1rem; margin: 0;}
+  .portal-header-title { font-weight: bold; font-size: 1.1rem; margin: 0;}
+  .header-club-logo { display: none; }
+  .header-club-logo[src]:not([src=""]) { display: inline-block; }
+
+  /* Login Screen Dynamic Branding */
+  #login-club-logo-container { display: none; }
+  #login-club-title { display: none; }
+  #login-club-title-large { display: block; }
+
+  .login-has-logo #login-club-logo-container { display: block; }
+  .login-has-logo #login-club-title { display: block; }
+  .login-has-logo #login-club-title-large { display: none; }
+
+  .login-no-logo #login-club-logo-container { display: none; }
+  .login-no-logo #login-club-title { display: none; }
+  .login-no-logo #login-club-title-large { display: block; }
+  
+
+  
+  @media (max-width: 480px) {
+    .portal-header-group { flex-direction: column; align-items: flex-start; gap: 0; }
+    .portal-header-club { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--on-bg); opacity: 0.7; margin-bottom: -2px; }
+    .portal-header-title { font-size: 1.1rem; }
+  }
+
+  /* Season Indicator Utilities */
+  .short-season { display: none; }
+  .full-season { display: inline; }
+
+  @media (max-width: 600px) {
+    .short-season { display: inline; }
+    .full-season { display: none; }
+  }
+
+  /* =========================================================================
+     9. DATE CHIP GRID (BOOKING PORTAL)
+     ========================================================================= */
+  .date-chip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .date-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Hide actual radio button accessibly */
+  .date-chip input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .date-chip:hover {
+    border-color: var(--primary);
+    background: var(--bg);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .date-chip:active {
+    transform: translateY(0);
+  }
+  
+  .date-chip:focus-within {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* Structural pseudo-selector to target the label when radio inside is checked */
+  .date-chip:has(input[type="radio"]:checked) {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(98, 0, 238, 0.25);
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .date-chip:has(input[type="radio"]:checked) {
+      color: #121212;
+      box-shadow: 0 4px 12px rgba(187, 134, 252, 0.25);
+    }
+  }
+
+  .chip-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none; /* Let clicks pass to the label */
+  }
+
+  .chip-day-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+  }
+
+  .chip-day-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 4px 0;
+  }
+
+  .chip-month {
+    font-size: 0.8rem;
+    font-weight: 500;
+    opacity: 0.9;
+  }
+
+  /* Connecting Splash Loading Overlay (Standalone Headless PWA - Aligned with CourtFlow) */
+  .screen-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    box-sizing: border-box;
+    padding: 24px;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    background: var(--splash-bg);
+  }
+
+  .glow-backdrop {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, var(--splash-glow) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  #spinner-loader {
+    width: 44px;
+    height: 44px;
+    border: 4px solid var(--splash-loader-bg);
+    border-top-color: var(--splash-loader-accent, var(--primary));
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+    display: block;
+    z-index: 2;
+  }
+
+  .screen-overlay .loading-text {
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    margin: 16px auto 0 auto;
+    color: var(--splash-text);
+    z-index: 2;
+    text-transform: uppercase;
+    text-align: center;
+    max-width: 85%;
+    display: block;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .offline-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    max-width: 320px;
+    z-index: 2;
+    box-shadow: var(--shadow-md);
+  }
+</style>
+
+  <script>
+  // --- Application Version Stamp ---
+  window.__FF_VERSION__ = "v3.0.0";
+  window.__FF_STORAGE_PREFIX__ = "leagues_pwa_";
+  console.log("%c[FixtureFlow · Player]%c Running version " + window.__FF_VERSION__, "background: #059669; color: #ffffff; border: 1px solid #10b981; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+
+  // --- Central Leagues & CourtFlow Club Registry ---
+  /**
+ * Fixture Flow - Central Leagues Club Registry
+ * 
+ * Maps human-readable club slugs to Google Apps Script Web App Host IDs.
+ * Enables clean PWA URLs (e.g. /leagues/player/?c=mount-pleasant).
+ */
+
+const CLUBS_REGISTRY = {
+  "mount-pleasant": {
+    name: "Mount Pleasant Badminton Club",
+    shortName: "MP",
+    aliases: ["mp", "mpbc", "mountpleasant", "mount_pleasant"],
+    hostId: "AKfycbwytXb33k1qFxppC6VF_HJhHfg9TrQ4vUNSWFFrzlN-_-OMfaA1lSfjC5YUt-8viMvo",
+    courtflowHostId: "AKfycbx_LtOWLocI6-J_apimSsoVrHSS3Mc419OnGnYlnz5e6nf4gCYacOMbxcrpILCDdjRyfg"
+  },
+  "dev": {
+    name: "Development / Staging",
+    shortName: "Dev",
+    aliases: ["test", "local"],
+    hostId: "AKfycbyBNsvDMn81v0WQoYO1Hm0xt6t6wUDH-iBvnwH0RgEVzi_magEqZxtO_Nk4aZUiQ6ys6Q",
+    courtflowHostId: "AKfycbyYadCqcW4iMp5QZcsTu74lhJJz8zL_ba65SKxMWZ7ycpaDsWBYYCbm2ocqH_gsCXl1"
+  }
+};
+
+/**
+ * Resolves a URL parameter (slug, alias, or raw hash) to a Leagues club record.
+ * 
+ * @param {string} input The query parameter value (e.g. "mount-pleasant", "mp", "AKfy...").
+ * @returns {{ name: string, shortName: string, hostId: string, slug: string } | null} The resolved club or null if invalid.
+ */
+function resolveClubHost(input) {
+  if (!input || typeof input !== 'string') return null;
+  const normalized = input.trim().toLowerCase();
+
+  // 1. Direct slug match
+  if (CLUBS_REGISTRY[normalized]) {
+    return {
+      slug: normalized,
+      name: CLUBS_REGISTRY[normalized].name,
+      shortName: CLUBS_REGISTRY[normalized].shortName || normalized.toUpperCase(),
+      hostId: CLUBS_REGISTRY[normalized].hostId
+    };
+  }
+
+  // 2. Alias match
+  for (const [slug, club] of Object.entries(CLUBS_REGISTRY)) {
+    if (club.aliases && club.aliases.includes(normalized)) {
+      return {
+        slug: slug,
+        name: club.name,
+        shortName: club.shortName || slug.toUpperCase(),
+        hostId: club.hostId
+      };
+    }
+  }
+
+  // 3. Fallback: Raw Google Apps Script deployment hash (strictly validated format)
+  const trimmed = input.trim();
+  if (/^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmed)) {
+    return {
+      slug: 'custom',
+      name: 'Custom Club',
+      shortName: 'Club',
+      hostId: trimmed
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Resolves a URL parameter (slug, alias, or raw hash) to a CourtFlow club record.
+ * 
+ * @param {string} input The query parameter value (e.g. "mount-pleasant", "mp", "AKfy...").
+ * @returns {{ name: string, shortName: string, hostId: string, slug: string } | null} The resolved club or null if invalid.
+ */
+function resolveCourtflowHost(input) {
+  if (!input || typeof input !== 'string') return null;
+  const normalized = input.trim().toLowerCase();
+
+  // 1. Direct slug match
+  if (CLUBS_REGISTRY[normalized] && CLUBS_REGISTRY[normalized].courtflowHostId) {
+    return {
+      slug: normalized,
+      name: CLUBS_REGISTRY[normalized].name,
+      shortName: CLUBS_REGISTRY[normalized].shortName || normalized.toUpperCase(),
+      hostId: CLUBS_REGISTRY[normalized].courtflowHostId
+    };
+  }
+
+  // 2. Alias match
+  for (const [slug, club] of Object.entries(CLUBS_REGISTRY)) {
+    if (club.aliases && club.aliases.includes(normalized) && club.courtflowHostId) {
+      return {
+        slug: slug,
+        name: club.name,
+        shortName: club.shortName || slug.toUpperCase(),
+        hostId: club.courtflowHostId
+      };
+    }
+  }
+
+  // 3. Fallback: Raw Google Apps Script deployment hash (strictly validated format)
+  const trimmedCf = input.trim();
+  if (/^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmedCf)) {
+    return {
+      slug: 'custom',
+      name: 'Custom Club',
+      shortName: 'Club',
+      hostId: trimmedCf
+    };
+  }
+
+  return null;
+}
+
+
+  // --- Google Apps Script Headless PWA API Mock Wrapper ---
+  let _portalViewReported = false;
+
+  function _detectClientDevice() {
+    const ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
+    if (/Tablet|iPad/i.test(ua)) return 'tablet';
+    if (/Mobi|Android|iPhone|iPod/i.test(ua)) return 'mobile';
+    return 'desktop';
+  }
+
+  function createRunner(successHandler, failureHandler) {
+    const handlers = {
+      withSuccessHandler(fn) {
+        return createRunner(fn, failureHandler);
+      },
+      withFailureHandler(fn) {
+        return createRunner(successHandler, fn);
+      },
+      withUserObject(obj) {
+        return this;
+      }
+    };
+    return new Proxy(handlers, {
+      get(target, propKey) {
+        if (propKey in target) {
+          return target[propKey];
+        }
+        return function(...args) {
+          callHostApi(propKey, args, successHandler, failureHandler);
+        };
+      }
+    });
+  }
+
+  const google = window.google = {
+    script: {
+      run: createRunner(null, null)
+    }
+  };
+
+  function callHostApi(action, args, successHandler, failureHandler) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const rawClubParam = urlParams.get('c') || urlParams.get('club') || '';
+    const rawHostParam = urlParams.get('h');
+    let hostId = null;
+    let clubName = '';
+    let clubShort = '';
+
+    // Format is not authorisation. /^AKfy[a-zA-Z0-9_-]{20,}$/ is satisfied by any
+    // string of the right shape, so honouring one on trust lets a link to this
+    // genuine origin repoint the app at someone else's Apps Script and collect the
+    // PINs typed into it. Only a host the compiled registry vouches for is trusted.
+    function isRegisteredHost(candidate) {
+      if (!candidate || !/^AKfy[a-zA-Z0-9_-]{20,}$/.test(candidate)) return false;
+      if (typeof CLUBS_REGISTRY !== 'object' || !CLUBS_REGISTRY) return false;
+      return Object.keys(CLUBS_REGISTRY).some(function(slug) {
+        return CLUBS_REGISTRY[slug] && CLUBS_REGISTRY[slug].hostId === candidate;
+      });
+    }
+
+    // Unregistered hosts are a testing affordance, not a feature. DEV honours them
+    // for the current page load only; PROD refuses them outright.
+    const ALLOW_UNREGISTERED_HOSTS = false;
+
+    if (rawClubParam && typeof resolveClubHost === 'function') {
+      const resolved = resolveClubHost(rawClubParam);
+      if (resolved && resolved.hostId) {
+        // resolveClubHost falls back to slug 'custom' for any well-formed hash, so a
+        // resolved result is not by itself evidence that the club is known.
+        if (isRegisteredHost(resolved.hostId)) {
+          hostId = resolved.hostId;
+          clubName = resolved.name;
+          clubShort = resolved.shortName || '';
+          if (resolved.slug !== 'custom') {
+            localStorage.setItem('leagues_pwa_host_id', hostId);
+            localStorage.setItem('leagues_pwa_club_name', clubName);
+            localStorage.setItem('leagues_pwa_club_short', clubShort);
+            localStorage.setItem('leagues_pwa_club_slug', resolved.slug);
+          }
+        } else if (ALLOW_UNREGISTERED_HOSTS) {
+          hostId = resolved.hostId; // session only, never persisted
+          clubName = resolved.name;
+          clubShort = resolved.shortName || '';
+          console.warn("[FixtureFlow · Testing] Session-only connection to an unregistered club:", rawClubParam);
+        } else {
+          console.warn("[Security] Rejected club parameter that is not in the club registry (?c=):", rawClubParam);
+        }
+      }
+    }
+
+    if (rawHostParam) {
+      const trimmedHost = rawHostParam.trim();
+      if (isRegisteredHost(trimmedHost)) {
+        // Registered, but still treated as a testing override: not persisted, so it
+        // does not silently become the club this device talks to from now on.
+        hostId = trimmedHost;
+      } else if (ALLOW_UNREGISTERED_HOSTS && /^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmedHost)) {
+        hostId = trimmedHost;
+        console.warn("%c[FixtureFlow · Testing]%c Connecting via Custom Testing Host ID: " + hostId, "background: #d97706; color: #ffffff; padding: 2px 6px; border-radius: 3px; font-weight: 600;", "color: inherit; margin-left: 4px;");
+      } else {
+        const invalidHostErr = "Configuration Error: host parameter is not a registered deployment.";
+        console.error(invalidHostErr);
+        if (failureHandler) failureHandler(new Error(invalidHostErr));
+        return;
+      }
+    }
+
+    if (!hostId) {
+      const storedHostId = localStorage.getItem('leagues_pwa_host_id');
+      if (isRegisteredHost(storedHostId)) {
+        hostId = storedHostId;
+        clubName = localStorage.getItem('leagues_pwa_club_name') || '';
+        clubShort = localStorage.getItem('leagues_pwa_club_short') || '';
+      } else if (storedHostId) {
+        // A client poisoned by an older build must not stay poisoned.
+        console.warn("[Security] Discarding a stored host that is not in the club registry.");
+        localStorage.removeItem('leagues_pwa_host_id');
+        localStorage.removeItem('leagues_pwa_club_slug');
+      }
+    }
+
+    
+    // PROD Environment Default Resolution (Mount Pleasant fallback)
+    if (!rawClubParam && !hostId && typeof resolveClubHost === 'function') {
+      const prodResolved = resolveClubHost('mount-pleasant');
+      if (prodResolved) {
+        hostId = prodResolved.hostId;
+        clubName = prodResolved.name;
+        clubShort = prodResolved.shortName || '';
+        localStorage.setItem('leagues_pwa_host_id', hostId);
+        localStorage.setItem('leagues_pwa_club_name', clubName);
+        localStorage.setItem('leagues_pwa_club_short', clubShort);
+        localStorage.setItem('leagues_pwa_club_slug', prodResolved.slug);
+      }
+    }
+    
+
+    if (!hostId) {
+      const errorMsg = "Configuration Error: Missing host ID or club parameter (?c=... or ?h=...)";
+      console.error(errorMsg);
+      if (failureHandler) failureHandler(new Error(errorMsg));
+      return;
+    }
+
+    const payload = {};
+    if (action === "getPortalData" || action === "authPlayer") {
+      payload.pin = args[0];
+      payload.token = args[0];
+    } else if (action === "submitPlayerAvailability" || action === "submitAvailability") {
+      payload.pin = args[0];
+      payload.token = args[0];
+      payload.payload = args[1];
+    } else if (action === "getCaptainDashboardData" || action === "authCaptain") {
+      payload.pin = args[0];
+      payload.token = args[0];
+      payload.settings = args[1];
+    } else if (action === "validateOpponentPin" || action === "authOpponent") {
+      payload.pin = args[0];
+    } else if (action === "getClubPortalBootstrapData") {
+      payload.token = args[0] || (typeof activeSessionToken !== 'undefined' ? activeSessionToken : ((typeof getPortalStorage === 'function' ? getPortalStorage('club_session_token') : null) || localStorage.getItem('leagues_pwa_club_session_token') || localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN')));
+      // Carries the same meaning as it does for getClubFixtures, and is resolved
+      // by the same server-side rule, because the bootstrap response now also
+      // carries that club's fixtures. Sending it saves the dashboard a second
+      // round trip, and each round trip is an independent chance of hitting
+      // Google's Web App response-pickup stall.
+      payload.clubName = args[1];
+    } else if (action === "getClubFixtures") {
+      payload.clubName = args[0];
+      payload.token = args[1] || (typeof activeSessionToken !== 'undefined' ? activeSessionToken : ((typeof getPortalStorage === 'function' ? getPortalStorage('club_session_token') : null) || localStorage.getItem('leagues_pwa_club_session_token') || localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN')));
+    } else if (action === "getTimeSlotsForDate") {
+      payload.dateStr = args[0];
+      payload.settings = args[1];
+    } else if (action === "findAvailableDatesForTeam") {
+      payload.teamName = args[0];
+      payload.isHome = true;
+      payload.excludeRowIndex = (args[1] !== undefined && typeof args[1] === 'number') ? args[1] : -1;
+    } else if (action === "findAvailableDatesForAwayMatch") {
+      payload.teamName = args[0];
+      payload.isHome = false;
+      payload.excludeRowIndex = (args[1] !== undefined && typeof args[1] === 'number') ? args[1] : -1;
+    } else if (action === "getAvailableDates") {
+      payload.teamName = args[0];
+      payload.isHome = args[1] !== undefined ? args[1] : true;
+      payload.excludeRowIndex = args[2] !== undefined ? args[2] : -1;
+    } else if (action === "confirmBooking") {
+      payload.booking = args[0];
+      payload.proposal = args[0];
+      payload.isAway = args[0] && args[0].isAway;
+    } else if (action === "submitBookingRequest") {
+      payload.booking = args[0];
+      payload.settings = args[1];
+    } else if (action === "submitAwayBookingRequest") {
+      payload.proposal = args[0];
+      payload.settings = args[1];
+    } else if (action === "logRescheduleRequest") {
+      payload.match = args[0];
+      payload.reason = args[1];
+      payload.requestorType = args[2];
+      payload.requestorName = args[3];
+      payload.selectedDates = args[4];
+      payload.customMessage = args[5];
+      payload.coordinatorEmails = args[6];
+    } else if (action === "processCaptainRescheduleReview") {
+      payload.match = args[0];
+      payload.action = args[1];
+      payload.justification = args[2];
+      payload.selectedDate = args[3];
+      payload.requestorType = args[4];
+    } else if (action === "getPublicClubMetadata") {
+      // Zero params needed
+    } else {
+      if (args && args.length === 1 && typeof args[0] === 'object') {
+        Object.assign(payload, args[0]);
+      } else {
+        payload.args = args;
+      }
+    }
+
+    // Attach this portal's session token to any request that does not already
+    // carry a credential. The library requires a verified session for every
+    // action beyond the pre-authentication tier once the host marks a request
+    // as originating from the public web, and doing it here covers every call
+    // site at once rather than each of them individually.
+    if (!payload.token) {
+      var carriedSession = null;
+      if (typeof getPortalStorage === 'function') {
+        carriedSession = getPortalStorage('player_session_token');
+      }
+      if (!carriedSession) {
+        carriedSession = localStorage.getItem('leagues_pwa_player_session_token')
+          || localStorage.getItem('ff_player_session_token')
+          || localStorage.getItem('FF_SESSION_TOKEN');
+      }
+      if (carriedSession) {
+        payload.token = carriedSession;
+      }
+    }
+
+    // Actions that change something. A retried read costs a little time; a
+    // retried write used to cost a duplicate booking, a second rate-limit slot
+    // and a second email to the opposing club.
+    const FF_WRITE_ACTIONS = [
+      'confirmBooking',
+      'submitBookingRequest',
+      'submitAwayBookingRequest',
+      'submitAvailability',
+      'submitPlayerAvailability',
+      'logRescheduleRequest',
+      'processCaptainRescheduleReview'
+    ];
+    const isWriteAction = FF_WRITE_ACTIONS.indexOf(action) !== -1;
+
+    // One id per user intent, deliberately generated HERE rather than inside
+    // executeFetch: the envelope is built once and closed over by every
+    // attempt, so all retries of this click - ours and the host's - carry the
+    // same id and the library replays the first result instead of writing
+    // again. Regenerating per attempt would silently disable the guard.
+    if (isWriteAction) {
+      payload.requestId = (window.crypto && typeof window.crypto.randomUUID === 'function')
+        ? window.crypto.randomUUID()
+        : (Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12));
+    }
+
+    const requestEnvelope = {
+      action: action,
+      payload: payload
+    };
+
+    let pendingClientView = null;
+    if (!_portalViewReported) {
+      pendingClientView = {
+        portal: 'player',
+        device: _detectClientDevice()
+      };
+      requestEnvelope.clientView = pendingClientView;
+    }
+
+    const targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
+
+    // Reads and writes fail differently, so they wait differently.
+    //
+    // These values are the OUTER half of an ordering invariant. The host gives
+    // up on the Central Library first (CONFIG.WRITE_ACTIONS decides which
+    // budget it uses: 30s reads, 40s writes, in ddlc-host/Delegate_Library.js),
+    // so by the time these timeouts fire the host has already returned. They
+    // are a backstop for a host that never answers at all, not the primary
+    // deadline. tests/contracts/retry_budget.test.js enforces the ordering.
+    //
+    // Attempts are 3 for reads and 2 for writes. While Host->Library UrlFetchApp
+    // pickup stalls remain possible (~30-50% during bad spells), 2 read attempts
+    // caused two consecutive stalls on login to hard-fail after 42s and force a
+    // manual refresh. With 3 read attempts, a double-stall streak recovers on
+    // Attempt #3 automatically.
+    const FF_TIMEOUT_MS = isWriteAction ? 50000 : 40000;
+    const FF_MAX_ATTEMPTS = isWriteAction ? 2 : 3;
+
+    function executeFetch(attemptNumber) {
+      const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      const timeoutId = controller ? setTimeout(() => controller.abort(), FF_TIMEOUT_MS) : null;
+
+      const fetchOptions = {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain"
+        },
+        body: JSON.stringify(requestEnvelope)
+      };
+      if (controller) {
+        fetchOptions.signal = controller.signal;
+      }
+
+      fetch(targetUrl, fetchOptions)
+      .then(response => {
+        if (timeoutId) clearTimeout(timeoutId);
+        if (pendingClientView) {
+          _portalViewReported = true;
+        }
+        return response.text().then(text => {
+          let result;
+          try {
+            result = JSON.parse(text);
+          } catch (parseErr) {
+            if (text.trim().startsWith('<')) {
+              // Google served an HTML page where JSON was expected. That means
+              // the club host script failed, timed out, or its response could
+              // not be retrieved - it is not a parsing problem, and it is not
+              // automatically a cold start. Name the real status: labelling
+              // every one of these a "cold-start" is precisely how a hard
+              // transport fault stayed hidden behind a reassuring badge.
+              const htmlErr = new Error('Server returned HTML instead of JSON (HTTP ' + response.status + '). The club host script failed or took too long to respond.');
+              htmlErr.httpStatus = response.status;
+              // Worth exactly one retry whatever the status: a genuine Apps
+              // Script cold start arrives as HTTP 200 carrying a login page,
+              // so status alone cannot separate it from a hard failure. The
+              // retry policy is therefore unchanged - only the diagnosis is.
+              htmlErr.retryable = true;
+              throw htmlErr;
+            }
+            throw new Error('Invalid JSON response (HTTP ' + response.status + '): ' + text.slice(0, 100));
+          }
+          if (!response.ok) {
+            const httpErr = new Error('API Error: HTTP status ' + response.status);
+            httpErr.httpStatus = response.status;
+            httpErr.retryable = (response.status >= 500 || response.status === 429);
+            throw httpErr;
+          }
+          return result;
+        });
+      })
+      .then(result => {
+        if (!result.success) {
+          if (result.code === 'AUTH_REQUIRED' || (result.error && (result.error.includes('Unauthorized') || result.error.includes('AUTH_REQUIRED')))) {
+            console.warn('[FixtureFlow · Auth] Received AUTH_REQUIRED. Evicting session and resetting login view.');
+            if (typeof handleAuthRequired_ === 'function') {
+              handleAuthRequired_();
+            }
+          }
+          const serverErr = new Error(result.error || "Unknown server error");
+          // The host now relays the library's code. Keep it on the error so the
+          // catch below can tell "already running, wait for it" apart from
+          // "this genuinely failed".
+          if (result.code) {
+            serverErr.serverCode = result.code;
+          }
+          throw serverErr;
+        }
+        if (successHandler) {
+          successHandler(result.data !== undefined ? result.data : result);
+        }
+      })
+      .catch(err => {
+        if (timeoutId) clearTimeout(timeoutId);
+        const isAbort = err && err.name === 'AbortError';
+        // Retryability is decided by the status the server actually returned,
+        // not by searching our own error text for a word we chose ourselves.
+        // The previous version matched 'cold-start' - a phrase it had just
+        // attached to *every* HTML response - so a permanent transport fault
+        // was indistinguishable from a genuine slow start, and got the same
+        // soothing blue badge.
+        const isTransient = isAbort || (err && (
+          err.retryable === true ||
+          err.serverCode === 'HOST_RETRY_EXHAUSTED' ||
+          (err.message && (
+            err.message.includes('[HostDelegate] Gave up') ||
+            err.message.includes('Failed to fetch') ||
+            err.message.includes('NetworkError')
+          ))
+        ));
+
+        // The server has this exact requestId running already - almost always
+        // our own earlier attempt, whose response was lost in transit rather
+        // than never computed. Waiting and re-sending the SAME id collects the
+        // stored result instead of reporting a failure for work that succeeded.
+        const isDuplicateInFlight = err && err.serverCode === 'DUPLICATE_IN_FLIGHT';
+        if (isDuplicateInFlight && attemptNumber < FF_MAX_ATTEMPTS + 1) {
+          console.warn(`%c[FixtureFlow · Network]%c ${action} is already being processed. Collecting the result in 4s...`, "background: #7c3aed; color: #ffffff; padding: 2px 6px; border-radius: 3px; font-weight: 600;", "color: inherit; margin-left: 4px;");
+          setTimeout(() => {
+            executeFetch(attemptNumber + 1);
+          }, 4000);
+          return;
+        }
+
+        if (attemptNumber < FF_MAX_ATTEMPTS && isTransient) {
+          const retryReason = isAbort
+            ? 'timed out after ' + Math.round(FF_TIMEOUT_MS / 1000) + 's'
+            : (err && err.httpStatus ? 'HTTP ' + err.httpStatus : ((err && err.message) ? err.message.slice(0, 60) : 'unknown cause'));
+          // Widen the gap between attempts rather than hammering at a fixed
+          // 1.5s. The faults being retried here cluster in time, so a second
+          // immediate attempt is the one most likely to land in the same bad
+          // patch as the first.
+          const backoffMs = 1500 * attemptNumber;
+          console.warn(`%c[FixtureFlow · Network]%c ${action} failed (${retryReason}). Retrying in ${backoffMs / 1000}s (attempt ${attemptNumber + 1}/${FF_MAX_ATTEMPTS})...`, "background: #3b82f6; color: #ffffff; padding: 2px 6px; border-radius: 3px; font-weight: 600;", "color: inherit; margin-left: 4px;");
+          setTimeout(() => {
+            executeFetch(attemptNumber + 1);
+          }, backoffMs);
+          return;
+        }
+
+        const friendlyErr = isAbort
+          ? new Error('Request timed out (' + Math.round(FF_TIMEOUT_MS / 1000) + 's). Google Apps Script took too long to respond. Please try again.')
+          : err;
+        console.error(`API Call failed (${action}):`, friendlyErr);
+        if (failureHandler) {
+          failureHandler(friendlyErr);
+        }
+      });
+    }
+
+    executeFetch(1);
+  }
+
+  /**
+   * Formats a date string (YYYY-MM-DD) or Date object into "Mon, 27 Oct" format.
+   * @param {string|Date} dateInput
+   * @return {string}
+   */
+  function formatPortalDate(dateInput) {
+    if (!dateInput) return '[Date]';
+    let d;
+    if (typeof dateInput === 'string') {
+      const parts = dateInput.split('-');
+      if (parts.length === 3) {
+        d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      } else {
+        d = new Date(dateInput); // Fallback for ISO or other strings
+      }
+    } else {
+      d = dateInput;
+    }
+    
+    if (isNaN(d.getTime())) return dateInput; // Return raw if invalid
+    
+    const dayName = d.toLocaleString('default', { weekday: 'short' });
+    const dayNum = d.getDate();
+    const monthName = d.toLocaleString('default', { month: 'short' });
+    return dayName + ', ' + dayNum + ' ' + monthName;
+  }
+
+  /**
+   * Escapes HTML special characters to prevent XSS.
+   * @param {string} text
+   * @return {string}
+   */
+  function escapeHtml(text) {
+    if (text === undefined || text === null) return '';
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    };
+    return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+  }
+
+  /**
+   * Validates and cleans a list of comma-separated email addresses.
+   * @param {string} rawEmailString
+   * @return {{isValid: boolean, cleaned: string}}
+   */
+  function validateAndCleanEmails(rawEmailString) {
+    if (!rawEmailString) return { isValid: false, cleaned: '' };
+    
+    const emailArray = rawEmailString.split(/[,;]+/).map(e => e.trim()).filter(e => e.length > 0);
+    if (emailArray.length === 0) return { isValid: false, cleaned: '' };
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    for (const email of emailArray) {
+      if (!emailRegex.test(email)) {
+        return { isValid: false, cleaned: '' };
+      }
+    }
+    
+    return { isValid: true, cleaned: emailArray.join(',') };
+  }
+
+  /**
+   * [PURE] Converts a local or international phone number into a valid WhatsApp wa.me URL.
+   * Assumes Irish (+353) numbers if starting with '0'.
+   *
+   * @param {string} phoneStr
+   * @returns {string}
+   */
+  function formatWhatsAppLink(phoneStr) {
+    if (!phoneStr) return '';
+    let cleaned = String(phoneStr).replace(/[^\d+]/g, '');
+    if (cleaned.startsWith('0')) {
+      cleaned = '353' + cleaned.substring(1);
+    } else if (cleaned.startsWith('+')) {
+      cleaned = cleaned.substring(1);
+    }
+    return cleaned ? ('https://wa.me/' + cleaned) : '';
+  }
+
+  /**
+   * [PURE] Extracts a friendly first name from a person's name string,
+   * gracefully handling institutional roles and titles on the client.
+   *
+   * @param {string} name - The raw name string from the sheet or payload.
+   * @param {string} [fallback='Match Secretary'] - The institutional fallback.
+   * @returns {string} The friendly first name or clean fallback.
+   */
+  function formatFriendlyName(name, fallback = 'Match Secretary') {
+    const cleanFallback = String(fallback || 'Match Secretary').trim();
+    if (!name) return cleanFallback;
+    let clean = String(name).trim();
+    if (!clean || clean.toUpperCase() === 'UNKNOWN') return cleanFallback;
+
+    // Strip leading honorifics / title prefixes (Captain, Match Sec, Dr., etc.)
+    clean = clean.replace(/^(Captain|Capt\.?|Match Secretary|Match Sec\.?|Secretary|Sec\.?|Dr\.?|Mr\.?|Ms\.?|Mrs\.?)\s+/i, '').trim();
+    if (!clean) return cleanFallback;
+
+    const upper = clean.toUpperCase();
+    const EXACT_GENERIC_TITLES = [
+      'MATCH SECRETARY', 'MATCH SEC', 'SECRETARY', 'SEC', 'CAPTAIN', 
+      'TEAM CAPTAIN', 'SHUTTLE MANAGER', 'MANAGER', 'UNKNOWN', 'CLUB', 
+      'ADMIN', 'THE MATCH SECRETARY', 'PRIMARY MATCH SECRETARY', 
+      'SECONDARY MATCH SECRETARY', 'OPPONENT', 'GUEST', 'N/A', 'SYSTEM'
+    ];
+    
+    if (EXACT_GENERIC_TITLES.includes(upper) || /\b(MATCH SECRETARY|MATCH SEC|CAPTAIN|SHUTTLE MANAGER)\b/i.test(clean)) {
+      if (upper.includes(' SEC') && !upper.includes('SECRETARY')) {
+        return clean.replace(/\bSec\b/i, 'Secretary');
+      }
+      return cleanFallback;
+    }
+
+    return clean.split(/\s+/)[0];
+  }
+
+  let _loadingOverlayTimeout = null;
+
+  /**
+   * Displays the fullscreen loading overlay with a custom message and safety timeout fallback.
+   * @param {string} [message='Processing...']
+   * @param {number} [timeoutSeconds=15]
+   */
+  function showFullPageLoading(message, timeoutSeconds = 15) {
+    const overlay = document.getElementById('fullscreen-loading');
+    const overlayText = document.getElementById('fullscreen-loading-text');
+    if (overlayText) overlayText.textContent = message || 'Processing...';
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      overlay.style.display = 'flex';
+    }
+    if (_loadingOverlayTimeout) clearTimeout(_loadingOverlayTimeout);
+    if (timeoutSeconds > 0) {
+      _loadingOverlayTimeout = setTimeout(() => {
+        hideFullPageLoading();
+      }, timeoutSeconds * 1000);
+    }
+  }
+
+  /**
+   * Hides the fullscreen loading overlay and clears safety timeouts.
+   */
+  function hideFullPageLoading() {
+    if (_loadingOverlayTimeout) {
+      clearTimeout(_loadingOverlayTimeout);
+      _loadingOverlayTimeout = null;
+    }
+    const overlay = document.getElementById('fullscreen-loading');
+    if (overlay) {
+      overlay.classList.add('hidden');
+      overlay.style.display = 'none';
+    }
+  }
+
+  /**
+   * Updates browser tab title and mobile home screen bookmark title according to environment.
+   * Format:
+   * - DEV:  [DEV] ${roleTitle} · FixtureFlow
+   * - PROD: ${roleTitle} Portal · ${clubName || 'FixtureFlow'}
+   * 
+   * @param {string} [clubName]
+   * @param {string} [portalRole]
+   * @param {string} [clubSlug]
+   * @private
+   */
+  function updatePortalTabTitle_(clubName, portalRole, clubSlug) {
+    let role = portalRole;
+    if (!role) {
+      if (document.title.includes('Player')) role = 'Player';
+      else if (document.title.includes('Captain')) role = 'Captain';
+      else if (document.title.includes('Opponent') || document.title.includes('Club')) role = 'Club Admin';
+      else role = 'Portal';
+    }
+    const roleTitle = (role === 'Club' || role === 'Opponent') ? 'Club Admin' : role;
+
+    let slug = clubSlug;
+    if (slug === undefined && typeof window !== 'undefined' && window.location && window.location.search) {
+      if (typeof URLSearchParams !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        slug = urlParams.get('c') || urlParams.get('club') || '';
+      } else {
+        const match = window.location.search.match(/[?&](?:c|club)=([^&#]*)/i);
+        slug = match ? decodeURIComponent(match[1]) : '';
+      }
+    }
+    slug = slug || '';
+
+    const isDev = (window.location && window.location.pathname && window.location.pathname.includes('/dev/')) || 
+                  ['dev', 'test', 'local'].includes(slug.toLowerCase()) ||
+                  (typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging')));
+
+    let mobileEnv = '';
+    if (isDev) {
+      document.title = `[DEV] ${roleTitle} · FixtureFlow`;
+      mobileEnv = '[DEV] ';
+    } else {
+      const brandAnchor = (clubName && clubName !== 'Host Club') ? clubName : 'FixtureFlow';
+      document.title = `${roleTitle} Portal · ${brandAnchor}`;
+    }
+
+    const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if (appleTitleMeta) {
+      appleTitleMeta.setAttribute('content', `${mobileEnv}FF ${roleTitle}`);
+    }
+  }
+
+  /**
+   * Updates the pre-JS / connecting splash screen text dynamically.
+   * Format:
+   * - DEV:  CONNECTING TO [DEV] ${upperRole} · FIXTUREFLOW...
+   * - PROD: CONNECTING TO ${upperRole} · ${(clubName || 'FIXTUREFLOW').toUpperCase()}...
+   * 
+   * @param {string} [portalRole]
+   * @param {string} [clubName]
+   * @param {string} [clubSlug]
+   * @private
+   */
+  function updatePortalSplashText_(portalRole, clubName, clubSlug) {
+    const statusText = document.getElementById('status-text');
+    if (!statusText) return;
+
+    let role = portalRole;
+    if (!role) {
+      if (document.title.includes('Player')) role = 'Player';
+      else if (document.title.includes('Captain')) role = 'Captain';
+      else if (document.title.includes('Opponent') || document.title.includes('Club')) role = 'Club Admin';
+      else role = 'Portal';
+    }
+    const roleTitle = (role === 'Club' || role === 'Opponent') ? 'Club Admin' : role;
+    const upperRole = roleTitle.toUpperCase();
+
+    let slug = clubSlug;
+    if (slug === undefined && typeof window !== 'undefined' && window.location && window.location.search) {
+      if (typeof URLSearchParams !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        slug = urlParams.get('c') || urlParams.get('club') || '';
+      } else {
+        const match = window.location.search.match(/[?&](?:c|club)=([^&#]*)/i);
+        slug = match ? decodeURIComponent(match[1]) : '';
+      }
+    }
+    slug = slug || '';
+
+    const isDev = (window.location && window.location.pathname && window.location.pathname.includes('/dev/')) || 
+                  ['dev', 'test', 'local'].includes(slug.toLowerCase()) ||
+                  (typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging')));
+
+    if (isDev) {
+      statusText.textContent = `CONNECTING TO [DEV] ${upperRole} · FIXTUREFLOW...`;
+    } else {
+      let targetClub = 'FIXTUREFLOW';
+      if (clubName && clubName !== 'Host Club') {
+        targetClub = clubName.toUpperCase().trim();
+      }
+      statusText.textContent = `CONNECTING TO ${upperRole} · ${targetClub}...`;
+    }
+  }
+
+  // --- Early Splash & Title Initialization (Zero-Delay Paint) ---
+  (function initPortalBrandingEarly_() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const rawClubParam = urlParams.get('c') || urlParams.get('club') || '';
+      const savedClubName = typeof getPortalStorage === 'function' ? getPortalStorage('club_name') : null;
+
+      const cfgEl = document.getElementById('ff-config');
+      const cfgClubName = cfgEl && cfgEl.dataset && cfgEl.dataset.clubName ? cfgEl.dataset.clubName : '';
+      let initialClubName = cfgClubName || savedClubName || '';
+      const slug = rawClubParam || '';
+      if (typeof resolveClubHost === 'function' && slug && !cfgClubName) {
+        const resolved = resolveClubHost(slug);
+        if (resolved && resolved.name) {
+          initialClubName = resolved.name;
+        }
+      }
+
+      let role = 'Portal';
+      const path = (window.location.pathname || '').toLowerCase();
+      if (path.includes('player')) role = 'Player';
+      else if (path.includes('captain')) role = 'Captain';
+      else if (path.includes('club')) role = 'Club Admin';
+
+      updatePortalTabTitle_(initialClubName, role, slug);
+
+      const applySplash = () => updatePortalSplashText_(role, initialClubName, slug);
+      if (document.getElementById('status-text')) {
+        applySplash();
+      } else if (typeof document.addEventListener === 'function') {
+        document.addEventListener('DOMContentLoaded', applySplash);
+      }
+    } catch (e) {
+      console.warn('[PWA] Early branding init error:', e);
+    }
+  })();
+
+  /**
+   * Hydrates club branding elements across all portals from public club metadata.
+   * @param {{ clubName?: string, clubLogoUrl?: string, season?: string, seasonShort?: string }} metadata
+   * @param {string} [portalRole] Optional portal role ('Player', 'Captain', 'Opponent')
+   */
+  function hydrateClubBranding(metadata, portalRole) {
+    if (!metadata) return;
+    const name = metadata.clubName || 'Host Club';
+    
+    // 1. Central In-Memory State
+    if (typeof window !== 'undefined') {
+      window.FF_STATE = window.FF_STATE || {};
+      if (metadata.clubName) window.FF_STATE.clubName = metadata.clubName;
+      if (metadata.clubLogoUrl !== undefined) window.FF_STATE.clubLogoUrl = metadata.clubLogoUrl;
+      if (metadata.season) window.FF_STATE.season = metadata.season;
+      if (metadata.seasonShort) window.FF_STATE.seasonShort = metadata.seasonShort;
+      if (metadata.email) window.FF_STATE.email = metadata.email;
+
+      // Safe window attachment for legacy runtime consumers
+      if (metadata.clubName) {
+        window.MAIN_CLUB_NAME = metadata.clubName;
+        window.ORIGINAL_HOST_CLUB_NAME = metadata.clubName;
+      }
+      if (metadata.clubLogoUrl !== undefined) {
+        window.ORIGINAL_HOST_LOGO_URL = metadata.clubLogoUrl;
+      }
+      if (metadata.email) {
+        window.MAIN_CLUB_EMAIL = metadata.email;
+      }
+    }
+
+    // 2. Synchronize legacy runtime globals defensively
+    if (metadata.clubName) {
+      try {
+        if (typeof MAIN_CLUB_NAME !== 'undefined') MAIN_CLUB_NAME = metadata.clubName;
+      } catch (e) {}
+      try {
+        if (typeof ORIGINAL_HOST_CLUB_NAME !== 'undefined') ORIGINAL_HOST_CLUB_NAME = metadata.clubName;
+      } catch (e) {}
+    }
+    if (metadata.clubLogoUrl) {
+      try {
+        if (typeof ORIGINAL_HOST_LOGO_URL !== 'undefined') {
+          ORIGINAL_HOST_LOGO_URL = metadata.clubLogoUrl;
+        }
+      } catch (e) {}
+    }
+    if (metadata.email) {
+      try {
+        if (typeof MAIN_CLUB_EMAIL !== 'undefined') MAIN_CLUB_EMAIL = metadata.email;
+      } catch (e) {}
+    }
+
+    // 3. Update localStorage cache with live authoritative club name
+    if (typeof setPortalStorage === 'function' && metadata.clubName) {
+      try {
+        setPortalStorage('club_name', metadata.clubName);
+      } catch (e) {}
+    }
+
+    // Update browser tab and mobile title
+    updatePortalTabTitle_(name, portalRole);
+    updatePortalSplashText_(portalRole, name);
+    
+    // Update all elements with class .portal-header-club
+    document.querySelectorAll('.portal-header-club').forEach(el => {
+      el.textContent = name;
+    });
+
+    // Update login title elements if present
+    const viewLogin = document.getElementById('view-login');
+    const loginTitle = document.getElementById('login-club-title');
+    const loginTitleLarge = document.getElementById('login-club-title-large');
+    const logoContainer = document.getElementById('login-club-logo-container');
+    const loginLogo = document.getElementById('login-club-logo');
+
+    const fallbackLogo = (typeof ORIGINAL_HOST_LOGO_URL !== 'undefined' && ORIGINAL_HOST_LOGO_URL) ? ORIGINAL_HOST_LOGO_URL : '';
+    const logoUrl = metadata.clubLogoUrl !== undefined ? metadata.clubLogoUrl : fallbackLogo;
+
+    if (logoUrl) {
+      if (viewLogin) {
+        viewLogin.classList.remove('login-no-logo');
+        viewLogin.classList.add('login-has-logo');
+      }
+      if (loginLogo) loginLogo.src = logoUrl;
+      if (logoContainer) logoContainer.style.display = 'block';
+      if (loginTitle) {
+        loginTitle.textContent = name;
+        loginTitle.style.display = 'block';
+      }
+      if (loginTitleLarge) loginTitleLarge.style.display = 'none';
+
+      // Header logos
+      document.querySelectorAll('.header-club-logo').forEach(img => {
+        img.src = logoUrl;
+        img.style.display = 'inline-block';
+      });
+    } else {
+      if (viewLogin) {
+        viewLogin.classList.remove('login-has-logo');
+        viewLogin.classList.add('login-no-logo');
+      }
+      if (logoContainer) logoContainer.style.display = 'none';
+      if (loginTitle) loginTitle.style.display = 'none';
+      if (loginTitleLarge) {
+        loginTitleLarge.textContent = name;
+        loginTitleLarge.style.display = 'block';
+      }
+      document.querySelectorAll('.header-club-logo').forEach(img => {
+        if (!img.getAttribute('src')) {
+          img.style.display = 'none';
+        }
+      });
+    }
+
+    // Season text
+    if (metadata.season) {
+      document.querySelectorAll('.full-season').forEach(el => {
+        el.textContent = 'DDLC ' + metadata.season;
+      });
+    }
+    if (metadata.seasonShort) {
+      document.querySelectorAll('.short-season').forEach(el => {
+        el.textContent = 'DDLC ' + metadata.seasonShort;
+      });
+    }
+  }
+
+  /**
+   * Rule 11.1 Perspective Normalization: Returns true if Host Club is the home team for this fixture.
+   * Un-flips the Opponent Portal flip (where venueRole AWAY meant host is home).
+   * @param {Object} m Fixture object
+   * @returns {boolean}
+   */
+  function isHostClubHome(m) {
+    if (!m) return true;
+    if (m.homeAway !== undefined) return String(m.homeAway).toUpperCase() === 'HOME';
+    if (m.venueRole !== undefined) return String(m.venueRole).toUpperCase() === 'AWAY';
+    if (m.isHome !== undefined) return m.isHome === true;
+    return true;
+  }
+
+  /**
+   * Rule 11.1 Perspective Normalization: Returns the Host Club's team name.
+   * @param {Object} m Fixture object
+   * @returns {string}
+   */
+  function getHostTeamName(m) {
+    if (!m) return '';
+    if (m.venueRole !== undefined && m.homeAway === undefined) {
+      return m.oppTeam || '';
+    }
+    return m.ourTeam || '';
+  }
+
+  /**
+   * Rule 11.1 Perspective Normalization: Returns the Opponent Club's team name.
+   * @param {Object} m Fixture object
+   * @returns {string}
+   */
+  function getOpponentTeamName(m) {
+    if (!m) return '';
+    if (m.venueRole !== undefined && m.homeAway === undefined) {
+      return m.ourTeam || '';
+    }
+    return m.oppTeam || '';
+  }
+
+  /**
+   * Returns the authoritative host club name from active state, cache, or fallback.
+   * @returns {string}
+   */
+  function getHostClubName() {
+    if (typeof window !== 'undefined' && window.FF_STATE && window.FF_STATE.clubName) {
+      return window.FF_STATE.clubName;
+    }
+    if (typeof appData !== 'undefined' && appData && appData.clubName) {
+      return appData.clubName;
+    }
+    if (typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && MAIN_CLUB_NAME !== 'Host Club' && !MAIN_CLUB_NAME.includes('Development / Staging')) {
+      return MAIN_CLUB_NAME;
+    }
+    if (typeof ORIGINAL_HOST_CLUB_NAME !== 'undefined' && ORIGINAL_HOST_CLUB_NAME && ORIGINAL_HOST_CLUB_NAME !== 'Host Club' && !ORIGINAL_HOST_CLUB_NAME.includes('Development / Staging')) {
+      return ORIGINAL_HOST_CLUB_NAME;
+    }
+    const headerEl = typeof document !== 'undefined' ? document.querySelector('.portal-header-club') : null;
+    if (headerEl && headerEl.textContent && headerEl.textContent.trim() && headerEl.textContent.trim() !== 'Host Club') {
+      return headerEl.textContent.trim();
+    }
+    if (typeof getPortalStorage === 'function') {
+      try {
+        const cached = getPortalStorage('shared_public_metadata');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.clubName) return parsed.clubName;
+        }
+      } catch (e) {}
+    }
+    return 'Host Club';
+  }
+
+  /**
+   * Resolves the active user club name using a robust memory-first hierarchy:
+   * 1. The fixture payload itself (match.clubName || match.oppClub)
+   * 2. In-memory application state (window.FF_STATE.activeClub)
+   * 3. Scoped storage fallback (getPortalStorage('club_active_name'))
+   * @param {Object|null} [match=null] - Optional fixture object
+   * @param {string} [fallback=''] - Optional fallback string
+   * @returns {string}
+   */
+  function getActiveUserClubName(match = null, fallback = '') {
+    if (match && typeof match === 'object') {
+      if (match.clubName && match.clubName !== 'Opponent' && match.clubName !== 'Visiting Club') return match.clubName;
+      if (match.oppClub && match.oppClub !== 'Opponent' && match.oppClub !== 'Visiting Club') return match.oppClub;
+    }
+    if (typeof window !== 'undefined' && window.FF_STATE && window.FF_STATE.activeClub) {
+      return window.FF_STATE.activeClub;
+    }
+    if (typeof getPortalStorage === 'function') {
+      const val = getPortalStorage('club_active_name');
+      if (val) return val;
+    }
+    return fallback || 'Opponent';
+  }
+
+  /**
+   * Synchronizes active club selection across in-memory state and scoped storage.
+   * @param {string} clubName
+   */
+  function setActiveUserClubName(clubName) {
+    if (!clubName) return;
+    if (typeof window !== 'undefined') {
+      window.FF_STATE = window.FF_STATE || {};
+      window.FF_STATE.activeClub = clubName;
+    }
+    if (typeof setPortalStorage === 'function') {
+      setPortalStorage('club_active_name', clubName);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    window.isHostClubHome = isHostClubHome;
+    window.getHostTeamName = getHostTeamName;
+    window.getOpponentTeamName = getOpponentTeamName;
+    window.getHostClubName = getHostClubName;
+    window.getActiveUserClubName = getActiveUserClubName;
+    window.setActiveUserClubName = setActiveUserClubName;
+  }
+
+  /**
+   * Unified state hydrator for club branding across all portals.
+   * Synchronizes in-memory state, storage cache, and visual DOM.
+   * @param {{ clubName?: string, clubLogoUrl?: string, season?: string, seasonShort?: string }} metadata
+   * @param {string} [portalRole]
+   */
+  function updateClubBrandingState(metadata, portalRole) {
+    if (!metadata) return;
+    hydrateClubBranding(metadata, portalRole);
+  }
+
+  // --- Unified Portal Storage Isolation & Auth Lifecycle ---
+  /**
+   * Resolves the environment- and tenant-scoped storage prefix (ff_{env}_{slug}_).
+   * @returns {string}
+   */
+  function getPortalStoragePrefix() {
+    var isDev = false;
+    var rawClub = "";
+
+    if (typeof window !== "undefined" && window.location) {
+      if (window.location.pathname && window.location.pathname.includes("/dev/")) {
+        isDev = true;
+      }
+      if (window.location.search) {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get("c") === "dev") isDev = true;
+        rawClub = (params.get("c") || params.get("club") || "").trim().toLowerCase();
+      }
+    }
+
+    var env = isDev ? "dev" : "prod";
+    var slug = rawClub;
+
+    if (slug && typeof resolveClubHost === "function") {
+      var resolved = resolveClubHost(slug);
+      if (resolved && resolved.slug) {
+        slug = resolved.slug;
+      }
+    }
+
+    if (!slug) {
+      slug = isDev ? "dev" : "mount-pleasant";
+    }
+
+    return "ff_" + env + "_" + slug + "_";
+  }
+
+  /**
+   * Reads a key from localStorage using tenant-scoped prefix.
+   * @param {string} key 
+   * @returns {string|null}
+   */
+  function getPortalStorage(key) {
+    if (typeof localStorage === 'undefined') return null;
+    try {
+      return localStorage.getItem(getPortalStoragePrefix() + key);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Persists a key to localStorage using tenant-scoped prefix.
+   * @param {string} key 
+   * @param {string} value 
+   */
+  function setPortalStorage(key, value) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      localStorage.setItem(getPortalStoragePrefix() + key, value);
+    } catch (e) {}
+  }
+
+  /**
+   * Evicts a key from localStorage across scoped and legacy names.
+   * @param {string} key 
+   */
+  function removePortalStorage(key) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      var prefix = getPortalStoragePrefix();
+      localStorage.removeItem(prefix + key);
+      localStorage.removeItem('ff_dev_' + key);
+      localStorage.removeItem('ff_' + key);
+      localStorage.removeItem(key);
+    } catch (e) {}
+  }
+
+  /**
+   * Global self-healing handler when an API returns AUTH_REQUIRED.
+   * Evicts active sessions and restores the initial PIN login screen.
+   */
+  function handleAuthRequired_() {
+    console.warn('[FixtureFlow · Auth] AUTH_REQUIRED detected. Evicting session and resetting login screen.');
+    removePortalStorage('club_session_token');
+    removePortalStorage('club_is_admin');
+    removePortalStorage('club_active_name');
+    removePortalStorage('club_admin_impersonate_list');
+    removePortalStorage('player_session_token');
+    removePortalStorage('player_pin');
+    removePortalStorage('captain_session_token');
+    removePortalStorage('captain_pin');
+
+    if (typeof handleLogout === 'function') {
+      handleLogout();
+    } else if (typeof logout === 'function') {
+      logout();
+    } else {
+      const loginView = document.getElementById('view-login') || document.getElementById('login-screen') || document.getElementById('login-view');
+      if (loginView) loginView.style.display = 'block';
+      const dashView = document.getElementById('club-dashboard-view') || document.getElementById('dashboard-view');
+      if (dashView) dashView.style.display = 'none';
+      const statusScreen = document.getElementById('status-screen');
+      if (statusScreen) statusScreen.style.display = 'none';
+      const globalLoading = document.getElementById('global-loading');
+      if (globalLoading) globalLoading.style.display = 'none';
+    }
+
+    const errDiv = document.getElementById('login-error') || document.getElementById('error-message');
+    if (errDiv) {
+      errDiv.textContent = 'Session expired or invalid. Please re-enter your PIN.';
+      errDiv.style.display = 'block';
+    }
+  }
+
+  /**
+   * Safely decodes a Base64 string into UTF-8 text across Browser and Node environments.
+   * @param {string} b64 
+   * @returns {string}
+   */
+  function safeBase64Decode_(b64) {
+    if (typeof atob === 'function') {
+      return atob(b64);
+    }
+    if (typeof Buffer !== 'undefined') {
+      return Buffer.from(b64, 'base64').toString('utf8');
+    }
+    return '';
+  }
+
+  /**
+   * Safely extracts and parses the JSON payload portion of an HMAC session token without verifying signature.
+   * Cryptographic verification is strictly enforced by the server on every request.
+   * @param {string|null} token - The signed token string (<payload>.<signature>)
+   * @returns {Object|null} The parsed payload or null if malformed.
+   */
+  function parseSessionTokenPayload_(token) {
+    if (!token || typeof token !== 'string') return null;
+    const parts = token.split('.');
+    if (parts.length !== 2) return null;
+    try {
+      const json = safeBase64Decode_(parts[0]);
+      if (!json) return null;
+      return JSON.parse(json);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Checks if the active session token belongs to System Admin.
+   * Eliminates client-side privilege escalation by deriving admin status from the signed token payload.
+   * @param {string|null} [customToken=null] - Optional token to evaluate.
+   * @returns {boolean} True if token exists and payload.c === 'System Admin'.
+   */
+  function isSystemAdminSession_(customToken = null) {
+    const token = customToken || ((typeof getPortalStorage === 'function') ? getPortalStorage('club_session_token') : null);
+    if (!token) return false;
+    const payload = parseSessionTokenPayload_(token);
+    if (!payload) return false;
+    return payload.c === 'System Admin';
+  }
+</script>
+
+  <style>
+    /* Custom Calendar Grid Styles */
+    .season-grid-scroll-area {
+        display: flex;
+        overflow-x: auto;
+        gap: 16px;
+        padding: 8px 0 16px 0;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+    @media (min-width: 601px) {
+        .desktop-launch-center {
+            max-width: 1050px !important;
+        }
+        .desktop-launch-header {
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .desktop-launch-header .step-header {
+            justify-content: center;
+        }
+        .desktop-launch-header .step-desc {
+            text-align: center;
+        }
+        .season-grid-scroll-area {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            overflow: visible;
+            padding-top: 16px;
+        }
+        .season-grid-scroll-area.centered-grid {
+            display: flex !important;
+            justify-content: center !important;
+            flex-wrap: wrap !important;
+        }
+        .month-grid {
+            margin-bottom: 0;
+            width: 100%;
+            max-width: 380px;
+        }
+        .desktop-sticky-save {
+            position: static;
+            margin: 32px auto 40px auto;
+            width: 100%;
+            max-width: 440px;
+            z-index: 1;
+            box-shadow: none;
+            border-radius: 12px;
+            background: transparent;
+            padding: 0;
+            border: none;
+            transform: none;
+            left: auto;
+            bottom: auto;
+        }
+    }
+    .month-grid {
+        min-width: 290px;
+        scroll-snap-align: start;
+        flex-shrink: 0;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .month-header-title {
+        text-align: center;
+        font-weight: 800;
+        color: var(--on-surface);
+        margin-bottom: 12px;
+        font-size: 1.15rem;
+        letter-spacing: -0.01em;
+    }
+    .dow-row {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--on-bg);
+        opacity: 0.7;
+        margin-bottom: 6px;
+        font-weight: 600;
+    }
+    .days-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+    }
+    .day-cell {
+        -webkit-tap-highlight-color: transparent;
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        border-radius: 50%;
+        background: var(--bg);
+        color: var(--on-surface);
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.15s ease;
+        user-select: none;
+        font-weight: 500;
+    }
+    .day-cell.empty {
+        background: transparent;
+        cursor: default;
+    }
+    .day-cell.past {
+        opacity: 0.35;
+        cursor: default;
+        pointer-events: none;
+    }
+    .day-cell:not(.empty):not(.past):not(.status-unav):not(.status-match):hover {
+        border-color: var(--border);
+        background: var(--surface-hover, #f1f5f9);
+    }
+    /* Active bounce */
+    .day-cell:active {
+        transform: scale(0.95);
+    }
+    /* Dark mode hover fallback */
+    @media (prefers-color-scheme: dark) {
+        .day-cell:not(.empty):not(.past):not(.status-unav):not(.status-match):hover {
+            background: var(--surface-hover, #334155);
+        }
+    }
+    .day-cell.status-unav {
+        background: var(--error);
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 2px 4px var(--bg-unav);
+        border-color: var(--error);
+    }
+    .day-cell.status-match {
+        background: var(--c-match);
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 2px 4px var(--bg-match);
+        border-color: var(--c-match);
+    }
+    .day-cell.status-unav.status-match {
+        background: linear-gradient(135deg, var(--error) 0%, var(--error) 50%, var(--c-match) 50%, var(--c-match) 100%);
+        box-shadow: 0 2px 4px var(--bg-unav);
+        border-color: var(--error);
+        color: white;
+    }
+    /* --- MATCH CARD --- */
+    .match-card {
+        background: var(--surface);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: var(--shadow);
+        border: var(--card-border);
+        border-left: 4px solid var(--primary);
+    }
+
+    .match-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 8px;
+    }
+
+    .match-date {
+        font-weight: bold;
+        color: var(--secondary);
+        font-size: 1.1rem;
+    }
+
+    .match-time {
+        font-family: monospace;
+        font-size: 1.1rem;
+    }
+
+    .match-teams {
+        font-size: 1.2rem;
+        margin-bottom: 8px;
+    }
+
+    .match-details {
+        display: flex;
+        gap: 12px;
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        background: var(--border);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    .badge.home {
+        background: var(--bg-avail);
+        color: var(--c-avail);
+    }
+
+    .badge.away {
+        background: var(--bg-match);
+        color: var(--c-match);
+    }
+
+    /* --- GUEST SUGGESTIONS & MODALS --- */
+    .suggestions-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        max-height: 150px;
+        overflow-y: auto;
+        z-index: 1001;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .suggestion-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        font-size: 0.95rem;
+        color: #333;
+    }
+
+    .suggestion-item:hover {
+        background-color: #f0f9ff;
+    }
+
+    .confirm-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .confirm-content {
+        background: var(--surface);
+        padding: 24px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 320px;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+        color: var(--on-surface);
+        border: 1px solid var(--border);
+    }
+
+    .confirm-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .remove-guest-btn {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        line-height: 1;
+        padding: 4px;
+        cursor: pointer;
+        color: var(--error);
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+
+    .remove-guest-btn:hover {
+        opacity: 1;
+    }
+
+    /* --- AVAILABILITY LIST --- */
+    .avail-card {
+        background: var(--surface);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border);
+    }
+
+    .avail-header {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: var(--secondary);
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 12px;
+        margin-bottom: 4px;
+    }
+
+    .player-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .player-row:last-child {
+        border-bottom: none;
+    }
+
+    .player-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .player-name {
+        font-weight: bold;
+        font-size: 0.95rem;
+        color: var(--on-surface);
+    }
+
+    .player-team {
+        font-size: 0.75rem;
+        color: var(--on-bg);
+        opacity: 0.6;
+        margin-top: 2px;
+    }
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        min-width: 90px;
+        text-align: center;
+    }
+
+    .status-avail {
+        background: var(--bg-avail);
+        color: var(--c-avail);
+        border: 1px solid var(--c-avail);
+    }
+
+    .status-match {
+        background: var(--bg-match);
+        color: var(--c-match);
+        border: 1px solid var(--c-match);
+    }
+
+    .status-rest {
+        background: var(--bg-rest);
+        color: var(--c-rest);
+        border: 1px solid var(--c-rest);
+    }
+
+    .status-unav {
+        background: var(--bg-unav);
+        color: var(--c-unav);
+        border: 1px solid var(--c-unav);
+    }
+
+    .status-unkn {
+        background: rgba(150, 150, 150, 0.1);
+        color: #888;
+        border: 1px dashed #888;
+        opacity: 0.8;
+    }
+
+    /* --- BOTTOM NAV --- */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-around;
+        padding: 12px;
+        z-index: 100;
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+
+    .nav-item {
+        color: var(--on-bg);
+        text-decoration: none;
+        font-size: 0.8rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+        border: none;
+        background: none;
+    }
+
+    .nav-item.active {
+        opacity: 1;
+        color: var(--primary);
+    }
+
+    .nav-icon {
+        font-size: 1.5rem;
+        margin-bottom: 4px;
+    }
+
+    /* --- SPINNER --- */
+    .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border-left-color: var(--primary);
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .error-msg {
+        color: var(--error);
+        margin-top: 12px;
+        font-weight: bold;
+    }
+
+    /* --- MONTH SELECTOR --- */
+    .month-selector {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        padding: 0 16px;
+        margin: 16px 0;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .month-selector::-webkit-scrollbar {
+        display: none;
+    }
+
+    .month-chip {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--on-surface);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: all 0.2s;
+    }
+
+    .month-chip.active {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+        opacity: 1;
+        font-weight: bold;
+    }
+
+    /* --- GUEST SELECTOR --- */
+    .guest-select-container {
+        padding: 0 16px;
+        margin-top: 12px;
+        margin-bottom: 8px;
+    }
+
+    .guest-indicator {
+        font-size: 0.75rem;
+        color: var(--primary);
+        border: 1px solid var(--primary);
+        border-radius: 4px;
+        padding: 2px 6px;
+        margin-left: 6px;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    .remove-guest-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px 8px;
+        margin-left: auto;
+        font-size: 1rem;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+    }
+
+    .remove-guest-btn:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    /* --- MODAL --- */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        backdrop-filter: blur(3px);
+    }
+
+    .modal-content {
+        background: var(--surface);
+        padding: 24px;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 350px;
+        box-shadow: var(--shadow);
+        border: var(--card-border);
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .btn-text {
+        background: none;
+        border: none;
+        color: var(--on-surface);
+        font-weight: 500;
+        padding: 10px 16px;
+        cursor: pointer;
+        border-radius: 8px;
+        opacity: 0.7;
+    }
+
+    .btn-text:hover {
+        opacity: 1;
+        background: var(--bg);
+    }
+
+    .fullscreen-loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.88);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: opacity 0.3s ease;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .fullscreen-loading-overlay {
+            background: rgba(15, 23, 42, 0.88);
+        }
+    }
+
+    #fullscreen-loading .loading-text,
+    .fullscreen-loading-overlay .loading-text {
+        margin-top: 20px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #0f172a;
+        text-align: center;
+        max-width: 80%;
+        line-height: 1.5;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        #fullscreen-loading .loading-text,
+        .fullscreen-loading-overlay .loading-text {
+            color: #f8fafc;
+        }
+    }
+
+    .fullscreen-loading-overlay .ff-spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: var(--primary, #6200ee);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+        margin: 0 auto;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .fullscreen-loading-overlay .ff-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.15);
+            border-left-color: var(--primary, #bb86fc);
+        }
+    }
+
+    /* Custom Player Portal Styles */
+    .portal-header { text-align: center; margin-bottom: 16px; display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 600px; margin: 0 auto; }
+    .portal-badge { display: inline-block; padding: 4px 12px; margin-bottom: 8px; border-radius: 9999px; background: rgba(98, 0, 238, 0.1); border: 1px solid rgba(98, 0, 238, 0.2); color: var(--primary); font-size: 0.75rem; font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; }
+    .logo-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .header-title { font-size: 1.5rem; font-weight: 800; color: var(--on-surface); margin: 0; }
+    .card-label { display: block; font-size: 0.875rem; font-weight: 500; color: var(--on-bg); opacity: 0.7; margin-bottom: 8px; }
+    
+    .picker-btn { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--on-surface); box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; text-align: left; cursor: pointer; transition: all 0.2s; margin: 0; box-sizing: border-box; }
+    
+    .step-container { display: flex; flex-direction: column; gap: 16px; }
+    .step-section { display: flex; flex-direction: column; gap: 16px; }
+    .step-header { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .step-number { display: flex; flex-shrink: 0; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #000; font-size: 0.875rem; font-weight: bold; line-height: 1; margin: 0; }
+    .step-title { font-size: 1.125rem; font-weight: bold; color: var(--on-surface); margin: 0; }
+    .step-desc { font-size: 0.875rem; color: var(--on-bg); opacity: 0.7; line-height: 1.5; margin: 0; }
+    
+    .macro-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+    @media (max-width: 600px) { .macro-grid { grid-template-columns: repeat(4, 1fr); } }
+    .macro-btn { min-height: 44px; border-radius: 12px; background: var(--bg); color: var(--on-surface); font-weight: 600; font-size: 0.875rem; border: 1px solid var(--border); cursor: pointer; transition: background 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 0; margin: 0;}
+    .macro-btn:hover { background: var(--border); }
+    .macro-btn.col-span-2 { grid-column: span 2 / span 2; }
+    .macro-btn.col-span-4 { grid-column: span 4 / span 4; }
+    @media (min-width: 601px) { .macro-btn.col-span-2, .macro-btn.col-span-4 { grid-column: span 1 / span 1; } }
+
+    .date-range-card { background: var(--bg); border-radius: 16px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin: 0 auto; max-width: 400px; width: 100%; box-sizing: border-box; }
+    .date-row { display: flex; align-items: center; gap: 12px; width: 100%; margin-bottom: 12px; }
+    .date-label { color: var(--on-bg); opacity: 0.6; font-weight: 500; font-size: 0.875rem; flex-shrink: 0; width: 32px; text-align: right; }
+    .date-input { flex: 1; width: 100%; min-height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); font-size: 0.875rem; outline: none; transition: all 0.2s; color: var(--on-surface); box-sizing: border-box; margin: 0;}
+    .date-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(98, 0, 238, 0.2); }
+    .btn-add-range { width: 100%; min-height: 44px; border-radius: 12px; background: var(--primary); color: #000; font-weight: bold; border: none; cursor: pointer; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 6px rgba(98, 0, 238, 0.2); margin: 0;}
+    .btn-add-range:active { transform: scale(0.98); }
+    
+    .btn-save { width: 100%; background: var(--on-surface); color: var(--surface); font-weight: 800; padding: 20px; border-radius: 16px; transition: all 0.2s; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 1.125rem; margin: 0;}
+    .btn-save:active { transform: scale(0.98); }
+    .save-footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0;
+        border: none;
+        margin: 16px auto 32px auto;
+        width: 100%;
+        max-width: 600px;
+        box-sizing: border-box;
+    }
+    
+    .logout-row { display: flex; align-items: center; justify-content: center; gap: 16px; padding-top: 16px; }
+    .link-btn { background: none; border: none; font-size: 0.875rem; color: var(--on-bg); opacity: 0.6; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; transition: opacity 0.2s; padding: 0; margin: 0;}
+    .link-btn:hover { opacity: 1; }
+    
+    .macro-btn.active { background: var(--error); color: white; border-color: var(--error); }
+
+    .hidden { display: none !important; }
+
+    .range-cancel-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: var(--on-surface);
+        color: var(--surface);
+        padding: 8px 16px;
+        border-radius: 9999px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+        margin-bottom: 12px;
+        opacity: 1;
+        max-height: 50px;
+        transform: translateY(0);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+        -webkit-user-select: none;
+        white-space: nowrap;
+    }
+    .range-cancel-pill.pill-hidden {
+        opacity: 0;
+        max-height: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        transform: translateY(-8px) scale(0.95);
+        pointer-events: none;
+        overflow: hidden;
+    }
+    .pill-cancel-btn {
+        background: rgba(255,255,255,0.15);
+        color: #ff5252;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    @media (prefers-color-scheme: dark) {
+        .pill-cancel-btn {
+            background: rgba(0,0,0,0.3);
+            color: #ff5252;
+        }
+    }
+    .pill-cancel-btn:hover { background: rgba(255,0,0,0.15); }
+    .pill-cancel-btn:active { transform: scale(0.95); }
+    .pill-hidden {
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+    
+    /* Accessibility utilities */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+
+    /* GLOBAL PLAYER PORTAL THEME OVERRIDES */
+    :root {
+        /* Override primary to Teal for Player Portal distinction */
+        --primary: #00897b;
+        --primary-hover: #00796b;
+        --bg: #f2f7f6; /* Subtle cool tint for Light Mode Player */
+        --splash-bg: radial-gradient(circle at center, #ffffff 0%, var(--bg) 100%);
+        --splash-glow: rgba(0, 137, 123, 0.15); /* Player Teal Bloom */
+        --splash-loader-accent: var(--primary);
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --primary: #03dac6;
+            --primary-hover: #01b4a3;
+            --bg: #0f1515; /* Subtle cool tint for Dark Mode Player */
+            /* Subtle organic glow matching the teal */
+            --bg-glow: radial-gradient(circle at 50% 10%, rgba(3, 218, 198, 0.08) 0%, var(--bg) 60%);
+            --splash-bg: radial-gradient(circle at center, #141e1e 0%, var(--bg) 100%);
+            --splash-glow: rgba(3, 218, 198, 0.2); /* Player Teal Cyan Bloom */
+            --splash-loader-accent: var(--primary);
+        }
+    }
+    @media (prefers-color-scheme: light) {
+        :root {
+            /* Subtle organic glow matching the teal in light mode */
+            --bg-glow: radial-gradient(circle at 50% 10%, rgba(0, 137, 123, 0.05) 0%, var(--bg) 60%);
+        }
+    }
+    body {
+        background-image: var(--bg-glow);
+        background-attachment: fixed;
+    }
+
+    /* Portal Header Mobile/Desktop */
+    .portal-header-mobile { display: block !important; }
+    .portal-header-desktop { display: none !important; }
+    @media (min-width: 601px) {
+        .portal-header-mobile { display: none !important; }
+        .portal-header-desktop { display: block !important; }
+    }
+
+    /* Soft Block Modal */
+    .match-card-content {
+        padding: 0; overflow: hidden; max-width: 340px; 
+        background: var(--surface); border: 1px solid var(--border);
+    }
+    .match-card-header {
+        background: var(--surface-hover); padding: 24px 20px 20px; text-align: center; border-bottom: 1px solid var(--border);
+    }
+    .match-card-action-block {
+        padding: 24px;
+    }
+    .match-btn-close {
+        background: var(--surface-hover); color: var(--on-surface); border: 1px solid var(--border); font-weight: bold;
+    }
+    .match-btn-unav {
+        background: transparent; color: var(--error); border: 2px solid var(--error); font-weight: bold;
+    }
+    .match-venue-badge {
+        display: inline-block; margin-top: 12px; font-size: 0.75rem; background: var(--bg); color: var(--on-bg); padding: 6px 14px; border-radius: 20px; font-weight: bold; border: 1px solid var(--border); letter-spacing: 0.5px;
+    }
+    
+    .range-anchor {
+        border: 3px solid var(--primary) !important;
+        transform: scale(1.1);
+        z-index: 5;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+</style>
+
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="app-version" content="v3.0.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-player.svg">
+  <link rel="apple-touch-icon" href="/assets/images/leagues/icon-player.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="FF Player">
+  <meta name="theme-color" content="#10b981">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body class="safe-area-pt safe-area-pb">
+  <!-- Hidden config container -->
+  <div id="ff-config" style="display: none;"
+       data-portal-type="player"
+       data-club-name=""
+       data-club-logo-url="">
+  </div>
+  <div id="app">
+    <!-- Overlays -->
+    <!-- Connecting Splash Screen (Pre-JS / Initial Load) -->
+<div class="screen-overlay" id="status-screen">
+    <div class="glow-backdrop"></div>
+    <div class="spinner" id="spinner-loader"></div>
+    <div class="loading-text" id="status-text">CONNECTING TO PLAYER · FIXTUREFLOW...</div>
+    <div class="offline-card" id="offline-panel" style="display: none;">
+        <div class="offline-icon" style="font-size: 40px; margin-bottom: 16px;">📶</div>
+        <h2 class="offline-title" style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">Connection Lost</h2>
+        <p class="offline-desc" style="font-size: 14px; line-height: 1.5; margin: 0 0 24px 0;">Unable to connect to club data. Please check your network connection.</p>
+        <button class="btn btn-primary" onclick="window.location.reload()" style="width: 100%;">RETRY CONNECTION</button>
+    </div>
+</div>
+
+<!-- FULLSCREEN LOADING OVERLAY -->
+<div id="fullscreen-loading" class="fullscreen-loading-overlay hidden">
+    <div id="loading-spinner" class="ff-spinner" style="width: 40px; height: 40px; border-width: 4px; border-left-color: var(--primary);"></div>
+    <div id="success-icon" class="hidden" style="font-size: 3.5rem; color: #22c55e; transform: scale(0.5); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">✅</div>
+    <div id="fullscreen-loading-text" class="loading-text">Saving your unavailabilities...</div>
+</div>
+
+<!-- ARIA LIVE REGION FOR ACCESSIBILITY -->
+<div id="aria-announcer" class="sr-only" aria-live="polite"></div>
+
+
+    <!-- View 1: Login (PIN Screen) -->
+    <!-- VIEW 1: LOGIN (PIN SCREEN) -->
+<div id="view-login" style="display:none;" class="view-login-container text-center ">
+    <div style="margin: auto; width: 100%;">
+        <div id="login-club-logo-container" style="margin-bottom: 24px;">
+            <img id="login-club-logo" src="" alt="Club Logo" style="width: 150px; height: 150px; object-fit: contain; margin: 0 auto; display: block;">
+        </div>
+        <h2 id="login-club-title" class="portal-header-club" style="margin-bottom: 8px; font-size: 1.5rem;">
+            
+        </h2>
+        <h1 id="login-club-title-large" class="portal-header-club" style="margin-bottom: 12px; font-size: 2.2rem; line-height: 1.2; color: var(--primary); font-weight: 800;">
+            
+        </h1>
+        
+        <h3 style="margin-top: 0; color: var(--text-muted); font-weight: normal; font-size: 1.17rem;">Player Availability Portal</h3>
+        <p class="text-sm">Manage your availability. Enter portal PIN below.</p>
+        
+        <form id="login-form-container" style="margin-top:24px; display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 250px; margin-left: auto; margin-right: auto;" onsubmit="handleLogin(event)">
+            <input type="password" id="pin-input" class="ff-input text-center" required placeholder="PIN" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="one-time-code" style="letter-spacing: 4px; font-size: 1.25rem; font-weight: bold; height: 50px; min-height: 50px; border-radius: 12px; box-sizing: border-box;">
+            <button type="submit" id="login-btn" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 1.1rem; height: 50px; min-height: 50px; border-radius: 12px; box-sizing: border-box;">
+                <span id="login-btn-text">ENTER</span>
+                <span id="login-spinner" class="hidden">VERIFYING...</span>
+            </button>
+            <div id="login-error" class="error-msg hidden" style="display: none;"></div>
+        </form>
+    </div>
+
+    <!-- BRANDING FOOTER (Login View) -->
+    <div class="brand-footer login-footer">
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v3.0.0</span>
+
+    </div>
+</div>
+
+
+    <!-- View 2: Player Selection & Calendar -->
+    <!-- VIEW 2: PLAYER SELECTION & CALENDAR -->
+<div id="view-main" class="hidden" style="animation: fadeIn 0.3s ease-in-out; width: 100%;">
+
+    <!-- HEADER (Inside Portal) - Desktop Stacked -->
+    <header class="portal-header-desktop" style="background: var(--surface); position: sticky; top: 0; z-index: 90; box-shadow: var(--shadow); margin-bottom: 16px; user-select: none; -webkit-user-select: none; cursor: pointer;" onclick="if(typeof handleDeveloperTap === 'function') handleDeveloperTap()">
+        <div class="container" style="display: flex; align-items: center; justify-content: center; gap: 12px; padding-top: 12px; padding-bottom: 12px;">
+          <img id="header-club-logo" class="header-club-logo" src="" alt="Logo" style="width: 40px; height: 40px; object-fit: contain;">
+          <div class="portal-header-group" style="display: flex; align-items: center; gap: 8px;">
+            <span class="portal-header-club" style="font-weight: 500; color: var(--text);"></span>
+            <span style="color: var(--text-muted);">•</span>
+            <span class="portal-header-title" style="font-weight: 700; color: var(--text);">Player Portal</span>
+            <span style="color: var(--text-muted);">•</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+              <span class="full-season">DDLC </span>
+              <span class="short-season">DDLC </span>
+            </span>
+          </div>
+        </div>
+
+        <!-- STICKY PROFILE STRIP (Hidden until player selected) -->
+        <div id="desktop-sticky-player-strip" class="container hidden" style="padding-bottom: 12px; cursor: default;" onclick="event.stopPropagation()">
+            <button type="button" onclick="openPlayerPicker()" class="btn btn-block" style="background: color-mix(in srgb, var(--primary) 8%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent); color: var(--primary); padding: 14px 16px; font-size: 0.95rem; display: block; border-radius: 12px; font-weight: 600; text-align: center; width: 100%; transition: background 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; outline: none; box-shadow: none;">
+                <span id="desktop-sticky-player-name">MANAGING: PLAYER NAME</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- HEADER (Inside Portal) - Ultra-Compact Matrix (Mobile Only) -->
+    <header class="portal-header-mobile" style="background: var(--surface); position: sticky; top: 0; z-index: 90; box-shadow: var(--shadow-sm); border-bottom: 1px solid var(--border); padding: 12px 0; margin-bottom: 16px; user-select: none; -webkit-user-select: none; cursor: pointer;" onclick="if(typeof handleDeveloperTap === 'function') handleDeveloperTap()">
+        <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding: 0 16px; width: 100%;">
+            
+            <!-- Left: Logo & Context -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img id="header-club-logo-mobile" class="header-club-logo" src="" alt="Logo" style="width: 32px; height: 32px; object-fit: contain; border-radius: 6px;">
+                <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <span class="portal-header-club" style="font-size: 0.95rem; font-weight: 700; color: var(--on-surface); line-height: 1.1;"></span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.1; font-weight: 500; margin-top: 2px;">Player Portal • <span class="short-season">DDLC </span></span>
+                </div>
+            </div>
+
+            <!-- Right: Compact Player Picker Trigger -->
+            <div id="mobile-sticky-player-strip" class="hidden">
+                <button type="button" onclick="openPlayerPicker()" style="background: var(--bg); border: 1px solid var(--primary); border-radius: 20px; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="height: 14px; width: 14px;" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="mobile-sticky-player-name" style="max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: middle;">Unknown</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" style="height: 14px; width: 14px; opacity: 0.6;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+        </div>
+    </header>
+    
+    <div class="container desktop-launch-center">
+
+    <!-- Player Select Card -->
+    <div id="player-select-card" class="match-card desktop-launch-center" style="margin: 0 auto 16px auto; max-width: 600px; width: 100%; box-sizing: border-box;">
+        <div class="card-label">Who are you?</div>
+        <button id="player-select-btn" type="button" onclick="openPlayerPicker()" class="btn btn-primary btn-block" style="padding: 12px; font-size: 1.1rem; margin-top: 20px;">
+            <span id="selected-player-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;">Select Your Name</span>
+            <svg xmlns="http://www.w3.org/2000/svg" style="height: 20px; width: 20px; opacity: 0.5; flex-shrink: 0;" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Calendar Card (Hidden until player selected) -->
+    <div id="calendar-card" class="match-card hidden desktop-launch-center" style="margin: 0 auto 16px auto; max-width: 600px; width: 100%; box-sizing: border-box;">
+        
+        <!-- [NEW] Pre-Season Guilt-Free Banner -->
+        <div id="pre-season-banner" class="hidden" style="margin-top: 16px; margin-bottom: 16px;">
+            <div class="desktop-launch-header" style="text-align: left;">
+                <div class="step-header" style="justify-content: center; margin-bottom: 8px;">
+                    <h3 class="step-title" style="color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; text-align: center; width: 100%;">
+                        <span>🗓️</span> Welcome to Pre-Season!
+                    </h3>
+                </div>
+                <p class="step-desc" style="font-size: 0.95rem; text-align: left; margin-top: 0;">
+                    Feel free to block any dates you cannot play. If your unavailable dates overlap with a draft fixture, the system will automatically try to cancel and reschedule for you. <strong style="color: var(--warning);">Exceptions:</strong> Extremely early season or Cup matches will ping your Captain instead due to tight deadlines.
+                </p>
+            </div>
+        </div>
+        <div class="step-container">
+            <!-- ADVANCED: Routine Absences -->
+            <details class="advanced-macro-group desktop-launch-header" style="padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: rgba(0,0,0,0.02);">
+                <summary style="cursor: pointer; font-weight: 700; color: var(--on-surface); font-size: 1.05rem; display: flex; align-items: center; justify-content: space-between; list-style: none;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" style="height: 18px; width: 18px; opacity: 0.6;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        Advanced Options: Bulk Routine Blocks
+                    </div>
+                    <span style="font-size: 0.8rem; opacity: 0.6;">▼</span>
+                </summary>
+                
+                <div style="padding-top: 16px;">
+                    <p style="font-size: 0.85rem; line-height: 1.5; color: var(--error); background: var(--bg-unav); padding: 12px; border-radius: 8px; margin-top: 0; margin-bottom: 20px; font-weight: 600; border-left: 3px solid var(--error);">
+                        Warning: Using these buttons will blanket-apply unavailabilities across the entire season. This may overwrite your previously marked dates. Please use responsibly.
+                    </p>
+                    
+                    <!-- Day Macros (Wrapping Grid) -->
+                    <div style="position: relative;">
+                        <div class="macro-grid">
+                            <button id="btn-macro-1" onclick="macroSelectDay(1, 'Mondays')" class="macro-btn">Mon</button>
+                            <button id="btn-macro-2" onclick="macroSelectDay(2, 'Tuesdays')" class="macro-btn">Tue</button>
+                            <button id="btn-macro-3" onclick="macroSelectDay(3, 'Wednesdays')" class="macro-btn">Wed</button>
+                            <button id="btn-macro-4" onclick="macroSelectDay(4, 'Thursdays')" class="macro-btn">Thu</button>
+                            <button id="btn-macro-5" onclick="macroSelectDay(5, 'Fridays')" class="macro-btn col-span-2">Fri</button>
+                            <button id="btn-macro-6" onclick="macroSelectDay(6, 'Saturdays')" class="macro-btn col-span-2">Sat</button>
+                            <button id="btn-macro-0" onclick="macroSelectDay(0, 'Sundays')" class="macro-btn col-span-4">Sun</button>
+                        </div>
+                        <!-- Feedback floats invisibly in the space-y gap without adding physical height -->
+                        <p id="macro-feedback" style="position: absolute; bottom: -28px; left: 0; right: 0; text-align: center; font-size: 0.875rem; font-weight: 600; color: var(--primary); opacity: 0; transition: opacity 0.3s; pointer-events: none; margin: 0;"></p>
+                    </div>
+                </div>
+            </details>
+
+            <!-- STEP 1: Review & Manage Calendar -->
+            <div class="step-section">
+                <div class="desktop-launch-header">
+                    <div class="step-header" style="justify-content: center;">
+                        <h3 class="step-title" style="text-align: center; margin: 0;">Review & Manage Calendar</h3>
+                    </div>
+                    <p class="step-desc" style="text-align: left; margin-bottom: 16px;">
+                        Review your season calendar below. Tap your Start Date, then tap your End Date to block a range (e.g. going on holiday). To toggle just a single day, simply tap it twice!
+                        <br><br>
+                        <strong>Tip:</strong> We recommend saving your unavailability in smaller chunks (e.g. month-by-month) rather than editing the entire calendar in one go.
+                    </p>
+                    <div style="text-align: center;">
+                        <span style="display: inline-flex; align-items: center;"><span style="width: 12px; height: 12px; border-radius: 50%; background: var(--error); display: inline-block; margin-right: 6px;"></span><span style="font-weight: 600; font-size: 0.8rem; color: var(--on-surface);">Red = Unavailable</span></span>
+                        <span style="display: inline-flex; align-items: center; margin-left: 12px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: var(--c-match); display: inline-block; margin-right: 6px;"></span><span style="font-weight: 600; font-size: 0.8rem; color: var(--on-surface);">Blue = Match</span></span>
+                    </div>
+                </div>
+                
+                <!-- Season Grid Anchor -->
+                <div id="season-grid-container" class="season-grid-scroll-area hidden-scrollbar"></div>
+            </div>
+
+            <!-- Soft Block Modal (Hidden) -->
+            <div id="soft-block-modal" class="modal-overlay hidden">
+                <div class="modal-content animate-fade-in match-card-content">
+                    <div class="match-card-header">
+                        <h3 style="margin: 0 0 8px 0; color: var(--on-surface); font-size: 1.15rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            🗓 <span id="modal-match-date"></span>
+                        </h3>
+                        <p id="modal-match-details" style="margin: 0; color: var(--secondary); font-weight: 800; font-size: 1.1rem;"></p>
+                        <span id="modal-match-venue" class="match-venue-badge"></span>
+                    </div>
+                    <div class="match-card-action-block">
+                        <h4 style="margin: 0 0 8px 0; color: var(--on-surface); font-size: 1.05rem; text-align: center;">Can't make this match?</h4>
+                        <p id="modal-match-subtext" style="margin: 0 0 24px 0; line-height: 1.5; font-size: 0.85rem; color: var(--on-bg); opacity: 0.8; text-align: center;">
+                            Warning: When marking yourself unavailable, please help your Team Captain find an appropriate substitute.
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <button type="button" class="btn match-btn-close" onclick="closeSoftBlockModal()">Close Details</button>
+                            <button type="button" class="btn match-btn-unav" onclick="confirmSoftBlock()">Mark Unavailable</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- STEP 4: Save (Positioned cleanly outside calendar-card) -->
+    <div id="player-save-footer" class="save-footer desktop-sticky-save hidden">
+        <!-- Range Cancel Pill (Stacked directly above save button) -->
+        <div id="range-cancel-pill" class="range-cancel-pill pill-hidden">
+            <span style="display: flex; align-items: center; gap: 6px;">🗓 Selecting Range...</span> 
+            <div class="pill-cancel-btn" onclick="cancelRangeAnchor(event)">✖ Cancel</div>
+        </div>
+
+        <button id="save-btn" onclick="submitAvailability()" class="btn btn-submit btn-block" style="padding: 14px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <span id="save-btn-text" style="font-weight: 800;">SAVE MY AVAILABILITY</span>
+            <div id="save-spinner" class="ff-spinner hidden" style="width: 20px; height: 20px; border-width: 3px; margin: 0; border-left-color: white;"></div>
+        </button>
+        <p id="save-msg" class="hidden text-center mt-4 text-sm font-medium"></p>
+    </div>
+
+    </div>
+    
+    <!-- BRANDING FOOTER (Portal View) REMOVED FOR OPTION A -->
+</div>
+
+<!-- GENERIC UI COMPONENTS -->
+<div id="picker-injection-point">
+    <!-- Generic Bottom Sheet Picker Component -->
+<div id="ff-picker-overlay" class="picker-overlay hidden">
+    <div class="picker-modal">
+        <!-- Header & Search -->
+        <div class="picker-header-block">
+            <div class="picker-title-row">
+                <h3 id="ff-picker-title" class="picker-title-text">Select Item</h3>
+                <button onclick="ff_pickerClose()" class="picker-close-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="height: 24px; width: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="search-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+                <input type="text" id="ff-picker-search-input" oninput="ff_pickerSearch()" placeholder="Type to search..." class="search-input">
+            </div>
+        </div>
+        <!-- Scrollable List -->
+        <div id="ff-picker-list-container" class="picker-list">
+            <!-- Populated via JS -->
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * GENERIC PICKER API
+     */
+    let ff_picker_data = [];
+    let ff_picker_onSelect = null;
+
+    /**
+     * Opens the picker modal with customized data.
+     * @param {string} title - The title of the modal (e.g. "Find your name")
+     * @param {string} placeholder - Search input placeholder
+     * @param {Array<{label: string, value: string, [key:string]: any}>} items - Array of items to list
+     * @param {function} onSelect - Callback when an item is selected. Receives the full item object.
+     */
+    function ff_openPicker(title, placeholder, items, onSelect) {
+        document.getElementById('ff-picker-title').textContent = title;
+        document.getElementById('ff-picker-search-input').placeholder = placeholder;
+        document.getElementById('ff-picker-search-input').value = '';
+        
+        ff_picker_data = items || [];
+        ff_picker_onSelect = onSelect;
+        
+        ff_pickerRenderList(ff_picker_data);
+        
+        const overlay = document.getElementById('ff-picker-overlay');
+        overlay.classList.remove('hidden');
+        overlay.style.opacity = '0';
+        requestAnimationFrame(() => {
+            overlay.style.opacity = '1';
+        });
+    }
+
+    function ff_pickerClose() {
+        const overlay = document.getElementById('ff-picker-overlay');
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 300);
+    }
+
+    function ff_pickerSearch() {
+        const query = document.getElementById('ff-picker-search-input').value.toLowerCase();
+        const filtered = ff_picker_data.filter(item => 
+            String(item.label).toLowerCase().includes(query)
+        );
+        ff_pickerRenderList(filtered);
+    }
+
+    function ff_pickerRenderList(items) {
+        const listContainer = document.getElementById('ff-picker-list-container');
+        listContainer.innerHTML = '';
+        
+        if (items.length === 0) {
+            listContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted);">No matches found.</div>';
+            return;
+        }
+
+        items.forEach(item => {
+            const btn = document.createElement('button');
+            btn.className = 'picker-list-btn';
+            btn.innerHTML = `<span>${item.label}</span>`;
+            
+            // Allow passing custom subtitle or badge HTML if needed
+            if (item.badgeHtml) {
+                btn.innerHTML += `<span style="float:right;">${item.badgeHtml}</span>`;
+            }
+
+            btn.onclick = () => {
+                if (typeof ff_picker_onSelect === 'function') {
+                    ff_picker_onSelect(item);
+                }
+            };
+            listContainer.appendChild(btn);
+        });
+    }
+</script>
+
+</div>
+
+  </div>
+
+  <!-- Global Scripts -->
+  <script>
+// --- State ---
+let currentPin = '';
+let portalData = null; // { players: [{name, teams, unavailabilities[]}], fixtures: [...] }
+let selectedPlayerObj = null;
+
+// --- DEVELOPER BACKDOOR ---
+let devTapCount = 0;
+let devTapTimeout;
+function handleDeveloperTap() {
+    devTapCount++;
+    clearTimeout(devTapTimeout);
+    if (devTapCount >= 5) {
+        const ver = (window && window.__FF_VERSION__) ? ` [${window.__FF_VERSION__}]` : (typeof appVersion !== 'undefined' && appVersion ? ` [${appVersion}]` : '');
+        if (confirm(`Developer Mode${ver}: Do you want to wipe memory and log out?`)) {
+            logout();
+        }
+        devTapCount = 0;
+    } else {
+        devTapTimeout = setTimeout(() => { devTapCount = 0; }, 1000);
+    }
+}
+
+let selectedDatesSet = new Set();
+let pendingSoftBlockDate = null;
+
+// --- RANGE MODE STATE ---
+let isRangeMode = true;
+let rangeStartDate = null;
+let pendingRangeConflicts = [];
+let pendingRangeDates = [];
+</script>
+
+  <script>
+function getServerToday() {
+    if (portalData && portalData.serverToday) {
+        const parts = portalData.serverToday.split('-');
+        if(parts.length === 3) {
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+    }
+    return new Date();
+}
+
+function initCalendar(existingDates) {
+    const today = getServerToday();
+    today.setHours(0, 0, 0, 0);
+
+    selectedDatesSet.clear();
+    const allExistingDates = existingDates || [];
+    
+    // Re-sync memory arrays to prevent length mismatches.
+    // Exclude past dates from the player's saved state since the calendar only operates on >= today
+    const futureOnlyDatesObj = [];
+    
+    allExistingDates.forEach(dStr => {
+        const parts = dStr.split('-');
+        if (parts.length === 3) {
+            const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            if (d >= today) {
+                selectedDatesSet.add(dStr);
+                futureOnlyDatesObj.push(dStr);
+            }
+        }
+    });
+
+    if (selectedPlayerObj) {
+        selectedPlayerObj.unavailabilities = futureOnlyDatesObj;
+    }
+
+    renderSeasonGrid();
+    _syncMacroButtonUI();
+    _updateSaveBtnText();
+}
+
+function renderSeasonGrid() {
+    const container = document.getElementById('season-grid-container');
+    if(!container) return;
+    container.innerHTML = '';
+    
+    const today = getServerToday();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth(); // 0-indexed
+    let renderedCount = 0;
+
+    if (portalData && portalData.seasonMonths && portalData.seasonMonths.length > 0) {
+        // Render exactly the months configured in the Availability sheet
+        portalData.seasonMonths.forEach(ym => {
+            const parts = ym.split('-');
+            if (parts.length === 2) {
+                const y = parseInt(parts[0]);
+                const m = parseInt(parts[1]) - 1; // 0-indexed month
+                if (y > currentYear || (y === currentYear && m >= currentMonth)) {
+                    container.appendChild(createMonthGrid(y, m));
+                    renderedCount++;
+                }
+            }
+        });
+    } else {
+        // Fallback safely just in case the backend payload is missing
+        // Render 7 months
+        for (let i = 0; i < 7; i++) {
+            const monthDate = new Date(currentYear, currentMonth + i, 1);
+            container.appendChild(createMonthGrid(monthDate.getFullYear(), monthDate.getMonth()));
+            renderedCount++;
+        }
+    }
+
+    // Desktop Centered Masonry alignment for 1 or 2 remaining items
+    if (renderedCount > 0 && renderedCount <= 2) {
+        container.classList.add('centered-grid');
+    } else {
+        container.classList.remove('centered-grid');
+    }
+}
+
+function createMonthGrid(year, month) {
+    const div = document.createElement('div');
+    div.className = 'month-grid';
+    
+    const header = document.createElement('div');
+    header.className = 'month-header-title';
+    header.textContent = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
+    div.appendChild(header);
+    
+    const dowRow = document.createElement('div');
+    dowRow.className = 'dow-row';
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    days.forEach(d => {
+        const dDiv = document.createElement('div');
+        dDiv.textContent = d;
+        dowRow.appendChild(dDiv);
+    });
+    div.appendChild(dowRow);
+    
+    const daysGrid = document.createElement('div');
+    daysGrid.className = 'days-grid';
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = getServerToday();
+    today.setHours(0,0,0,0);
+    
+    for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'day-cell empty';
+        daysGrid.appendChild(empty);
+    }
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement('div');
+        const currentDate = new Date(year, month, d);
+        
+        const yyyy = currentDate.getFullYear();
+        const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(currentDate.getDate()).padStart(2, '0');
+        const ymd = `${yyyy}-${mm}-${dd}`;
+        
+        cell.className = 'day-cell';
+        cell.textContent = d;
+        
+        if (currentDate < today) {
+            cell.classList.add('past');
+        } else {
+            let hasMatch = false;
+            let matchDesc = '';
+            if (portalData && portalData.fixtures) {
+                const playerTeams = selectedPlayerObj ? selectedPlayerObj.teams : [];
+                const match = portalData.fixtures.find(f => f.date === ymd && playerTeams.includes(String(f.ourTeam).toUpperCase().trim()));
+                if (match) {
+                    hasMatch = true;
+                    cell.dataset.matchInfo = `${match.ourTeam} vs ${match.opponent}`;
+                    cell.dataset.matchVenue = match.isHome ? '🏠 HOME MATCH' : '🚌 AWAY MATCH';
+                }
+            }
+            
+            if (selectedDatesSet.has(ymd)) {
+                cell.classList.add('status-unav');
+            }
+            
+            if (hasMatch) {
+                // 🛡️ Pre-Season Guard for Conflicts
+                if (portalData && portalData.isPreSeason && selectedDatesSet.has(ymd)) {
+                    // Are we blocking a protected match?
+                    const isProtectedMatch = ymd <= portalData.earlyMatchProtectionDate;
+                    
+                    if (isProtectedMatch) {
+                        // It's a conflict even in pre-season! Show split cell.
+                        cell.classList.add('status-match');
+                    } else {
+                        // It's a normal pre-season match. Skip adding blue!
+                        // The indicator stays strictly red!
+                    }
+                } else {
+                    // Regular season or no conflict situation
+                    cell.classList.add('status-match');
+                }
+            }
+            if (isRangeMode && rangeStartDate === ymd) {
+                cell.classList.add('range-anchor');
+            }
+            
+            cell.onclick = () => handleDayClick(ymd, cell);
+        }
+        
+        daysGrid.appendChild(cell);
+    }
+    div.appendChild(daysGrid);
+    return div;
+}
+
+window.cancelRangeAnchor = function(e) {
+    if (e) e.preventDefault();
+    rangeStartDate = null;
+    document.getElementById('range-cancel-pill').classList.add('pill-hidden');
+    renderSeasonGrid();
+};
+
+function handleDayClick(ymd, cellEl) {
+    // Dismiss active notification text immediately on calendar tap
+    document.getElementById('save-msg').classList.add('hidden');
+
+    // -- RANGE MODE NATIVE --
+    if (!rangeStartDate) {
+        // Intelligent Purple Tap: Prevent Anchor and show Info Modal if tapping a Purple Match
+        if (cellEl.classList.contains('status-match') && !selectedDatesSet.has(ymd)) {
+            pendingSoftBlockDate = ymd;
+            document.getElementById('modal-match-date').textContent = formatPortalDate(ymd);
+            document.getElementById('modal-match-details').textContent = cellEl.dataset.matchInfo || "Scheduled Match";
+            document.getElementById('modal-match-venue').textContent = cellEl.dataset.matchVenue || "Match";
+            document.getElementById('modal-match-venue').style.display = 'inline-block';
+            document.getElementById('soft-block-modal').classList.remove('hidden');
+            return; // Abort Range Anchor creation
+        }
+        
+        // Tap 1: Anchor
+        rangeStartDate = ymd;
+        renderSeasonGrid();
+        document.getElementById('range-cancel-pill').classList.remove('pill-hidden');
+    } else {
+        // Tap 2: Finalize
+        const endDateStr = ymd;
+            
+            const parseLocal = (str) => {
+                const pts = str.split('-');
+                return new Date(parseInt(pts[0]), parseInt(pts[1]) - 1, parseInt(pts[2]));
+            };
+            
+            let startD = parseLocal(rangeStartDate);
+            let endD = parseLocal(endDateStr);
+            
+            // Auto-swap
+            if (startD > endD) {
+                const temp = startD; startD = endD; endD = temp;
+            }
+            
+            const rangeDates = [];
+            let currD = new Date(startD);
+            const today = getServerToday();
+            today.setHours(0,0,0,0);
+            
+            while (currD <= endD) {
+                if (currD >= today) { 
+                    const y = currD.getFullYear();
+                    const m = String(currD.getMonth() + 1).padStart(2, '0');
+                    const d = String(currD.getDate()).padStart(2, '0');
+                    rangeDates.push(`${y}-${m}-${d}`);
+                }
+                currD.setDate(currD.getDate() + 1);
+            }
+            
+            // Intelligent Toggle Logic (Deselect Brush)
+            let currentBlockedCount = 0;
+            rangeDates.forEach(dStr => {
+                if (selectedDatesSet.has(dStr)) currentBlockedCount++;
+            });
+            
+            // If 50% or more of the range is already red, intelligently assume they want a Deselect Brush.
+            const isRemoving = currentBlockedCount >= Math.max(1, rangeDates.length / 2);
+            
+            if (isRemoving) {
+                // Immediately erase the unavailabilities. No match warning needed when clearing.
+                rangeDates.forEach(dStr => selectedDatesSet.delete(dStr));
+                rangeStartDate = null;
+                document.getElementById('range-cancel-pill').classList.add('pill-hidden');
+                renderSeasonGrid();
+                _syncMacroButtonUI();
+                _updateSaveBtnText();
+            } else {
+                // Conflict Check Engine (Bulk Adding)
+                const conflicts = [];
+                if (portalData && portalData.fixtures) {
+                    const playerTeams = selectedPlayerObj ? selectedPlayerObj.teams : [];
+                    rangeDates.forEach(dStr => {
+                        const match = portalData.fixtures.find(f => f.date === dStr && playerTeams.includes(String(f.team).toUpperCase().trim()));
+                        if (match) {
+                            const fM = formatPortalDate(dStr);
+                            const vStr = match.isHome ? 'Home' : 'Away';
+                            conflicts.push(`🚫 [${fM}] ${vStr} ${escapeHtml(match.ourTeam)} vs ${escapeHtml(match.opponent)}`);
+                        }
+                    });
+                }
+                
+                if (conflicts.length > 0) {
+                    pendingRangeDates = rangeDates;
+                    const matchStr = conflicts.length === 1 ? "1 Match Scheduled" : `${conflicts.length} Matches Scheduled`;
+                    document.getElementById('modal-match-date').textContent = matchStr;
+                    document.getElementById('modal-match-details').innerHTML = conflicts.join('<br><br>');
+                    document.getElementById('modal-match-venue').style.display = 'none';
+                    document.getElementById('soft-block-modal').classList.remove('hidden');
+                } else {
+                    rangeDates.forEach(dStr => selectedDatesSet.add(dStr));
+                    rangeStartDate = null;
+                    document.getElementById('range-cancel-pill').classList.add('pill-hidden');
+                    renderSeasonGrid();
+                    _syncMacroButtonUI();
+                    _updateSaveBtnText();
+                }
+            }
+        }
+}
+
+// --- Advanced Calendar Macros ---
+function _getSeasonDatesForDow(dayOfWeek) {
+    const results = [];
+    if (!portalData || !portalData.seasonMonths) return results;
+    
+    portalData.seasonMonths.forEach(ymStr => {
+        const parts = ymStr.split('-');
+        const y = parseInt(parts[0]);
+        const m = parseInt(parts[1]) - 1;
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+        
+        for (let d = 1; d <= daysInMonth; d++) {
+            const temp = new Date(y, m, d);
+            if (temp.getDay() === dayOfWeek) {
+                results.push(temp);
+            }
+        }
+    });
+    return results;
+}
+
+function _syncMacroButtonUI() {
+    for (let i = 0; i <= 6; i++) {
+        const btn = document.getElementById(`btn-macro-${i}`);
+        if (!btn) continue;
+
+        const seasonDates = _getSeasonDatesForDow(i);
+        let selectedCount = 0;
+        seasonDates.forEach(d => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const x = String(d.getDate()).padStart(2, '0');
+            if (selectedDatesSet.has(`${y}-${m}-${x}`)) selectedCount++;
+        });
+
+        if (selectedCount === seasonDates.length && seasonDates.length > 0) {
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    }
+}
+
+function macroSelectDay(dayOfWeek, dayName) {
+    const seasonDates = _getSeasonDatesForDow(dayOfWeek);
+    
+    let selectedCount = 0;
+    seasonDates.forEach(d => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const x = String(d.getDate()).padStart(2, '0');
+        if (selectedDatesSet.has(`${y}-${m}-${x}`)) selectedCount++;
+    });
+    
+    const isFullySelected = (selectedCount === seasonDates.length && seasonDates.length > 0);
+
+    if (isFullySelected) {
+        // DESELECT ALL MODE: Instant and safe
+        seasonDates.forEach(d => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const x = String(d.getDate()).padStart(2, '0');
+            selectedDatesSet.delete(`${y}-${m}-${x}`);
+        });
+        renderSeasonGrid();
+        _syncMacroButtonUI();
+        _updateSaveBtnText();
+
+        const feedbackEl = document.getElementById('macro-feedback');
+        if (feedbackEl && dayName) {
+            feedbackEl.textContent = `All upcoming ${dayName} are no longer marked automatically.`;
+            feedbackEl.classList.remove('opacity-0');
+            setTimeout(() => { feedbackEl.classList.add('opacity-0'); }, 3000);
+        }
+    } else {
+        // SELECT ALL MODE: Check for Match Conflicts
+        const newDates = [];
+        seasonDates.forEach(d => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const x = String(d.getDate()).padStart(2, '0');
+            const k = `${y}-${m}-${x}`;
+            if (!selectedDatesSet.has(k)) {
+                newDates.push(k);
+            }
+        });
+
+        // Run Conflict Engine on newDates only
+        const conflicts = [];
+        if (portalData && portalData.fixtures) {
+            const playerTeams = selectedPlayerObj ? selectedPlayerObj.teams : [];
+            newDates.forEach(dStr => {
+                const match = portalData.fixtures.find(f => f.date === dStr && playerTeams.includes(f.team));
+                if (match) {
+                        const fM = formatPortalDate(dStr);
+                        const vStr = match.isHome ? 'Home' : 'Away';
+                        conflicts.push(`🚫 [${fM}] ${vStr} ${escapeHtml(match.ourTeam)} vs ${escapeHtml(match.opponent)}`);
+                }
+            });
+        }
+
+        if (conflicts.length > 0) {
+            // Route to Modal (Pending confirmation)
+            pendingRangeDates = newDates;
+            const matchStr = conflicts.length === 1 ? "1 Match Scheduled" : `${conflicts.length} Matches Scheduled`;
+            document.getElementById('modal-match-date').textContent = matchStr;
+            document.getElementById('modal-match-details').innerHTML = conflicts.join('<br><br>');
+            document.getElementById('modal-match-venue').style.display = 'none';
+            document.getElementById('soft-block-modal').classList.remove('hidden');
+        } else {
+            // Instant Add
+            newDates.forEach(dStr => selectedDatesSet.add(dStr));
+            renderSeasonGrid();
+            _syncMacroButtonUI();
+            _updateSaveBtnText();
+
+            const feedbackEl = document.getElementById('macro-feedback');
+            if (feedbackEl && dayName) {
+                feedbackEl.textContent = `All upcoming ${dayName} are now marked as unavailable.`;
+                feedbackEl.classList.remove('opacity-0');
+                setTimeout(() => { feedbackEl.classList.add('opacity-0'); }, 3000);
+            }
+        }
+    }
+}
+</script>
+
+  <script>
+function toggleDate(ymd) {
+    if (selectedDatesSet.has(ymd)) {
+        selectedDatesSet.delete(ymd);
+    } else {
+        selectedDatesSet.add(ymd);
+    }
+    renderSeasonGrid();
+    _syncMacroButtonUI();
+    _updateSaveBtnText();
+}
+
+function _updateSaveBtnText() {
+    const count = selectedDatesSet.size;
+    const btnEl = document.getElementById('save-btn-text');
+    const mainBtn = document.getElementById('save-btn');
+    
+    let hasChanges = false;
+    if (selectedPlayerObj && selectedPlayerObj.unavailabilities) {
+        const savedArr = selectedPlayerObj.unavailabilities;
+        const setArr = Array.from(selectedDatesSet);
+        
+        if (savedArr.length !== count) {
+            hasChanges = true;
+        } else {
+            hasChanges = setArr.some(d => !savedArr.includes(d));
+        }
+    }
+
+    if (!hasChanges) {
+        mainBtn.disabled = true;
+        mainBtn.style.opacity = '0.5';
+        mainBtn.style.cursor = 'not-allowed';
+        btnEl.textContent = count === 0 ? "NO CHANGES (0 Blocked)" : `NO CHANGES (${count} Blocked)`;
+    } else {
+        mainBtn.disabled = false;
+        mainBtn.style.opacity = '1';
+        mainBtn.style.cursor = 'pointer';
+        if (count === 0) {
+            btnEl.textContent = "SAVE (0 Dates Blocked)";
+        } else if (count === 1) {
+            btnEl.textContent = "SAVE (1 Date Blocked)";
+        } else {
+            btnEl.textContent = `SAVE (${count} Dates Blocked)`;
+        }
+    }
+}
+
+function submitAvailability() {
+    if(!selectedPlayerObj) return;
+
+    const btn = document.getElementById('save-btn');
+    const spinner = document.getElementById('save-spinner');
+    const msg = document.getElementById('save-msg');
+
+    const payloadDates = Array.from(selectedDatesSet);
+
+    btn.disabled = true;
+    spinner.classList.remove('hidden');
+    msg.className = "hidden text-center mt-4 text-sm font-medium";
+    
+    // Show Fullscreen Loading Overlay with Simple Message
+    const overlay = document.getElementById('fullscreen-loading');
+    const overlayText = document.getElementById('fullscreen-loading-text');
+    
+    if (overlayText) overlayText.textContent = "Saving your availability...";
+    if (overlay) overlay.classList.remove('hidden');
+
+    const payload = {
+        playerName: selectedPlayerObj.name,
+        submittedDates: payloadDates
+    };
+
+    google.script.run
+        .withSuccessHandler(res => {
+            spinner.classList.add('hidden');
+            
+            const overlay = document.getElementById('fullscreen-loading');
+            const overlaySpinner = document.getElementById('loading-spinner');
+            const successIcon = document.getElementById('success-icon');
+            const overlayText = document.getElementById('fullscreen-loading-text');
+            
+            if (overlay && overlaySpinner && successIcon && overlayText) {
+                // Switch to success state
+                overlaySpinner.classList.add('hidden');
+                successIcon.classList.remove('hidden');
+                
+                // Micro-animation trigger
+                setTimeout(() => { successIcon.style.transform = "scale(1)"; }, 10);
+                
+                // Determine specific message based on conflicts and season deadline
+                let overlayMsg = "Saved successfully!";
+                const bad = (res.conflicts && res.conflicts.badNews) ? res.conflicts.badNews.length : 0;
+                const good = (res.conflicts && res.conflicts.goodNews) ? res.conflicts.goodNews.length : 0;
+                const isPostDeadline = portalData && !portalData.isPreSeason;
+                
+                if (bad > 0 && good === 0) {
+                    overlayMsg = isPostDeadline
+                        ? ('⚠️ Saved! You created ' + bad + ' match conflict(s). Since the free reschedule deadline has passed, please notify your captain immediately.')
+                        : ('⚠️ Saved! You have created ' + bad + ' match conflict(s). Please notify your captain immediately.');
+                } else if (bad === 0 && good > 0) {
+                    overlayMsg = '✅ Saved! You are now available for ' + good + ' newly resolved match(es). Please notify your captain!';
+                } else if (bad > 0 && good > 0) {
+                    overlayMsg = isPostDeadline
+                        ? ('⚠️ Saved! You created ' + bad + ' new conflict(s) and resolved ' + good + ' match(es). Since the free reschedule deadline has passed, please notify your captain immediately.')
+                        : ('⚠️ Saved! You created ' + bad + ' new conflict(s) and resolved ' + good + ' match(es). Please notify your captain immediately.');
+                }
+                
+                overlayText.textContent = overlayMsg;
+                
+                // Update ARIA announcer for screen readers
+                const ariaAnnouncer = document.getElementById('aria-announcer');
+                if (ariaAnnouncer) ariaAnnouncer.textContent = overlayMsg;
+                
+                // Hold longer for complex messages so user can read them
+                const holdTime = (bad > 0 || good > 0) ? 4000 : 1500;
+                
+                // Hold then fade out
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    // Reset state for next time
+                    overlaySpinner.classList.remove('hidden');
+                    successIcon.classList.add('hidden');
+                    successIcon.style.transform = "scale(0.5)";
+                    overlayText.textContent = "Saving your availability...";
+                }, holdTime);
+            } else if (overlay) {
+                overlay.classList.add('hidden');
+            }
+            
+            const calCard = document.getElementById('calendar-card');
+            if (calCard) {
+                calCard.style.pointerEvents = "auto";
+                calCard.style.opacity = "1";
+            }
+            
+            if(res.success) {
+                const bad = (res.conflicts && res.conflicts.badNews) ? res.conflicts.badNews.length : 0;
+                const good = (res.conflicts && res.conflicts.goodNews) ? res.conflicts.goodNews.length : 0;
+
+                if (bad > 0 && good === 0) {
+                    msg.textContent = `⚠️ Saved! You have created ${bad} match conflict(s). Please notify your captain immediately.`;
+                    msg.style.color = "var(--primary)";
+                } else if (bad === 0 && good > 0) {
+                    msg.textContent = `✅ Saved! You are now available for ${good} newly resolved match(es). Please notify your captain!`;
+                    msg.classList.add("text-green-600", "dark:text-green-400");
+                    msg.style.color = "";
+                } else if (bad > 0 && good > 0) {
+                    msg.textContent = `⚠️ Saved! You created ${bad} new conflict(s) and resolved ${good} match(es). Please notify your captain immediately.`;
+                    msg.style.color = "var(--primary)";
+                } else {
+                    msg.textContent = "✅ Availability saved successfully!";
+                    msg.classList.add("text-green-600", "dark:text-green-400");
+                    msg.style.color = "";
+                }
+                
+                msg.classList.remove('hidden');
+                selectedPlayerObj.unavailabilities = payloadDates;
+                _updateSaveBtnText();
+
+                // Dynamic Wipe: Remove auto-cancelled matches from local UI state
+                if (res.cancelledDates && res.cancelledDates.length > 0) {
+                    if (portalData && portalData.fixtures) {
+                        portalData.fixtures = portalData.fixtures.filter(f => !res.cancelledDates.includes(f.date));
+                        renderSeasonGrid();
+                    }
+                }
+
+            } else {
+                msg.textContent = "❌ " + (res.error || "Failed to save.");
+                msg.classList.add("text-red-500");
+                msg.style.color = "";
+                _updateSaveBtnText();
+            }
+        })
+        .withFailureHandler(errObj => {
+            btn.disabled = false;
+            spinner.classList.add('hidden');
+            
+            const overlay = document.getElementById('fullscreen-loading');
+            if (overlay) overlay.classList.add('hidden');
+            
+            if (btnTextSpan) _updateSaveBtnText();
+            
+            if (calCard) {
+                calCard.style.pointerEvents = "auto";
+                calCard.style.opacity = "1";
+            }
+            msg.textContent = "❌ Network error. Try again.";
+            msg.classList.add("text-red-500");
+            msg.classList.remove('hidden');
+        })
+        .submitPlayerAvailability(currentPin, payload);
+}
+</script>
+
+  <script>
+window.closeSoftBlockModal = function() {
+    pendingSoftBlockDate = null;
+    pendingRangeDates = [];
+    document.getElementById('modal-match-venue').style.display = 'inline-block';
+    document.getElementById('soft-block-modal').classList.add('hidden');
+};
+
+window.confirmSoftBlock = function() {
+    if (pendingSoftBlockDate) {
+        toggleDate(pendingSoftBlockDate);
+    } else if (pendingRangeDates && pendingRangeDates.length > 0) {
+        pendingRangeDates.forEach(dStr => selectedDatesSet.add(dStr));
+        rangeStartDate = null;
+        document.getElementById('range-cancel-pill').classList.add('pill-hidden');
+        pendingRangeDates = [];
+        renderSeasonGrid();
+        _syncMacroButtonUI();
+        _updateSaveBtnText();
+    }
+    closeSoftBlockModal();
+};
+</script>
+
+  <script>
+function handleLogin(e, autoPin = null) {
+    if(e) e.preventDefault();
+    const pin = autoPin || (document.getElementById('pin-input') ? document.getElementById('pin-input').value : '');
+    const btn = document.getElementById('login-btn');
+    const btnText = document.getElementById('login-btn-text');
+    const spinner = document.getElementById('login-spinner');
+    const err = document.getElementById('login-error');
+    const formContainer = document.getElementById('login-form-container');
+    const fullscreenLoading = document.getElementById('fullscreen-loading');
+
+    if(!pin) return;
+
+    if (btn) btn.disabled = true;
+    if (btnText) btnText.classList.add('hidden');
+    if (spinner) spinner.classList.remove('hidden');
+    if (err) {
+        err.classList.add('hidden');
+        err.style.display = 'none';
+    }
+    if (formContainer) formContainer.classList.remove('shake');
+
+    // GAS Call
+    google.script.run
+        .withSuccessHandler(res => {
+            if (btn) btn.disabled = false;
+            if (btnText) btnText.classList.remove('hidden');
+            if (spinner) spinner.classList.add('hidden');
+            if (fullscreenLoading) fullscreenLoading.classList.add('hidden');
+
+            if(res.success) {
+                currentPin = res.token || pin;
+                if (typeof setPortalStorage === 'function') {
+                    if (res.token) {
+                        setPortalStorage('player_session_token', res.token);
+                    }
+                    setPortalStorage('player_pin', pin);
+                    setPortalStorage('player_cached_data', JSON.stringify(res.data));
+                }
+                localStorage.setItem('ff_player_pin', pin); // Backwards compatibility for contract tests
+                portalData = res.data;
+                if (portalData && portalData.clubName && typeof updateClubBrandingState === 'function') {
+                    updateClubBrandingState(portalData, 'Player');
+                }
+                initPortalView();
+            } else {
+                if (typeof removePortalStorage === 'function') {
+                    removePortalStorage('player_session_token');
+                    removePortalStorage('player_pin');
+                    removePortalStorage('player_cached_data');
+                }
+                localStorage.removeItem('ff_player_pin'); // Clear invalid memory
+                localStorage.removeItem('ff_portal_pin');
+                localStorage.removeItem('ff_player_cached_data');
+                localStorage.removeItem('ff_cached_portal_data');
+                const statusScreen = document.getElementById('status-screen');
+                if (statusScreen) statusScreen.style.display = 'none';
+                const loginView = document.getElementById('view-login');
+                if (loginView) {
+                    loginView.style.display = '';
+                    loginView.classList.remove('hidden');
+                }
+                if (formContainer) formContainer.classList.remove('hidden');
+                if (!autoPin && err) {
+                    const isCustomSystemMsg = res.error && (res.error.includes('disabled') || res.error.includes('Configuration'));
+                    const isNetwork = res.error && (res.error.includes('Network') || res.error.includes('server') || res.error.includes('connect'));
+                    err.textContent = (isNetwork || isCustomSystemMsg) ? res.error : "Incorrect PIN.";
+                    err.style.display = 'block';
+                    err.classList.remove('hidden');
+                }
+                if (formContainer) {
+                    formContainer.classList.remove('shake');
+                    void formContainer.offsetWidth;
+                    formContainer.classList.add('shake');
+                }
+                const pinInput = document.getElementById('pin-input');
+                if (pinInput) {
+                    pinInput.value = '';
+                    pinInput.focus({ preventScroll: true });
+                }
+            }
+        })
+        .withFailureHandler(errObj => {
+            const statusScreen = document.getElementById('status-screen');
+            if (btn) btn.disabled = false;
+            if (btnText) btnText.classList.remove('hidden');
+            if (spinner) spinner.classList.add('hidden');
+            if (fullscreenLoading) fullscreenLoading.classList.add('hidden');
+
+            const cachedData = (typeof getPortalStorage === 'function' ? getPortalStorage('player_cached_data') : null) || localStorage.getItem('ff_player_cached_data') || localStorage.getItem('ff_cached_portal_data');
+            if (cachedData && autoPin) {
+                try {
+                    portalData = JSON.parse(cachedData);
+                    if (portalData && portalData.clubName && typeof updateClubBrandingState === 'function') {
+                        updateClubBrandingState(portalData, 'Player');
+                    }
+                    currentPin = pin;
+                    initPortalView();
+                    return;
+                } catch (e) {}
+            }
+
+            if (!navigator.onLine && autoPin) {
+                showPlayerOfflineCard();
+                return;
+            }
+
+            if (statusScreen) statusScreen.style.display = 'none';
+            const loginView = document.getElementById('view-login');
+            if (loginView) {
+                loginView.style.display = '';
+                loginView.classList.remove('hidden');
+            }
+            if (formContainer) formContainer.classList.remove('hidden');
+            if (err) {
+                err.textContent = "Network error. Try again.";
+                err.style.display = 'block';
+                err.classList.remove('hidden');
+            }
+            if (formContainer) {
+                formContainer.classList.remove('shake');
+                void formContainer.offsetWidth;
+                formContainer.classList.add('shake');
+            }
+        })
+        .getPortalData(pin);
+}
+
+function revealPlayerLoginView() {
+    const statusScreen = document.getElementById('status-screen');
+    if (statusScreen) statusScreen.style.display = 'none';
+    const loginView = document.getElementById('view-login');
+    if (loginView) {
+        loginView.style.display = '';
+        loginView.classList.remove('hidden');
+    }
+    const formContainer = document.getElementById('login-form-container');
+    if (formContainer) formContainer.classList.remove('hidden');
+    const pinInput = document.getElementById('pin-input');
+    if (pinInput) {
+        setTimeout(() => pinInput.focus({ preventScroll: true }), 100);
+    }
+}
+
+function showPlayerOfflineCard() {
+    const spinner = document.getElementById('spinner-loader');
+    const statusTxt = document.getElementById('status-text');
+    const offlinePanel = document.getElementById('offline-panel');
+    const statusScreen = document.getElementById('status-screen');
+    if (spinner) spinner.style.display = 'none';
+    if (statusTxt) statusTxt.style.display = 'none';
+    if (offlinePanel) offlinePanel.style.display = 'block';
+    if (statusScreen) statusScreen.style.display = 'flex';
+}
+
+function initPortalView() {
+    const statusScreen = document.getElementById('status-screen');
+    if (statusScreen) statusScreen.style.display = 'none';
+    const loginView = document.getElementById('view-login');
+    if (loginView) {
+        loginView.style.display = 'none';
+        loginView.classList.add('hidden');
+    }
+    document.getElementById('view-main').classList.remove('hidden');
+
+    const macroGroup = document.querySelector('.advanced-macro-group');
+    const preSeasonBanner = document.getElementById('pre-season-banner');
+    const modalMatchSubtext = document.getElementById('modal-match-subtext');
+
+    if (portalData && portalData.isMacroEnabled) {
+        if (macroGroup) macroGroup.classList.remove('hidden');
+    } else {
+        if (macroGroup) macroGroup.classList.add('hidden');
+    }
+
+    if (portalData && portalData.isPreSeason) {
+        if (preSeasonBanner) preSeasonBanner.classList.remove('hidden');
+        if (modalMatchSubtext) {
+            modalMatchSubtext.innerHTML = "<strong>Don't worry!</strong> During the scheduling phase, your unavailability will automatically request a reschedule. (Note: Early Cup matches exclude this).";
+        }
+    } else {
+        if (preSeasonBanner) preSeasonBanner.classList.add('hidden');
+        if (modalMatchSubtext) {
+            modalMatchSubtext.innerHTML = '<strong style="color: var(--error);">Warning:</strong> When marking yourself unavailable, please help your Team Captain find an appropriate substitute.';
+        }
+    }
+
+    // Auto-select player if in memory
+    const savedPlayer = (typeof getPortalStorage === 'function' ? getPortalStorage('player_name') : null) || localStorage.getItem('ff_player_name') || localStorage.getItem('ff_portal_player');
+    if (savedPlayer) {
+        const exists = portalData.players.find(p => p.name === savedPlayer);
+        if (exists) {
+            processPlayerSelection(savedPlayer);
+        }
+    }
+}
+
+// --- Custom Player Picker Logic ---
+function openPlayerPicker() {
+    if (!portalData || !portalData.players) return;
+    
+    // Map player data to the generic picker format
+    const pickerItems = portalData.players
+        .map(p => ({ label: p.name, value: p.name }))
+        .sort((a,b) => a.label.localeCompare(b.label));
+
+    ff_openPicker(
+        "Find your name", 
+        "Type to search...", 
+        pickerItems, 
+        (selectedItem) => {
+            processPlayerSelection(selectedItem.value);
+        }
+    );
+}
+
+function processPlayerSelection(playerName) {
+    if(!playerName) return;
+
+    selectedPlayerObj = portalData.players.find(p => p.name === playerName);
+    if (typeof setPortalStorage === 'function') {
+        setPortalStorage('player_name', playerName);
+    }
+    localStorage.setItem('ff_player_name', playerName); // Save Memory
+    
+    // Hide the initial selector entirely
+    document.getElementById('player-select-card').classList.add('hidden');
+    
+    // Update UI trigger
+    const nameEl = document.getElementById('selected-player-name');
+    nameEl.textContent = playerName;
+    
+    ff_pickerClose();
+    document.getElementById('calendar-card').classList.remove('hidden');
+    const saveFooter = document.getElementById('player-save-footer');
+    if (saveFooter) saveFooter.classList.remove('hidden');
+    
+    // Show sticky profile strip
+    // Desktop logic
+    const dName = document.getElementById('desktop-sticky-player-name');
+    if (dName) dName.innerText = 'MANAGING: ' + playerName;
+    
+    // Mobile Logic (First Name + Last Initial)
+    let shortName = playerName;
+    const parts = playerName.trim().split(/\s+/);
+    if (parts.length > 1) {
+        shortName = parts[0] + ' ' + parts[parts.length - 1].charAt(0) + '.';
+    }
+    const mName = document.getElementById('mobile-sticky-player-name');
+    if (mName) mName.innerText = shortName;
+
+    const dStrip = document.getElementById('desktop-sticky-player-strip');
+    if (dStrip) dStrip.classList.remove('hidden');
+    const mStrip = document.getElementById('mobile-sticky-player-strip');
+    if (mStrip) mStrip.classList.remove('hidden');
+    
+    initCalendar(selectedPlayerObj.unavailabilities);
+    
+    // Reset msg
+    document.getElementById('save-msg').classList.add('hidden');
+}
+
+function clearPlayerMemory() {
+    if (typeof removePortalStorage === 'function') {
+        removePortalStorage('player_name');
+    }
+    localStorage.removeItem('ff_player_name');
+    localStorage.removeItem('ff_portal_player');
+    localStorage.removeItem('player_name');
+    const pCard = document.getElementById('player-select-card');
+    if (pCard) pCard.classList.remove('hidden');
+    const cCard = document.getElementById('calendar-card');
+    if (cCard) cCard.classList.add('hidden');
+    const saveFooterEl = document.getElementById('player-save-footer');
+    if (saveFooterEl) saveFooterEl.classList.add('hidden');
+    const dStrip = document.getElementById('desktop-sticky-player-strip');
+    if (dStrip) dStrip.classList.add('hidden');
+    const mStrip = document.getElementById('mobile-sticky-player-strip');
+    if (mStrip) mStrip.classList.add('hidden');
+    
+    const saveMsg = document.getElementById('save-msg');
+    if (saveMsg) saveMsg.classList.add('hidden');
+    const nameEl = document.getElementById('selected-player-name');
+    if (nameEl) nameEl.textContent = "Select your name...";
+    selectedPlayerObj = null;
+    selectedDatesSet.clear();
+}
+
+function logout() {
+    if (typeof removePortalStorage === 'function') {
+        removePortalStorage('player_session_token');
+        removePortalStorage('player_pin');
+        removePortalStorage('player_name');
+        removePortalStorage('player_cached_data');
+    }
+    localStorage.removeItem('ff_player_pin');
+    localStorage.removeItem('ff_portal_pin');
+    localStorage.removeItem('player_pin');
+    localStorage.removeItem('player_session_token');
+    localStorage.removeItem('ff_player_session_token');
+    localStorage.removeItem('ff_player_name');
+    localStorage.removeItem('ff_portal_player');
+    localStorage.removeItem('ff_player_cached_data');
+    localStorage.removeItem('ff_cached_portal_data');
+    
+    document.getElementById('view-main').classList.add('hidden');
+    revealPlayerLoginView();
+    const pinInput = document.getElementById('pin-input');
+    if (pinInput) pinInput.value = "";
+    const saveMsg = document.getElementById('save-msg');
+    if (saveMsg) saveMsg.classList.add('hidden');
+    
+    clearPlayerMemory();
+    currentPin = '';
+    portalData = null;
+}
+
+// --- Boot & Branding Hydration (CourtFlow Network-Gated Model) ---
+(function initPlayerBoot_() {
+    const cfgEl = document.getElementById('ff-config');
+    const cfgClubName = cfgEl && cfgEl.dataset && cfgEl.dataset.clubName ? cfgEl.dataset.clubName : '';
+    const cfgClubLogo = cfgEl && cfgEl.dataset && cfgEl.dataset.clubLogoUrl ? cfgEl.dataset.clubLogoUrl : '';
+    const initialClubName = cfgClubName || (typeof getPortalStorage === 'function' ? getPortalStorage('club_name') : null) || localStorage.getItem('leagues_dev_pwa_club_name') || localStorage.getItem('leagues_pwa_club_name');
+    const cachedMeta = (typeof getPortalStorage === 'function' ? getPortalStorage('shared_public_metadata') : null) || localStorage.getItem('ff_shared_public_metadata') || localStorage.getItem('ff_public_metadata');
+    if (cfgClubName || cfgClubLogo) {
+        hydrateClubBranding({ clubName: cfgClubName, clubLogoUrl: cfgClubLogo }, 'Player');
+    } else if (cachedMeta) {
+        try {
+            const parsed = JSON.parse(cachedMeta);
+            hydrateClubBranding(parsed, 'Player');
+        } catch (e) {}
+    } else if (initialClubName) {
+        hydrateClubBranding({ clubName: initialClubName }, 'Player');
+    }
+
+    const storedToken = (typeof getPortalStorage === 'function') ? getPortalStorage('player_session_token') : null;
+    const storedPin = (typeof getPortalStorage === 'function') ? getPortalStorage('player_pin') : (localStorage.getItem('ff_player_pin') || localStorage.getItem('ff_portal_pin'));
+    const authParam = storedToken || storedPin;
+    if (authParam) {
+        // Authenticated: Keep splash screen visible while fetching fresh portal data
+        const triggerAutoLogin = () => {
+            handleLogin(null, authParam);
+        };
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', triggerAutoLogin);
+        } else {
+            triggerAutoLogin();
+        }
+    } else {
+        // Unauthenticated: Fetch public metadata before revealing login view (CourtFlow model)
+        if (typeof google !== 'undefined' && google.script && google.script.run && typeof google.script.run.getPublicClubMetadata === 'function') {
+            google.script.run
+                .withSuccessHandler(res => {
+                    const meta = (res && res.clubName) ? res : (res && res.data ? res.data : null);
+                    if (meta) {
+                        if (typeof setPortalStorage === 'function') {
+                            setPortalStorage('shared_public_metadata', JSON.stringify(meta));
+                        }
+                        localStorage.setItem('ff_shared_public_metadata', JSON.stringify(meta));
+                        hydrateClubBranding(meta, 'Player');
+                    }
+                    revealPlayerLoginView();
+                })
+                .withFailureHandler(err => {
+                    console.warn('[PWA] Failed to fetch public club metadata:', err);
+                    if (!navigator.onLine) {
+                        showPlayerOfflineCard();
+                    } else {
+                        revealPlayerLoginView();
+                    }
+                })
+                .getPublicClubMetadata();
+        } else {
+            revealPlayerLoginView();
+        }
+    }
+})();
+</script>
+
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch(err => console.error('SW register failed: ', err));
+    }
+  </script>
+</body>
+</html>
