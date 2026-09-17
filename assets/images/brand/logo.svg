@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <defs>
+    <!-- Icon Gradient (30% split for 1:1 circular badge) -->
+    <linearGradient id="icon-g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="30%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+
+    <!-- Text Gradient (55% split for horizontal wordmark) -->
+    <linearGradient id="text-g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="55%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+
+    <!-- Responsive Theming Stylesheet -->
+    <style>
+      :root {
+        --text-fixture: #0f172a; /* Obsidian Slate for light mode */
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --text-fixture: #ffffff; /* Pure White for dark mode */
+        }
+      }
+      .txt-fixture {
+        fill: var(--text-fixture);
+      }
+    </style>
+  </defs>
+
+  <!-- 1. Circular Brand Icon Badge (Left) -->
+  <g transform="translate(10, 10)">
+    <rect width="60" height="60" rx="30" fill="url(#icon-g)"/>
+    <g transform="scale(0.6)">
+      <path d="M22.5,32 H30.5 V68 H22.5 Z M28.6,47 H46.6 V53.9 H28.6 Z M28.6,32 H47.4 V38.9 H28.6 Z M52.6,32 H60.6 V68 H52.6 Z M58.7,47 H76.7 V53.9 H58.7 Z M58.7,32 H77.5 V38.9 H58.7 Z" fill="#ffffff"/>
+    </g>
+  </g>
+
+  <!-- 2. Integrated Wordmark (Right) -->
+  <text x="85" y="40" 
+        dominant-baseline="central" 
+        font-family="Outfit, -apple-system, sans-serif" 
+        font-size="32" 
+        letter-spacing="-0.04em">
+    <tspan class="txt-fixture" font-weight="850">Fixture</tspan><tspan class="txt-flow" font-weight="500" fill="url(#text-g)">Flow</tspan>
+  </text>
+</svg>
