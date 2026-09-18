@@ -1,12 +1,12 @@
-const CACHE_NAME = 'ff-club-dev-cache-v132';
+const CACHE_NAME = 'ff-club-dev-cache-v133';
 const CACHE_PREFIX = 'ff-club-dev-cache-';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   '/assets/js/leagues-registry.js',
-  '/assets/images/leagues/icon-club.png',
-  '/assets/images/leagues/icon-club.svg'
+  '/assets/images/leagues/icon-club-dev-180.png',
+  '/assets/images/leagues/icon-club-dev.svg'
 ];
 
 self.addEventListener('install', (event) => {

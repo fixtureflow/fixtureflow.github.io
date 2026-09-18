@@ -1,12 +1,12 @@
-const CACHE_NAME = 'ff-captain-dev-cache-v132';
+const CACHE_NAME = 'ff-captain-dev-cache-v133';
 const CACHE_PREFIX = 'ff-captain-dev-cache-';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   '/assets/js/leagues-registry.js',
-  '/assets/images/leagues/icon-captain.png',
-  '/assets/images/leagues/icon-captain.svg'
+  '/assets/images/leagues/icon-captain-dev-180.png',
+  '/assets/images/leagues/icon-captain-dev.svg'
 ];
 
 self.addEventListener('install', (event) => {

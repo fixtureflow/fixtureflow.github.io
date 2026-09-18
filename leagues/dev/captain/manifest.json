@@ -1,6 +1,8 @@
 {
   "name": "FixtureFlow: Captain Portal (Dev)",
   "short_name": "FF Captain (Dev)",
+  "id": "/leagues/dev/captain/",
+  "scope": "/leagues/dev/captain/",
   "start_url": "/leagues/dev/captain/?c=dev",
   "display": "standalone",
   "background_color": "#0b1329",
@@ -8,15 +10,34 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/assets/images/leagues/icon-captain.png",
-      "sizes": "180x180",
-      "type": "image/png"
+      "src": "/assets/images/leagues/icon-captain-dev-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/assets/images/leagues/icon-captain.svg",
+      "src": "/assets/images/leagues/icon-captain-dev-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/leagues/icon-captain-dev-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/images/leagues/icon-captain-dev.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
+    },
+    {
+      "src": "/assets/images/leagues/icon-captain-dev-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }

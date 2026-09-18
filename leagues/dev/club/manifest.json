@@ -1,22 +1,43 @@
 {
-  "name": "FixtureFlow: Opponent Portal (Dev)",
-  "short_name": "FF Opponent (Dev)",
+  "name": "FixtureFlow: Club Admin (Dev)",
+  "short_name": "FF Fixtures (Dev)",
+  "id": "/leagues/dev/club/",
+  "scope": "/leagues/dev/club/",
   "start_url": "/leagues/dev/club/?c=dev",
   "display": "standalone",
   "background_color": "#0b1329",
-  "theme_color": "#38bdf8",
+  "theme_color": "#0f172a",
   "orientation": "any",
   "icons": [
     {
-      "src": "/assets/images/leagues/icon-club.png",
-      "sizes": "180x180",
-      "type": "image/png"
+      "src": "/assets/images/leagues/icon-club-dev-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/assets/images/leagues/icon-club.svg",
+      "src": "/assets/images/leagues/icon-club-dev-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/leagues/icon-club-dev-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/images/leagues/icon-club-dev.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
+    },
+    {
+      "src": "/assets/images/leagues/icon-club-dev-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }

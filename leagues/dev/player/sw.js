@@ -1,12 +1,12 @@
-const CACHE_NAME = 'ff-player-dev-cache-v132';
+const CACHE_NAME = 'ff-player-dev-cache-v133';
 const CACHE_PREFIX = 'ff-player-dev-cache-';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   '/assets/js/leagues-registry.js',
-  '/assets/images/leagues/icon-player.png',
-  '/assets/images/leagues/icon-player.svg'
+  '/assets/images/leagues/icon-player-dev-180.png',
+  '/assets/images/leagues/icon-player-dev.svg'
 ];
 
 self.addEventListener('install', (event) => {
