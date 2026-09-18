@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-club-cache-v3.0.0';
+const CACHE_NAME = 'ff-club-cache-v3.1.0';
 const CACHE_PREFIX = 'ff-club-cache-';
 const ASSETS_TO_CACHE = [
   './',
