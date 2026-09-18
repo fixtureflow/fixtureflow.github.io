@@ -1118,6 +1118,14 @@ function resolveCourtflowHost(input) {
         hostId = storedHostId;
         clubName = localStorage.getItem('leagues_pwa_club_name') || '';
         clubShort = localStorage.getItem('leagues_pwa_club_short') || '';
+        const storedSlug = localStorage.getItem('leagues_pwa_club_slug') || '';
+        if (storedSlug && !rawClubParam && typeof window !== 'undefined' && window.history && window.history.replaceState) {
+          try {
+            const nextUrl = new URL(window.location.href);
+            nextUrl.searchParams.set('c', storedSlug);
+            window.history.replaceState(null, '', nextUrl.toString());
+          } catch (e) {}
+        }
       } else if (storedHostId) {
         // A client poisoned by an older build must not stay poisoned.
         console.warn("[Security] Discarding a stored host that is not in the club registry.");
@@ -1624,9 +1632,15 @@ function resolveCourtflowHost(input) {
         slug = match ? decodeURIComponent(match[1]) : '';
       }
     }
+    const isDevPath = (typeof window !== 'undefined' && window.location && window.location.pathname && window.location.pathname.includes('/dev/'));
+    if (!slug && typeof localStorage !== 'undefined') {
+      try {
+        slug = localStorage.getItem(isDevPath ? 'leagues_dev_pwa_club_slug' : 'leagues_pwa_club_slug') || '';
+      } catch (e) {}
+    }
     slug = slug || '';
 
-    const isDev = (window.location && window.location.pathname && window.location.pathname.includes('/dev/')) || 
+    const isDev = isDevPath || 
                   ['dev', 'test', 'local'].includes(slug.toLowerCase()) ||
                   (typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging')));
 
@@ -1680,9 +1694,15 @@ function resolveCourtflowHost(input) {
         slug = match ? decodeURIComponent(match[1]) : '';
       }
     }
+    const isDevPath = (typeof window !== 'undefined' && window.location && window.location.pathname && window.location.pathname.includes('/dev/'));
+    if (!slug && typeof localStorage !== 'undefined') {
+      try {
+        slug = localStorage.getItem(isDevPath ? 'leagues_dev_pwa_club_slug' : 'leagues_pwa_club_slug') || '';
+      } catch (e) {}
+    }
     slug = slug || '';
 
-    const isDev = (window.location && window.location.pathname && window.location.pathname.includes('/dev/')) || 
+    const isDev = isDevPath || 
                   ['dev', 'test', 'local'].includes(slug.toLowerCase()) ||
                   (typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging')));
 
@@ -2022,6 +2042,14 @@ function resolveCourtflowHost(input) {
       if (resolved && resolved.slug) {
         slug = resolved.slug;
       }
+    }
+
+    if (!slug) {
+      try {
+        var prefixKey = isDev ? "leagues_dev_pwa_club_slug" : "leagues_pwa_club_slug";
+        var storedSlug = (typeof localStorage !== "undefined" && localStorage.getItem(prefixKey)) || "";
+        slug = storedSlug.trim().toLowerCase();
+      } catch (e) {}
     }
 
     if (!slug) {
@@ -3215,7 +3243,7 @@ function resolveCourtflowHost(input) {
   <meta name="app-version" content="v3.0.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-captain.svg">
-  <link rel="apple-touch-icon" href="/assets/images/leagues/icon-captain.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/leagues/icon-captain.png">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
