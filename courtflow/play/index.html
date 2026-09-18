@@ -10,9 +10,8 @@
     <title>CourtFlow · FixtureFlow</title>
     <meta name="apple-mobile-web-app-title" content="CourtFlow">
     <meta name="application-name" content="CourtFlow">
-    <meta name="theme-color" content="#080d16">
+    <meta name="theme-color" content="#0b1329">
     <meta name="robots" content="noindex, nofollow">
-    <link rel="apple-touch-icon" href="https://fixtureflow.github.io/assets/images/courtflow/icon-courtflow.png">
     
     <!-- Zero-Flash Theme Initialization: Detects System OS or Saved Preference Before Paint -->
     <script>
@@ -255,6 +254,14 @@ function resolveCourtflowHost(input) {
       const storedHostId = localStorage.getItem('cf_host_id');
       if (isRegisteredHost(storedHostId)) {
         hostId = storedHostId;
+        const storedSlug = localStorage.getItem('cf_club_slug') || '';
+        if (storedSlug && !clubParam && typeof window !== 'undefined' && window.history && window.history.replaceState) {
+          try {
+            const nextUrl = new URL(window.location.href);
+            nextUrl.searchParams.set('c', storedSlug);
+            window.history.replaceState(null, '', nextUrl.toString());
+          } catch (e) {}
+        }
       } else if (storedHostId) {
         // A client poisoned before this check existed must not stay poisoned.
         console.warn("[Security] Discarding a stored host that is not in the club registry.");
@@ -2436,7 +2443,10 @@ function resolveCourtflowHost(input) {
   <meta name="app-version" content="v2.3.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <link rel="icon" type="image/svg+xml" href="/assets/images/courtflow/icon-courtflow.svg">
-  <link rel="apple-touch-icon" href="/assets/images/courtflow/icon-courtflow.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/courtflow/icon-courtflow.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="manifest.json">
 </head>
   <body>
@@ -2969,6 +2979,13 @@ function resolveCourtflowHost(input) {
     }
 
     if (!slug) {
+      try {
+        var storedSlug = (typeof localStorage !== "undefined" && localStorage.getItem("cf_club_slug")) || "";
+        slug = storedSlug.trim().toLowerCase();
+      } catch (e) {}
+    }
+
+    if (!slug) {
       slug = isDev ? "dev" : "mount-pleasant";
     }
 
@@ -3200,6 +3217,11 @@ function resolveCourtflowHost(input) {
         slug = match ? decodeURIComponent(match[1]) : "";
       }
     }
+    if (!slug && typeof localStorage !== "undefined") {
+      try {
+        slug = localStorage.getItem("cf_club_slug") || "";
+      } catch (e) {}
+    }
     slug = slug || "";
 
     const isDev = (window.location && window.location.pathname && window.location.pathname.includes("/dev/")) ||
@@ -3244,6 +3266,11 @@ function resolveCourtflowHost(input) {
         const match = window.location.search.match(/[?&](?:c|club)=([^&#]*)/i);
         slug = match ? decodeURIComponent(match[1]) : "";
       }
+    }
+    if (!slug && typeof localStorage !== "undefined") {
+      try {
+        slug = localStorage.getItem("cf_club_slug") || "";
+      } catch (e) {}
     }
     slug = slug || "";
 
