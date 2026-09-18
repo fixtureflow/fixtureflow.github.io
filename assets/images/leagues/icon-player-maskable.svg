@@ -1,18 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <!-- Background Linear Gradient: Sky Blue to Mint Green -->
+    <!-- Background Linear Gradient: Deep Pine Green to Emerald Green -->
     <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0ea5e9"/>
-      <stop offset="100%" stop-color="#10b981"/>
+      <stop offset="0%" stop-color="#065f46"/>
+      <stop offset="100%" stop-color="#34d399"/>
     </linearGradient>
     
-    <!-- Circle Gradient (Reversed): Mint Green to Sky Blue -->
+    <!-- Circle Gradient (Reversed): Emerald Green to Deep Pine Green -->
     <linearGradient id="circle-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10b981"/>
-      <stop offset="100%" stop-color="#0ea5e9"/>
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#065f46"/>
     </linearGradient>
 
-    <!-- Spherical Light Overlay (Mint glow top-left, Blue shadow bottom-right) -->
+    <!-- Spherical Light Overlay (Emerald glow top-left, Pine shadow bottom-right) -->
     <radialGradient id="sphere-light" cx="35%" cy="35%" r="65%">
       <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
       <stop offset="50%" stop-color="#ffffff" stop-opacity="0"/>
