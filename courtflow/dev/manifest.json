@@ -1,26 +1,40 @@
 {
   "name": "FixtureFlow: CourtFlow (Dev)",
   "short_name": "CourtFlow Dev",
+  "id": "/courtflow/dev/",
+  "scope": "/courtflow/dev/",
   "start_url": "/courtflow/dev/",
   "display": "standalone",
   "background_color": "#0b1329",
-  "theme_color": "#0ea5e9",
+  "theme_color": "#0b1329",
   "orientation": "any",
   "icons": [
     {
-      "src": "/assets/images/courtflow/icon-courtflow.png",
-      "sizes": "512x512",
+      "src": "/assets/images/courtflow/icon-courtflow-dev-192.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/assets/images/courtflow/icon-courtflow.svg",
+      "src": "/assets/images/courtflow/icon-courtflow-dev-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/courtflow/icon-courtflow-dev-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/images/courtflow/icon-courtflow-dev.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/assets/images/courtflow/icon-courtflow-maskable.svg",
+      "src": "/assets/images/courtflow/icon-courtflow-dev-maskable.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
