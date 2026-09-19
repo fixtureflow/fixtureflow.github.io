@@ -16,6 +16,12 @@
       "purpose": "any"
     },
     {
+      "src": "/assets/images/courtflow/icon-courtflow-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/assets/images/courtflow/icon-courtflow-512.png",
       "sizes": "512x512",
       "type": "image/png",
