@@ -17,13 +17,21 @@ For backend webhook items (spam controls, double opt-in, CRM sheet performance),
 - **Objective**: Prevent micro-commit noise in this repository during active PWA development.
 - **Action**: Update `.husky/post-commit` in `ddlc-dev` and `courtflow-dev` to run `npm run pwa:build` (local compile) on checkpoint commits, and only run `npm run pwa:publish` (push to GitHub Pages) when a feature is ready for physical device testing.
 
-### 3. OpenGraph Social Share Preview Cards
-- **Objective**: Add OpenGraph metadata tags (`og:title`, `og:description`, `og:image`, `og:url`, `twitter:card`) to public marketing pages (`index.html`, `courtflow/index.html`, `ddlc/index.html`).
-- **Benefit**: Displays branded rich preview cards with custom banner thumbnails and descriptions when sharing links on WhatsApp, iMessage, and social channels.
+### 3. Product Screen Recording Walkthrough Videos
+- **Status**: UI placeholders (*"Soon to Come"*) are live across [`ddlc/index.html`](./ddlc/index.html) (Opponent Reschedule Handshake, Captain Roster, Player Availability) and [`courtflow/index.html`](./courtflow/index.html) (Full Session Walkthrough).
+- **Action**: Record concise product walkthrough clips and embed them into the walkthrough cards on both marketing pages.
 
 ---
 
 ## ✅ Completed Milestones
+
+### Unified 6-Icon PWA Manifest Standard & OpenGraph Social Previews (Sep 2026)
+- **Objective**: Standardize all Web App Manifests, device icons, and WhatsApp/social link previews across marketing pages and all 8 PWA portals (`leagues/{player,captain,club}`, `leagues/dev/*`, `courtflow/{play,dev}`).
+- **Resolution**: Generated full raster (`32x32`, `180x180`, `192x192`, `192x192-maskable`, `512x512`, `512x512-maskable`) and vector (`any`, `maskable`, and `-dev` badged) icon sets; aligned [`site.webmanifest`](./assets/images/brand/android/site.webmanifest) and all 8 portal `manifest.json` files to the 6-icon standard via `buildManifestSource()`; fixed multi-tenant Home Screen launch restoration (`localStorage` + `history.replaceState`); and added OpenGraph (`og:image`, `og:title`, `og:description`, `twitter:card`) metadata across all marketing pages (`card-fixtureflow.png`) and all 8 PWA portals (`512x512` portal orb icons).
+
+### Demo Sandbox Removal & Walkthrough Placeholders (Sep 2026)
+- **Objective**: Retire the maintenance-heavy live `?c=demo` sandbox links in favour of guided screen recording walkthroughs.
+- **Resolution**: Removed the `demo` registry entry from [`assets/js/leagues-registry.js`](./assets/js/leagues-registry.js), purged `Service_SandboxGenerator` across `ddlc-dev` and `courtflow-dev`, replaced live demo buttons on [`ddlc/index.html`](./ddlc/index.html) and [`courtflow/index.html`](./courtflow/index.html) with Screen Recording Walkthrough placeholder cards, and updated `Interactive Preview` copy to `Interface Overview`.
 
 ### Waitlist Frontend Hardening — M4 & M6 Parity (Sep 2026)
 - **Objective**: Eliminate the silent false-success window where `mode: 'no-cors'` discarded `LOCK_TIMEOUT` or server errors, causing leads to vanish while reporting success.
