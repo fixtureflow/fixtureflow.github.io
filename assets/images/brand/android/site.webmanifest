@@ -1,6 +1,13 @@
 {
   "name": "FixtureFlow",
   "short_name": "FixtureFlow",
+  "id": "/",
+  "scope": "/",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08090d",
+  "theme_color": "#0b1329",
+  "orientation": "any",
   "icons": [
     {
       "src": "/assets/images/brand/android/favicon-192x192.png",
@@ -25,10 +32,18 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/assets/images/brand/android/icon-site.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/brand/android/icon-site-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
-  ],
-  "theme_color": "#0b1329",
-  "background_color": "#08090d",
-  "display": "standalone",
-  "start_url": "/"
+  ]
 }
