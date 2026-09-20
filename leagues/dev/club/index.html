@@ -883,7 +883,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v136";
+  window.__FF_VERSION__ = "dev-v137";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Club Admin]%c Running version " + window.__FF_VERSION__, "background: #0f172a; color: #ffffff; border: 1px solid #334155; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -3066,7 +3066,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v136">
+  <meta name="app-version" content="dev-v137">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/leagues/dev/club/">
@@ -3817,7 +3817,7 @@ function onLoginFailure(error) {
 
     
     <div id="native-app-footer" style="display:none; width: 100%; margin-top: auto;" class="brand-footer login-footer">
-      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v136</span>
+      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v137</span>
 
     </div>
 
@@ -6462,6 +6462,12 @@ function onLoginFailure(error) {
     const emailField = document.getElementById('rr-coordinator-email');
     const coordinatorEmails = emailField ? emailField.value.trim() : '';
 
+    const hostTeam = getHostTeamName(match);
+    const matchPayload = Object.assign({}, match);
+    if (typeof appData !== 'undefined' && appData && appData.teamFingerprints && hostTeam && appData.teamFingerprints[hostTeam]) {
+      matchPayload._teamFingerprint = appData.teamFingerprints[hostTeam];
+    }
+
     google.script.run
       .withSuccessHandler(function(result) {
         const overlay = document.getElementById('fullscreen-loading');
@@ -6489,6 +6495,9 @@ function onLoginFailure(error) {
             .withSuccessHandler(function(response) {
               if (response && response.success) {
                 appData = response.data;
+                if (typeof setPortalStorage === 'function') {
+                  setPortalStorage('captain_cached_data', JSON.stringify(appData));
+                }
                 renderMatches();
                 if (typeof renderAvailability === 'function') renderAvailability();
               }
@@ -6505,14 +6514,35 @@ function onLoginFailure(error) {
       .withFailureHandler(function(error) {
         const overlay = document.getElementById('fullscreen-loading');
         if (overlay) overlay.classList.add('hidden');
-        
-        alert('Failed to log request: ' + error);
+        const errStr = String(error && error.message ? error.message : error);
+        alert('Failed to log request: ' + errStr);
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = 'Submit Request';
         }
+        if (errStr.includes('Availability Updated')) {
+          const pin = (typeof currentPin !== 'undefined' && currentPin) || (typeof getPortalStorage === 'function' ? (getPortalStorage('captain_session_token') || getPortalStorage('captain_pin')) : null) || localStorage.getItem('ff_captain_pin') || localStorage.getItem('captain_pin');
+          if (pin) {
+            google.script.run
+              .withSuccessHandler(function(response) {
+                if (response && response.success) {
+                  appData = response.data;
+                  if (typeof setPortalStorage === 'function') {
+                    setPortalStorage('captain_cached_data', JSON.stringify(appData));
+                  }
+                  if (typeof renderMatches === 'function') renderMatches();
+                  if (typeof renderAvailability === 'function') renderAvailability();
+                  if (activeRescheduleMatch && activeRescheduleContext === 'Captain') {
+                    const newState = CaptainRescheduleFlow.computeState(activeRescheduleMatch, appData);
+                    CaptainRescheduleFlow.render(newState, activeRescheduleMatch, 'Captain');
+                  }
+                }
+              })
+              .getCaptainDashboardData(pin);
+          }
+        }
       })
-      .logRescheduleRequest(match, reason, 'Captain', captainName, selectedDates, customMessage, coordinatorEmails);
+      .logRescheduleRequest(matchPayload, reason, 'Captain', captainName, selectedDates, customMessage, coordinatorEmails);
   }
 
   function setupSuccessMessagingLink(match) {
