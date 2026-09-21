@@ -134,8 +134,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v78";
-  console.log("%c[CourtFlow]%c Running version dev-v78", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "dev-v79";
+  console.log("%c[CourtFlow]%c Running version dev-v79", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -2104,33 +2104,6 @@ function resolveCourtflowHost(input) {
       }
     }
 
-  .sync-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 10px;
-    transition: all 0.3s ease;
-  }
-  .sync-dot.green {
-    background-color: var(--accent-success);
-    box-shadow: 0 0 8px var(--accent-success);
-  }
-  .sync-dot.amber {
-    background-color: var(--accent-warning);
-    box-shadow: 0 0 8px var(--accent-warning);
-  }
-  .sync-dot.red {
-    background-color: var(--accent-danger);
-    box-shadow: 0 0 8px var(--accent-danger);
-    animation: pulse-red 1.5s infinite;
-  }
-  @keyframes pulse-red {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.4; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
   .backup-list-collapsed {
     display: none !important;
   }
@@ -2440,7 +2413,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="app-version" content="dev-v78">
+  <meta name="app-version" content="dev-v79">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/courtflow/dev/">
@@ -2519,7 +2492,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v78</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v79</span>
 
         </div>
       </div>
@@ -2532,7 +2505,6 @@ function resolveCourtflowHost(input) {
           <div class="branding" style="display: flex; align-items: center; gap: 10px;">
             <img id="club-logo" class="club-logo" src="" alt="Club Logo" style="display: none; height: 26px; width: auto; border-radius: 4px; object-fit: contain;">
             <h1 style="margin: 0; font-size: 20px; font-weight: 850; letter-spacing: -0.03em; line-height: 1.1;">CourtFlow</h1>
-            <span id="sync-status" class="sync-dot green" title="All changes saved to cloud"></span>
           </div>
           <div class="header-actions" style="display: flex; gap: 8px;">
             <button id="logout-btn" class="icon-button" onclick="handleAdminLogout()" aria-label="Log Out" title="Log Out">
@@ -2693,7 +2665,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v78</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v79</span>
 
       </div>
 
@@ -4738,7 +4710,12 @@ function resolveCourtflowHost(input) {
           syncTimeout = null;
         }
         google.script.run
-          .withSuccessHandler(() => {
+          .withSuccessHandler((success) => {
+            if (success === false) {
+              hideLoadingOverlay();
+              showAlertModal("Error", "Failed to clear settings overrides (spreadsheet lock timeout). Please try again.");
+              return;
+            }
             // Reload initial state from server
             const token = getAuthToken();
             google.script.run
@@ -4825,6 +4802,11 @@ function resolveCourtflowHost(input) {
             // 3. Clear session properties
             google.script.run
               .withSuccessHandler(success => {
+                if (success === false) {
+                  hideLoadingOverlay();
+                  showAlertModal("Error", "Failed to reset session (spreadsheet lock timeout). Please try again.");
+                  return;
+                }
                 // Re-fetch initial state
                 const token = getAuthToken();
                 google.script.run
@@ -5076,21 +5058,38 @@ function resolveCourtflowHost(input) {
   let syncTimeout = null;
 
   /**
-   * Executes immediate session state sync to cloud.
-   * Clears debounced timer and binds interactive retry on failure.
+   * Handles a session state sync failure by silently retrying once after 1.5s,
+   * and surfacing a loud modal alert if the retry also fails.
+   * @param {string} errMsg - Reason for the sync failure.
+   * @param {boolean} isRetry - Whether this call was already a retry attempt.
    */
-  function triggerSyncNow() {
+  function handleSyncFailure_(errMsg, isRetry) {
+    if (!isRetry) {
+      console.warn("Session state sync failed (" + errMsg + "). Retrying once in 1.5s...");
+      if (syncTimeout) clearTimeout(syncTimeout);
+      syncTimeout = setTimeout(() => {
+        triggerSyncNow(true);
+      }, 1500);
+      return;
+    }
+    console.error("Session state sync failed after retry: ", errMsg);
+    if (typeof showAlertModal === "function") {
+      showAlertModal(
+        "Cloud Sync Failed",
+        "Could not save your session to the cloud (" + errMsg + "). Please check your connection — your next action will try saving again."
+      );
+    }
+  }
+
+  /**
+   * Executes immediate session state sync to cloud.
+   * Clears debounced timer, auto-retries once on transient failure, and alerts loudly if persistent.
+   * @param {boolean} [isRetry=false] - True when invoked by the automatic retry timer.
+   */
+  function triggerSyncNow(isRetry = false) {
     if (syncTimeout) {
       clearTimeout(syncTimeout);
       syncTimeout = null;
-    }
-
-    const statusEl = document.getElementById("sync-status");
-    if (statusEl) {
-      statusEl.className = "sync-dot amber";
-      statusEl.title = "Saving changes to cloud...";
-      statusEl.style.cursor = "default";
-      statusEl.onclick = null;
     }
 
     const playCounts = {};
@@ -5125,24 +5124,15 @@ function resolveCourtflowHost(input) {
 
     google.script.run
       .withSuccessHandler(success => {
-        console.log("Session state synced: ", success);
-        if (statusEl) {
-          statusEl.className = "sync-dot green";
-          statusEl.title = "All changes saved to cloud";
-          statusEl.style.cursor = "default";
-          statusEl.onclick = null;
+        if (success === false) {
+          handleSyncFailure_("Spreadsheet lock timeout or storage error", Boolean(isRetry));
+          return;
         }
+        console.log("Session state synced: ", success);
       })
       .withFailureHandler(err => {
-        console.error("Session state sync failed: ", err);
-        if (statusEl) {
-          statusEl.className = "sync-dot red";
-          statusEl.title = "Sync failed: " + (err && err.message ? err.message : "Network error") + ". Click to retry.";
-          statusEl.style.cursor = "pointer";
-          statusEl.onclick = function() {
-            triggerSyncNow();
-          };
-        }
+        const msg = err && err.message ? err.message : "Network error";
+        handleSyncFailure_(msg, Boolean(isRetry));
       })
       .saveSessionState(JSON.stringify(payload), getAuthToken());
   }
@@ -5151,15 +5141,9 @@ function resolveCourtflowHost(input) {
    * Debounces saving session state to prevent flooding Apps Script properties quotas.
    */
   function debouncedSync() {
-    const statusEl = document.getElementById("sync-status");
-    if (statusEl) {
-      statusEl.className = "sync-dot amber";
-      statusEl.title = "Pending changes...";
-    }
-
     if (syncTimeout) clearTimeout(syncTimeout);
     syncTimeout = setTimeout(() => {
-      triggerSyncNow();
+      triggerSyncNow(false);
     }, 1000);
   }
 
