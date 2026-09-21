@@ -134,8 +134,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "v2.4.0";
-  console.log("%c[CourtFlow]%c Running version v2.4.0", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "v2.5.0";
+  console.log("%c[CourtFlow]%c Running version v2.5.0", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -2104,33 +2104,6 @@ function resolveCourtflowHost(input) {
       }
     }
 
-  .sync-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 10px;
-    transition: all 0.3s ease;
-  }
-  .sync-dot.green {
-    background-color: var(--accent-success);
-    box-shadow: 0 0 8px var(--accent-success);
-  }
-  .sync-dot.amber {
-    background-color: var(--accent-warning);
-    box-shadow: 0 0 8px var(--accent-warning);
-  }
-  .sync-dot.red {
-    background-color: var(--accent-danger);
-    box-shadow: 0 0 8px var(--accent-danger);
-    animation: pulse-red 1.5s infinite;
-  }
-  @keyframes pulse-red {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.4; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
   .backup-list-collapsed {
     display: none !important;
   }
@@ -2440,7 +2413,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="app-version" content="v2.4.0">
+  <meta name="app-version" content="v2.5.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/courtflow/play/">
@@ -2519,7 +2492,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.4.0</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.5.0</span>
 
         </div>
       </div>
@@ -2532,7 +2505,6 @@ function resolveCourtflowHost(input) {
           <div class="branding" style="display: flex; align-items: center; gap: 10px;">
             <img id="club-logo" class="club-logo" src="" alt="Club Logo" style="display: none; height: 26px; width: auto; border-radius: 4px; object-fit: contain;">
             <h1 style="margin: 0; font-size: 20px; font-weight: 850; letter-spacing: -0.03em; line-height: 1.1;">CourtFlow</h1>
-            <span id="sync-status" class="sync-dot green" title="All changes saved to cloud"></span>
           </div>
           <div class="header-actions" style="display: flex; gap: 8px;">
             <button id="logout-btn" class="icon-button" onclick="handleAdminLogout()" aria-label="Log Out" title="Log Out">
@@ -2693,7 +2665,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.4.0</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.5.0</span>
 
       </div>
 
@@ -3947,7 +3919,7 @@ function resolveCourtflowHost(input) {
       // 1. Client-Side Pre-validation (Save network roundtrip if < 4 checked-in players)
       const candidates = state.players.filter(p => p.checkedIn);
       if (candidates.length < 4) {
-        showCustomAlert("Error", "Not enough checked-in players to generate a doubles match!");
+        showAlertModal("Error", "Not enough checked-in players to generate a doubles match!");
         return;
       }
 
@@ -4019,7 +3991,7 @@ function resolveCourtflowHost(input) {
             renderUI();
             debouncedSync();
           } else {
-            showCustomAlert("Generation Result", "Not enough players with matching genders to form a valid doubles (Men/Women) or Mixed match!");
+            showAlertModal("Generation Result", "Not enough players with matching genders to form a valid doubles (Men/Women) or Mixed match!");
           }
         })
         .withFailureHandler(err => {
@@ -4028,7 +4000,7 @@ function resolveCourtflowHost(input) {
             btn.innerHTML = originalHTML;
           }
           hideLoadingOverlay();
-          showCustomAlert("Server Error", "Failed to generate next round matches: " + err.message);
+          showAlertModal("Server Error", "Failed to generate next round matches: " + err.message);
         })
         .calculateNextRound(JSON.stringify(payload));
     }
@@ -4112,7 +4084,7 @@ function resolveCourtflowHost(input) {
             // Transaction Rollback
             state.matchHistory.pop();
             state.activeCourts = originalActive;
-            showCustomAlert("Generation Result", "Not enough players with matching genders to form a valid doubles (Men/Women) or Mixed match!");
+            showAlertModal("Generation Result", "Not enough players with matching genders to form a valid doubles (Men/Women) or Mixed match!");
           }
 
           renderUI();
@@ -4123,7 +4095,7 @@ function resolveCourtflowHost(input) {
           // Transaction Rollback
           state.matchHistory.pop();
           state.activeCourts = originalActive;
-          showCustomAlert("Server Error", "Failed to refresh court match: " + err.message);
+          showAlertModal("Server Error", "Failed to refresh court match: " + err.message);
           renderUI();
         })
         .calculateMatchForCourt(JSON.stringify(payload), cId);
@@ -4227,6 +4199,19 @@ function resolveCourtflowHost(input) {
 <script>
   let confirmCallback = null;
 
+  // Teardown timer handles. Without these a hide immediately followed by a show
+  // lets the earlier timer fire against the freshly re-shown element and blank it.
+  let alertModalHideTimer = null;
+  let confirmModalHideTimer = null;
+  let loadingOverlayHideTimer = null;
+
+  // These must stay in step with the CSS transitions in Portal_Main_CSS.html:
+  //   .modal-overlay   { transition: opacity 0.25s ease; }
+  //   .loading-overlay { transition: opacity 0.3s ease; }
+  // Unmounting early cuts the fade off mid-flight.
+  const MODAL_FADE_MS = 250;
+  const LOADING_FADE_MS = 300;
+
   /**
    * Opens the custom alert modal with a title and message.
    */
@@ -4236,6 +4221,10 @@ function resolveCourtflowHost(input) {
     const messageEl = document.getElementById("modal-message");
     
     if (modalEl && titleEl && messageEl) {
+      if (alertModalHideTimer) {
+        clearTimeout(alertModalHideTimer);
+        alertModalHideTimer = null;
+      }
       titleEl.innerText = title;
       messageEl.innerText = message;
       
@@ -4253,9 +4242,11 @@ function resolveCourtflowHost(input) {
     const modalEl = document.getElementById("custom-alert-modal");
     if (modalEl) {
       modalEl.classList.remove("show");
-      setTimeout(() => {
+      if (alertModalHideTimer) clearTimeout(alertModalHideTimer);
+      alertModalHideTimer = setTimeout(() => {
+        alertModalHideTimer = null;
         modalEl.style.display = "none";
-      }, 250);
+      }, MODAL_FADE_MS);
     }
   }
 
@@ -4268,6 +4259,10 @@ function resolveCourtflowHost(input) {
     const messageEl = document.getElementById("confirm-modal-message");
     
     if (modalEl && titleEl && messageEl) {
+      if (confirmModalHideTimer) {
+        clearTimeout(confirmModalHideTimer);
+        confirmModalHideTimer = null;
+      }
       titleEl.innerText = title;
       messageEl.innerText = message;
       confirmCallback = onConfirm;
@@ -4280,16 +4275,43 @@ function resolveCourtflowHost(input) {
 
   /**
    * Closes the custom confirm modal.
+   *
+   * @param {Function} [onClosed] Invoked once the modal has actually left the
+   *   render tree. Any caller that goes on to open another full-screen layer
+   *   (the loading overlay) MUST use this instead of running straight after the
+   *   call. Both layers carry backdrop-filter, and on WebKit an incoming blurred
+   *   layer promoted on top of an outgoing one can be rasterised a single time
+   *   and never re-composited, which freezes the spinner inside it.
    */
-  function closeConfirmModal() {
+  function closeConfirmModal(onClosed) {
     const modalEl = document.getElementById("custom-confirm-modal");
-    if (modalEl) {
-      modalEl.classList.remove("show");
-      setTimeout(() => {
-        modalEl.style.display = "none";
-        confirmCallback = null;
-      }, 250);
+    if (!modalEl) {
+      if (typeof onClosed === "function") onClosed();
+      return;
     }
+    modalEl.classList.remove("show");
+    if (confirmModalHideTimer) clearTimeout(confirmModalHideTimer);
+    confirmModalHideTimer = setTimeout(() => {
+      confirmModalHideTimer = null;
+      modalEl.style.display = "none";
+      confirmCallback = null;
+      if (typeof onClosed === "function") onClosed();
+    }, MODAL_FADE_MS);
+  }
+
+  /**
+   * Restarts the overlay spinner's keyframe animation.
+   *
+   * Belt and braces alongside the teardown ordering above: clearing the
+   * animation, forcing a reflow, then restoring it guarantees WebKit builds a
+   * fresh animation rather than reusing a layer it has stopped ticking.
+   */
+  function restartOverlaySpinner_(overlayEl) {
+    const spinnerEl = overlayEl.querySelector(".loading-spinner");
+    if (!spinnerEl) return;
+    spinnerEl.style.animation = "none";
+    spinnerEl.offsetHeight; // Force reflow so the removal is actually observed
+    spinnerEl.style.animation = "";
   }
 
   /**
@@ -4299,11 +4321,16 @@ function resolveCourtflowHost(input) {
     const overlayEl = document.getElementById("loading-overlay");
     const messageEl = document.getElementById("loading-message");
     if (overlayEl) {
+      if (loadingOverlayHideTimer) {
+        clearTimeout(loadingOverlayHideTimer);
+        loadingOverlayHideTimer = null;
+      }
       if (messageEl && message) {
         messageEl.innerText = message;
       }
       overlayEl.style.display = "flex";
       overlayEl.offsetHeight; // Force layout recalculation
+      restartOverlaySpinner_(overlayEl);
       overlayEl.classList.add("show");
     }
   }
@@ -4315,9 +4342,11 @@ function resolveCourtflowHost(input) {
     const overlayEl = document.getElementById("loading-overlay");
     if (overlayEl) {
       overlayEl.classList.remove("show");
-      setTimeout(() => {
+      if (loadingOverlayHideTimer) clearTimeout(loadingOverlayHideTimer);
+      loadingOverlayHideTimer = setTimeout(() => {
+        loadingOverlayHideTimer = null;
         overlayEl.style.display = "none";
-      }, 250);
+      }, LOADING_FADE_MS);
     }
   }
 
@@ -4681,7 +4710,12 @@ function resolveCourtflowHost(input) {
           syncTimeout = null;
         }
         google.script.run
-          .withSuccessHandler(() => {
+          .withSuccessHandler((success) => {
+            if (success === false) {
+              hideLoadingOverlay();
+              showAlertModal("Error", "Failed to clear settings overrides (spreadsheet lock timeout). Please try again.");
+              return;
+            }
             // Reload initial state from server
             const token = getAuthToken();
             google.script.run
@@ -4768,6 +4802,11 @@ function resolveCourtflowHost(input) {
             // 3. Clear session properties
             google.script.run
               .withSuccessHandler(success => {
+                if (success === false) {
+                  hideLoadingOverlay();
+                  showAlertModal("Error", "Failed to reset session (spreadsheet lock timeout). Please try again.");
+                  return;
+                }
                 // Re-fetch initial state
                 const token = getAuthToken();
                 google.script.run
@@ -4932,8 +4971,14 @@ function resolveCourtflowHost(input) {
     const okBtn = document.getElementById("confirm-modal-ok-btn");
     if (okBtn) {
       okBtn.addEventListener("click", () => {
-        if (confirmCallback) confirmCallback();
-        closeConfirmModal();
+        // Capture the action before closeConfirmModal clears it, then run it
+        // only once the modal has left the render tree. Confirmed actions open
+        // the loading overlay, and overlapping two backdrop-filter layers
+        // freezes the overlay spinner on WebKit.
+        const pendingAction = confirmCallback;
+        closeConfirmModal(() => {
+          if (pendingAction) pendingAction();
+        });
       });
     }
   }
@@ -5013,21 +5058,38 @@ function resolveCourtflowHost(input) {
   let syncTimeout = null;
 
   /**
-   * Executes immediate session state sync to cloud.
-   * Clears debounced timer and binds interactive retry on failure.
+   * Handles a session state sync failure by silently retrying once after 1.5s,
+   * and surfacing a loud modal alert if the retry also fails.
+   * @param {string} errMsg - Reason for the sync failure.
+   * @param {boolean} isRetry - Whether this call was already a retry attempt.
    */
-  function triggerSyncNow() {
+  function handleSyncFailure_(errMsg, isRetry) {
+    if (!isRetry) {
+      console.warn("Session state sync failed (" + errMsg + "). Retrying once in 1.5s...");
+      if (syncTimeout) clearTimeout(syncTimeout);
+      syncTimeout = setTimeout(() => {
+        triggerSyncNow(true);
+      }, 1500);
+      return;
+    }
+    console.error("Session state sync failed after retry: ", errMsg);
+    if (typeof showAlertModal === "function") {
+      showAlertModal(
+        "Cloud Sync Failed",
+        "Could not save your session to the cloud (" + errMsg + "). Please check your connection — your next action will try saving again."
+      );
+    }
+  }
+
+  /**
+   * Executes immediate session state sync to cloud.
+   * Clears debounced timer, auto-retries once on transient failure, and alerts loudly if persistent.
+   * @param {boolean} [isRetry=false] - True when invoked by the automatic retry timer.
+   */
+  function triggerSyncNow(isRetry = false) {
     if (syncTimeout) {
       clearTimeout(syncTimeout);
       syncTimeout = null;
-    }
-
-    const statusEl = document.getElementById("sync-status");
-    if (statusEl) {
-      statusEl.className = "sync-dot amber";
-      statusEl.title = "Saving changes to cloud...";
-      statusEl.style.cursor = "default";
-      statusEl.onclick = null;
     }
 
     const playCounts = {};
@@ -5062,24 +5124,15 @@ function resolveCourtflowHost(input) {
 
     google.script.run
       .withSuccessHandler(success => {
-        console.log("Session state synced: ", success);
-        if (statusEl) {
-          statusEl.className = "sync-dot green";
-          statusEl.title = "All changes saved to cloud";
-          statusEl.style.cursor = "default";
-          statusEl.onclick = null;
+        if (success === false) {
+          handleSyncFailure_("Spreadsheet lock timeout or storage error", Boolean(isRetry));
+          return;
         }
+        console.log("Session state synced: ", success);
       })
       .withFailureHandler(err => {
-        console.error("Session state sync failed: ", err);
-        if (statusEl) {
-          statusEl.className = "sync-dot red";
-          statusEl.title = "Sync failed: " + (err && err.message ? err.message : "Network error") + ". Click to retry.";
-          statusEl.style.cursor = "pointer";
-          statusEl.onclick = function() {
-            triggerSyncNow();
-          };
-        }
+        const msg = err && err.message ? err.message : "Network error";
+        handleSyncFailure_(msg, Boolean(isRetry));
       })
       .saveSessionState(JSON.stringify(payload), getAuthToken());
   }
@@ -5088,15 +5141,9 @@ function resolveCourtflowHost(input) {
    * Debounces saving session state to prevent flooding Apps Script properties quotas.
    */
   function debouncedSync() {
-    const statusEl = document.getElementById("sync-status");
-    if (statusEl) {
-      statusEl.className = "sync-dot amber";
-      statusEl.title = "Pending changes...";
-    }
-
     if (syncTimeout) clearTimeout(syncTimeout);
     syncTimeout = setTimeout(() => {
-      triggerSyncNow();
+      triggerSyncNow(false);
     }, 1000);
   }
 
