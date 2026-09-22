@@ -134,8 +134,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v86";
-  console.log("%c[CourtFlow]%c Running version dev-v86", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "dev-v87";
+  console.log("%c[CourtFlow]%c Running version dev-v87", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -1955,7 +1955,11 @@ function resolveCourtflowHost(input) {
       display: flex;
       flex-direction: column;
       gap: 16px;
-      padding-bottom: 80px; /* Leave space for sticky bottom bar */
+      padding-bottom: 16px;
+    }
+
+    .main-footer {
+      padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
     }
     
     /* Default Tab Layout: Hide all panels */
@@ -1987,17 +1991,18 @@ function resolveCourtflowHost(input) {
       bottom: 0;
       left: 0;
       right: 0;
-      height: 64px;
+      min-height: 68px;
+      height: auto;
       background: var(--bg-panel);
       border-top: 1px solid var(--border-panel);
       z-index: 100;
       justify-content: center;
       align-items: center;
       gap: 12px;
-      padding: 0 16px;
-      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      padding: 10px 16px max(14px, calc(10px + env(safe-area-inset-bottom, 0px))) 16px;
+      box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       box-sizing: border-box;
     }
     
@@ -2012,15 +2017,18 @@ function resolveCourtflowHost(input) {
       color: var(--text-secondary);
       cursor: pointer;
       font-family: 'Outfit', sans-serif;
-      font-size: 13px;
+      font-size: 14.5px;
       font-weight: 700;
-      padding: 8px 16px;
-      border-radius: 12px;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.01em;
+      padding: 10px 20px;
+      border-radius: 14px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       flex: 1;
-      max-width: 160px;
-      height: 44px;
+      max-width: 220px;
+      min-height: 48px;
       box-sizing: border-box;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
     
     .nav-item:active {
@@ -2037,12 +2045,12 @@ function resolveCourtflowHost(input) {
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 20px;
+      height: 21px;
     }
     
     .svg-nav-icon {
-      width: 20px;
-      height: 20px;
+      width: 21px;
+      height: 21px;
       fill: none;
       stroke: currentColor;
       stroke-width: 2.2;
@@ -2444,7 +2452,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="app-version" content="dev-v86">
+  <meta name="app-version" content="dev-v87">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/courtflow/dev/">
@@ -2523,7 +2531,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v86</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v87</span>
 
         </div>
       </div>
@@ -2696,7 +2704,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v86</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v87</span>
 
       </div>
 

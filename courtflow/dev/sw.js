@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-courtflow-dev-cache-v86';
+const CACHE_NAME = 'ff-courtflow-dev-cache-v87';
 const CACHE_PREFIX = 'ff-courtflow-dev-cache-';
 const ASSETS_TO_CACHE = [
   './',
