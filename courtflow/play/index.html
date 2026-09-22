@@ -134,8 +134,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "v2.5.1";
-  console.log("%c[CourtFlow]%c Running version v2.5.1", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "v2.5.2";
+  console.log("%c[CourtFlow]%c Running version v2.5.2", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -310,12 +310,18 @@ function resolveCourtflowHost(input) {
       payload.targetCourtId = args[1];
     }
 
-    const targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
+    const queryParams = new URLSearchParams({ rpc: "1", action: action });
+    if (action === "getInitialState" && payload.token) {
+      queryParams.set("token", payload.token);
+    }
+    const targetUrl = `https://script.google.com/macros/s/${hostId}/exec?${queryParams.toString()}`;
     const attemptCount = typeof isRetry === 'number' ? isRetry : (isRetry ? 1 : 0);
-    const maxRetries = (action === "getInitialState" || action === "calculateNextRound" || action === "calculateMatchForCourt") ? 2 : 1;
+    const isReadOrCompute = (action === "getInitialState" || action === "calculateNextRound" || action === "calculateMatchForCourt" || action === "runDiagnostics");
+    const maxRetries = isReadOrCompute ? 2 : 1;
+    const timeoutMs = isReadOrCompute ? 40000 : 50000;
     
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    const timeoutId = controller ? setTimeout(() => controller.abort(), 30000) : null;
+    const timeoutId = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
 
     const fetchOptions = {
       method: "POST",
@@ -348,6 +354,13 @@ function resolveCourtflowHost(input) {
             throw new Error('Server returned HTML instead of JSON (Google Apps Script cold-start or session conflict). Please refresh.');
           }
           throw new Error('Invalid JSON response: ' + text.slice(0, 100));
+        }
+        if (result && result.retryable && attemptCount < maxRetries) {
+          console.warn("%c[CourtFlow]%c Redirect bounce detected on " + action + ". Retrying in 800ms...", "background: #0284c7; color: #ffffff; border-radius: 3px; padding: 2px 5px; font-size: 11px;", "color: inherit; margin-left: 4px;");
+          setTimeout(() => {
+            callHostApi(action, args, successHandler, failureHandler, attemptCount + 1);
+          }, 800);
+          return null;
         }
         if (!response.ok) {
           throw new Error('API Error: HTTP status ' + response.status);
@@ -384,7 +397,7 @@ function resolveCourtflowHost(input) {
       }
 
       const friendlyErr = isAbort
-        ? new Error('Request timed out (30s). Google Apps Script took too long to respond. Please try again.')
+        ? new Error(`Request timed out (${Math.round(timeoutMs / 1000)}s). Google Apps Script took too long to respond. Please try again.`)
         : err;
       console.error(`API Call failed (${action}):`, friendlyErr);
       if (failureHandler) {
@@ -2431,7 +2444,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="app-version" content="v2.5.1">
+  <meta name="app-version" content="v2.5.2">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/courtflow/play/">
@@ -2510,7 +2523,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.5.1</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.5.2</span>
 
         </div>
       </div>
@@ -2683,7 +2696,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.5.1</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.5.2</span>
 
       </div>
 
