@@ -134,8 +134,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "v2.5.0";
-  console.log("%c[CourtFlow]%c Running version v2.5.0", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "v2.5.1";
+  console.log("%c[CourtFlow]%c Running version v2.5.1", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -311,6 +311,8 @@ function resolveCourtflowHost(input) {
     }
 
     const targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
+    const attemptCount = typeof isRetry === 'number' ? isRetry : (isRetry ? 1 : 0);
+    const maxRetries = (action === "getInitialState" || action === "calculateNextRound" || action === "calculateMatchForCourt") ? 2 : 1;
     
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timeoutId = controller ? setTimeout(() => controller.abort(), 30000) : null;
@@ -335,10 +337,10 @@ function resolveCourtflowHost(input) {
           result = JSON.parse(text);
         } catch (parseErr) {
           const isHtml = text.trim().startsWith('<');
-          if (isHtml && !isRetry && action === "getInitialState") {
-            console.warn("%c[CourtFlow]%c Apps Script cold-start detected. Retrying getInitialState in 800ms...", "background: #0284c7; color: #ffffff; border-radius: 3px; padding: 2px 5px; font-size: 11px;", "color: inherit; margin-left: 4px;");
+          if ((isHtml && !isRetry && action === "getInitialState") || (isHtml && attemptCount < maxRetries)) {
+            console.warn("%c[CourtFlow]%c Apps Script cold-start detected. Retrying " + action + " in 800ms...", "background: #0284c7; color: #ffffff; border-radius: 3px; padding: 2px 5px; font-size: 11px;", "color: inherit; margin-left: 4px;");
             setTimeout(() => {
-              callHostApi(action, args, successHandler, failureHandler, true);
+              callHostApi(action, args, successHandler, failureHandler, attemptCount + 1);
             }, 800);
             return null;
           }
@@ -365,6 +367,22 @@ function resolveCourtflowHost(input) {
     .catch(err => {
       if (timeoutId) clearTimeout(timeoutId);
       const isAbort = err && err.name === 'AbortError';
+      const errMsg = (err && err.message) ? String(err.message) : String(err || '');
+      const isCorsOrColdStart = isAbort ||
+        errMsg.includes('Failed to fetch') ||
+        errMsg.includes('NetworkError') ||
+        errMsg.includes('Load failed') ||
+        errMsg.includes('cold-start');
+
+      if (isCorsOrColdStart && attemptCount < maxRetries) {
+        const delayMs = (attemptCount + 1) * 1000;
+        console.warn(`%c[CourtFlow]%c Apps Script cold-start or CORS redirect hiccup on ${action} (attempt ${attemptCount + 1}/${maxRetries + 1}). Retrying in ${delayMs}ms...`, "background: #0284c7; color: #ffffff; border-radius: 3px; padding: 2px 5px; font-size: 11px;", "color: inherit; margin-left: 4px;");
+        setTimeout(() => {
+          callHostApi(action, args, successHandler, failureHandler, attemptCount + 1);
+        }, delayMs);
+        return;
+      }
+
       const friendlyErr = isAbort
         ? new Error('Request timed out (30s). Google Apps Script took too long to respond. Please try again.')
         : err;
@@ -2413,7 +2431,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="app-version" content="v2.5.0">
+  <meta name="app-version" content="v2.5.1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/courtflow/play/">
@@ -2492,7 +2510,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.5.0</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.5.1</span>
 
         </div>
       </div>
@@ -2665,7 +2683,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.5.0</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· v2.5.1</span>
 
       </div>
 
@@ -5056,6 +5074,8 @@ function resolveCourtflowHost(input) {
 
     <script>
   let syncTimeout = null;
+  let isSyncInFlight = false;
+  let hasPendingSync = false;
 
   /**
    * Handles a session state sync failure by silently retrying once after 1.5s,
@@ -5083,7 +5103,8 @@ function resolveCourtflowHost(input) {
 
   /**
    * Executes immediate session state sync to cloud.
-   * Clears debounced timer, auto-retries once on transient failure, and alerts loudly if persistent.
+   * Serializes in-flight requests so concurrent UI actions coalesce into a single follow-up sync
+   * rather than competing for the spreadsheet lock simultaneously.
    * @param {boolean} [isRetry=false] - True when invoked by the automatic retry timer.
    */
   function triggerSyncNow(isRetry = false) {
@@ -5091,6 +5112,13 @@ function resolveCourtflowHost(input) {
       clearTimeout(syncTimeout);
       syncTimeout = null;
     }
+
+    if (isSyncInFlight) {
+      hasPendingSync = true;
+      return;
+    }
+
+    isSyncInFlight = true;
 
     const playCounts = {};
     if (state && Array.isArray(state.players)) {
@@ -5124,6 +5152,12 @@ function resolveCourtflowHost(input) {
 
     google.script.run
       .withSuccessHandler(success => {
+        isSyncInFlight = false;
+        if (hasPendingSync) {
+          hasPendingSync = false;
+          triggerSyncNow(false);
+          return;
+        }
         if (success === false) {
           handleSyncFailure_("Spreadsheet lock timeout or storage error", Boolean(isRetry));
           return;
@@ -5131,6 +5165,12 @@ function resolveCourtflowHost(input) {
         console.log("Session state synced: ", success);
       })
       .withFailureHandler(err => {
+        isSyncInFlight = false;
+        if (hasPendingSync) {
+          hasPendingSync = false;
+          triggerSyncNow(false);
+          return;
+        }
         const msg = err && err.message ? err.message : "Network error";
         handleSyncFailure_(msg, Boolean(isRetry));
       })
