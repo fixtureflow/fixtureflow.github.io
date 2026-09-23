@@ -134,8 +134,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v90";
-  console.log("%c[CourtFlow]%c Running version dev-v90", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "dev-v91";
+  console.log("%c[CourtFlow]%c Running version dev-v91", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -2455,7 +2455,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="app-version" content="dev-v90">
+  <meta name="app-version" content="dev-v91">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/courtflow/dev/">
@@ -2534,7 +2534,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v90</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v91</span>
 
         </div>
       </div>
@@ -2707,7 +2707,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v90</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v91</span>
 
       </div>
 
@@ -3131,11 +3131,22 @@ function resolveCourtflowHost(input) {
 
   /**
    * Toggles the UI layout visual theme manually.
+   * If the new theme matches the OS system preference, removes the manual override
+   * from localStorage so automatic OS dark/light mode tracking resumes.
    */
   function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
     const newTheme = currentTheme === "dark" ? "light" : "dark";
-    applyTheme(newTheme, true);
+    const mql = typeof window !== "undefined" && window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+    const systemTheme = mql && mql.matches ? "dark" : "light";
+    if (mql && newTheme === systemTheme) {
+      try {
+        localStorage.removeItem("clubflow-theme");
+      } catch (e) {}
+      applyTheme(newTheme, false);
+    } else {
+      applyTheme(newTheme, true);
+    }
   }
 
   // Set the theme configuration from localStorage or system preference before DOM fully paints
@@ -3418,14 +3429,28 @@ function resolveCourtflowHost(input) {
   function handleAdminLogout() {
     const ver = getActiveAppVersion_();
     const promptMsg = ver 
-      ? `Are you sure you want to log out of CourtFlow [${ver}] on this device?`
-      : `Are you sure you want to log out of CourtFlow on this device?`;
+      ? `Are you sure you want to log out and reset local preferences (theme, layout & cache) on CourtFlow [${ver}]?`
+      : `Are you sure you want to log out and reset local preferences on CourtFlow?`;
     if (confirm(promptMsg)) {
       if (typeof removeAuthToken === "function") {
         removeAuthToken();
       }
       localStorage.removeItem("cf_dev_auth_token");
+      localStorage.removeItem("clubflow-theme");
+      localStorage.removeItem("clubflow-collapsed");
       try {
+        if (typeof window !== "undefined" && typeof applyTheme === "function") {
+          const mql = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+          applyTheme(mql && mql.matches ? "dark" : "light", false);
+        }
+        if (typeof collapsedPanels === "object" && collapsedPanels) {
+          collapsedPanels.courts = false;
+          collapsedPanels.queue = false;
+          collapsedPanels.roster = false;
+          if (typeof applyAllPanelCollapseStates === "function") {
+            applyAllPanelCollapseStates();
+          }
+        }
         sessionStorage.clear();
         if (typeof caches !== "undefined" && caches.keys) {
           caches.keys().then(names => {
