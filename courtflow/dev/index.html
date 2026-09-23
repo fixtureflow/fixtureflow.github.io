@@ -134,8 +134,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v88";
-  console.log("%c[CourtFlow]%c Running version dev-v88", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "dev-v89";
+  console.log("%c[CourtFlow]%c Running version dev-v89", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -1952,12 +1952,11 @@ function resolveCourtflowHost(input) {
       display: flex;
       flex-direction: column;
       gap: 16px;
-      padding-bottom: 16px;
+      padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
     }
 
     .main-footer {
-      margin-top: auto;
-      padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+      display: none;
     }
     
     /* Default Tab Layout: Hide all panels */
@@ -1982,14 +1981,14 @@ function resolveCourtflowHost(input) {
       flex-direction: column;
     }
     
-    /* Sticky Bottom Tab Bar */
+    /* Sticky Bottom Tab Bar (Exact height parity with DDLC Captain Portal: 8px top + 40px item + max(8px, safe-area) bottom) */
     .mobile-nav-bar {
       display: flex;
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      min-height: 58px;
+      min-height: 56px;
       height: auto;
       background: var(--bg-panel);
       border-top: 1px solid var(--border-panel);
@@ -1997,7 +1996,7 @@ function resolveCourtflowHost(input) {
       justify-content: center;
       align-items: center;
       gap: 12px;
-      padding: 8px 16px max(10px, calc(8px + env(safe-area-inset-bottom, 0px))) 16px;
+      padding: 8px 16px max(8px, env(safe-area-inset-bottom, 0px)) 16px;
       box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.12);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
@@ -2023,6 +2022,7 @@ function resolveCourtflowHost(input) {
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       flex: 1;
       max-width: 176px;
+      height: 40px;
       min-height: 40px;
       box-sizing: border-box;
       touch-action: manipulation;
@@ -2455,7 +2455,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="app-version" content="dev-v88">
+  <meta name="app-version" content="dev-v89">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/courtflow/dev/">
@@ -2534,7 +2534,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v88</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v89</span>
 
         </div>
       </div>
@@ -2707,7 +2707,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v88</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v89</span>
 
       </div>
 
