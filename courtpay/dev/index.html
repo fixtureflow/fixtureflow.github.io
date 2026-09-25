@@ -744,8 +744,10 @@
   </nav>
 
   <script>
+  var _isLiveServerMode = Boolean(window.COURTPAY_API_URL || (typeof google !== 'undefined' && google.script && google.script.run));
   window.CourtPayState = {
     activeTab: 'session',
+    isLoadingServer: _isLiveServerMode,
     theme: localStorage.getItem('courtpay_theme') || 'dark',
     authToken: localStorage.getItem('courtpay_token') || '',
     config: {
@@ -759,10 +761,10 @@
     },
     courtsCount: 1,
     courtHours: 2,
-    courtHoursStep: Number(localStorage.getItem('courtpay_hours_step')) === 0.5 ? 0.5 : 1,
-    courtRatePerHourEUR: Number(localStorage.getItem('courtpay_court_rate')) || 16.00,
+    courtHoursStep: 1,
+    courtRatePerHourEUR: 16.00,
     courtCostManualOverride: false,
-    players: [
+    players: _isLiveServerMode ? [] : [
       { playerId: 'p_org_1', name: 'Ming (You)', type: 'ORGANIZER', defaultShares: 1, isOrganizer: true, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 },
       { playerId: 'p_org_2', name: 'Sarah (Partner)', type: 'PARTNER', defaultShares: 1, isOrganizer: true, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 },
       { playerId: 'p_fam_1', name: 'David Chen', type: 'FAMILY', defaultShares: 4, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 4 },
@@ -771,12 +773,12 @@
       { playerId: 'p_reg_3', name: 'Liam O\'Connor', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 },
       { playerId: 'p_reg_4', name: 'Noah Patel', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 12.50, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 }
     ],
-    batches: [
+    batches: _isLiveServerMode ? [] : [
       { batchId: 'b_as30_1', shuttleType: 'Yonex AS-30', category: 'Feather', tubesCount: 1, shuttlesPerTube: 12, totalShuttles: 12, remainingShuttles: 9, totalCostEUR: 28.80, costPerShuttleEUR: 2.40, status: 'ACTIVE' },
       { batchId: 'b_as30_2', shuttleType: 'Yonex AS-30', category: 'Feather', tubesCount: 1, shuttlesPerTube: 12, totalShuttles: 12, remainingShuttles: 12, totalCostEUR: 30.00, costPerShuttleEUR: 2.50, status: 'ACTIVE' },
       { batchId: 'b_mavis_1', shuttleType: 'Mavis 300', category: 'Nylon', tubesCount: 1, shuttlesPerTube: 6, totalShuttles: 6, remainingShuttles: 6, totalCostEUR: 9.00, costPerShuttleEUR: 1.50, status: 'ACTIVE' }
     ],
-    shuttleUsageMap: {
+    shuttleUsageMap: _isLiveServerMode ? {} : {
       'Yonex AS-30': 4,
       'Mavis 300': 0
     },
@@ -974,20 +976,30 @@
 
     hydrateFromServer: function (serverState) {
       if (!serverState) return;
+      var isFirstHydration = !window.CourtPayState._hydratedOnce;
+      window.CourtPayState.isLoadingServer = false;
       if (serverState.config) {
         window.CourtPayState.config = serverState.config;
-        if (!localStorage.getItem('courtpay_court_rate') && serverState.config.defaultCourtRatePerHourEUR) {
-          window.CourtPayState.courtRatePerHourEUR = Number(serverState.config.defaultCourtRatePerHourEUR);
-          var rateEl = document.getElementById('input-court-rate');
-          if (rateEl) rateEl.value = window.CourtPayState.courtRatePerHourEUR.toFixed(2);
-        }
-        if (!localStorage.getItem('courtpay_hours_step') && serverState.config.courtHoursStep) {
-          window.CourtPayState.courtHoursStep = Number(serverState.config.courtHoursStep) === 0.5 ? 0.5 : 1;
+        if (isFirstHydration) {
+          if (serverState.config.defaultCourtsCount !== undefined) {
+            window.CourtPayState.courtsCount = Math.max(1, Number(serverState.config.defaultCourtsCount) || 1);
+          }
+          if (serverState.config.defaultCourtHours !== undefined) {
+            window.CourtPayState.courtHours = Math.max(0.5, Number(serverState.config.defaultCourtHours) || 2);
+          }
+          if (serverState.config.courtHoursStep !== undefined) {
+            window.CourtPayState.courtHoursStep = Number(serverState.config.courtHoursStep) === 0.5 ? 0.5 : 1;
+          }
+          if (serverState.config.defaultCourtRatePerHourEUR !== undefined) {
+            window.CourtPayState.courtRatePerHourEUR = Number(serverState.config.defaultCourtRatePerHourEUR);
+            var rateEl = document.getElementById('input-court-rate');
+            if (rateEl) rateEl.value = window.CourtPayState.courtRatePerHourEUR.toFixed(2);
+          }
         }
       }
-      if (Array.isArray(serverState.players) && serverState.players.length > 0) {
+      if (Array.isArray(serverState.players)) {
         var prevSelectionMap = {};
-        if (window.CourtPayState._hydratedOnce && Array.isArray(window.CourtPayState.players)) {
+        if (!isFirstHydration && Array.isArray(window.CourtPayState.players)) {
           for (var m = 0; m < window.CourtPayState.players.length; m++) {
             var oldP = window.CourtPayState.players[m];
             prevSelectionMap[oldP.playerId] = {
@@ -1003,12 +1015,26 @@
             sessionShares: prev ? prev.sessionShares : (Number(p.defaultShares) || 1)
           });
         });
-        window.CourtPayState._hydratedOnce = true;
       }
-      if (Array.isArray(serverState.batches)) window.CourtPayState.batches = serverState.batches;
+      if (Array.isArray(serverState.batches)) {
+        window.CourtPayState.batches = serverState.batches;
+        if (isFirstHydration) {
+          window.CourtPayState.shuttleUsageMap = {};
+        }
+        for (var b = 0; b < serverState.batches.length; b++) {
+          var stName = serverState.batches[b].shuttleType;
+          if (stName && window.CourtPayState.shuttleUsageMap[stName] === undefined) {
+            window.CourtPayState.shuttleUsageMap[stName] = 0;
+          }
+        }
+      }
       if (Array.isArray(serverState.sessions)) window.CourtPayState.sessions = serverState.sessions;
       if (Array.isArray(serverState.ledgerEntries)) window.CourtPayState.ledgerEntries = serverState.ledgerEntries;
-      if (window.CourtPayUI) window.CourtPayUI.renderAll();
+      window.CourtPayState._hydratedOnce = true;
+      if (window.CourtPayUI) {
+        window.CourtPayUI.syncCourtCalculatorUI();
+        window.CourtPayUI.renderAll();
+      }
     }
   };
 </script>
@@ -1237,16 +1263,12 @@
       var name = input ? String(input.value || '').trim() : '';
       if (!name) return;
       if (input) input.value = '';
-      window.CourtPayBridge.call('addPlayer', {
+      window.CourtPayState.callServer('addPlayer', {
         name: name,
         defaultShares: 1,
         type: 'REGULAR'
-      }).then(function (res) {
-        if (res && res.state) {
-          window.CourtPayBridge.hydrateFromServer(res.state);
-        } else {
-          window.CourtPayUI.renderAll();
-        }
+      }, function () {
+        window.CourtPayUI.renderAll();
       });
     },
 
@@ -1344,6 +1366,10 @@
     renderShuttleUsageSteppers: function () {
       var container = document.getElementById('shuttle-usage-list');
       if (!container) return;
+      if (window.CourtPayState.isLoadingServer) {
+        container.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.84rem; padding: 8px 0;">Syncing live shuttle stock from Google Sheet...</div>';
+        return;
+      }
       var typesMap = {};
       for (var i = 0; i < window.CourtPayState.batches.length; i++) {
         var b = window.CourtPayState.batches[i];
@@ -1376,6 +1402,10 @@
     renderRosterSelection: function () {
       var container = document.getElementById('roster-selection-list');
       if (!container) return;
+      if (window.CourtPayState.isLoadingServer) {
+        container.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.84rem; padding: 8px 0;">Syncing live player roster from Google Sheet...</div>';
+        return;
+      }
       var html = '';
       for (var i = 0; i < window.CourtPayState.players.length; i++) {
         var p = window.CourtPayState.players[i];
