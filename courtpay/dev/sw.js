@@ -1,10 +1,12 @@
-// CourtPay Standalone Service Worker (dev - v1.0.0)
-const CACHE_NAME = 'courtpay-dev-v1.0.0-1790347420565';
+// CourtPay Standalone Service Worker (dev - dev-v2)
+const CACHE_NAME = 'ff-courtpay-dev-cache-v2';
+const CACHE_PREFIX = 'ff-courtpay-dev-cache-';
 const ASSETS = [
   '/courtpay/dev/',
   '/courtpay/dev/index.html',
   '/courtpay/dev/manifest.json',
-  '/assets/images/icon-courtpay.svg'
+  '/assets/images/courtpay/icon-courtpay-dev.svg',
+  '/assets/images/courtpay/icon-courtpay-dev-180.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -17,7 +19,11 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      Promise.all(
+        keys
+          .filter((k) => k !== CACHE_NAME && k.startsWith(CACHE_PREFIX))
+          .map((k) => caches.delete(k))
+      )
     )
   );
   self.clients.claim();

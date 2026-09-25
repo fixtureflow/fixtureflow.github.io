@@ -47,4 +47,9 @@
   
   <!-- Layer 5: Diagonal Glass Sheen Path -->
   <path d="M 0,0 L 0,100 L 30,100 L 70,0 Z" fill="url(#sheen-grad)" pointer-events="none"/>
+  <!-- Layer 6: DEV Environment Pill Badge -->
+  <g filter="url(#soft-shadow)">
+    <rect x="48" y="73" width="46" height="21" rx="5" fill="#0f172a" stroke="#fbbf24" stroke-width="1.8"/>
+    <path fill="#fbbf24" fill-rule="evenodd" d="M 55.5,78.5 H 60 C 62.2,78.5 63.8,80 63.8,83.5 C 63.8,87 62.2,88.5 60,88.5 H 55.5 Z M 57.7,80.5 V 86.5 H 59.8 C 60.8,86.5 61.5,85.6 61.5,83.5 C 61.5,81.4 60.8,80.5 59.8,80.5 Z M 66.8,78.5 H 73.3 V 80.5 H 69 V 82.5 H 72.6 V 84.5 H 69 V 86.5 H 73.3 V 88.5 H 66.8 Z M 75.8,78.5 H 78.1 L 79.8,85.3 L 81.5,78.5 H 83.8 L 80.9,88.5 H 78.7 Z"/>
+  </g>
 </svg>
