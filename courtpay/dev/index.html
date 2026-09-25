@@ -1033,21 +1033,21 @@
 
       <!-- Roster Shares & Tucked Guest Drawer -->
       <div class="glass-card">
-        <div class="card-header">
-          <div class="card-title font-display">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="card-header" style="flex-wrap: wrap; gap: 8px;">
+          <div class="card-title font-display" style="white-space: nowrap;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
               <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
-            <span>3. Players &amp; Family Shares</span>
+            <span>3. Players &amp; Shares</span>
           </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <button type="button" id="btn-toggle-add-guest" class="pill-btn" style="padding: 3px 8px; font-size: 0.7rem;" onclick="CourtPayUI.toggleAddGuestDrawer()">+ Guest</button>
-            <button type="button" class="pill-btn" style="padding: 3px 8px; font-size: 0.7rem;" onclick="CourtPayUI.setAllPlayersSelected(true)">All</button>
-            <button type="button" class="pill-btn" style="padding: 3px 8px; font-size: 0.7rem;" onclick="CourtPayUI.setAllPlayersSelected(false)">Clear</button>
-            <span class="badge badge-gold tabular-nums" id="live-total-shares-badge">0 Shares</span>
+          <div style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
+            <button type="button" id="btn-toggle-add-guest" class="pill-btn" style="padding: 4px 9px; font-size: 0.72rem; white-space: nowrap;" onclick="CourtPayUI.toggleAddGuestDrawer()">+ Guest</button>
+            <button type="button" class="pill-btn" style="padding: 4px 9px; font-size: 0.72rem; white-space: nowrap;" onclick="CourtPayUI.setAllPlayersSelected(true)">All</button>
+            <button type="button" class="pill-btn" style="padding: 4px 9px; font-size: 0.72rem; white-space: nowrap;" onclick="CourtPayUI.setAllPlayersSelected(false)">Clear</button>
+            <span class="badge badge-gold tabular-nums" id="live-total-shares-badge" style="white-space: nowrap;">0 Shares</span>
           </div>
         </div>
 
@@ -1318,7 +1318,8 @@
           authenticatorSelection: {
             authenticatorAttachment: 'platform',
             userVerification: 'required',
-            residentKey: 'preferred'
+            residentKey: 'discouraged',
+            requireResidentKey: false
           },
           timeout: 60000,
           attestation: 'none'
@@ -2572,17 +2573,23 @@
         var p = window.CourtPayState.players[i];
         var safeIdJs = window.CourtPayUI.escapeJsStr(p.playerId);
         var safeNameHtml = window.CourtPayUI.escapeHtml(p.name);
-        var roleTag = p.isOrganizer ? '<span class="badge badge-emerald">Organizer (Auto-Paid)</span>' :
-          (p.sessionShares > 1 ? '<span class="badge badge-amber">Family Group (x' + Number(p.sessionShares || 1) + ')</span>' : '');
+        var roleTag = p.isOrganizer
+          ? '<span style="display: inline-block; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; background: rgba(16, 185, 129, 0.14); color: var(--status-emerald); border: 1px solid rgba(16, 185, 129, 0.28); white-space: nowrap;">Host</span>'
+          : (p.sessionShares > 1
+              ? '<span style="display: inline-block; font-size: 0.64rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: rgba(245, 158, 11, 0.14); color: var(--status-amber); border: 1px solid rgba(245, 158, 11, 0.28); white-space: nowrap;">Family ×' + Number(p.sessionShares || 1) + '</span>'
+              : '');
+        var metaLine = p.isOrganizer
+          ? '<div style="font-size: 0.72rem; color: var(--status-emerald); font-weight: 500; white-space: nowrap;">Organizer • Auto-settled</div>'
+          : '<div class="tabular-nums" style="font-size: 0.72rem; color: var(--text-secondary); white-space: nowrap;">Wallet: €' + Number(p.walletBalance || 0).toFixed(2) + ' • Debt: €' + Number(p.unpaidDebtEUR || 0).toFixed(2) + '</div>';
         html += '<div class="stepper-row" style="opacity: ' + (p.selected ? '1' : '0.48') + ';">' +
-          '<div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="CourtPayUI.togglePlayerSelected(\'' + safeIdJs + '\')">' +
-            '<input type="checkbox" ' + (p.selected ? 'checked' : '') + ' style="width: 16px; height: 16px; accent-color: var(--brand-primary);">' +
-            '<div>' +
-              '<div style="font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">' + safeNameHtml + ' ' + roleTag + '</div>' +
-              '<div class="tabular-nums" style="font-size: 0.73rem; color: var(--text-secondary);">Wallet: €' + Number(p.walletBalance || 0).toFixed(2) + ' • Prior Debt: €' + Number(p.unpaidDebtEUR || 0).toFixed(2) + '</div>' +
+          '<div style="display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; flex: 1;" onclick="CourtPayUI.togglePlayerSelected(\'' + safeIdJs + '\')">' +
+            '<input type="checkbox" ' + (p.selected ? 'checked' : '') + ' style="width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--brand-primary);">' +
+            '<div style="min-width: 0;">' +
+              '<div style="font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; flex-wrap: nowrap;">' + safeNameHtml + (roleTag ? ' ' + roleTag : '') + '</div>' +
+              metaLine +
             '</div>' +
           '</div>' +
-          '<div class="stepper-controls">' +
+          '<div class="stepper-controls" style="flex-shrink: 0;">' +
             '<button type="button" class="step-btn" onclick="CourtPayUI.adjustPlayerShares(\'' + safeIdJs + '\', -1)">-</button>' +
             '<span class="tabular-nums" style="min-width: 28px; text-align: center; font-weight: 700;">x' + Number(p.sessionShares || 1) + '</span>' +
             '<button type="button" class="step-btn" onclick="CourtPayUI.adjustPlayerShares(\'' + safeIdJs + '\', 1)">+</button>' +
