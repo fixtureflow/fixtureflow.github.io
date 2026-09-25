@@ -426,7 +426,7 @@
   <meta name="theme-color" content="#080d16">
   <script>
     window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
       });
