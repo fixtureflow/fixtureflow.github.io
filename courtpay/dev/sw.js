@@ -1,5 +1,5 @@
 // CourtPay Standalone Service Worker (dev - v1.0.0)
-const CACHE_NAME = 'courtpay-dev-v1.0.0-1790340865578';
+const CACHE_NAME = 'courtpay-dev-v1.0.0-1790343758705';
 const ASSETS = [
   '/courtpay/dev/',
   '/courtpay/dev/index.html',
