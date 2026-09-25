@@ -418,6 +418,129 @@
   .hidden {
     display: none !important;
   }
+
+  /* Connecting Splash Screen Overlay (100% aligned with DDLC & CourtFlow) */
+  .screen-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    box-sizing: border-box;
+    padding: 24px;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    background: var(--bg-base, #0b0f19);
+  }
+
+  .glow-backdrop {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, var(--brand-primary-glow, rgba(245, 158, 11, 0.22)) 0%, rgba(245, 158, 11, 0) 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @keyframes cpSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  #spinner-loader {
+    width: 44px;
+    height: 44px;
+    border: 4px solid rgba(245, 158, 11, 0.2);
+    border-top-color: var(--brand-primary, #f59e0b);
+    border-radius: 50%;
+    margin: 0 auto;
+    display: block;
+    z-index: 2;
+    animation: cpSpin 0.85s linear infinite;
+  }
+
+  .screen-overlay .loading-text {
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    margin: 16px auto 0 auto;
+    color: var(--text-secondary, #94a3b8);
+    z-index: 2;
+    text-transform: uppercase;
+    text-align: center;
+    max-width: 85%;
+    display: block;
+  }
+
+  .offline-card {
+    background: var(--bg-elevated, #111827);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    max-width: 320px;
+    z-index: 2;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  }
+
+  .offline-title {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    color: var(--status-crimson, #ef4444);
+    font-weight: 700;
+  }
+
+  .offline-desc {
+    margin: 0 0 16px 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  /* Collapsible Section 1 Summary Bar */
+  .court-summary-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+
+  .court-summary-bar:hover {
+    border-color: var(--brand-primary);
+  }
+
+  /* Settings Modal Overlay */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.68);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 5000;
+  }
+
+  .modal-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-top: 4px solid var(--brand-primary);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+  }
 </style>
 
 
@@ -434,6 +557,76 @@
   </script>
 </head>
 <body>
+  <!-- Connecting Splash Screen (100% aligned with DDLC & CourtFlow) -->
+  <div id="status-screen" class="screen-overlay">
+    <div class="glow-backdrop"></div>
+    <div id="spinner-loader"></div>
+    <div class="loading-text" id="status-text">CONNECTING TO COURTPAY · FIXTUREFLOW...</div>
+    <div id="offline-panel" class="offline-card hidden">
+      <h3 class="offline-title">Connection Error</h3>
+      <p id="offline-error-msg" class="offline-desc">Unable to connect to club Google Sheet.</p>
+      <button type="button" class="btn-primary" onclick="CourtPayUI.retryInitialConnect()" style="padding: 10px 20px; font-size: 0.9rem;">RETRY</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal (Saves Defaults to Google Sheet Config Tab) -->
+  <div id="settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+    <div class="modal-card">
+      <div class="card-header" style="margin-bottom: 14px;">
+        <div class="card-title font-display" id="settings-modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>Sheet Default Settings</span>
+        </div>
+        <button type="button" class="btn-secondary" style="padding: 5px 10px;" onclick="CourtPayUI.closeSettingsModal()">Close</button>
+      </div>
+
+      <div class="input-group" style="margin-bottom: 10px;">
+        <label for="setting-session-title">Default Session Title</label>
+        <input id="setting-session-title" class="input-control" type="text" placeholder="Friday Night Badminton">
+      </div>
+
+      <div class="field-row">
+        <div class="input-group">
+          <label for="setting-courts-count">Default Courts</label>
+          <input id="setting-courts-count" class="input-control tabular-nums" type="number" min="1" max="12" step="1">
+        </div>
+        <div class="input-group">
+          <label for="setting-court-hours">Default Duration (Hrs)</label>
+          <input id="setting-court-hours" class="input-control tabular-nums" type="number" min="0.5" max="12" step="0.5">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="input-group">
+          <label for="setting-court-rate">Default Rate / Hr (€)</label>
+          <input id="setting-court-rate" class="input-control tabular-nums" type="number" min="0" step="0.50">
+        </div>
+        <div class="input-group">
+          <label for="setting-hours-step">Hour Step Mode</label>
+          <select id="setting-hours-step" class="input-control">
+            <option value="1">1 Hour (1h)</option>
+            <option value="0.5">Half Hour (0.5h)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="input-group" style="margin-bottom: 14px;">
+        <label for="setting-revolut-tag">Revolut.me Tag (@username)</label>
+        <input id="setting-revolut-tag" class="input-control" type="text" placeholder="765xu">
+      </div>
+
+      <button type="button" id="btn-save-settings" class="btn-primary" onclick="CourtPayUI.saveSettingsModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M20 6 9 17l-5-5"/>
+        </svg>
+        <span id="btn-save-settings-text">Save Defaults to Google Sheet</span>
+      </button>
+    </div>
+  </div>
+
   <div class="app-shell">
     <!-- Header Bar -->
     <header class="app-header">
@@ -460,11 +653,11 @@
             <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
           </svg>
         </button>
-        <button id="btn-pin-modal" class="icon-btn" type="button" title="Organizer PIN Status" onclick="CourtPayUI.promptOrganizerPin()">
-          <!-- Shield Check SVG -->
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            <path d="m9 12 2 2 4-4"/>
+        <button id="btn-settings-modal" class="icon-btn" type="button" title="Sheet Default Settings" onclick="CourtPayUI.openSettingsModal()">
+          <!-- Settings Gear SVG -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
         </button>
       </div>
@@ -472,9 +665,9 @@
 
     <!-- VIEW 1: NEW SESSION (30-SECOND COURTSIDE FLOW) -->
     <section id="view-session" class="view-section">
-      <!-- Court Cost Card -->
-      <div class="glass-card">
-        <div class="card-header">
+      <!-- Court Cost Card (Collapsible, Collapsed by Default) -->
+      <div class="glass-card" id="card-court-setup">
+        <div class="card-header" style="cursor: pointer;" onclick="CourtPayUI.toggleCourtSetupCollapse()">
           <div class="card-title font-display">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="2" y="4" width="20" height="16" rx="2"/>
@@ -483,61 +676,76 @@
             </svg>
             <span>1. Court &amp; Session Setup</span>
           </div>
-          <span class="badge badge-gold tabular-nums" id="live-per-share-badge">€4.16 / share</span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="badge badge-gold tabular-nums" id="live-per-share-badge">€0.00 / share</span>
+            <button type="button" id="btn-toggle-court-setup" class="pill-btn" style="padding: 3px 9px; font-size: 0.72rem;" onclick="event.stopPropagation(); CourtPayUI.toggleCourtSetupCollapse()">Edit</button>
+          </div>
         </div>
 
-        <!-- Quick Court x Hours Combinations -->
-        <div class="preset-pills" id="court-preset-pills">
-          <button type="button" class="pill-btn tabular-nums" data-courts="1" data-hours="1" onclick="CourtPayUI.setCourtHoursPreset(1, 1)">1 Ct &times; 1h</button>
-          <button type="button" class="pill-btn active tabular-nums" data-courts="1" data-hours="2" onclick="CourtPayUI.setCourtHoursPreset(1, 2)">1 Ct &times; 2h</button>
-          <button type="button" class="pill-btn tabular-nums" data-courts="2" data-hours="1" onclick="CourtPayUI.setCourtHoursPreset(2, 1)">2 Cts &times; 1h</button>
-          <button type="button" class="pill-btn tabular-nums" data-courts="2" data-hours="2" onclick="CourtPayUI.setCourtHoursPreset(2, 2)">2 Cts &times; 2h</button>
-          <button type="button" class="pill-btn tabular-nums" data-courts="3" data-hours="2" onclick="CourtPayUI.setCourtHoursPreset(3, 2)">3 Cts &times; 2h</button>
+        <!-- Compact Summary Bar (Visible when Section 1 is collapsed) -->
+        <div id="court-setup-summary-bar" class="court-summary-bar" onclick="CourtPayUI.toggleCourtSetupCollapse()">
+          <div>
+            <div id="court-setup-summary-title" style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Friday Night Badminton</div>
+            <div id="court-setup-summary-details" class="tabular-nums" style="font-size: 0.76rem; color: var(--text-secondary); margin-top: 2px;">2 Courts &times; 2 hrs @ €2.00/hr = €8.00</div>
+          </div>
+          <span class="badge badge-gold tabular-nums" id="court-setup-summary-cost">€8.00</span>
         </div>
 
-        <!-- Interactive Courts & Hours (0.5h step) Steppers -->
-        <div class="field-row">
-          <div class="input-group">
-            <label>Courts Booked</label>
-            <div class="stepper-row" style="margin-bottom: 0;">
-              <button type="button" class="step-btn" aria-label="Remove Court" onclick="CourtPayUI.adjustCourtsCount(-1)">-</button>
-              <span id="display-courts-count" class="tabular-nums" style="font-weight: 700; font-size: 0.9rem;">1 Court</span>
-              <button type="button" class="step-btn" aria-label="Add Court" onclick="CourtPayUI.adjustCourtsCount(1)">+</button>
+        <!-- Expandable Court & Session Inputs (Hidden by default once configured) -->
+        <div id="court-setup-body" class="hidden" style="margin-top: 12px;">
+          <!-- Quick Court x Hours Combinations -->
+          <div class="preset-pills" id="court-preset-pills">
+            <button type="button" class="pill-btn tabular-nums" data-courts="1" data-hours="1" onclick="CourtPayUI.setCourtHoursPreset(1, 1)">1 Ct &times; 1h</button>
+            <button type="button" class="pill-btn active tabular-nums" data-courts="1" data-hours="2" onclick="CourtPayUI.setCourtHoursPreset(1, 2)">1 Ct &times; 2h</button>
+            <button type="button" class="pill-btn tabular-nums" data-courts="2" data-hours="1" onclick="CourtPayUI.setCourtHoursPreset(2, 1)">2 Cts &times; 1h</button>
+            <button type="button" class="pill-btn tabular-nums" data-courts="2" data-hours="2" onclick="CourtPayUI.setCourtHoursPreset(2, 2)">2 Cts &times; 2h</button>
+            <button type="button" class="pill-btn tabular-nums" data-courts="3" data-hours="2" onclick="CourtPayUI.setCourtHoursPreset(3, 2)">3 Cts &times; 2h</button>
+          </div>
+
+          <!-- Interactive Courts & Hours (0.5h step) Steppers -->
+          <div class="field-row">
+            <div class="input-group">
+              <label>Courts Booked</label>
+              <div class="stepper-row" style="margin-bottom: 0;">
+                <button type="button" class="step-btn" aria-label="Remove Court" onclick="CourtPayUI.adjustCourtsCount(-1)">-</button>
+                <span id="display-courts-count" class="tabular-nums" style="font-weight: 700; font-size: 0.9rem;">1 Court</span>
+                <button type="button" class="step-btn" aria-label="Add Court" onclick="CourtPayUI.adjustCourtsCount(1)">+</button>
+              </div>
+            </div>
+            <div class="input-group">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                <label style="margin-bottom: 0;">Duration (Hours)</label>
+                <button type="button" id="btn-hours-step-mode" class="badge badge-gold tabular-nums" style="cursor: pointer; padding: 1px 7px; font-size: 0.68rem;" title="Toggle 1h / 0.5h hour increment setting" onclick="CourtPayUI.toggleHoursStepSetting()">Step: 1h</button>
+              </div>
+              <div class="stepper-row" style="margin-bottom: 0;">
+                <button type="button" class="step-btn" aria-label="Decrease Hours" onclick="CourtPayUI.adjustCourtHours(-1)">-</button>
+                <span id="display-court-hours" class="tabular-nums" style="font-weight: 700; font-size: 0.9rem;">2 hrs</span>
+                <button type="button" class="step-btn" aria-label="Increase Hours" onclick="CourtPayUI.adjustCourtHours(1)">+</button>
+              </div>
             </div>
           </div>
-          <div class="input-group">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-              <label style="margin-bottom: 0;">Duration (Hours)</label>
-              <button type="button" id="btn-hours-step-mode" class="badge badge-gold tabular-nums" style="cursor: pointer; padding: 1px 7px; font-size: 0.68rem;" title="Toggle 1h / 0.5h hour increment setting" onclick="CourtPayUI.toggleHoursStepSetting()">Step: 1h</button>
+
+          <!-- Rate per Court/Hour & Auto-Calculated Total Court Cost (with manual override) -->
+          <div class="field-row">
+            <div class="input-group">
+              <label for="input-court-rate">Rate / Court / Hr (€)</label>
+              <input id="input-court-rate" class="input-control tabular-nums" type="number" step="0.50" min="0" value="16.00" oninput="CourtPayUI.onCourtRateInput()">
             </div>
-            <div class="stepper-row" style="margin-bottom: 0;">
-              <button type="button" class="step-btn" aria-label="Decrease Hours" onclick="CourtPayUI.adjustCourtHours(-1)">-</button>
-              <span id="display-court-hours" class="tabular-nums" style="font-weight: 700; font-size: 0.9rem;">2 hrs</span>
-              <button type="button" class="step-btn" aria-label="Increase Hours" onclick="CourtPayUI.adjustCourtHours(1)">+</button>
+            <div class="input-group">
+              <label for="input-court-cost">Total Court Cost (€)</label>
+              <input id="input-court-cost" class="input-control tabular-nums" type="number" step="0.50" min="0" value="32.00" oninput="CourtPayUI.onManualCourtCostInput()">
             </div>
           </div>
-        </div>
 
-        <!-- Rate per Court/Hour & Auto-Calculated Total Court Cost (with manual override) -->
-        <div class="field-row">
-          <div class="input-group">
-            <label for="input-court-rate">Rate / Court / Hr (€)</label>
-            <input id="input-court-rate" class="input-control tabular-nums" type="number" step="0.50" min="0" value="16.00" oninput="CourtPayUI.onCourtRateInput()">
+          <div id="court-calc-formula-bar" class="calc-formula-bar tabular-nums">
+            <span id="court-calc-formula-text">1 Court &times; 2 hrs &times; €16.00/hr = €32.00</span>
+            <button type="button" id="btn-reset-court-auto" class="hidden" style="background:none;border:none;color:var(--brand-primary);font-weight:700;font-size:0.75rem;cursor:pointer;text-decoration:underline;" onclick="CourtPayUI.resetCourtCostToAuto()">Auto-Calc</button>
           </div>
+
           <div class="input-group">
-            <label for="input-court-cost">Total Court Cost (€)</label>
-            <input id="input-court-cost" class="input-control tabular-nums" type="number" step="0.50" min="0" value="32.00" oninput="CourtPayUI.onManualCourtCostInput()">
+            <label for="input-session-title">Session Title</label>
+            <input id="input-session-title" class="input-control" type="text" value="Friday Night Badminton" oninput="window.CourtPayState._titleManuallyEdited = true; CourtPayUI.syncCourtCalculatorUI(); CourtPayUI.recalculatePreview()">
           </div>
-        </div>
-
-        <div id="court-calc-formula-bar" class="calc-formula-bar tabular-nums">
-          <span id="court-calc-formula-text">1 Court &times; 2 hrs &times; €16.00/hr = €32.00</span>
-          <button type="button" id="btn-reset-court-auto" class="hidden" style="background:none;border:none;color:var(--brand-primary);font-weight:700;font-size:0.75rem;cursor:pointer;text-decoration:underline;" onclick="CourtPayUI.resetCourtCostToAuto()">Auto-Calc</button>
-        </div>
-
-        <div class="input-group">
-          <label for="input-session-title">Session Title</label>
-          <input id="input-session-title" class="input-control" type="text" value="Tuesday Night Badminton" oninput="CourtPayUI.recalculatePreview()">
         </div>
       </div>
 
@@ -551,7 +759,7 @@
             </svg>
             <span>2. Shuttles Used (FIFO Auto-Split)</span>
           </div>
-          <span class="badge badge-gold tabular-nums" id="live-shuttle-cost-badge">€9.60</span>
+          <span class="badge badge-gold tabular-nums" id="live-shuttle-cost-badge">€0.00</span>
         </div>
         <div id="shuttle-usage-list"></div>
       </div>
@@ -568,7 +776,11 @@
             </svg>
             <span>3. Players &amp; Family Shares</span>
           </div>
-          <span class="badge badge-gold tabular-nums" id="live-total-shares-badge">10 Shares</span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button type="button" class="pill-btn" style="padding: 3px 8px; font-size: 0.7rem;" onclick="CourtPayUI.setAllPlayersSelected(true)">All</button>
+            <button type="button" class="pill-btn" style="padding: 3px 8px; font-size: 0.7rem;" onclick="CourtPayUI.setAllPlayersSelected(false)">Clear</button>
+            <span class="badge badge-gold tabular-nums" id="live-total-shares-badge">0 Shares</span>
+          </div>
         </div>
 
         <div class="input-group" style="margin-bottom: 10px;">
@@ -750,7 +962,9 @@
     isLoadingServer: _isLiveServerMode,
     theme: localStorage.getItem('courtpay_theme') || 'dark',
     authToken: localStorage.getItem('courtpay_token') || '',
+    isCourtSetupExpanded: false,
     config: {
+      defaultSessionTitle: 'Friday Night Badminton',
       revolutTag: 'mingbadminton',
       roundingMode: 'CEIL_CENT',
       defaultCourtRatePerHourEUR: 16.00,
@@ -765,13 +979,13 @@
     courtRatePerHourEUR: 16.00,
     courtCostManualOverride: false,
     players: _isLiveServerMode ? [] : [
-      { playerId: 'p_org_1', name: 'Ming (You)', type: 'ORGANIZER', defaultShares: 1, isOrganizer: true, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 },
-      { playerId: 'p_org_2', name: 'Sarah (Partner)', type: 'PARTNER', defaultShares: 1, isOrganizer: true, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 },
-      { playerId: 'p_fam_1', name: 'David Chen', type: 'FAMILY', defaultShares: 4, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 4 },
-      { playerId: 'p_reg_1', name: 'Alex Rivera', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 4.10, active: true, selected: true, sessionShares: 1 },
-      { playerId: 'p_reg_2', name: 'Emma Walsh', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 },
-      { playerId: 'p_reg_3', name: 'Liam O\'Connor', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 },
-      { playerId: 'p_reg_4', name: 'Noah Patel', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 12.50, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 }
+      { playerId: 'p_org_1', name: 'Ming (You)', type: 'ORGANIZER', defaultShares: 1, isOrganizer: true, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
+      { playerId: 'p_org_2', name: 'Sarah (Partner)', type: 'PARTNER', defaultShares: 1, isOrganizer: true, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
+      { playerId: 'p_fam_1', name: 'David Chen', type: 'FAMILY', defaultShares: 4, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 4 },
+      { playerId: 'p_reg_1', name: 'Alex Rivera', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 4.10, active: true, selected: false, sessionShares: 1 },
+      { playerId: 'p_reg_2', name: 'Emma Walsh', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
+      { playerId: 'p_reg_3', name: 'Liam O\'Connor', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
+      { playerId: 'p_reg_4', name: 'Noah Patel', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 12.50, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 }
     ],
     batches: _isLiveServerMode ? [] : [
       { batchId: 'b_as30_1', shuttleType: 'Yonex AS-30', category: 'Feather', tubesCount: 1, shuttlesPerTube: 12, totalShuttles: 12, remainingShuttles: 9, totalCostEUR: 28.80, costPerShuttleEUR: 2.40, status: 'ACTIVE' },
@@ -1017,6 +1231,20 @@
             });
           }
         }
+      } else if (action === 'updateConfig') {
+        st.config = Object.assign({}, st.config, payload);
+        if (payload.defaultSessionTitle) {
+          var titleInput = document.getElementById('input-session-title');
+          if (titleInput) titleInput.value = payload.defaultSessionTitle;
+        }
+        if (payload.defaultCourtsCount !== undefined) st.courtsCount = Number(payload.defaultCourtsCount);
+        if (payload.defaultCourtHours !== undefined) st.courtHours = Number(payload.defaultCourtHours);
+        if (payload.courtHoursStep !== undefined) st.courtHoursStep = Number(payload.courtHoursStep) === 0.5 ? 0.5 : 1;
+        if (payload.defaultCourtRatePerHourEUR !== undefined) {
+          st.courtRatePerHourEUR = Number(payload.defaultCourtRatePerHourEUR);
+          var rInp = document.getElementById('input-court-rate');
+          if (rInp) rInp.value = st.courtRatePerHourEUR.toFixed(2);
+        }
       }
     },
 
@@ -1024,8 +1252,13 @@
       if (!serverState) return;
       var isFirstHydration = !window.CourtPayState._hydratedOnce;
       window.CourtPayState.isLoadingServer = false;
+      window.CourtPayState.syncError = '';
       if (serverState.config) {
         window.CourtPayState.config = serverState.config;
+        var titleEl = document.getElementById('input-session-title');
+        if (titleEl && (isFirstHydration || !window.CourtPayState._titleManuallyEdited)) {
+          titleEl.value = serverState.config.defaultSessionTitle || 'Friday Night Badminton';
+        }
         if (isFirstHydration) {
           if (serverState.config.defaultCourtsCount !== undefined) {
             window.CourtPayState.courtsCount = Math.max(1, Number(serverState.config.defaultCourtsCount) || 1);
@@ -1057,7 +1290,7 @@
         window.CourtPayState.players = serverState.players.map(function (p) {
           var prev = prevSelectionMap[p.playerId];
           return Object.assign({}, p, {
-            selected: prev ? prev.selected : true,
+            selected: isFirstHydration ? false : (prev ? prev.selected : true),
             sessionShares: prev ? prev.sessionShares : (Number(p.defaultShares) || 1)
           });
         });
@@ -1093,15 +1326,48 @@
       if (rateInp && window.CourtPayState.courtRatePerHourEUR) {
         rateInp.value = Number(window.CourtPayState.courtRatePerHourEUR).toFixed(2);
       }
+      window.CourtPayUI.syncStatusScreenOverlay();
       window.CourtPayUI.syncCourtCalculatorUI();
       window.CourtPayUI.renderAll();
       window.CourtPayState.callServer('getInitialState', {}, function (res) {
         if (res && res.players) {
           window.CourtPayState.hydrateFromServer(res);
+          window.CourtPayUI.syncStatusScreenOverlay();
           window.CourtPayUI.syncCourtCalculatorUI();
           window.CourtPayUI.recalculatePreview();
         }
       });
+    },
+
+    retryInitialConnect: function () {
+      window.CourtPayState.isLoadingServer = true;
+      window.CourtPayState.syncError = '';
+      window.CourtPayUI.syncStatusScreenOverlay();
+      window.CourtPayUI.init();
+    },
+
+    syncStatusScreenOverlay: function () {
+      var screen = document.getElementById('status-screen');
+      if (!screen) return;
+      var spinner = document.getElementById('spinner-loader');
+      var statusText = document.getElementById('status-text');
+      var offlinePanel = document.getElementById('offline-panel');
+      var offlineMsg = document.getElementById('offline-error-msg');
+
+      if (window.CourtPayState.isLoadingServer) {
+        screen.classList.remove('hidden');
+        if (spinner) spinner.style.display = 'block';
+        if (statusText) statusText.style.display = 'block';
+        if (offlinePanel) offlinePanel.classList.add('hidden');
+      } else if (window.CourtPayState.syncError && !window.CourtPayState._hydratedOnce) {
+        screen.classList.remove('hidden');
+        if (spinner) spinner.style.display = 'none';
+        if (statusText) statusText.style.display = 'none';
+        if (offlinePanel) offlinePanel.classList.remove('hidden');
+        if (offlineMsg) offlineMsg.textContent = 'Unable to connect to club Google Sheet (' + window.CourtPayState.syncError + ').';
+      } else {
+        screen.classList.add('hidden');
+      }
     },
 
     toggleTheme: function () {
@@ -1111,16 +1377,92 @@
       document.documentElement.setAttribute('data-theme', next);
     },
 
-    promptOrganizerPin: function () {
-      var pin = window.prompt('Enter 4-Digit Organizer PIN (Default: 2026):', '2026');
-      if (!pin) return;
-      window.CourtPayState.callServer('validateAdminPin', { pin: pin }, function (res) {
-        if (res && res.token) {
-          window.CourtPayState.authToken = res.token;
-          localStorage.setItem('courtpay_token', res.token);
-          window.alert('Organizer PIN verified.');
-        }
+    toggleCourtSetupCollapse: function () {
+      window.CourtPayState.isCourtSetupExpanded = !window.CourtPayState.isCourtSetupExpanded;
+      var bodyEl = document.getElementById('court-setup-body');
+      var sumEl = document.getElementById('court-setup-summary-bar');
+      var btnEl = document.getElementById('btn-toggle-court-setup');
+      var expanded = Boolean(window.CourtPayState.isCourtSetupExpanded);
+      if (bodyEl) bodyEl.classList.toggle('hidden', !expanded);
+      if (sumEl) sumEl.classList.toggle('hidden', expanded);
+      if (btnEl) btnEl.textContent = expanded ? 'Done' : 'Edit';
+    },
+
+    openSettingsModal: function () {
+      var cfg = window.CourtPayState.config || {};
+      var titleEl = document.getElementById('setting-session-title');
+      var courtsEl = document.getElementById('setting-courts-count');
+      var hoursEl = document.getElementById('setting-court-hours');
+      var rateEl = document.getElementById('setting-court-rate');
+      var stepEl = document.getElementById('setting-hours-step');
+      var revEl = document.getElementById('setting-revolut-tag');
+
+      if (titleEl) titleEl.value = cfg.defaultSessionTitle || (document.getElementById('input-session-title') || {}).value || 'Friday Night Badminton';
+      if (courtsEl) courtsEl.value = String(cfg.defaultCourtsCount !== undefined ? cfg.defaultCourtsCount : (window.CourtPayState.courtsCount || 2));
+      if (hoursEl) hoursEl.value = String(cfg.defaultCourtHours !== undefined ? cfg.defaultCourtHours : (window.CourtPayState.courtHours || 2));
+      if (rateEl) rateEl.value = Number(cfg.defaultCourtRatePerHourEUR !== undefined ? cfg.defaultCourtRatePerHourEUR : (window.CourtPayState.courtRatePerHourEUR || 2)).toFixed(2);
+      if (stepEl) stepEl.value = String(Number(cfg.courtHoursStep || window.CourtPayState.courtHoursStep || 1) === 0.5 ? '0.5' : '1');
+      if (revEl) revEl.value = cfg.revolutTag || '';
+
+      var modal = document.getElementById('settings-modal');
+      if (modal) modal.classList.remove('hidden');
+    },
+
+    closeSettingsModal: function () {
+      var modal = document.getElementById('settings-modal');
+      if (modal) modal.classList.add('hidden');
+    },
+
+    saveSettingsModal: function () {
+      var titleVal = String((document.getElementById('setting-session-title') || {}).value || 'Friday Night Badminton').trim() || 'Friday Night Badminton';
+      var courtsVal = Math.max(1, Math.round(Number((document.getElementById('setting-courts-count') || {}).value || 2)));
+      var hoursVal = Math.max(0.5, Number((document.getElementById('setting-court-hours') || {}).value || 2));
+      var rateVal = Math.max(0, Number((document.getElementById('setting-court-rate') || {}).value || 0));
+      var stepVal = Number((document.getElementById('setting-hours-step') || {}).value) === 0.5 ? 0.5 : 1;
+      var revVal = String((document.getElementById('setting-revolut-tag') || {}).value || '').trim().replace(/^@/, '');
+      var costVal = Math.round((courtsVal * hoursVal * rateVal) * 100) / 100;
+
+      var saveBtnText = document.getElementById('btn-save-settings-text');
+      if (saveBtnText) saveBtnText.textContent = 'Saving to Sheet...';
+
+      window.CourtPayState.courtsCount = courtsVal;
+      window.CourtPayState.courtHours = hoursVal;
+      window.CourtPayState.courtRatePerHourEUR = rateVal;
+      window.CourtPayState.courtHoursStep = stepVal;
+      window.CourtPayState.courtCostManualOverride = false;
+      window.CourtPayState._titleManuallyEdited = false;
+
+      var sessionTitleInput = document.getElementById('input-session-title');
+      if (sessionTitleInput) sessionTitleInput.value = titleVal;
+      var rateInp = document.getElementById('input-court-rate');
+      if (rateInp) rateInp.value = rateVal.toFixed(2);
+
+      window.CourtPayUI.syncCourtCalculatorUI();
+      window.CourtPayUI.recalculatePreview();
+
+      window.CourtPayState.callServer('updateConfig', {
+        defaultSessionTitle: titleVal,
+        defaultCourtsCount: courtsVal,
+        defaultCourtHours: hoursVal,
+        defaultCourtRatePerHourEUR: rateVal,
+        courtHoursStep: stepVal,
+        defaultCourtCostEUR: costVal,
+        revolutTag: revVal
+      }, function () {
+        if (saveBtnText) saveBtnText.textContent = 'Save Defaults to Google Sheet';
+        window.CourtPayUI.closeSettingsModal();
+        window.CourtPayUI.syncCourtCalculatorUI();
+        window.CourtPayUI.renderAll();
       });
+    },
+
+    setAllPlayersSelected: function (isSelected) {
+      var flag = Boolean(isSelected);
+      for (var i = 0; i < window.CourtPayState.players.length; i++) {
+        window.CourtPayState.players[i].selected = flag;
+      }
+      window.CourtPayUI.renderRosterSelection();
+      window.CourtPayUI.recalculatePreview();
     },
 
     switchTab: function (tabName) {
@@ -1165,6 +1507,7 @@
       if (costInp && !window.CourtPayState.courtCostManualOverride) {
         costInp.value = autoCost.toFixed(2);
       }
+      var effectiveCost = (window.CourtPayState.courtCostManualOverride && costInp) ? Number(costInp.value || 0) : autoCost;
 
       var pills = document.querySelectorAll('#court-preset-pills .pill-btn');
       for (var i = 0; i < pills.length; i++) {
@@ -1174,19 +1517,31 @@
         pills[i].classList.toggle('active', isMatch);
       }
 
+      var cLabel = courts === 1 ? '1 Court' : (courts + ' Courts');
+      var hLabel = hoursFmt + (hours === 1 ? ' hr' : ' hrs');
       var formulaTextEl = document.getElementById('court-calc-formula-text');
       var resetBtn = document.getElementById('btn-reset-court-auto');
       if (formulaTextEl) {
         if (window.CourtPayState.courtCostManualOverride && costInp) {
-          formulaTextEl.textContent = 'Manual Court Cost Override: €' + Number(costInp.value || 0).toFixed(2);
+          formulaTextEl.textContent = 'Manual Court Cost Override: €' + effectiveCost.toFixed(2);
           if (resetBtn) resetBtn.classList.remove('hidden');
         } else {
-          var cLabel = courts === 1 ? '1 Court' : (courts + ' Courts');
-          var hLabel = hoursFmt + (hours === 1 ? ' hr' : ' hrs');
           formulaTextEl.textContent = cLabel + ' × ' + hLabel + ' × €' + rate.toFixed(2) + '/hr = €' + autoCost.toFixed(2);
           if (resetBtn) resetBtn.classList.add('hidden');
         }
       }
+
+      var titleVal = (document.getElementById('input-session-title') || {}).value ||
+        (window.CourtPayState.config && window.CourtPayState.config.defaultSessionTitle) ||
+        'Friday Night Badminton';
+      var sumTitleEl = document.getElementById('court-setup-summary-title');
+      var sumDetailsEl = document.getElementById('court-setup-summary-details');
+      var sumCostEl = document.getElementById('court-setup-summary-cost');
+      if (sumTitleEl) sumTitleEl.textContent = titleVal;
+      if (sumDetailsEl) {
+        sumDetailsEl.textContent = cLabel + ' × ' + hLabel + ' @ €' + rate.toFixed(2) + '/hr = €' + effectiveCost.toFixed(2);
+      }
+      if (sumCostEl) sumCostEl.textContent = '€' + effectiveCost.toFixed(2);
     },
 
     toggleHoursStepSetting: function () {
@@ -1631,6 +1986,7 @@
     },
 
     renderAll: function () {
+      window.CourtPayUI.syncStatusScreenOverlay();
       window.CourtPayUI.renderShuttleUsageSteppers();
       window.CourtPayUI.renderRosterSelection();
       window.CourtPayUI.recalculatePreview();
