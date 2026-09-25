@@ -7,8 +7,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+<script>
+  (function () {
+    try {
+      var sysLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      document.documentElement.setAttribute('data-theme', sysLight ? 'light' : 'dark');
+    } catch (e) {}
+  })();
+</script>
 <style>
   :root {
+    color-scheme: dark;
     --bg-base: #080d16;
     --bg-elevated: rgba(15, 23, 42, 0.72);
     --bg-card-hover: rgba(30, 41, 59, 0.82);
@@ -37,6 +46,7 @@
   }
 
   [data-theme="light"] {
+    color-scheme: light;
     --bg-base: #faf7f2;
     --bg-elevated: rgba(255, 255, 255, 0.94);
     --bg-card-hover: #fffbeb;
@@ -155,9 +165,17 @@
     transition: all 0.15s ease;
   }
 
-  .icon-btn:hover {
+  .icon-btn:active {
+    transform: scale(0.95);
     border-color: var(--brand-primary);
     color: var(--brand-primary);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .icon-btn:hover {
+      border-color: var(--brand-primary);
+      color: var(--brand-primary);
+    }
   }
 
   .glass-card {
@@ -238,13 +256,82 @@
     font-size: 0.79rem;
     font-weight: 600;
     cursor: pointer;
+    touch-action: manipulation;
     transition: all 0.15s ease;
   }
 
-  .pill-btn.active, .pill-btn:hover {
+  .pill-btn.active {
     background: var(--brand-primary-glow);
     border-color: var(--brand-primary);
     color: var(--brand-primary);
+  }
+
+  .pill-btn:active {
+    transform: scale(0.95);
+  }
+
+  /* Momentary click buttons (All, Clear, Collapse/Edit) — responsive on press only, never sticky */
+  .action-chip-btn {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    font-size: 0.73rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    touch-action: manipulation;
+    transition: transform 0.1s ease, background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+
+  .action-chip-btn:active {
+    transform: scale(0.94);
+    background: var(--brand-primary-glow);
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+  }
+
+  /* Dedicated + Guest Drawer Toggle Button */
+  .guest-toggle-btn {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px dashed rgba(16, 185, 129, 0.48);
+    background: rgba(16, 185, 129, 0.08);
+    color: var(--brand-emerald);
+    font-size: 0.73rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    touch-action: manipulation;
+    transition: all 0.15s ease;
+  }
+
+  .guest-toggle-btn.active {
+    border-style: solid;
+    border-color: var(--brand-emerald);
+    background: var(--brand-emerald-glow);
+    color: var(--brand-emerald);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+  }
+
+  .guest-toggle-btn:active {
+    transform: scale(0.95);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .pill-btn:hover {
+      border-color: var(--brand-primary);
+      color: var(--brand-primary);
+    }
+    .action-chip-btn:hover {
+      border-color: var(--text-muted);
+      color: var(--text-primary);
+    }
+    .guest-toggle-btn:hover {
+      border-color: var(--brand-emerald);
+      background: var(--brand-emerald-glow);
+    }
   }
 
   .calc-formula-bar {
@@ -323,11 +410,20 @@
     font-weight: 700;
     font-size: 0.98rem;
     touch-action: manipulation;
+    transition: transform 0.1s ease, border-color 0.12s ease, color 0.12s ease;
   }
 
-  .step-btn:hover {
+  .step-btn:active {
+    transform: scale(0.93);
     border-color: var(--brand-primary);
     color: var(--brand-primary);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .step-btn:hover {
+      border-color: var(--brand-primary);
+      color: var(--brand-primary);
+    }
   }
 
   .btn-primary {
@@ -884,11 +980,15 @@
       </div>
 
       <div class="header-actions">
-        <button id="btn-theme-toggle" class="icon-btn" type="button" title="Toggle Dark / Light Mode" onclick="CourtPayUI.toggleTheme()">
-          <!-- Sun / Moon Vector SVG -->
+        <button id="btn-theme-toggle" class="icon-btn" type="button" title="Follows System Day/Night Mode (Tap to switch)" onclick="CourtPayUI.toggleTheme()">
+          <!-- Sun Vector SVG (shown in Dark mode) -->
           <svg id="icon-theme-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="4"/>
             <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+          <!-- Moon Vector SVG (shown in Light mode) -->
+          <svg id="icon-theme-moon" class="hidden" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
           </svg>
         </button>
         <button id="btn-lock-app" class="icon-btn" type="button" title="Lock CourtPay Session" onclick="CourtPayUI.lockSession()">
@@ -926,7 +1026,7 @@
       </div>
       <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
         <button type="button" class="pill-btn active" style="padding: 5px 10px; font-size: 0.74rem;" onclick="CourtPayUI.enableBiometricLogin()">Enable</button>
-        <button type="button" class="pill-btn" style="padding: 5px 8px; font-size: 0.72rem;" onclick="CourtPayUI.dismissBiometricBanner()">Later</button>
+        <button type="button" class="action-chip-btn" style="padding: 5px 8px; font-size: 0.72rem;" onclick="CourtPayUI.dismissBiometricBanner()">Later</button>
       </div>
     </div>
 
@@ -945,7 +1045,7 @@
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
             <span class="badge badge-gold tabular-nums" id="live-per-share-badge">€0.00 / share</span>
-            <button type="button" id="btn-toggle-court-setup" class="pill-btn" style="padding: 3px 9px; font-size: 0.72rem;" onclick="event.stopPropagation(); CourtPayUI.toggleCourtSetupCollapse()">Edit</button>
+            <button type="button" id="btn-toggle-court-setup" class="action-chip-btn" onclick="event.stopPropagation(); CourtPayUI.toggleCourtSetupCollapse()">Edit</button>
           </div>
         </div>
 
@@ -1031,9 +1131,9 @@
         <div id="shuttle-usage-list"></div>
       </div>
 
-      <!-- Roster Shares & Tucked Guest Drawer -->
-      <div class="glass-card">
-        <div class="card-header" style="flex-wrap: wrap; gap: 8px;">
+      <!-- Roster Shares & Tucked Guest Drawer (Expandable / Collapsible) -->
+      <div class="glass-card" id="card-roster-setup">
+        <div class="card-header" style="cursor: pointer;" onclick="CourtPayUI.toggleRosterCollapse()">
           <div class="card-title font-display" style="white-space: nowrap;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -1043,24 +1143,43 @@
             </svg>
             <span>3. Players &amp; Shares</span>
           </div>
-          <div style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
-            <button type="button" id="btn-toggle-add-guest" class="pill-btn" style="padding: 4px 9px; font-size: 0.72rem; white-space: nowrap;" onclick="CourtPayUI.toggleAddGuestDrawer()">+ Guest</button>
-            <button type="button" class="pill-btn" style="padding: 4px 9px; font-size: 0.72rem; white-space: nowrap;" onclick="CourtPayUI.setAllPlayersSelected(true)">All</button>
-            <button type="button" class="pill-btn" style="padding: 4px 9px; font-size: 0.72rem; white-space: nowrap;" onclick="CourtPayUI.setAllPlayersSelected(false)">Clear</button>
+          <div style="display: flex; align-items: center; gap: 6px;">
             <span class="badge badge-gold tabular-nums" id="live-total-shares-badge" style="white-space: nowrap;">0 Shares</span>
+            <button type="button" id="btn-toggle-roster-setup" class="action-chip-btn" onclick="event.stopPropagation(); CourtPayUI.toggleRosterCollapse()">Collapse</button>
           </div>
         </div>
 
-        <!-- Tucked Add Player / Guest Drawer (Hidden by default so Roster starts immediately) -->
-        <div id="add-guest-drawer" class="input-group hidden" style="margin-bottom: 12px;">
-          <label for="input-new-player-name">Add New Player / Guest on the Fly</label>
-          <div style="display: flex; gap: 8px;">
-            <input id="input-new-player-name" class="input-control" type="text" placeholder="e.g. Lucas Meyer" onkeydown="if(event.key==='Enter'){event.preventDefault();CourtPayUI.submitNewPlayer();}">
-            <button type="button" class="btn-secondary" style="white-space: nowrap;" onclick="CourtPayUI.submitNewPlayer()">+ Add Player</button>
+        <!-- Compact Summary Bar (Visible when Section 3 is collapsed) -->
+        <div id="roster-summary-bar" class="court-summary-bar hidden" onclick="CourtPayUI.toggleRosterCollapse()">
+          <div style="min-width: 0;">
+            <div id="roster-summary-title" style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">No players selected yet</div>
+            <div id="roster-summary-details" style="font-size: 0.76rem; color: var(--text-secondary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tap to expand and select session players</div>
           </div>
+          <span class="badge badge-emerald tabular-nums" id="roster-summary-count-badge" style="flex-shrink: 0;">0 Selected</span>
         </div>
 
-        <div id="roster-selection-list"></div>
+        <!-- Expandable Roster Body -->
+        <div id="roster-setup-body">
+          <!-- Roster Action Toolbar: Momentary All/Clear on left, dedicated + Guest toggle on right -->
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <button type="button" class="action-chip-btn" onclick="CourtPayUI.setAllPlayersSelected(true)">Select All</button>
+              <button type="button" class="action-chip-btn" onclick="CourtPayUI.setAllPlayersSelected(false)">Clear</button>
+            </div>
+            <button type="button" id="btn-toggle-add-guest" class="guest-toggle-btn" onclick="CourtPayUI.toggleAddGuestDrawer()">+ Guest</button>
+          </div>
+
+          <!-- Tucked Add Player / Guest Drawer (Hidden by default so Roster starts immediately) -->
+          <div id="add-guest-drawer" class="input-group hidden" style="margin-bottom: 12px;">
+            <label for="input-new-player-name">Add New Player / Guest on the Fly</label>
+            <div style="display: flex; gap: 8px;">
+              <input id="input-new-player-name" class="input-control" type="text" placeholder="e.g. Lucas Meyer" onkeydown="if(event.key==='Enter'){event.preventDefault();CourtPayUI.submitNewPlayer();}">
+              <button type="button" class="btn-secondary" style="white-space: nowrap;" onclick="CourtPayUI.submitNewPlayer()">+ Add Player</button>
+            </div>
+          </div>
+
+          <div id="roster-selection-list"></div>
+        </div>
       </div>
 
       <!-- Live WhatsApp Payment Summary & Save -->
@@ -1433,9 +1552,10 @@
     activeTab: 'session',
     isLoadingServer: _isLiveServerMode,
     isAuthenticated: Boolean(localStorage.getItem('courtpay_token')),
-    theme: localStorage.getItem('courtpay_theme') || 'dark',
+    theme: (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark',
     authToken: localStorage.getItem('courtpay_token') || '',
     isCourtSetupExpanded: false,
+    isRosterExpanded: true,
     isAddGuestExpanded: false,
     config: {
       defaultSessionTitle: 'Friday Night Badminton',
@@ -1856,8 +1976,45 @@
         .replace(/\r|\n/g, ' ');
     },
 
+    applyTheme: function (themeName) {
+      var resolved = themeName === 'light' ? 'light' : 'dark';
+      window.CourtPayState.theme = resolved;
+      document.documentElement.setAttribute('data-theme', resolved);
+      var sunIcon = document.getElementById('icon-theme-sun');
+      var moonIcon = document.getElementById('icon-theme-moon');
+      if (sunIcon) sunIcon.classList.toggle('hidden', resolved === 'light');
+      if (moonIcon) moonIcon.classList.toggle('hidden', resolved !== 'light');
+      var metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) {
+        metaTheme.setAttribute('content', resolved === 'light' ? '#faf7f2' : '#080d16');
+      }
+    },
+
+    initSystemThemeListener: function () {
+      try {
+        localStorage.removeItem('courtpay_theme');
+      } catch (e) {}
+      if (typeof window === 'undefined' || !window.matchMedia) {
+        window.CourtPayUI.applyTheme(window.CourtPayState.theme || 'dark');
+        return;
+      }
+      var mql = window.matchMedia('(prefers-color-scheme: light)');
+      window.CourtPayUI.applyTheme(mql.matches ? 'light' : 'dark');
+      if (!window.CourtPayState._systemThemeListenerBound) {
+        window.CourtPayState._systemThemeListenerBound = true;
+        var onSchemeChange = function (ev) {
+          window.CourtPayUI.applyTheme(ev.matches ? 'light' : 'dark');
+        };
+        if (typeof mql.addEventListener === 'function') {
+          mql.addEventListener('change', onSchemeChange);
+        } else if (typeof mql.addListener === 'function') {
+          mql.addListener(onSchemeChange);
+        }
+      }
+    },
+
     init: function () {
-      document.documentElement.setAttribute('data-theme', window.CourtPayState.theme);
+      window.CourtPayUI.initSystemThemeListener();
       var rateInp = document.getElementById('input-court-rate');
       if (rateInp && window.CourtPayState.courtRatePerHourEUR) {
         rateInp.value = Number(window.CourtPayState.courtRatePerHourEUR).toFixed(2);
@@ -2168,9 +2325,7 @@
 
     toggleTheme: function () {
       var next = window.CourtPayState.theme === 'dark' ? 'light' : 'dark';
-      window.CourtPayState.theme = next;
-      localStorage.setItem('courtpay_theme', next);
-      document.documentElement.setAttribute('data-theme', next);
+      window.CourtPayUI.applyTheme(next);
     },
 
     toggleCourtSetupCollapse: function () {
@@ -2182,6 +2337,46 @@
       if (bodyEl) bodyEl.classList.toggle('hidden', !expanded);
       if (sumEl) sumEl.classList.toggle('hidden', expanded);
       if (btnEl) btnEl.textContent = expanded ? 'Done' : 'Edit';
+    },
+
+    toggleRosterCollapse: function () {
+      window.CourtPayState.isRosterExpanded = !window.CourtPayState.isRosterExpanded;
+      var bodyEl = document.getElementById('roster-setup-body');
+      var sumEl = document.getElementById('roster-summary-bar');
+      var btnEl = document.getElementById('btn-toggle-roster-setup');
+      var expanded = Boolean(window.CourtPayState.isRosterExpanded);
+      if (bodyEl) bodyEl.classList.toggle('hidden', !expanded);
+      if (sumEl) sumEl.classList.toggle('hidden', expanded);
+      if (btnEl) btnEl.textContent = expanded ? 'Collapse' : 'Edit';
+      window.CourtPayUI.syncRosterSummaryBar();
+    },
+
+    syncRosterSummaryBar: function () {
+      var selectedPlayers = (window.CourtPayState.players || []).filter(function (p) { return p.selected; });
+      var totalShares = 0;
+      var names = [];
+      for (var i = 0; i < selectedPlayers.length; i++) {
+        var pl = selectedPlayers[i];
+        var sh = Number(pl.sessionShares || 1);
+        totalShares += sh;
+        names.push(pl.name + (sh > 1 ? ' (x' + sh + ')' : ''));
+      }
+      var titleEl = document.getElementById('roster-summary-title');
+      var detailsEl = document.getElementById('roster-summary-details');
+      var badgeEl = document.getElementById('roster-summary-count-badge');
+      if (titleEl) {
+        titleEl.textContent = selectedPlayers.length === 0
+          ? 'No players selected yet'
+          : (selectedPlayers.length + (selectedPlayers.length === 1 ? ' Player' : ' Players') + ' Selected • ' + totalShares + (totalShares === 1 ? ' Share' : ' Shares'));
+      }
+      if (detailsEl) {
+        detailsEl.textContent = selectedPlayers.length === 0
+          ? 'Tap to expand and select session players'
+          : names.join(', ');
+      }
+      if (badgeEl) {
+        badgeEl.textContent = selectedPlayers.length + ' Selected';
+      }
     },
 
     openSettingsModal: function () {
@@ -2573,6 +2768,7 @@
       if (sharesCountBadge) sharesCountBadge.textContent = data.totalShares + ' Shares';
       var pre = document.getElementById('whatsapp-summary-box');
       if (pre) pre.textContent = data.whatsAppText;
+      window.CourtPayUI.syncRosterSummaryBar();
     },
 
     renderShuttleUsageSteppers: function () {
