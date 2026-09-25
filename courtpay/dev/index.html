@@ -1442,13 +1442,21 @@
           '&payload=' + encodeURIComponent(JSON.stringify(reqPayload)) +
           '&token=' + encodeURIComponent(activeToken);
 
-        fetch(targetUrl, {
-          method: 'POST',
-          redirect: 'follow',
-          credentials: 'omit',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: action, payload: reqPayload, token: activeToken })
-        })
+        var fetchInit = (targetUrl.length < 1800)
+          ? {
+              method: 'GET',
+              redirect: 'follow',
+              credentials: 'omit'
+            }
+          : {
+              method: 'POST',
+              redirect: 'follow',
+              credentials: 'omit',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ action: action, payload: reqPayload, token: activeToken })
+            };
+
+        fetch(targetUrl, fetchInit)
           .then(function (r) { return r.text(); })
           .then(function (text) {
             var res;
