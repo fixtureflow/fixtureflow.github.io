@@ -785,28 +785,74 @@
     sessions: [],
     ledgerEntries: [],
 
-    callServer: function (action, payload, onSuccess) {
+    callServer: function (action, payload, onSuccess, attemptCount) {
+      var attempt = Number(attemptCount) || 0;
       var reqPayload = Object.assign({ clientRequestId: 'req_' + Date.now() }, payload || {});
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(function (res) {
-            if (res && res.state) window.CourtPayState.hydrateFromServer(res.state);
+            var stateSnap = (res && res.state) ? res.state : ((res && res.players) ? res : null);
+            if (stateSnap) window.CourtPayState.hydrateFromServer(stateSnap);
             if (onSuccess) onSuccess(res);
+          })
+          .withFailureHandler(function (err) {
+            window.CourtPayState.isLoadingServer = false;
+            window.CourtPayState.syncError = String(err && err.message ? err.message : err);
+            if (window.CourtPayUI) window.CourtPayUI.renderAll();
           })[action](reqPayload);
       } else if (window.COURTPAY_API_URL) {
-        fetch(window.COURTPAY_API_URL, {
+        var sep = window.COURTPAY_API_URL.indexOf('?') === -1 ? '?' : '&';
+        var targetUrl = window.COURTPAY_API_URL + sep +
+          'rpc=1&action=' + encodeURIComponent(action) +
+          '&payload=' + encodeURIComponent(JSON.stringify(reqPayload)) +
+          '&token=' + encodeURIComponent(window.CourtPayState.authToken || '');
+
+        fetch(targetUrl, {
           method: 'POST',
+          redirect: 'follow',
+          credentials: 'omit',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: action, payload: reqPayload, token: window.CourtPayState.authToken })
         })
-          .then(function (r) { return r.json(); })
-          .then(function (res) {
-            if (res && res.data && res.data.state) {
-              window.CourtPayState.hydrateFromServer(res.data.state);
+          .then(function (r) { return r.text(); })
+          .then(function (text) {
+            var res;
+            try {
+              res = JSON.parse(text);
+            } catch (parseErr) {
+              if (attempt < 2) {
+                setTimeout(function () {
+                  window.CourtPayState.callServer(action, payload, onSuccess, attempt + 1);
+                }, 800);
+                return;
+              }
+              throw new Error('Server returned HTML instead of JSON on ' + action);
             }
-            if (onSuccess) onSuccess(res.data || res);
+            if (res && res.retryable && attempt < 2) {
+              setTimeout(function () {
+                window.CourtPayState.callServer(action, payload, onSuccess, attempt + 1);
+              }, 800);
+              return;
+            }
+            window.CourtPayState.syncError = '';
+            var serverData = (res && res.data !== undefined) ? res.data : res;
+            var stateSnap = (serverData && serverData.state) ? serverData.state : ((serverData && serverData.players) ? serverData : null);
+            if (stateSnap) {
+              window.CourtPayState.hydrateFromServer(stateSnap);
+            }
+            if (onSuccess) onSuccess(serverData);
           })
-          .catch(function () {});
+          .catch(function (err) {
+            if (attempt < 2) {
+              setTimeout(function () {
+                window.CourtPayState.callServer(action, payload, onSuccess, attempt + 1);
+              }, 800);
+              return;
+            }
+            window.CourtPayState.isLoadingServer = false;
+            window.CourtPayState.syncError = String(err && err.message ? err.message : err);
+            if (window.CourtPayUI) window.CourtPayUI.renderAll();
+          });
       } else {
         window.CourtPayState.simulateLocalServer(action, reqPayload);
         if (onSuccess) onSuccess({ success: true, localMode: true });
@@ -1404,6 +1450,13 @@
       if (!container) return;
       if (window.CourtPayState.isLoadingServer) {
         container.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.84rem; padding: 8px 0;">Syncing live player roster from Google Sheet...</div>';
+        return;
+      }
+      if (window.CourtPayState.syncError && (!window.CourtPayState.players || window.CourtPayState.players.length === 0)) {
+        container.innerHTML = '<div style="color: var(--status-amber); font-size: 0.84rem; padding: 8px 0; display: flex; align-items: center; justify-content: space-between; gap: 8px;">' +
+          '<span>Could not reach Google Sheet (' + window.CourtPayState.syncError + ')</span>' +
+          '<button type="button" class="btn-secondary" onclick="window.CourtPayState.isLoadingServer=true;window.CourtPayUI.renderAll();window.CourtPayUI.init();">Retry Sync</button>' +
+          '</div>';
         return;
       }
       var html = '';
