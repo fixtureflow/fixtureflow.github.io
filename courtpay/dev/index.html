@@ -1218,8 +1218,10 @@
 
   <script>
   /**
-   * Reusable Cross-Platform WebAuthn Biometric Passkey Engine (iOS Face ID / Touch ID + Android BiometricPrompt).
-   * Designed for zero-latency courtside unlock and direct portability to DDLC & CourtFlow.
+   * Reusable Cross-Platform WebAuthn Biometric & Synced Passkey Engine
+   * (iOS Face ID / Touch ID, Android BiometricPrompt, iCloud Keychain, Bitwarden, 1Password).
+   * Encodes the HMAC session token into WebAuthn `user.id` (`userHandle`, 46 bytes <= 64-byte W3C limit)
+   * so a single passkey enrolled on Mobile unlocks Desktop (and vice-versa) with zero server state.
    */
   window.CourtPayBiometrics = {
     VAULT_KEY: 'courtpay_biometric_vault_v1',
@@ -1243,13 +1245,47 @@
       return bytes;
     },
 
+    _stringToBytes: function (str) {
+      var clean = String(str || '');
+      if (typeof TextEncoder !== 'undefined') {
+        return new TextEncoder().encode(clean);
+      }
+      var bytes = new Uint8Array(clean.length);
+      for (var i = 0; i < clean.length; i++) {
+        bytes[i] = clean.charCodeAt(i) & 0xff;
+      }
+      return bytes;
+    },
+
+    _bytesToString: function (buffer) {
+      if (!buffer) return '';
+      var bytes = new Uint8Array(buffer);
+      if (typeof TextDecoder !== 'undefined') {
+        return new TextDecoder().decode(bytes);
+      }
+      var out = '';
+      for (var i = 0; i < bytes.byteLength; i++) {
+        out += String.fromCharCode(bytes[i]);
+      }
+      return out;
+    },
+
+    isWebAuthnSupported: function () {
+      return Boolean(
+        typeof window !== 'undefined' &&
+        window.PublicKeyCredential &&
+        window.navigator &&
+        window.navigator.credentials &&
+        window.crypto
+      );
+    },
+
     isHardwareAvailable: function () {
-      if (
-        typeof window === 'undefined' ||
-        !window.PublicKeyCredential ||
-        typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable !== 'function'
-      ) {
+      if (!this.isWebAuthnSupported()) {
         return Promise.resolve(false);
+      }
+      if (typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable !== 'function') {
+        return Promise.resolve(true);
       }
       return window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
         .then(function (available) { return Boolean(available); })
@@ -1261,7 +1297,7 @@
         var raw = localStorage.getItem(this.VAULT_KEY);
         if (!raw) return null;
         var parsed = JSON.parse(raw);
-        if (parsed && parsed.credentialIdB64 && parsed.authToken) {
+        if (parsed && parsed.authToken) {
           return parsed;
         }
       } catch (e) {}
@@ -1274,8 +1310,9 @@
 
     updateVaultToken: function (newToken) {
       var vault = this.getVault();
-      if (vault && newToken) {
+      if (vault && newToken && vault.authToken !== newToken) {
         vault.authToken = newToken;
+        vault.tokenRotated = true;
         localStorage.setItem(this.VAULT_KEY, JSON.stringify(vault));
       }
     },
@@ -1289,13 +1326,14 @@
       if (!authToken) {
         return Promise.reject(new Error('Unlock with your PIN first before enabling biometrics.'));
       }
-      if (!window.navigator || !window.navigator.credentials || !window.crypto) {
-        return Promise.reject(new Error('WebAuthn biometrics require HTTPS or localhost.'));
+      if (!self.isWebAuthnSupported()) {
+        return Promise.reject(new Error('WebAuthn passkeys require HTTPS or localhost.'));
       }
       var challenge = new Uint8Array(32);
-      var userId = new Uint8Array(16);
       window.crypto.getRandomValues(challenge);
-      window.crypto.getRandomValues(userId);
+      // Encode the 46-byte HMAC token (`cpsig_<40hex>`) directly into `user.id` (<= 64 bytes per W3C WebAuthn spec)
+      // so synced passkey managers (Bitwarden, 1Password, iCloud Keychain) carry the token across all devices.
+      var userIdBytes = self._stringToBytes(String(authToken).slice(0, 64));
 
       var rpOption = { name: 'CourtPay · FixtureFlow' };
       if (window.location && window.location.hostname && window.location.hostname !== '') {
@@ -1307,19 +1345,18 @@
           challenge: challenge,
           rp: rpOption,
           user: {
-            id: userId,
+            id: userIdBytes,
             name: 'organizer@courtpay.fixtureflow',
             displayName: 'CourtPay Organizer'
           },
           pubKeyCredParams: [
-            { type: 'public-key', alg: -7 },   // ES256 (iOS Secure Enclave / Android Hardware Keystore)
+            { type: 'public-key', alg: -7 },   // ES256 (iOS Secure Enclave / Android Keystore / Bitwarden)
             { type: 'public-key', alg: -257 }  // RS256 fallback
           ],
           authenticatorSelection: {
-            authenticatorAttachment: 'platform',
-            userVerification: 'required',
-            residentKey: 'discouraged',
-            requireResidentKey: false
+            userVerification: 'preferred',
+            residentKey: 'required',
+            requireResidentKey: true
           },
           timeout: 60000,
           attestation: 'none'
@@ -1331,6 +1368,7 @@
         var vaultRecord = {
           credentialIdB64: self._bytesToBase64(cred.rawId),
           authToken: authToken,
+          tokenRotated: false,
           enrolledAt: new Date().toISOString()
         };
         localStorage.setItem(self.VAULT_KEY, JSON.stringify(vaultRecord));
@@ -1341,20 +1379,17 @@
 
     unlockWithPasskey: function () {
       var self = this;
-      var vault = self.getVault();
-      if (!vault) {
-        return Promise.reject(new Error('No biometric passkey enrolled on this device.'));
+      if (!self.isWebAuthnSupported()) {
+        return Promise.reject(new Error('WebAuthn passkeys are not supported in this browser.'));
       }
+      var vault = self.getVault();
       var challenge = new Uint8Array(32);
       window.crypto.getRandomValues(challenge);
+      // Omit `allowCredentials` restriction so discoverable passkeys synced via Bitwarden / iCloud Keychain /
+      // Google Password Manager from another device can be selected and verified natively.
       var getOptions = {
         challenge: challenge,
-        allowCredentials: [{
-          type: 'public-key',
-          id: self._base64ToBytes(vault.credentialIdB64),
-          transports: ['internal', 'hybrid']
-        }],
-        userVerification: 'required',
+        userVerification: 'preferred',
         timeout: 60000
       };
       if (window.location && window.location.hostname && window.location.hostname !== '') {
@@ -1364,7 +1399,31 @@
         if (!assertion) {
           throw new Error('Biometric verification failed.');
         }
-        return vault.authToken;
+        var handleToken = '';
+        if (assertion.response && assertion.response.userHandle) {
+          var decoded = self._bytesToString(assertion.response.userHandle).trim();
+          if (decoded.indexOf('cpsig_') === 0) {
+            handleToken = decoded;
+          }
+        }
+        var resolvedToken = (vault && vault.tokenRotated && vault.authToken)
+          ? vault.authToken
+          : (handleToken || (vault && vault.authToken) || '');
+
+        if (!resolvedToken) {
+          throw new Error('This passkey was created before multi-device sync. Please sign in with your PIN once and re-enable Passkey.');
+        }
+
+        var credIdB64 = assertion.rawId ? self._bytesToBase64(assertion.rawId) : (vault && vault.credentialIdB64 ? vault.credentialIdB64 : 'synced');
+        var syncedVault = {
+          credentialIdB64: credIdB64,
+          authToken: resolvedToken,
+          tokenRotated: Boolean(vault && vault.tokenRotated),
+          enrolledAt: (vault && vault.enrolledAt) ? vault.enrolledAt : new Date().toISOString()
+        };
+        localStorage.setItem(self.VAULT_KEY, JSON.stringify(syncedVault));
+        localStorage.removeItem(self.DISMISS_KEY);
+        return resolvedToken;
       });
     }
   };
@@ -1858,16 +1917,17 @@
         }
       }
 
-      var hasBioVault = window.CourtPayBiometrics && window.CourtPayBiometrics.hasEnrolledVault();
+      var webAuthnReady = Boolean(window.CourtPayBiometrics && window.CourtPayBiometrics.isWebAuthnSupported());
+      var hasBioVault = Boolean(window.CourtPayBiometrics && window.CourtPayBiometrics.hasEnrolledVault());
       var bioBtn = document.getElementById('btn-biometric-unlock');
       var bioDiv = document.getElementById('login-divider');
-      if (bioBtn) bioBtn.classList.toggle('hidden', !hasBioVault);
-      if (bioDiv) bioDiv.classList.toggle('hidden', !hasBioVault);
+      if (bioBtn) bioBtn.classList.toggle('hidden', !webAuthnReady);
+      if (bioDiv) bioDiv.classList.toggle('hidden', !webAuthnReady);
 
       var pinInp = document.getElementById('login-pin-input');
       if (pinInp) {
         pinInp.value = '';
-        // Do NOT auto-focus the PIN input if a biometric passkey is enrolled so iOS/Android virtual keyboard doesn't obscure the Face ID button
+        // Do NOT auto-focus the PIN input if a biometric passkey is already active on this device so iOS/Android virtual keyboard doesn't obscure the Face ID button
         if (!hasBioVault) {
           setTimeout(function () {
             try { pinInp.focus(); } catch (e) {}
@@ -1963,12 +2023,12 @@
     },
 
     unlockWithBiometrics: function () {
-      if (!window.CourtPayBiometrics || !window.CourtPayBiometrics.hasEnrolledVault()) {
-        window.CourtPayUI.showLoginScreen('Please sign in with your Organizer PIN first.');
+      if (!window.CourtPayBiometrics || !window.CourtPayBiometrics.isWebAuthnSupported()) {
+        window.CourtPayUI.showLoginScreen('Passkeys are not supported in this browser. Please enter your Organizer PIN.');
         return;
       }
       var bioBtnText = document.getElementById('btn-biometric-unlock-text');
-      if (bioBtnText) bioBtnText.textContent = 'Scanning Face ID / Biometrics...';
+      if (bioBtnText) bioBtnText.textContent = 'Scanning Face ID / Passkey...';
 
       window.CourtPayBiometrics.unlockWithPasskey()
         .then(function (storedToken) {
@@ -1983,6 +2043,7 @@
           window.CourtPayState.callServer('getInitialState', {}, function (res) {
             if (res && res.requiresAuth) {
               window.CourtPayBiometrics.clearVault();
+              localStorage.removeItem(window.CourtPayBiometrics.DISMISS_KEY);
               window.CourtPayUI.showLoginScreen('Organizer PIN was changed in Google Sheet. Please enter the new PIN.');
               return;
             }
@@ -1997,7 +2058,7 @@
         .catch(function (err) {
           if (bioBtnText) bioBtnText.textContent = 'Unlock with Face ID / Biometrics';
           var msg = (err && err.name === 'NotAllowedError')
-            ? 'Biometric scan cancelled. Tap again or enter your PIN below.'
+            ? 'No passkey selected or scan cancelled. Enter your PIN below first if you have not enrolled a passkey yet.'
             : String((err && err.message) || 'Biometric verification could not complete.');
           var errEl = document.getElementById('login-error-msg');
           if (errEl) {
@@ -2040,22 +2101,20 @@
 
       var enrolled = window.CourtPayBiometrics.hasEnrolledVault();
       if (enrolled) {
-        statusEl.textContent = 'Active on this device (Face ID / Fingerprint Passkey ready)';
+        statusEl.textContent = 'Active (Face ID / Synced Passkey ready across devices)';
         btnEl.textContent = 'Disable';
         btnEl.disabled = false;
         return;
       }
-      window.CourtPayBiometrics.isHardwareAvailable().then(function (supported) {
-        if (supported) {
-          statusEl.textContent = 'Supported on this device — tap Enable to enroll passkey';
-          btnEl.textContent = 'Enable';
-          btnEl.disabled = false;
-        } else {
-          statusEl.textContent = 'Hardware platform authenticator not available in this browser';
-          btnEl.textContent = 'Unavailable';
-          btnEl.disabled = true;
-        }
-      });
+      if (window.CourtPayBiometrics.isWebAuthnSupported()) {
+        statusEl.textContent = 'Supported — tap Enable to save passkey (Face ID, Touch ID, Bitwarden, iCloud)';
+        btnEl.textContent = 'Enable';
+        btnEl.disabled = false;
+      } else {
+        statusEl.textContent = 'WebAuthn passkeys not supported in this browser';
+        btnEl.textContent = 'Unavailable';
+        btnEl.disabled = true;
+      }
     },
 
     lockSession: function () {
