@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>[DEV] CourtPay · FixtureFlow</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -470,6 +470,13 @@
     display: flex;
     justify-content: center;
     z-index: 100;
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+
+  body.overlay-active .bottom-nav,
+  body.keyboard-open .bottom-nav {
+    display: none !important;
   }
 
   .bottom-nav-inner {
@@ -477,7 +484,7 @@
     max-width: 540px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    padding: 6px 10px 10px;
+    padding: 6px 10px max(10px, env(safe-area-inset-bottom, 0px)) 10px;
     gap: 6px;
   }
 
@@ -829,7 +836,7 @@
 
   <meta name="apple-mobile-web-app-title" content="[DEV] CourtPay">
   <meta name="application-name" content="CourtPay">
-  <meta name="app-version" content="dev-v2">
+  <meta name="app-version" content="dev-v3">
   <meta name="theme-color" content="#080d16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -852,9 +859,9 @@
   <link rel="mask-icon" href="/assets/images/courtpay/icon-courtpay-dev.svg" color="#f59e0b">
   <link rel="manifest" href="/courtpay/dev/manifest.json">
   <script>
-    window.__FF_VERSION__ = 'dev-v2';
+    window.__FF_VERSION__ = 'dev-v3';
     window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
-    console.log('%c[CourtPay]%c Running version dev-v2', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
+    console.log('%c[CourtPay]%c Running version dev-v3', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
@@ -862,7 +869,7 @@
     }
   </script>
 </head>
-<body>
+<body class="overlay-active">
   <!-- Connecting Splash Screen (100% aligned with DDLC & CourtFlow) -->
   <div id="status-screen" class="screen-overlay">
     <div class="glow-backdrop"></div>
@@ -942,7 +949,7 @@
       <p id="login-error-msg" class="login-error hidden"></p>
     </div>
     <div class="brand-footer" style="margin-top: 20px; position: relative; z-index: 2;">
-      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v2</span>
+      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v3</span>
     </div>
   </div>
 
@@ -1362,14 +1369,14 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3z" />
     </svg>
-    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v2</span></span>
+    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v3</span></span>
   </div>
 </footer>
 
   </div>
 
   <!-- Fixed Bottom Mobile Navigation -->
-  <nav class="bottom-nav" aria-label="Primary Navigation">
+  <nav id="bottom-nav-bar" class="bottom-nav" aria-label="Primary Navigation">
     <div class="bottom-nav-inner">
       <button type="button" id="nav-btn-session" class="nav-tab active" onclick="CourtPayUI.switchTab('session')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2124,8 +2131,71 @@
       if (loginBadge) loginBadge.textContent = resolvedVer;
     },
 
+    reanchorBottomNav: function () {
+      var screen = document.getElementById('status-screen');
+      var loginOverlay = document.getElementById('portal-view-login');
+      var isOverlayVisible = Boolean(
+        (screen && !screen.classList.contains('hidden')) ||
+        (loginOverlay && !loginOverlay.classList.contains('hidden'))
+      );
+      if (document.body) {
+        document.body.classList.toggle('overlay-active', isOverlayVisible);
+      }
+      var nav = document.getElementById('bottom-nav-bar');
+      if (nav && !isOverlayVisible) {
+        // Force iOS WebKit compositor to recompute fixed bottom layer after virtual keyboard dismissal
+        nav.style.display = 'none';
+        void nav.offsetHeight;
+        nav.style.display = '';
+      }
+    },
+
+    initViewportKeyboardGuard: function () {
+      if (window.CourtPayState._keyboardGuardBound || typeof window === 'undefined') return;
+      window.CourtPayState._keyboardGuardBound = true;
+
+      var isTextField = function (el) {
+        if (!el || !el.tagName) return false;
+        var tag = String(el.tagName).toUpperCase();
+        if (tag === 'TEXTAREA') return true;
+        if (tag !== 'INPUT') return false;
+        var type = String(el.type || 'text').toLowerCase();
+        return type !== 'checkbox' && type !== 'radio' && type !== 'button' && type !== 'submit';
+      };
+
+      document.addEventListener('focusin', function (ev) {
+        if (isTextField(ev.target) && document.body) {
+          document.body.classList.add('keyboard-open');
+        }
+      });
+
+      document.addEventListener('focusout', function () {
+        setTimeout(function () {
+          if (!isTextField(document.activeElement) && document.body) {
+            document.body.classList.remove('keyboard-open');
+            window.CourtPayUI.reanchorBottomNav();
+          }
+        }, 80);
+      });
+
+      if (window.visualViewport && typeof window.visualViewport.addEventListener === 'function') {
+        window.visualViewport.addEventListener('resize', function () {
+          var vv = window.visualViewport;
+          if (!vv || !document.body) return;
+          var isShrunk = vv.height < window.innerHeight * 0.82;
+          if (isShrunk) {
+            document.body.classList.add('keyboard-open');
+          } else if (!isTextField(document.activeElement)) {
+            document.body.classList.remove('keyboard-open');
+            window.CourtPayUI.reanchorBottomNav();
+          }
+        });
+      }
+    },
+
     init: function () {
       window.CourtPayUI.initSystemThemeListener();
+      window.CourtPayUI.initViewportKeyboardGuard();
       window.CourtPayUI.syncVersionBadges();
       var rateInp = document.getElementById('input-court-rate');
       if (rateInp && window.CourtPayState.courtRatePerHourEUR) {
@@ -2176,10 +2246,10 @@
 
     showLoginScreen: function (errorMessage) {
       window.CourtPayState.isLoadingServer = false;
-      window.CourtPayUI.syncStatusScreenOverlay();
-      window.CourtPayUI.syncVersionBadges();
       var loginOverlay = document.getElementById('portal-view-login');
       if (loginOverlay) loginOverlay.classList.remove('hidden');
+      window.CourtPayUI.syncStatusScreenOverlay();
+      window.CourtPayUI.syncVersionBadges();
 
       var errEl = document.getElementById('login-error-msg');
       if (errEl) {
@@ -2241,8 +2311,19 @@
     },
 
     hideLoginScreen: function () {
+      var pinInp = document.getElementById('login-pin-input');
+      if (pinInp) {
+        try { pinInp.blur(); } catch (e) {}
+      }
+      if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        try { document.activeElement.blur(); } catch (e) {}
+      }
+      if (document.body) {
+        document.body.classList.remove('keyboard-open');
+      }
       var loginOverlay = document.getElementById('portal-view-login');
       if (loginOverlay) loginOverlay.classList.add('hidden');
+      window.CourtPayUI.reanchorBottomNav();
       window.CourtPayUI.refreshBiometricEnrollmentBanner();
     },
 
@@ -2289,6 +2370,14 @@
       }
       if (window.CourtPayState._isSubmittingPin) return;
       window.CourtPayState._isSubmittingPin = true;
+
+      // Immediately dismiss the iOS virtual keyboard before transitioning overlays
+      if (pinInp) {
+        try { pinInp.blur(); } catch (e) {}
+      }
+      if (document.body) {
+        document.body.classList.remove('keyboard-open');
+      }
 
       var btnText = document.getElementById('btn-login-submit-text');
       if (btnText) btnText.textContent = 'Verifying & Syncing Sheet...';
@@ -2478,6 +2567,7 @@
       } else {
         screen.classList.add('hidden');
       }
+      window.CourtPayUI.reanchorBottomNav();
     },
 
     toggleTheme: function () {
