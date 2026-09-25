@@ -1,0 +1,24 @@
+{
+  "name": "CourtPay (DEV)",
+  "short_name": "CourtPay DEV",
+  "description": "Badminton Court & FIFO Shuttle Split Ledger with Revolut Reconciliation",
+  "start_url": "/courtpay/dev/",
+  "scope": "/courtpay/dev/",
+  "display": "standalone",
+  "background_color": "#080d16",
+  "theme_color": "#f59e0b",
+  "icons": [
+    {
+      "src": "/assets/images/icon-courtpay.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/icon-courtpay.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

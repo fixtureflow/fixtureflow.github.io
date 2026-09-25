@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CourtPay — Badminton Cost &amp; Shuttle Ledger</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-base: #080d16;
+    --bg-elevated: rgba(15, 23, 42, 0.72);
+    --bg-card-hover: rgba(30, 41, 59, 0.82);
+    --bg-input: rgba(15, 23, 42, 0.92);
+    --border-subtle: rgba(255, 255, 255, 0.09);
+    --border-focus: rgba(245, 158, 11, 0.58);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --brand-primary: #f59e0b;
+    --brand-primary-dark: #d97706;
+    --brand-primary-glow: rgba(245, 158, 11, 0.16);
+    --brand-on-primary: #080d16;
+    --brand-emerald: #10b981;
+    --brand-emerald-dark: #059669;
+    --brand-emerald-glow: rgba(16, 185, 129, 0.16);
+    --accent-cyan: #0ea5e9;
+    --status-amber: #fb923c;
+    --status-amber-bg: rgba(251, 146, 60, 0.15);
+    --status-crimson: #ef4444;
+    --status-crimson-bg: rgba(239, 68, 68, 0.15);
+    --shadow-card: 0 12px 32px -8px rgba(0, 0, 0, 0.55);
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+  }
+
+  [data-theme="light"] {
+    --bg-base: #faf7f2;
+    --bg-elevated: rgba(255, 255, 255, 0.94);
+    --bg-card-hover: #fffbeb;
+    --bg-input: #ffffff;
+    --border-subtle: rgba(15, 23, 42, 0.10);
+    --border-focus: rgba(217, 119, 6, 0.65);
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --brand-primary: #d97706;
+    --brand-primary-dark: #b45309;
+    --brand-primary-glow: rgba(217, 119, 6, 0.13);
+    --brand-on-primary: #ffffff;
+    --brand-emerald: #059669;
+    --brand-emerald-dark: #047857;
+    --brand-emerald-glow: rgba(5, 150, 105, 0.12);
+    --shadow-card: 0 8px 24px -6px rgba(15, 23, 42, 0.08);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.45;
+    padding-bottom: 92px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+
+  <style>
+  .app-shell {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 16px 14px 32px;
+  }
+
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    background: var(--bg-elevated);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border-subtle);
+    border-top: 4px solid var(--brand-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+  }
+
+  .brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  .brand-crest {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--brand-primary-glow);
+    border: 1px solid var(--border-focus);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-primary);
+  }
+
+  .brand-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .brand-subtitle {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .icon-btn:hover {
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+  }
+
+  .glass-card {
+    background: var(--bg-elevated);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border-subtle);
+    border-top: 4px solid var(--brand-primary);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-size: 1.02rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .badge-gold {
+    background: var(--brand-primary-glow);
+    color: var(--brand-primary);
+    border: 1px solid var(--border-focus);
+  }
+
+  .badge-emerald {
+    background: var(--brand-emerald-glow);
+    color: var(--brand-emerald);
+    border: 1px solid rgba(16, 185, 129, 0.45);
+  }
+
+  .badge-amber {
+    background: var(--status-amber-bg);
+    color: var(--status-amber);
+    border: 1px solid rgba(251, 146, 60, 0.38);
+  }
+
+  .badge-crimson {
+    background: var(--status-crimson-bg);
+    color: var(--status-crimson);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+  }
+
+  .preset-pills {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .pill-btn {
+    padding: 6px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    font-size: 0.79rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .pill-btn.active, .pill-btn:hover {
+    background: var(--brand-primary-glow);
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+  }
+
+  .calc-formula-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 11px;
+    margin-bottom: 10px;
+    border-radius: var(--radius-sm);
+    background: var(--brand-primary-glow);
+    border: 1px dashed var(--border-focus);
+    font-size: 0.76rem;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .input-group label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .input-control, textarea.input-control {
+    width: 100%;
+    padding: 9px 11px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+  }
+
+  .input-control:focus {
+    outline: none;
+    border-color: var(--brand-primary);
+  }
+
+  .stepper-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 11px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-input);
+    margin-bottom: 8px;
+  }
+
+  .stepper-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .step-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .step-btn:hover {
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
+    color: var(--brand-on-primary);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.96rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.28);
+  }
+
+  .btn-secondary {
+    padding: 9px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-elevated);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: center;
+    z-index: 100;
+  }
+
+  .bottom-nav-inner {
+    width: 100%;
+    max-width: 540px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 6px 10px 10px;
+    gap: 6px;
+  }
+
+  .nav-tab {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 8px 4px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.73rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .nav-tab.active {
+    color: var(--brand-primary);
+    background: var(--brand-primary-glow);
+  }
+
+  .summary-pre {
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.80rem;
+    white-space: pre-wrap;
+    color: var(--text-primary);
+    margin: 10px 0;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+</style>
+
+
+  <link rel="manifest" href="/courtpay/dev/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/icon-courtpay.svg">
+  <meta name="theme-color" content="#080d16">
+  <script>
+    window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Header Bar -->
+    <header class="app-header">
+      <div class="brand-lockup">
+        <div class="brand-crest" aria-hidden="true">
+          <!-- Badminton Shuttlecock & Euro Crest Vector SVG -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+            <path d="M9.5 14.5 5 4l4.5 2L12 3l2.5 3L19 4l-4.5 10.5"/>
+            <path d="M7.5 9.5h9"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title font-display">CourtPay</div>
+          <div class="brand-subtitle">Shuttle &amp; Court Split Ledger</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btn-theme-toggle" class="icon-btn" type="button" title="Toggle Dark / Light Mode" onclick="CourtPayUI.toggleTheme()">
+          <!-- Sun / Moon Vector SVG -->
+          <svg id="icon-theme-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+        </button>
+        <button id="btn-pin-modal" class="icon-btn" type="button" title="Organizer PIN Status" onclick="CourtPayUI.promptOrganizerPin()">
+          <!-- Shield Check SVG -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEW 1: NEW SESSION (30-SECOND COURTSIDE FLOW) -->
+    <section id="view-session" class="view-section">
+      <!-- Court Cost Card -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title font-display">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <line x1="12" y1="4" x2="12" y2="20"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+            </svg>
+            <span>1. Court &amp; Session Setup</span>
+          </div>
+          <span class="badge badge-gold tabular-nums" id="live-per-share-badge">€4.16 / share</span>
+        </div>
+
+        <!-- Quick Court x Hours Combinations -->
+        <div class="preset-pills" id="court-preset-pills">
+          <button type="button" class="pill-btn tabular-nums" data-courts="1" data-hours="1" onclick="CourtPayUI.setCourtHoursPreset(1, 1)">1 Ct &times; 1h</button>
+          <button type="button" class="pill-btn active tabular-nums" data-courts="1" data-hours="2" onclick="CourtPayUI.setCourtHoursPreset(1, 2)">1 Ct &times; 2h</button>
+          <button type="button" class="pill-btn tabular-nums" data-courts="2" data-hours="1" onclick="CourtPayUI.setCourtHoursPreset(2, 1)">2 Cts &times; 1h</button>
+          <button type="button" class="pill-btn tabular-nums" data-courts="2" data-hours="2" onclick="CourtPayUI.setCourtHoursPreset(2, 2)">2 Cts &times; 2h</button>
+          <button type="button" class="pill-btn tabular-nums" data-courts="3" data-hours="2" onclick="CourtPayUI.setCourtHoursPreset(3, 2)">3 Cts &times; 2h</button>
+        </div>
+
+        <!-- Interactive Courts & Hours (0.5h step) Steppers -->
+        <div class="field-row">
+          <div class="input-group">
+            <label>Courts Booked</label>
+            <div class="stepper-row" style="margin-bottom: 0;">
+              <button type="button" class="step-btn" aria-label="Remove Court" onclick="CourtPayUI.adjustCourtsCount(-1)">-</button>
+              <span id="display-courts-count" class="tabular-nums" style="font-weight: 700; font-size: 0.9rem;">1 Court</span>
+              <button type="button" class="step-btn" aria-label="Add Court" onclick="CourtPayUI.adjustCourtsCount(1)">+</button>
+            </div>
+          </div>
+          <div class="input-group">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+              <label style="margin-bottom: 0;">Duration (Hours)</label>
+              <button type="button" id="btn-hours-step-mode" class="badge badge-gold tabular-nums" style="cursor: pointer; padding: 1px 7px; font-size: 0.68rem;" title="Toggle 1h / 0.5h hour increment setting" onclick="CourtPayUI.toggleHoursStepSetting()">Step: 1h</button>
+            </div>
+            <div class="stepper-row" style="margin-bottom: 0;">
+              <button type="button" class="step-btn" aria-label="Decrease Hours" onclick="CourtPayUI.adjustCourtHours(-1)">-</button>
+              <span id="display-court-hours" class="tabular-nums" style="font-weight: 700; font-size: 0.9rem;">2 hrs</span>
+              <button type="button" class="step-btn" aria-label="Increase Hours" onclick="CourtPayUI.adjustCourtHours(1)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rate per Court/Hour & Auto-Calculated Total Court Cost (with manual override) -->
+        <div class="field-row">
+          <div class="input-group">
+            <label for="input-court-rate">Rate / Court / Hr (€)</label>
+            <input id="input-court-rate" class="input-control tabular-nums" type="number" step="0.50" min="0" value="16.00" oninput="CourtPayUI.onCourtRateInput()">
+          </div>
+          <div class="input-group">
+            <label for="input-court-cost">Total Court Cost (€)</label>
+            <input id="input-court-cost" class="input-control tabular-nums" type="number" step="0.50" min="0" value="32.00" oninput="CourtPayUI.onManualCourtCostInput()">
+          </div>
+        </div>
+
+        <div id="court-calc-formula-bar" class="calc-formula-bar tabular-nums">
+          <span id="court-calc-formula-text">1 Court &times; 2 hrs &times; €16.00/hr = €32.00</span>
+          <button type="button" id="btn-reset-court-auto" class="hidden" style="background:none;border:none;color:var(--brand-primary);font-weight:700;font-size:0.75rem;cursor:pointer;text-decoration:underline;" onclick="CourtPayUI.resetCourtCostToAuto()">Auto-Calc</button>
+        </div>
+
+        <div class="input-group">
+          <label for="input-session-title">Session Title</label>
+          <input id="input-session-title" class="input-control" type="text" value="Tuesday Night Badminton" oninput="CourtPayUI.recalculatePreview()">
+        </div>
+      </div>
+
+      <!-- Multi-Type Shuttle Consumption Steppers -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title font-display">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+              <path d="M9.5 14.5 5 4l4.5 2L12 3l2.5 3L19 4l-4.5 10.5"/>
+            </svg>
+            <span>2. Shuttles Used (FIFO Auto-Split)</span>
+          </div>
+          <span class="badge badge-gold tabular-nums" id="live-shuttle-cost-badge">€9.60</span>
+        </div>
+        <div id="shuttle-usage-list"></div>
+      </div>
+
+      <!-- Smart Poll Paste & Roster Shares -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title font-display">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>3. Players &amp; Family Shares</span>
+          </div>
+          <span class="badge badge-gold tabular-nums" id="live-total-shares-badge">10 Shares</span>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 10px;">
+          <label for="input-poll-paste">Quick Paste WhatsApp Poll / List (Optional)</label>
+          <div style="display: flex; gap: 8px;">
+            <input id="input-poll-paste" class="input-control" type="text" placeholder="e.g. 1. Ming 2. Sarah 3. David Chen 4. Alex">
+            <button type="button" class="btn-secondary" onclick="CourtPayUI.applyPollPaste()">Match</button>
+          </div>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 12px;">
+          <label for="input-new-player-name">Add New Player / Guest on the Fly</label>
+          <div style="display: flex; gap: 8px;">
+            <input id="input-new-player-name" class="input-control" type="text" placeholder="e.g. Lucas Meyer" onkeydown="if(event.key==='Enter'){event.preventDefault();CourtPayUI.submitNewPlayer();}">
+            <button type="button" class="btn-secondary" style="white-space: nowrap;" onclick="CourtPayUI.submitNewPlayer()">+ Add Player</button>
+          </div>
+        </div>
+
+        <div id="roster-selection-list"></div>
+      </div>
+
+      <!-- Live WhatsApp Payment Summary & Save -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title font-display">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            <span>4. WhatsApp Summary &amp; Revolut Link</span>
+          </div>
+          <button type="button" class="btn-secondary" onclick="CourtPayUI.copyWhatsAppSummary()">Copy Text</button>
+        </div>
+
+        <pre id="whatsapp-summary-box" class="summary-pre tabular-nums"></pre>
+
+        <button type="button" class="btn-primary" onclick="CourtPayUI.submitNewSession()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+          <span>Commit Session &amp; Copy WhatsApp Split</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW 2: LEDGER & REVOLUT 1-TAP RECONCILIATION -->
+    <section id="view-ledger" class="view-section hidden">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title font-display">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+            <span>Unpaid Debts &amp; Wallet Credits</span>
+          </div>
+          <button type="button" class="btn-secondary" onclick="CourtPayUI.handleVoidLastSession()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 7v6h6"/>
+              <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+            </svg>
+            <span>Void Last Session</span>
+          </button>
+        </div>
+        <div id="ledger-players-list"></div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title font-display">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span>Session Entries (1-Tap Paid / Unpaid)</span>
+          </div>
+        </div>
+        <div id="ledger-entries-list"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: SHUTTLE TUBES & FIFO INVENTORY -->
+    <section id="view-inventory" class="view-section hidden">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title font-display">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            <span>Active Shuttle Tubes (FIFO Queue)</span>
+          </div>
+        </div>
+        <div id="inventory-batches-list"></div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title font-display">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>Add Tube or Partial Batch</span>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="input-group">
+            <label for="batch-type">Shuttle Brand / Type</label>
+            <input id="batch-type" class="input-control" type="text" value="Yonex AS-30">
+          </div>
+          <div class="input-group">
+            <label for="batch-cost">Tube Cost (€)</label>
+            <input id="batch-cost" class="input-control tabular-nums" type="number" step="0.10" value="30.00">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="input-group">
+            <label for="batch-per-tube">Shuttles per Tube</label>
+            <input id="batch-per-tube" class="input-control tabular-nums" type="number" value="12">
+          </div>
+          <div class="input-group">
+            <label for="batch-remaining">Initial Remaining (Partial)</label>
+            <input id="batch-remaining" class="input-control tabular-nums" type="number" value="12">
+          </div>
+        </div>
+        <button type="button" class="btn-primary" onclick="CourtPayUI.submitAddShuttleBatch()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>Add Shuttle Batch to FIFO Queue</span>
+        </button>
+      </div>
+    </section>
+
+    <footer style="text-align: center; padding: 18px 0 8px; color: var(--text-muted); font-size: 0.74rem;">
+  <div style="display: inline-flex; align-items: center; gap: 6px;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3z" />
+    </svg>
+    <span>CourtPay Ledger Engine • FixtureFlow Yard Architecture</span>
+  </div>
+</footer>
+
+  </div>
+
+  <!-- Fixed Bottom Mobile Navigation -->
+  <nav class="bottom-nav" aria-label="Primary Navigation">
+    <div class="bottom-nav-inner">
+      <button type="button" id="nav-btn-session" class="nav-tab active" onclick="CourtPayUI.switchTab('session')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span>New Session</span>
+      </button>
+      <button type="button" id="nav-btn-ledger" class="nav-tab" onclick="CourtPayUI.switchTab('ledger')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        <span>Ledger &amp; Revolut</span>
+      </button>
+      <button type="button" id="nav-btn-inventory" class="nav-tab" onclick="CourtPayUI.switchTab('inventory')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 20a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+          <path d="M9.5 14.5 5 4l4.5 2L12 3l2.5 3L19 4l-4.5 10.5"/>
+        </svg>
+        <span>Shuttle Tubes</span>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+  window.CourtPayState = {
+    activeTab: 'session',
+    theme: localStorage.getItem('courtpay_theme') || 'dark',
+    authToken: localStorage.getItem('courtpay_token') || '',
+    config: {
+      revolutTag: 'mingbadminton',
+      roundingMode: 'CEIL_CENT',
+      defaultCourtRatePerHourEUR: 16.00,
+      defaultCourtsCount: 1,
+      defaultCourtHours: 2,
+      courtHoursStep: 1,
+      defaultCourtCostEUR: 32.00
+    },
+    courtsCount: 1,
+    courtHours: 2,
+    courtHoursStep: Number(localStorage.getItem('courtpay_hours_step')) === 0.5 ? 0.5 : 1,
+    courtRatePerHourEUR: Number(localStorage.getItem('courtpay_court_rate')) || 16.00,
+    courtCostManualOverride: false,
+    players: [
+      { playerId: 'p_org_1', name: 'Ming (You)', type: 'ORGANIZER', defaultShares: 1, isOrganizer: true, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 },
+      { playerId: 'p_org_2', name: 'Sarah (Partner)', type: 'PARTNER', defaultShares: 1, isOrganizer: true, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 },
+      { playerId: 'p_fam_1', name: 'David Chen', type: 'FAMILY', defaultShares: 4, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 4 },
+      { playerId: 'p_reg_1', name: 'Alex Rivera', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 4.10, active: true, selected: true, sessionShares: 1 },
+      { playerId: 'p_reg_2', name: 'Emma Walsh', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 },
+      { playerId: 'p_reg_3', name: 'Liam O\'Connor', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 },
+      { playerId: 'p_reg_4', name: 'Noah Patel', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 12.50, unpaidDebtEUR: 0, active: true, selected: true, sessionShares: 1 }
+    ],
+    batches: [
+      { batchId: 'b_as30_1', shuttleType: 'Yonex AS-30', category: 'Feather', tubesCount: 1, shuttlesPerTube: 12, totalShuttles: 12, remainingShuttles: 9, totalCostEUR: 28.80, costPerShuttleEUR: 2.40, status: 'ACTIVE' },
+      { batchId: 'b_as30_2', shuttleType: 'Yonex AS-30', category: 'Feather', tubesCount: 1, shuttlesPerTube: 12, totalShuttles: 12, remainingShuttles: 12, totalCostEUR: 30.00, costPerShuttleEUR: 2.50, status: 'ACTIVE' },
+      { batchId: 'b_mavis_1', shuttleType: 'Mavis 300', category: 'Nylon', tubesCount: 1, shuttlesPerTube: 6, totalShuttles: 6, remainingShuttles: 6, totalCostEUR: 9.00, costPerShuttleEUR: 1.50, status: 'ACTIVE' }
+    ],
+    shuttleUsageMap: {
+      'Yonex AS-30': 4,
+      'Mavis 300': 0
+    },
+    sessions: [],
+    ledgerEntries: [],
+
+    callServer: function (action, payload, onSuccess) {
+      var reqPayload = Object.assign({ clientRequestId: 'req_' + Date.now() }, payload || {});
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function (res) {
+            if (res && res.state) window.CourtPayState.hydrateFromServer(res.state);
+            if (onSuccess) onSuccess(res);
+          })[action](reqPayload);
+      } else if (window.COURTPAY_API_URL) {
+        fetch(window.COURTPAY_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: action, payload: reqPayload, token: window.CourtPayState.authToken })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (res && res.data && res.data.state) {
+              window.CourtPayState.hydrateFromServer(res.data.state);
+            }
+            if (onSuccess) onSuccess(res.data || res);
+          })
+          .catch(function () {});
+      } else {
+        window.CourtPayState.simulateLocalServer(action, reqPayload);
+        if (onSuccess) onSuccess({ success: true, localMode: true });
+      }
+    },
+
+    simulateLocalServer: function (action, payload) {
+      var st = window.CourtPayState;
+      if (action === 'createSession') {
+        var snapshotPlayers = JSON.parse(JSON.stringify(st.players));
+        var snapshotBatches = JSON.parse(JSON.stringify(st.batches));
+        var sId = 'ses_' + Date.now();
+        var preview = window.CourtPayUI ? window.CourtPayUI.computeLivePreviewData() : { courtCost: 32, shuttleCost: 0, totalCost: 32, totalShares: 1, perShare: 32 };
+
+        // Deduct shuttles FIFO in local state
+        var usage = payload.shuttleUsage || [];
+        for (var u = 0; u < usage.length; u++) {
+          var rem = Number(usage[u].count || 0);
+          for (var b = 0; b < st.batches.length; b++) {
+            if (st.batches[b].shuttleType === usage[u].shuttleType && st.batches[b].remainingShuttles > 0 && rem > 0) {
+              var take = Math.min(st.batches[b].remainingShuttles, rem);
+              st.batches[b].remainingShuttles -= take;
+              rem -= take;
+            }
+          }
+        }
+
+        // Create ledger entries & update player balances
+        var selected = st.players.filter(function (p) { return p.selected; });
+        var idx = 1;
+        for (var i = 0; i < selected.length; i++) {
+          var pl = selected[i];
+          var sh = Number(pl.sessionShares || 1);
+          var gross = Math.round(sh * preview.perShare * 100) / 100;
+          if (pl.isOrganizer) {
+            st.ledgerEntries.unshift({
+              entryId: sId + '_e' + (idx++),
+              sessionId: sId,
+              playerId: pl.playerId,
+              playerName: pl.name,
+              shares: sh,
+              grossShareEUR: gross,
+              walletAppliedEUR: 0,
+              amountPaidEUR: gross,
+              amountOwedEUR: 0,
+              status: 'PAID'
+            });
+            continue;
+          }
+          var wal = Number(pl.walletBalance || 0);
+          var walUsed = Math.min(wal, gross);
+          var owed = Math.round((gross - walUsed) * 100) / 100;
+          pl.walletBalance = Math.round((wal - walUsed) * 100) / 100;
+          pl.unpaidDebtEUR = Math.round((Number(pl.unpaidDebtEUR || 0) + owed) * 100) / 100;
+          st.ledgerEntries.unshift({
+            entryId: sId + '_e' + (idx++),
+            sessionId: sId,
+            playerId: pl.playerId,
+            playerName: pl.name,
+            shares: sh,
+            grossShareEUR: gross,
+            walletAppliedEUR: walUsed,
+            amountPaidEUR: 0,
+            amountOwedEUR: owed,
+            status: owed === 0 ? 'CREDIT_COVERED' : (walUsed > 0 ? 'PARTIAL' : 'UNPAID')
+          });
+        }
+        st.sessions.push({
+          sessionId: sId,
+          title: payload.title,
+          _snapshotPlayers: snapshotPlayers,
+          _snapshotBatches: snapshotBatches
+        });
+      } else if (action === 'toggleSessionEntryPaid') {
+        for (var e = 0; e < st.ledgerEntries.length; e++) {
+          var ent = st.ledgerEntries[e];
+          if (ent.entryId === payload.entryId) {
+            var targetPl = st.players.find(function (p) { return p.playerId === ent.playerId; });
+            if (ent.status === 'PAID') {
+              var restore = Math.round((ent.grossShareEUR - (ent.walletAppliedEUR || 0)) * 100) / 100;
+              ent.amountOwedEUR = restore;
+              ent.status = ent.walletAppliedEUR > 0 ? 'PARTIAL' : 'UNPAID';
+              if (targetPl) targetPl.unpaidDebtEUR = Math.round((Number(targetPl.unpaidDebtEUR || 0) + restore) * 100) / 100;
+            } else {
+              var clearAmt = Number(ent.amountOwedEUR || 0);
+              ent.amountPaidEUR = Math.round((Number(ent.amountPaidEUR || 0) + clearAmt) * 100) / 100;
+              ent.amountOwedEUR = 0;
+              ent.status = 'PAID';
+              if (targetPl) targetPl.unpaidDebtEUR = Math.max(0, Math.round((Number(targetPl.unpaidDebtEUR || 0) - clearAmt) * 100) / 100);
+            }
+          }
+        }
+      } else if (action === 'recordPayment') {
+        var cash = Number(payload.paymentAmountEUR || 0);
+        var pRec = st.players.find(function (p) { return p.playerId === payload.playerId; });
+        if (pRec && cash > 0) {
+          for (var k = st.ledgerEntries.length - 1; k >= 0; k--) {
+            var le = st.ledgerEntries[k];
+            if (le.playerId === pRec.playerId && le.amountOwedEUR > 0 && cash > 0) {
+              var pay = Math.min(cash, le.amountOwedEUR);
+              le.amountOwedEUR = Math.round((le.amountOwedEUR - pay) * 100) / 100;
+              le.amountPaidEUR = Math.round((Number(le.amountPaidEUR || 0) + pay) * 100) / 100;
+              le.status = le.amountOwedEUR === 0 ? 'PAID' : 'PARTIAL';
+              cash = Math.round((cash - pay) * 100) / 100;
+              pRec.unpaidDebtEUR = Math.max(0, Math.round((Number(pRec.unpaidDebtEUR || 0) - pay) * 100) / 100);
+            }
+          }
+          if (cash > 0 && pRec.unpaidDebtEUR > 0) {
+            var clr = Math.min(cash, pRec.unpaidDebtEUR);
+            pRec.unpaidDebtEUR = Math.round((pRec.unpaidDebtEUR - clr) * 100) / 100;
+            cash = Math.round((cash - clr) * 100) / 100;
+          }
+          if (cash > 0) {
+            pRec.walletBalance = Math.round((Number(pRec.walletBalance || 0) + cash) * 100) / 100;
+          }
+        }
+      } else if (action === 'voidLastSession') {
+        var lastSes = st.sessions.pop();
+        if (lastSes) {
+          if (lastSes._snapshotPlayers) st.players = lastSes._snapshotPlayers;
+          if (lastSes._snapshotBatches) st.batches = lastSes._snapshotBatches;
+          st.ledgerEntries = st.ledgerEntries.filter(function (le) { return le.sessionId !== lastSes.sessionId; });
+        }
+      } else if (action === 'addShuttleBatch') {
+        var perTube = Math.max(1, Number(payload.shuttlesPerTube || 12));
+        var remInit = Math.max(0, Number(payload.initialRemainingShuttles !== undefined ? payload.initialRemainingShuttles : perTube));
+        var costTot = Number(payload.totalCostEUR || 30);
+        var uCost = Math.round((costTot / perTube) * 100) / 100;
+        var sName = String(payload.shuttleType || 'Yonex AS-30').trim();
+        st.batches.push({
+          batchId: 'b_' + Date.now().toString(36).slice(-4),
+          shuttleType: sName,
+          category: 'Feather',
+          tubesCount: 1,
+          shuttlesPerTube: perTube,
+          totalShuttles: perTube,
+          remainingShuttles: remInit,
+          totalCostEUR: costTot,
+          costPerShuttleEUR: uCost,
+          status: remInit > 0 ? 'ACTIVE' : 'DEPLETED'
+        });
+        if (st.shuttleUsageMap[sName] === undefined) {
+          st.shuttleUsageMap[sName] = 0;
+        }
+      } else if (action === 'addPlayer') {
+        var newPName = String((payload && payload.name) || '').trim();
+        if (newPName) {
+          var existingP = st.players.find(function (p) { return p.name.trim().toLowerCase() === newPName.toLowerCase(); });
+          if (existingP) {
+            existingP.selected = true;
+          } else {
+            st.players.push({
+              playerId: 'p_' + Date.now().toString(36).slice(-4),
+              name: newPName,
+              type: 'REGULAR',
+              defaultShares: 1,
+              sessionShares: 1,
+              isOrganizer: false,
+              walletBalance: 0,
+              unpaidDebtEUR: 0,
+              selected: true
+            });
+          }
+        }
+      }
+    },
+
+    hydrateFromServer: function (serverState) {
+      if (!serverState) return;
+      if (serverState.config) {
+        window.CourtPayState.config = serverState.config;
+        if (!localStorage.getItem('courtpay_court_rate') && serverState.config.defaultCourtRatePerHourEUR) {
+          window.CourtPayState.courtRatePerHourEUR = Number(serverState.config.defaultCourtRatePerHourEUR);
+          var rateEl = document.getElementById('input-court-rate');
+          if (rateEl) rateEl.value = window.CourtPayState.courtRatePerHourEUR.toFixed(2);
+        }
+        if (!localStorage.getItem('courtpay_hours_step') && serverState.config.courtHoursStep) {
+          window.CourtPayState.courtHoursStep = Number(serverState.config.courtHoursStep) === 0.5 ? 0.5 : 1;
+        }
+      }
+      if (Array.isArray(serverState.players) && serverState.players.length > 0) {
+        var prevSelectionMap = {};
+        if (window.CourtPayState._hydratedOnce && Array.isArray(window.CourtPayState.players)) {
+          for (var m = 0; m < window.CourtPayState.players.length; m++) {
+            var oldP = window.CourtPayState.players[m];
+            prevSelectionMap[oldP.playerId] = {
+              selected: Boolean(oldP.selected),
+              sessionShares: Number(oldP.sessionShares) || 1
+            };
+          }
+        }
+        window.CourtPayState.players = serverState.players.map(function (p) {
+          var prev = prevSelectionMap[p.playerId];
+          return Object.assign({}, p, {
+            selected: prev ? prev.selected : true,
+            sessionShares: prev ? prev.sessionShares : (Number(p.defaultShares) || 1)
+          });
+        });
+        window.CourtPayState._hydratedOnce = true;
+      }
+      if (Array.isArray(serverState.batches)) window.CourtPayState.batches = serverState.batches;
+      if (Array.isArray(serverState.sessions)) window.CourtPayState.sessions = serverState.sessions;
+      if (Array.isArray(serverState.ledgerEntries)) window.CourtPayState.ledgerEntries = serverState.ledgerEntries;
+      if (window.CourtPayUI) window.CourtPayUI.renderAll();
+    }
+  };
+</script>
+
+  <script>
+  window.CourtPayUI = {
+    init: function () {
+      document.documentElement.setAttribute('data-theme', window.CourtPayState.theme);
+      var rateInp = document.getElementById('input-court-rate');
+      if (rateInp && window.CourtPayState.courtRatePerHourEUR) {
+        rateInp.value = Number(window.CourtPayState.courtRatePerHourEUR).toFixed(2);
+      }
+      window.CourtPayUI.syncCourtCalculatorUI();
+      window.CourtPayUI.renderAll();
+      window.CourtPayState.callServer('getInitialState', {}, function (res) {
+        if (res && res.players) {
+          window.CourtPayState.hydrateFromServer(res);
+          window.CourtPayUI.syncCourtCalculatorUI();
+          window.CourtPayUI.recalculatePreview();
+        }
+      });
+    },
+
+    toggleTheme: function () {
+      var next = window.CourtPayState.theme === 'dark' ? 'light' : 'dark';
+      window.CourtPayState.theme = next;
+      localStorage.setItem('courtpay_theme', next);
+      document.documentElement.setAttribute('data-theme', next);
+    },
+
+    promptOrganizerPin: function () {
+      var pin = window.prompt('Enter 4-Digit Organizer PIN (Default: 2026):', '2026');
+      if (!pin) return;
+      window.CourtPayState.callServer('validateAdminPin', { pin: pin }, function (res) {
+        if (res && res.token) {
+          window.CourtPayState.authToken = res.token;
+          localStorage.setItem('courtpay_token', res.token);
+          window.alert('Organizer PIN verified.');
+        }
+      });
+    },
+
+    switchTab: function (tabName) {
+      window.CourtPayState.activeTab = tabName;
+      ['session', 'ledger', 'inventory'].forEach(function (t) {
+        var sec = document.getElementById('view-' + t);
+        var btn = document.getElementById('nav-btn-' + t);
+        if (sec) sec.classList.toggle('hidden', t !== tabName);
+        if (btn) btn.classList.toggle('active', t === tabName);
+      });
+      window.CourtPayUI.renderAll();
+    },
+
+    syncCourtCalculatorUI: function () {
+      var step = Number(window.CourtPayState.courtHoursStep) === 0.5 ? 0.5 : 1;
+      window.CourtPayState.courtHoursStep = step;
+      var courts = Math.max(1, Number(window.CourtPayState.courtsCount) || 1);
+      var minHours = step === 0.5 ? 0.5 : 1;
+      var hours = Math.max(minHours, Number(window.CourtPayState.courtHours) || 2);
+      if (step === 1 && hours % 1 !== 0) {
+        hours = Math.max(1, Math.round(hours));
+        window.CourtPayState.courtHours = hours;
+      }
+      var rateInp = document.getElementById('input-court-rate');
+      var rate = rateInp ? Math.max(0, Number(rateInp.value) || 0) : (Number(window.CourtPayState.courtRatePerHourEUR) || 16.00);
+      window.CourtPayState.courtRatePerHourEUR = rate;
+
+      var stepModeBtn = document.getElementById('btn-hours-step-mode');
+      if (stepModeBtn) {
+        stepModeBtn.textContent = 'Step: ' + (step === 0.5 ? '0.5h' : '1h');
+      }
+
+      var courtsEl = document.getElementById('display-courts-count');
+      if (courtsEl) courtsEl.textContent = courts + (courts === 1 ? ' Court' : ' Courts');
+
+      var hoursFmt = (hours % 1 === 0) ? String(hours) : hours.toFixed(1);
+      var hoursEl = document.getElementById('display-court-hours');
+      if (hoursEl) hoursEl.textContent = hoursFmt + (hours === 1 ? ' hr' : ' hrs');
+
+      var autoCost = Math.round((courts * hours * rate) * 100) / 100;
+      var costInp = document.getElementById('input-court-cost');
+      if (costInp && !window.CourtPayState.courtCostManualOverride) {
+        costInp.value = autoCost.toFixed(2);
+      }
+
+      var pills = document.querySelectorAll('#court-preset-pills .pill-btn');
+      for (var i = 0; i < pills.length; i++) {
+        var pCourts = Number(pills[i].getAttribute('data-courts'));
+        var pHours = Number(pills[i].getAttribute('data-hours'));
+        var isMatch = !window.CourtPayState.courtCostManualOverride && pCourts === courts && Math.abs(pHours - hours) < 0.01;
+        pills[i].classList.toggle('active', isMatch);
+      }
+
+      var formulaTextEl = document.getElementById('court-calc-formula-text');
+      var resetBtn = document.getElementById('btn-reset-court-auto');
+      if (formulaTextEl) {
+        if (window.CourtPayState.courtCostManualOverride && costInp) {
+          formulaTextEl.textContent = 'Manual Court Cost Override: €' + Number(costInp.value || 0).toFixed(2);
+          if (resetBtn) resetBtn.classList.remove('hidden');
+        } else {
+          var cLabel = courts === 1 ? '1 Court' : (courts + ' Courts');
+          var hLabel = hoursFmt + (hours === 1 ? ' hr' : ' hrs');
+          formulaTextEl.textContent = cLabel + ' × ' + hLabel + ' × €' + rate.toFixed(2) + '/hr = €' + autoCost.toFixed(2);
+          if (resetBtn) resetBtn.classList.add('hidden');
+        }
+      }
+    },
+
+    toggleHoursStepSetting: function () {
+      var nextStep = Number(window.CourtPayState.courtHoursStep) === 0.5 ? 1 : 0.5;
+      window.CourtPayState.courtHoursStep = nextStep;
+      try {
+        localStorage.setItem('courtpay_hours_step', String(nextStep));
+      } catch (_) {}
+      if (nextStep === 1 && window.CourtPayState.courtHours % 1 !== 0) {
+        window.CourtPayState.courtHours = Math.max(1, Math.round(window.CourtPayState.courtHours));
+      }
+      window.CourtPayUI.syncCourtCalculatorUI();
+      window.CourtPayUI.recalculatePreview();
+    },
+
+    setCourtHoursPreset: function (courts, hours) {
+      window.CourtPayState.courtsCount = Math.max(1, Number(courts) || 1);
+      window.CourtPayState.courtHours = Math.max(0.5, Number(hours) || 1);
+      window.CourtPayState.courtCostManualOverride = false;
+      window.CourtPayUI.syncCourtCalculatorUI();
+      window.CourtPayUI.recalculatePreview();
+    },
+
+    adjustCourtsCount: function (delta) {
+      var next = Math.max(1, Math.min(12, (Number(window.CourtPayState.courtsCount) || 1) + Number(delta)));
+      window.CourtPayState.courtsCount = next;
+      window.CourtPayState.courtCostManualOverride = false;
+      window.CourtPayUI.syncCourtCalculatorUI();
+      window.CourtPayUI.recalculatePreview();
+    },
+
+    adjustCourtHours: function (directionOrDelta) {
+      var step = Number(window.CourtPayState.courtHoursStep) === 0.5 ? 0.5 : 1;
+      var delta = (Math.abs(Number(directionOrDelta)) === 1) ? (Number(directionOrDelta) * step) : Number(directionOrDelta);
+      var minHours = step === 0.5 ? 0.5 : 1;
+      var rawNext = (Number(window.CourtPayState.courtHours) || 2) + delta;
+      var next = Math.max(minHours, Math.min(12, Math.round(rawNext * 2) / 2));
+      window.CourtPayState.courtHours = next;
+      window.CourtPayState.courtCostManualOverride = false;
+      window.CourtPayUI.syncCourtCalculatorUI();
+      window.CourtPayUI.recalculatePreview();
+    },
+
+    onCourtRateInput: function () {
+      var rateInp = document.getElementById('input-court-rate');
+      var rate = rateInp ? Math.max(0, Number(rateInp.value) || 0) : 16.00;
+      window.CourtPayState.courtRatePerHourEUR = rate;
+      try {
+        localStorage.setItem('courtpay_court_rate', String(rate));
+      } catch (_) {}
+      window.CourtPayState.courtCostManualOverride = false;
+      window.CourtPayUI.syncCourtCalculatorUI();
+      window.CourtPayUI.recalculatePreview();
+    },
+
+    onManualCourtCostInput: function () {
+      window.CourtPayState.courtCostManualOverride = true;
+      window.CourtPayUI.syncCourtCalculatorUI();
+      window.CourtPayUI.recalculatePreview();
+    },
+
+    resetCourtCostToAuto: function () {
+      window.CourtPayState.courtCostManualOverride = false;
+      window.CourtPayUI.syncCourtCalculatorUI();
+      window.CourtPayUI.recalculatePreview();
+    },
+
+    setCourtPreset: function (amount) {
+      var inp = document.getElementById('input-court-cost');
+      if (inp) inp.value = Number(amount).toFixed(2);
+      window.CourtPayState.courtCostManualOverride = true;
+      window.CourtPayUI.syncCourtCalculatorUI();
+      window.CourtPayUI.recalculatePreview();
+    },
+
+    adjustShuttleUsage: function (shuttleType, delta) {
+      var cur = Number(window.CourtPayState.shuttleUsageMap[shuttleType] || 0);
+      window.CourtPayState.shuttleUsageMap[shuttleType] = Math.max(0, cur + delta);
+      window.CourtPayUI.renderShuttleUsageSteppers();
+      window.CourtPayUI.recalculatePreview();
+    },
+
+    togglePlayerSelected: function (playerId) {
+      for (var i = 0; i < window.CourtPayState.players.length; i++) {
+        if (window.CourtPayState.players[i].playerId === playerId) {
+          window.CourtPayState.players[i].selected = !window.CourtPayState.players[i].selected;
+        }
+      }
+      window.CourtPayUI.renderRosterSelection();
+      window.CourtPayUI.recalculatePreview();
+    },
+
+    adjustPlayerShares: function (playerId, delta) {
+      for (var i = 0; i < window.CourtPayState.players.length; i++) {
+        if (window.CourtPayState.players[i].playerId === playerId) {
+          var next = Math.max(1, (Number(window.CourtPayState.players[i].sessionShares) || 1) + delta);
+          window.CourtPayState.players[i].sessionShares = next;
+          window.CourtPayState.players[i].selected = true;
+        }
+      }
+      window.CourtPayUI.renderRosterSelection();
+      window.CourtPayUI.recalculatePreview();
+    },
+
+    applyPollPaste: function () {
+      var input = document.getElementById('input-poll-paste');
+      if (!input || !input.value.trim()) return;
+      var raw = input.value.toLowerCase();
+      for (var i = 0; i < window.CourtPayState.players.length; i++) {
+        var p = window.CourtPayState.players[i];
+        var firstToken = p.name.toLowerCase().split(' ')[0];
+        p.selected = raw.indexOf(firstToken) !== -1;
+      }
+      window.CourtPayUI.renderRosterSelection();
+      window.CourtPayUI.recalculatePreview();
+    },
+
+    submitNewPlayer: function () {
+      var input = document.getElementById('input-new-player-name');
+      var name = input ? String(input.value || '').trim() : '';
+      if (!name) return;
+      if (input) input.value = '';
+      window.CourtPayBridge.call('addPlayer', {
+        name: name,
+        defaultShares: 1,
+        type: 'REGULAR'
+      }).then(function (res) {
+        if (res && res.state) {
+          window.CourtPayBridge.hydrateFromServer(res.state);
+        } else {
+          window.CourtPayUI.renderAll();
+        }
+      });
+    },
+
+    computeLivePreviewData: function () {
+      var courtCost = Number((document.getElementById('input-court-cost') || {}).value || 32);
+      var title = (document.getElementById('input-session-title') || {}).value || 'Badminton Session';
+
+      // Calculate FIFO shuttle cost
+      var shuttleCost = 0;
+      var batchesClone = window.CourtPayState.batches.map(function (b) { return Object.assign({}, b); });
+      var types = Object.keys(window.CourtPayState.shuttleUsageMap);
+      for (var t = 0; t < types.length; t++) {
+        var sType = types[t];
+        var needed = Number(window.CourtPayState.shuttleUsageMap[sType] || 0);
+        for (var b = 0; b < batchesClone.length; b++) {
+          if (batchesClone[b].shuttleType === sType && batchesClone[b].remainingShuttles > 0 && needed > 0) {
+            var take = Math.min(batchesClone[b].remainingShuttles, needed);
+            shuttleCost += take * Number(batchesClone[b].costPerShuttleEUR || 2.40);
+            needed -= take;
+          }
+        }
+      }
+
+      var selectedPlayers = window.CourtPayState.players.filter(function (p) { return p.selected; });
+      var totalShares = 0;
+      for (var i = 0; i < selectedPlayers.length; i++) {
+        totalShares += Number(selectedPlayers[i].sessionShares || 1);
+      }
+
+      var totalCost = Math.round((courtCost + shuttleCost) * 100) / 100;
+      var rawShare = totalShares > 0 ? (totalCost / totalShares) : 0;
+      var perShare = totalShares > 0 ? (Math.ceil((rawShare - 1e-9) * 100) / 100) : 0;
+
+      var lines = [];
+      lines.push(title);
+      lines.push('Total: €' + totalCost.toFixed(2) + ' | ' + totalShares + ' Players (€' + perShare.toFixed(2) + ' each)');
+      lines.push('');
+      lines.push('To Pay:');
+
+      var creditLines = [];
+      for (var k = 0; k < selectedPlayers.length; k++) {
+        var pl = selectedPlayers[k];
+        if (pl.isOrganizer) continue;
+        var sh = Number(pl.sessionShares || 1);
+        var gross = Math.round(sh * perShare * 100) / 100;
+        var wallet = Number(pl.walletBalance || 0);
+        var prior = Number(pl.unpaidDebtEUR || 0);
+        var badge = sh > 1 ? (' (x' + sh + ')') : '';
+
+        if (wallet >= gross && gross > 0) {
+          creditLines.push('• ' + pl.name + ' (Wallet Credit)');
+        } else {
+          var netToday = Math.max(0, Math.round((gross - wallet) * 100) / 100);
+          var totalOwed = Math.round((netToday + prior) * 100) / 100;
+          if (prior > 0.005) {
+            lines.push('• ' + pl.name + badge + ': €' + totalOwed.toFixed(2) + ' (€' + netToday.toFixed(2) + ' today + €' + prior.toFixed(2) + ' prior)');
+          } else {
+            lines.push('• ' + pl.name + badge + ': €' + totalOwed.toFixed(2));
+          }
+        }
+      }
+
+      if (creditLines.length > 0) {
+        lines.push('');
+        lines.push('Paid / Credit:');
+        for (var c = 0; c < creditLines.length; c++) lines.push(creditLines[c]);
+      }
+
+      var revTag = (window.CourtPayState.config && window.CourtPayState.config.revolutTag) || 'mingbadminton';
+      lines.push('');
+      lines.push('Revolut: https://revolut.me/' + revTag + '/' + perShare.toFixed(2) + 'eur (@' + revTag + ')');
+
+      return {
+        courtCost: courtCost,
+        shuttleCost: shuttleCost,
+        totalCost: totalCost,
+        totalShares: totalShares,
+        perShare: perShare,
+        whatsAppText: lines.join('\n')
+      };
+    },
+
+    recalculatePreview: function () {
+      var data = window.CourtPayUI.computeLivePreviewData();
+      var shareBadge = document.getElementById('live-per-share-badge');
+      if (shareBadge) shareBadge.textContent = '€' + data.perShare.toFixed(2) + ' / share';
+      var shuttleBadge = document.getElementById('live-shuttle-cost-badge');
+      if (shuttleBadge) shuttleBadge.textContent = '€' + data.shuttleCost.toFixed(2);
+      var sharesCountBadge = document.getElementById('live-total-shares-badge');
+      if (sharesCountBadge) sharesCountBadge.textContent = data.totalShares + ' Shares';
+      var pre = document.getElementById('whatsapp-summary-box');
+      if (pre) pre.textContent = data.whatsAppText;
+    },
+
+    renderShuttleUsageSteppers: function () {
+      var container = document.getElementById('shuttle-usage-list');
+      if (!container) return;
+      var typesMap = {};
+      for (var i = 0; i < window.CourtPayState.batches.length; i++) {
+        var b = window.CourtPayState.batches[i];
+        if (!typesMap[b.shuttleType]) {
+          typesMap[b.shuttleType] = { remaining: 0, unitCost: b.costPerShuttleEUR };
+        }
+        typesMap[b.shuttleType].remaining += Number(b.remainingShuttles || 0);
+      }
+      var html = '';
+      var typeKeys = Object.keys(typesMap);
+      for (var k = 0; k < typeKeys.length; k++) {
+        var tName = typeKeys[k];
+        var usedCount = Number(window.CourtPayState.shuttleUsageMap[tName] || 0);
+        var info = typesMap[tName];
+        html += '<div class="stepper-row">' +
+          '<div>' +
+            '<div style="font-weight: 600; font-size: 0.9rem;">' + tName + '</div>' +
+            '<div class="tabular-nums" style="font-size: 0.75rem; color: var(--text-secondary);">FIFO Stock: ' + info.remaining + ' left • €' + Number(info.unitCost).toFixed(2) + '/shuttle</div>' +
+          '</div>' +
+          '<div class="stepper-controls">' +
+            '<button type="button" class="step-btn" onclick="CourtPayUI.adjustShuttleUsage(\'' + tName + '\', -1)">-</button>' +
+            '<span class="tabular-nums" style="min-width: 24px; text-align: center; font-weight: 700;">' + usedCount + '</span>' +
+            '<button type="button" class="step-btn" onclick="CourtPayUI.adjustShuttleUsage(\'' + tName + '\', 1)">+</button>' +
+          '</div>' +
+        '</div>';
+      }
+      container.innerHTML = html;
+    },
+
+    renderRosterSelection: function () {
+      var container = document.getElementById('roster-selection-list');
+      if (!container) return;
+      var html = '';
+      for (var i = 0; i < window.CourtPayState.players.length; i++) {
+        var p = window.CourtPayState.players[i];
+        var roleTag = p.isOrganizer ? '<span class="badge badge-emerald">Organizer (Auto-Paid)</span>' :
+          (p.sessionShares > 1 ? '<span class="badge badge-amber">Family Group (x' + p.sessionShares + ')</span>' : '');
+        html += '<div class="stepper-row" style="opacity: ' + (p.selected ? '1' : '0.48') + ';">' +
+          '<div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="CourtPayUI.togglePlayerSelected(\'' + p.playerId + '\')">' +
+            '<input type="checkbox" ' + (p.selected ? 'checked' : '') + ' style="width: 16px; height: 16px; accent-color: var(--brand-primary);">' +
+            '<div>' +
+              '<div style="font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">' + p.name + ' ' + roleTag + '</div>' +
+              '<div class="tabular-nums" style="font-size: 0.73rem; color: var(--text-secondary);">Wallet: €' + Number(p.walletBalance || 0).toFixed(2) + ' • Prior Debt: €' + Number(p.unpaidDebtEUR || 0).toFixed(2) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="stepper-controls">' +
+            '<button type="button" class="step-btn" onclick="CourtPayUI.adjustPlayerShares(\'' + p.playerId + '\', -1)">-</button>' +
+            '<span class="tabular-nums" style="min-width: 28px; text-align: center; font-weight: 700;">x' + Number(p.sessionShares || 1) + '</span>' +
+            '<button type="button" class="step-btn" onclick="CourtPayUI.adjustPlayerShares(\'' + p.playerId + '\', 1)">+</button>' +
+          '</div>' +
+        '</div>';
+      }
+      container.innerHTML = html;
+    },
+
+    renderLedgerView: function () {
+      var pContainer = document.getElementById('ledger-players-list');
+      if (pContainer) {
+        var pHtml = '';
+        for (var i = 0; i < window.CourtPayState.players.length; i++) {
+          var p = window.CourtPayState.players[i];
+          if (p.isOrganizer) continue;
+          var debt = Number(p.unpaidDebtEUR || 0);
+          var wallet = Number(p.walletBalance || 0);
+          var statusBadge = debt > 0 ? '<span class="badge badge-crimson tabular-nums">Owes €' + debt.toFixed(2) + '</span>' :
+            (wallet > 0 ? '<span class="badge badge-emerald tabular-nums">Credit €' + wallet.toFixed(2) + '</span>' : '<span class="badge badge-emerald">Settled</span>');
+          pHtml += '<div class="stepper-row">' +
+            '<div>' +
+              '<div style="font-weight: 600; font-size: 0.9rem;">' + p.name + '</div>' +
+              '<div style="margin-top: 3px;">' + statusBadge + '</div>' +
+            '</div>' +
+            '<button type="button" class="btn-secondary" onclick="CourtPayUI.promptRecordPayment(\'' + p.playerId + '\', \'' + p.name.replace(/'/g, '') + '\')">+ Revolut Top-Up</button>' +
+          '</div>';
+        }
+        pContainer.innerHTML = pHtml;
+      }
+
+      var eContainer = document.getElementById('ledger-entries-list');
+      if (eContainer) {
+        if (!window.CourtPayState.ledgerEntries || window.CourtPayState.ledgerEntries.length === 0) {
+          eContainer.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.84rem; padding: 8px 0;">Commit a session in Tab 1 to view 1-tap session entries.</div>';
+        } else {
+          var eHtml = '';
+          for (var j = 0; j < window.CourtPayState.ledgerEntries.length; j++) {
+            var e = window.CourtPayState.ledgerEntries[j];
+            if (e.status === 'VOID') continue;
+            var isPaid = e.status === 'PAID' || e.status === 'CREDIT_COVERED';
+            eHtml += '<div class="stepper-row">' +
+              '<div>' +
+                '<div style="font-weight: 600; font-size: 0.88rem;">' + e.playerName + ' (x' + e.shares + ')</div>' +
+                '<div class="tabular-nums" style="font-size: 0.75rem; color: var(--text-secondary);">Gross: €' + Number(e.grossShareEUR || 0).toFixed(2) + ' • Owed: €' + Number(e.amountOwedEUR || 0).toFixed(2) + '</div>' +
+              '</div>' +
+              '<button type="button" class="pill-btn ' + (isPaid ? 'active' : '') + '" onclick="CourtPayUI.toggleEntryPaid(\'' + e.entryId + '\')">' +
+                (isPaid ? 'PAID' : 'Mark Paid') +
+              '</button>' +
+            '</div>';
+          }
+          eContainer.innerHTML = eHtml;
+        }
+      }
+    },
+
+    renderInventoryView: function () {
+      var bContainer = document.getElementById('inventory-batches-list');
+      if (!bContainer) return;
+      var html = '';
+      for (var i = 0; i < window.CourtPayState.batches.length; i++) {
+        var b = window.CourtPayState.batches[i];
+        var badgeClass = b.remainingShuttles <= 3 ? 'badge-crimson' : (b.remainingShuttles <= 6 ? 'badge-amber' : 'badge-emerald');
+        html += '<div class="stepper-row">' +
+          '<div>' +
+            '<div style="font-weight: 600; font-size: 0.9rem;">' + b.shuttleType + ' <span class="badge ' + badgeClass + ' tabular-nums">' + b.remainingShuttles + ' / ' + b.totalShuttles + ' left</span></div>' +
+            '<div class="tabular-nums" style="font-size: 0.75rem; color: var(--text-secondary);">Batch ' + b.batchId + ' • €' + Number(b.costPerShuttleEUR || 0).toFixed(2) + ' / shuttle</div>' +
+          '</div>' +
+          '<div class="stepper-controls">' +
+            '<button type="button" class="step-btn" onclick="CourtPayUI.adjustBatchStock(\'' + b.batchId + '\', -1)">-</button>' +
+            '<button type="button" class="step-btn" onclick="CourtPayUI.adjustBatchStock(\'' + b.batchId + '\', 1)">+</button>' +
+          '</div>' +
+        '</div>';
+      }
+      bContainer.innerHTML = html;
+    },
+
+    copyWhatsAppSummary: function () {
+      var pre = document.getElementById('whatsapp-summary-box');
+      if (!pre) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(pre.textContent);
+      }
+    },
+
+    submitNewSession: function () {
+      var preview = window.CourtPayUI.computeLivePreviewData();
+      window.CourtPayUI.copyWhatsAppSummary();
+      var usageArr = [];
+      var types = Object.keys(window.CourtPayState.shuttleUsageMap);
+      for (var i = 0; i < types.length; i++) {
+        var cnt = Number(window.CourtPayState.shuttleUsageMap[types[i]] || 0);
+        if (cnt > 0) usageArr.push({ shuttleType: types[i], count: cnt });
+      }
+      var attendees = window.CourtPayState.players
+        .filter(function (p) { return p.selected; })
+        .map(function (p) { return { playerId: p.playerId, shares: Number(p.sessionShares || 1) }; });
+
+      window.CourtPayState.callServer('createSession', {
+        title: (document.getElementById('input-session-title') || {}).value || 'Badminton Session',
+        courtsCount: Number(window.CourtPayState.courtsCount || 1),
+        courtHours: Number(window.CourtPayState.courtHours || 2.0),
+        courtRatePerHourEUR: Number(window.CourtPayState.courtRatePerHourEUR || 16.00),
+        courtCostEUR: preview.courtCost,
+        shuttleUsage: usageArr,
+        attendees: attendees
+      }, function () {
+        window.CourtPayUI.switchTab('ledger');
+      });
+    },
+
+    toggleEntryPaid: function (entryId) {
+      window.CourtPayState.callServer('toggleSessionEntryPaid', { entryId: entryId }, function () {
+        window.CourtPayUI.renderAll();
+      });
+    },
+
+    promptRecordPayment: function (playerId, playerName) {
+      var raw = window.prompt('Record Revolut Payment / Top-Up for ' + playerName + ' (€):', '20.00');
+      var amount = Number(raw);
+      if (!amount || amount <= 0) return;
+      window.CourtPayState.callServer('recordPayment', { playerId: playerId, paymentAmountEUR: amount }, function () {
+        window.CourtPayUI.renderAll();
+      });
+    },
+
+    handleVoidLastSession: function () {
+      window.CourtPayState.callServer('voidLastSession', {}, function () {
+        window.CourtPayUI.renderAll();
+      });
+    },
+
+    adjustBatchStock: function (batchId, delta) {
+      for (var i = 0; i < window.CourtPayState.batches.length; i++) {
+        if (window.CourtPayState.batches[i].batchId === batchId) {
+          window.CourtPayState.batches[i].remainingShuttles = Math.max(0, Number(window.CourtPayState.batches[i].remainingShuttles || 0) + delta);
+        }
+      }
+      window.CourtPayUI.renderAll();
+      window.CourtPayState.callServer('adjustBatchStock', { batchId: batchId, delta: delta });
+    },
+
+    submitAddShuttleBatch: function () {
+      var sType = (document.getElementById('batch-type') || {}).value || 'Yonex AS-30';
+      var cost = Number((document.getElementById('batch-cost') || {}).value || 30);
+      var perTube = Number((document.getElementById('batch-per-tube') || {}).value || 12);
+      var rem = Number((document.getElementById('batch-remaining') || {}).value || 12);
+      window.CourtPayState.callServer('addShuttleBatch', {
+        shuttleType: sType,
+        totalCostEUR: cost,
+        shuttlesPerTube: perTube,
+        initialRemainingShuttles: rem
+      }, function () {
+        window.CourtPayUI.renderAll();
+      });
+    },
+
+    renderAll: function () {
+      window.CourtPayUI.renderShuttleUsageSteppers();
+      window.CourtPayUI.renderRosterSelection();
+      window.CourtPayUI.recalculatePreview();
+      window.CourtPayUI.renderLedgerView();
+      window.CourtPayUI.renderInventoryView();
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    window.CourtPayUI.init();
+  });
+</script>
+
+</body>
+</html>
