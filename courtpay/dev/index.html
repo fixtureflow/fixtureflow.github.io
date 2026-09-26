@@ -829,6 +829,100 @@
     border: 1px solid var(--border-subtle);
   }
 
+  .summary-textarea {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8rem;
+    line-height: 1.42;
+    resize: vertical;
+    min-height: 165px;
+  }
+
+  .btn-whatsapp {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.96rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.28);
+    transition: transform 0.1s ease, filter 0.15s ease;
+  }
+
+  .btn-whatsapp:active {
+    transform: scale(0.98);
+  }
+
+  .btn-danger {
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    background: var(--status-crimson-bg);
+    color: var(--status-crimson);
+    font-size: 0.84rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 0.1s ease, background-color 0.15s ease;
+  }
+
+  .btn-danger:active {
+    transform: scale(0.97);
+  }
+
+  .btn-secondary.copied-state {
+    border-color: var(--brand-emerald);
+    background: var(--brand-emerald-glow);
+    color: var(--brand-emerald);
+  }
+
+  .toast-banner {
+    position: fixed;
+    top: max(16px, env(safe-area-inset-top, 16px));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10050;
+    max-width: min(460px, calc(100vw - 28px));
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-focus);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .toast-banner.toast-success {
+    border-color: rgba(16, 185, 129, 0.55);
+  }
+
+  .toast-banner.toast-error {
+    border-color: rgba(239, 68, 68, 0.65);
+    color: var(--status-crimson);
+  }
+
+  .toast-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
   .sr-only {
     position: absolute;
     width: 1px;
@@ -845,7 +939,7 @@
 
   <meta name="apple-mobile-web-app-title" content="[DEV] CourtPay">
   <meta name="application-name" content="CourtPay">
-  <meta name="app-version" content="dev-v4">
+  <meta name="app-version" content="dev-v5">
   <meta name="theme-color" content="#080d16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -868,9 +962,9 @@
   <link rel="mask-icon" href="/assets/images/courtpay/icon-courtpay-dev.svg" color="#f59e0b">
   <link rel="manifest" href="/courtpay/dev/manifest.json">
   <script>
-    window.__FF_VERSION__ = 'dev-v4';
+    window.__FF_VERSION__ = 'dev-v5';
     window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
-    console.log('%c[CourtPay]%c Running version dev-v4', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
+    console.log('%c[CourtPay]%c Running version dev-v5', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
@@ -958,7 +1052,7 @@
       <p id="login-error-msg" class="login-error hidden"></p>
     </div>
     <div class="brand-footer" style="margin-top: 20px; position: relative; z-index: 2;">
-      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v4</span>
+      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v5</span>
     </div>
   </div>
 
@@ -1036,6 +1130,118 @@
         <span id="btn-save-settings-text">Save Defaults to Google Sheet</span>
       </button>
     </div>
+  </div>
+
+  <!-- Post-Commit WhatsApp Share Modal (Editable message + 1-Tap wa.me deep link) -->
+  <div id="whatsapp-share-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="whatsapp-modal-title">
+    <div class="modal-card">
+      <div class="card-header" style="margin-bottom: 10px;">
+        <div class="card-title font-display" id="whatsapp-modal-title" style="color: var(--brand-emerald);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <span>Session Saved to Sheet</span>
+        </div>
+        <button type="button" class="btn-secondary" style="padding: 5px 10px;" onclick="CourtPayUI.closeWhatsAppModal(true)">Close</button>
+      </div>
+
+      <div id="whatsapp-modal-meta" class="calc-formula-bar tabular-nums" style="margin-bottom: 10px;">
+        <span>Ready to share payment split</span>
+      </div>
+
+      <div class="input-group" style="margin-bottom: 12px;">
+        <label for="modal-whatsapp-textarea">Review or Edit Message Before Sending to WhatsApp</label>
+        <textarea id="modal-whatsapp-textarea" class="input-control summary-textarea tabular-nums" rows="9"></textarea>
+      </div>
+
+      <button type="button" id="btn-open-whatsapp" class="btn-whatsapp" onclick="CourtPayUI.openWhatsAppFromModal()">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+        </svg>
+        <span>Open in WhatsApp</span>
+      </button>
+
+      <div class="field-row" style="margin-top: 10px; margin-bottom: 0;">
+        <button type="button" id="btn-modal-copy-text" class="btn-secondary" style="justify-content: center; width: 100%;" onclick="CourtPayUI.copyWhatsAppFromModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          <span id="btn-modal-copy-label">Copy Text</span>
+        </button>
+        <button type="button" class="btn-secondary" style="justify-content: center; width: 100%;" onclick="CourtPayUI.closeWhatsAppModal(true)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+          <span>Done (View Ledger)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Void Last Session Confirmation Modal -->
+  <div id="void-session-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="void-modal-title">
+    <div class="modal-card">
+      <div class="card-header" style="margin-bottom: 10px;">
+        <div class="card-title font-display" id="void-modal-title" style="color: var(--status-crimson);">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span>Void Last Session?</span>
+        </div>
+        <button type="button" class="btn-secondary" style="padding: 5px 10px;" onclick="CourtPayUI.closeVoidModal()">Cancel</button>
+      </div>
+      <p id="void-modal-desc" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45; margin: 0 0 16px 0;">
+        This will mark the most recent session as VOID in Google Sheets, reverse all player ledger charges for that session, and restore its shuttle usage back to the FIFO stock queue.
+      </p>
+      <div class="field-row" style="margin-bottom: 0;">
+        <button type="button" class="btn-secondary" style="justify-content: center; width: 100%;" onclick="CourtPayUI.closeVoidModal()">Keep Session</button>
+        <button type="button" class="btn-danger" style="justify-content: center; width: 100%;" onclick="CourtPayUI.confirmVoidLastSession()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M3 7v6h6"/>
+            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+          </svg>
+          <span>Confirm Void</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Record Revolut Payment / Top-Up Modal -->
+  <div id="record-payment-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+    <div class="modal-card">
+      <div class="card-header" style="margin-bottom: 10px;">
+        <div class="card-title font-display" id="payment-modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          <span id="payment-modal-player-name">Record Payment</span>
+        </div>
+        <button type="button" class="btn-secondary" style="padding: 5px 10px;" onclick="CourtPayUI.closeRecordPaymentModal()">Cancel</button>
+      </div>
+      <div id="payment-modal-status-bar" class="calc-formula-bar tabular-nums" style="margin-bottom: 10px;"></div>
+      <div id="payment-preset-pills" class="preset-pills" style="margin-bottom: 10px;"></div>
+      <div class="input-group" style="margin-bottom: 14px;">
+        <label for="input-payment-amount">Payment / Top-Up Amount (€)</label>
+        <input id="input-payment-amount" class="input-control tabular-nums" type="number" step="0.01" min="0.01" placeholder="20.00" onkeydown="if(event.key==='Enter'){event.preventDefault();CourtPayUI.confirmRecordPayment();}">
+      </div>
+      <button type="button" class="btn-primary" onclick="CourtPayUI.confirmRecordPayment()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M20 6 9 17l-5-5"/>
+        </svg>
+        <span>Record Payment to Sheet</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Floating Toast Feedback Banner -->
+  <div id="toast-container" class="toast-banner hidden" role="status" aria-live="polite">
+    <span id="toast-icon" class="toast-icon" aria-hidden="true"></span>
+    <span id="toast-message">Action completed</span>
   </div>
 
   <div id="portal-view-main" class="app-shell">
@@ -1264,21 +1470,20 @@
         <div class="card-header">
           <div class="card-title font-display">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
             </svg>
-            <span>4. WhatsApp Summary &amp; Revolut Link</span>
+            <span>4. Session Summary Preview</span>
           </div>
-          <button type="button" class="btn-secondary" onclick="CourtPayUI.copyWhatsAppSummary()">Copy Text</button>
+          <span class="badge badge-emerald tabular-nums" id="live-total-cost-badge">€0.00 Total</span>
         </div>
 
         <pre id="whatsapp-summary-box" class="summary-pre tabular-nums"></pre>
 
-        <button type="button" class="btn-primary" onclick="CourtPayUI.submitNewSession()">
+        <button type="button" id="btn-commit-session" class="btn-primary" onclick="CourtPayUI.submitNewSession()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <path d="M20 6 9 17l-5-5"/>
           </svg>
-          <span>Commit Session &amp; Copy WhatsApp Split</span>
+          <span>Commit Session to Sheet</span>
         </button>
       </div>
     </section>
@@ -1314,6 +1519,12 @@
             </svg>
             <span>Session Entries (1-Tap Paid / Unpaid)</span>
           </div>
+          <button type="button" id="btn-ledger-share-whatsapp" class="btn-secondary" style="padding: 6px 10px; font-size: 0.76rem;" onclick="CourtPayUI.openLastSessionWhatsAppModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+            <span>Share Summary</span>
+          </button>
         </div>
         <div id="ledger-entries-list"></div>
       </div>
@@ -1378,7 +1589,7 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3z" />
     </svg>
-    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v4</span></span>
+    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v5</span></span>
   </div>
 </footer>
 
@@ -1671,28 +1882,108 @@
     ledgerEntries: [],
 
     STATE_CACHE_KEY: 'courtpay_state_cache_v1',
+    LAST_WHATSAPP_KEY: 'courtpay_last_whatsapp_v1',
+    draftSessionRequestId: 'ses_draft_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+    isActionInFlight: false,
+    actionStatusText: '',
+    pendingPaymentPlayerId: '',
+    pendingPaymentPlayerName: '',
+
+    ACTION_STATUS_LABELS: {
+      validateAdminPin: 'VERIFYING PIN & SYNCING GOOGLE SHEET...',
+      createSession: 'COMMITTING SESSION TO GOOGLE SHEET...',
+      toggleSessionEntryPaid: 'UPDATING PAYMENT STATUS IN SHEET...',
+      recordPayment: 'RECORDING REVOLUT PAYMENT IN SHEET...',
+      voidLastSession: 'VOIDING SESSION & RESTORING STOCK...',
+      addPlayer: 'ADDING PLAYER TO GOOGLE SHEET...',
+      addShuttleBatch: 'ADDING SHUTTLE TUBE TO SHEET...',
+      adjustBatchStock: 'UPDATING SHUTTLE STOCK IN SHEET...',
+      updateConfig: 'SAVING CLUB SETTINGS TO SHEET...'
+    },
+
+    resetDraftAfterCommit: function () {
+      window.CourtPayState.draftSessionRequestId = 'ses_draft_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+      window.CourtPayState._userModifiedDraft = false;
+      if (Array.isArray(window.CourtPayState.players)) {
+        for (var i = 0; i < window.CourtPayState.players.length; i++) {
+          window.CourtPayState.players[i].selected = false;
+          window.CourtPayState.players[i].sessionShares = Number(window.CourtPayState.players[i].defaultShares) || 1;
+        }
+      }
+      if (window.CourtPayState.shuttleUsageMap) {
+        var keys = Object.keys(window.CourtPayState.shuttleUsageMap);
+        for (var k = 0; k < keys.length; k++) {
+          window.CourtPayState.shuttleUsageMap[keys[k]] = 0;
+        }
+      }
+    },
 
     callServer: function (action, payload, onSuccess, attemptCount) {
       var attempt = Number(attemptCount) || 0;
-      var reqPayload = Object.assign({ clientRequestId: 'req_' + Date.now() }, payload || {});
+      var statusLabel = window.CourtPayState.ACTION_STATUS_LABELS[action] || '';
+
+      if (attempt === 0 && statusLabel) {
+        if (window.CourtPayState.isActionInFlight) {
+          return;
+        }
+        window.CourtPayState.isActionInFlight = true;
+        window.CourtPayState.actionStatusText = statusLabel;
+        if (window.CourtPayUI) {
+          window.CourtPayUI.syncStatusScreenOverlay();
+        }
+      }
+
+      var basePayload = payload ? Object.assign({}, payload) : {};
+      if (!basePayload.clientRequestId) {
+        basePayload.clientRequestId = (action === 'createSession')
+          ? window.CourtPayState.draftSessionRequestId
+          : ('req_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7));
+      }
+      var reqPayload = basePayload;
       var hydrateOpts = { autoSelectNew: action === 'addPlayer' };
+
+      var clearActionOverlay = function () {
+        if (statusLabel) {
+          window.CourtPayState.isActionInFlight = false;
+          window.CourtPayState.actionStatusText = '';
+          if (window.CourtPayUI) {
+            window.CourtPayUI.syncStatusScreenOverlay();
+          }
+        }
+      };
+
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(function (res) {
+            clearActionOverlay();
+            if (res && res.success === false && action !== 'validateAdminPin') {
+              if (window.CourtPayUI) {
+                window.CourtPayUI.showToast(res.error || 'Operation could not be completed.', 'error');
+              }
+              return;
+            }
             if (res && res.token) {
               window.CourtPayState.authToken = res.token;
               window.CourtPayState.isAuthenticated = true;
               localStorage.setItem('courtpay_token', res.token);
               window.CourtPayBiometrics.updateVaultToken(res.token);
             }
+            if (action === 'createSession') {
+              window.CourtPayState.resetDraftAfterCommit();
+            }
             var stateSnap = (res && res.state) ? res.state : ((res && res.players) ? res : null);
             if (stateSnap) window.CourtPayState.hydrateFromServer(stateSnap, hydrateOpts);
             if (onSuccess) onSuccess(res);
           })
           .withFailureHandler(function (err) {
+            clearActionOverlay();
             window.CourtPayState.isLoadingServer = false;
-            window.CourtPayState.syncError = String(err && err.message ? err.message : err);
-            if (window.CourtPayUI) window.CourtPayUI.renderAll();
+            var errMsg = String(err && err.message ? err.message : err);
+            window.CourtPayState.syncError = errMsg;
+            if (window.CourtPayUI) {
+              window.CourtPayUI.renderAll();
+              window.CourtPayUI.showToast(errMsg, 'error');
+            }
           })[action](reqPayload);
       } else if (window.COURTPAY_API_URL) {
         var activeToken = window.CourtPayState.authToken || localStorage.getItem('courtpay_token') || '';
@@ -1725,7 +2016,7 @@
             } catch (parseErr) {
               if (attempt < 2) {
                 setTimeout(function () {
-                  window.CourtPayState.callServer(action, payload, onSuccess, attempt + 1);
+                  window.CourtPayState.callServer(action, reqPayload, onSuccess, attempt + 1);
                 }, 800);
                 return;
               }
@@ -1733,10 +2024,11 @@
             }
             if (res && res.retryable && attempt < 2) {
               setTimeout(function () {
-                window.CourtPayState.callServer(action, payload, onSuccess, attempt + 1);
+                window.CourtPayState.callServer(action, reqPayload, onSuccess, attempt + 1);
               }, 800);
               return;
             }
+            clearActionOverlay();
             var serverData = (res && res.data !== undefined) ? res.data : res;
             if ((res && res.requiresAuth) || (serverData && serverData.requiresAuth)) {
               window.CourtPayState.isLoadingServer = false;
@@ -1750,12 +2042,22 @@
               if (onSuccess) onSuccess(res || { success: false, requiresAuth: true });
               return;
             }
+            if (((res && res.success === false) || (serverData && serverData.success === false)) && action !== 'validateAdminPin') {
+              var failMsg = (res && res.error) || (serverData && serverData.error) || 'Action could not be completed.';
+              if (window.CourtPayUI) {
+                window.CourtPayUI.showToast(failMsg, 'error');
+              }
+              return;
+            }
             window.CourtPayState.syncError = '';
             if (serverData && serverData.token) {
               window.CourtPayState.authToken = serverData.token;
               window.CourtPayState.isAuthenticated = true;
               localStorage.setItem('courtpay_token', serverData.token);
               window.CourtPayBiometrics.updateVaultToken(serverData.token);
+            }
+            if (action === 'createSession') {
+              window.CourtPayState.resetDraftAfterCommit();
             }
             var stateSnap = (serverData && serverData.state) ? serverData.state : ((serverData && serverData.players) ? serverData : null);
             if (stateSnap) {
@@ -1767,16 +2069,22 @@
           .catch(function (err) {
             if (attempt < 2) {
               setTimeout(function () {
-                window.CourtPayState.callServer(action, payload, onSuccess, attempt + 1);
+                window.CourtPayState.callServer(action, reqPayload, onSuccess, attempt + 1);
               }, 800);
               return;
             }
+            clearActionOverlay();
             window.CourtPayState.isLoadingServer = false;
-            window.CourtPayState.syncError = String(err && err.message ? err.message : err);
-            if (window.CourtPayUI) window.CourtPayUI.renderAll();
+            var errMsg = String(err && err.message ? err.message : err);
+            window.CourtPayState.syncError = errMsg;
+            if (window.CourtPayUI) {
+              window.CourtPayUI.renderAll();
+              window.CourtPayUI.showToast(errMsg, 'error');
+            }
           });
       } else {
         var simRes = window.CourtPayState.simulateLocalServer(action, reqPayload);
+        clearActionOverlay();
         if (onSuccess) onSuccess(simRes || { success: true, localMode: true });
       }
     },
@@ -1787,7 +2095,7 @@
         var snapshotPlayers = JSON.parse(JSON.stringify(st.players));
         var snapshotBatches = JSON.parse(JSON.stringify(st.batches));
         var sId = 'ses_' + Date.now();
-        var preview = window.CourtPayUI ? window.CourtPayUI.computeLivePreviewData() : { courtCost: 32, shuttleCost: 0, totalCost: 32, totalShares: 1, perShare: 32 };
+        var preview = window.CourtPayUI ? window.CourtPayUI.computeLivePreviewData() : { courtCost: 32, shuttleCost: 0, totalCost: 32, totalShares: 1, perShare: 32, whatsAppText: '' };
 
         // Deduct shuttles FIFO in local state
         var usage = payload.shuttleUsage || [];
@@ -1842,12 +2150,29 @@
             status: owed === 0 ? 'CREDIT_COVERED' : (walUsed > 0 ? 'PARTIAL' : 'UNPAID')
           });
         }
-        st.sessions.push({
+        var createdSession = {
           sessionId: sId,
+          dateStr: new Date().toISOString().slice(0, 10),
           title: payload.title,
+          courtCostEUR: preview.courtCost,
+          shuttleCostEUR: preview.shuttleCost,
+          totalCostEUR: preview.totalCost,
+          totalShares: preview.totalShares,
+          perShareEUR: preview.perShare,
+          status: 'ACTIVE',
           _snapshotPlayers: snapshotPlayers,
           _snapshotBatches: snapshotBatches
-        });
+        };
+        st.sessions.push(createdSession);
+        st.resetDraftAfterCommit();
+        if (window.CourtPayUI) window.CourtPayUI.renderAll();
+        return {
+          success: true,
+          deduplicated: false,
+          sessionId: sId,
+          whatsAppText: preview.whatsAppText,
+          session: createdSession
+        };
       } else if (action === 'toggleSessionEntryPaid') {
         for (var e = 0; e < st.ledgerEntries.length; e++) {
           var ent = st.ledgerEntries[e];
@@ -1918,6 +2243,13 @@
         });
         if (st.shuttleUsageMap[sName] === undefined) {
           st.shuttleUsageMap[sName] = 0;
+        }
+      } else if (action === 'adjustBatchStock') {
+        for (var bi = 0; bi < st.batches.length; bi++) {
+          if (st.batches[bi].batchId === payload.batchId) {
+            st.batches[bi].remainingShuttles = Math.max(0, Number(st.batches[bi].remainingShuttles || 0) + Number(payload.delta || 0));
+            st.batches[bi].status = st.batches[bi].remainingShuttles > 0 ? 'ACTIVE' : 'DEPLETED';
+          }
         }
       } else if (action === 'addPlayer') {
         var newPName = String((payload && payload.name) || '').trim();
@@ -2496,6 +2828,28 @@
       }
     },
 
+    showToast: function (message, optType) {
+      var banner = document.getElementById('toast-container');
+      var msgEl = document.getElementById('toast-message');
+      var iconEl = document.getElementById('toast-icon');
+      if (!banner || !msgEl) return;
+      var type = optType === 'error' ? 'error' : 'success';
+      banner.classList.remove('hidden', 'toast-success', 'toast-error');
+      banner.classList.add(type === 'error' ? 'toast-error' : 'toast-success');
+      msgEl.textContent = String(message || '');
+      if (iconEl) {
+        iconEl.innerHTML = type === 'error'
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+          : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+      }
+      if (window.CourtPayState._toastTimer) {
+        clearTimeout(window.CourtPayState._toastTimer);
+      }
+      window.CourtPayState._toastTimer = setTimeout(function () {
+        banner.classList.add('hidden');
+      }, 2800);
+    },
+
     syncStatusScreenOverlay: function () {
       var screen = document.getElementById('status-screen');
       if (!screen) return;
@@ -2504,10 +2858,17 @@
       var offlinePanel = document.getElementById('offline-panel');
       var offlineMsg = document.getElementById('offline-error-msg');
 
-      if (window.CourtPayState.isLoadingServer) {
+      if (statusText && !window.CourtPayState._defaultStatusText) {
+        window.CourtPayState._defaultStatusText = statusText.textContent || 'CONNECTING TO COURTPAY · FIXTUREFLOW...';
+      }
+
+      if (window.CourtPayState.isActionInFlight || window.CourtPayState.isLoadingServer) {
         screen.classList.remove('hidden');
         if (spinner) spinner.style.display = 'block';
-        if (statusText) statusText.style.display = 'block';
+        if (statusText) {
+          statusText.style.display = 'block';
+          statusText.textContent = window.CourtPayState.actionStatusText || window.CourtPayState._defaultStatusText || 'SYNCING WITH GOOGLE SHEET...';
+        }
         if (offlinePanel) offlinePanel.classList.add('hidden');
       } else if (window.CourtPayState.syncError && !window.CourtPayState._hydratedOnce) {
         screen.classList.remove('hidden');
@@ -2517,6 +2878,9 @@
         if (offlineMsg) offlineMsg.textContent = 'Unable to connect to club Google Sheet (' + window.CourtPayState.syncError + ').';
       } else {
         screen.classList.add('hidden');
+        if (statusText && window.CourtPayState._defaultStatusText) {
+          statusText.textContent = window.CourtPayState._defaultStatusText;
+        }
       }
     },
 
@@ -2615,9 +2979,6 @@
       var newPinVal = String((document.getElementById('setting-admin-pin') || {}).value || '').trim();
       var costVal = Math.round((courtsVal * hoursVal * rateVal) * 100) / 100;
 
-      var saveBtnText = document.getElementById('btn-save-settings-text');
-      if (saveBtnText) saveBtnText.textContent = 'Saving to Sheet...';
-
       window.CourtPayState.courtsCount = courtsVal;
       window.CourtPayState.courtHours = hoursVal;
       window.CourtPayState.courtRatePerHourEUR = rateVal;
@@ -2629,9 +2990,6 @@
       if (sessionTitleInput) sessionTitleInput.value = titleVal;
       var rateInp = document.getElementById('input-court-rate');
       if (rateInp) rateInp.value = rateVal.toFixed(2);
-
-      window.CourtPayUI.syncCourtCalculatorUI();
-      window.CourtPayUI.recalculatePreview();
 
       var updatePayload = {
         defaultSessionTitle: titleVal,
@@ -2646,11 +3004,11 @@
         updatePayload.adminPin = newPinVal;
       }
 
+      window.CourtPayUI.closeSettingsModal();
       window.CourtPayState.callServer('updateConfig', updatePayload, function () {
-        if (saveBtnText) saveBtnText.textContent = 'Save Defaults to Google Sheet';
-        window.CourtPayUI.closeSettingsModal();
         window.CourtPayUI.syncCourtCalculatorUI();
         window.CourtPayUI.renderAll();
+        window.CourtPayUI.showToast('Club settings saved to Google Sheet', 'success');
       });
     },
 
@@ -2662,6 +3020,10 @@
       }
       window.CourtPayUI.renderRosterSelection();
       window.CourtPayUI.recalculatePreview();
+      window.CourtPayUI.showToast(
+        flag ? ('Selected all ' + window.CourtPayState.players.length + ' players') : 'Cleared player selection',
+        'success'
+      );
     },
 
     switchTab: function (tabName) {
@@ -2871,7 +3233,10 @@
     submitNewPlayer: function () {
       var input = document.getElementById('input-new-player-name');
       var name = input ? String(input.value || '').trim() : '';
-      if (!name) return;
+      if (!name) {
+        window.CourtPayUI.showToast('Please enter a player or guest name first.', 'error');
+        return;
+      }
       if (input) input.value = '';
       window.CourtPayState.isAddGuestExpanded = false;
       var drawer = document.getElementById('add-guest-drawer');
@@ -2884,6 +3249,7 @@
         type: 'REGULAR'
       }, function () {
         window.CourtPayUI.renderAll();
+        window.CourtPayUI.showToast('Added ' + name + ' to roster', 'success');
       });
     },
 
@@ -2974,6 +3340,8 @@
       if (shuttleBadge) shuttleBadge.textContent = '€' + data.shuttleCost.toFixed(2);
       var sharesCountBadge = document.getElementById('live-total-shares-badge');
       if (sharesCountBadge) sharesCountBadge.textContent = data.totalShares + ' Shares';
+      var totalCostBadge = document.getElementById('live-total-cost-badge');
+      if (totalCostBadge) totalCostBadge.textContent = '€' + data.totalCost.toFixed(2) + ' Total';
       var pre = document.getElementById('whatsapp-summary-box');
       if (pre) pre.textContent = data.whatsAppText;
       window.CourtPayUI.syncRosterSummaryBar();
@@ -3089,13 +3457,15 @@
 
       var eContainer = document.getElementById('ledger-entries-list');
       if (eContainer) {
-        if (!window.CourtPayState.ledgerEntries || window.CourtPayState.ledgerEntries.length === 0) {
+        var activeEntries = (window.CourtPayState.ledgerEntries || []).filter(function (item) {
+          return item.status !== 'VOID';
+        });
+        if (activeEntries.length === 0) {
           eContainer.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.84rem; padding: 8px 0;">Commit a session in Tab 1 to view 1-tap session entries.</div>';
         } else {
           var eHtml = '';
-          for (var j = 0; j < window.CourtPayState.ledgerEntries.length; j++) {
-            var e = window.CourtPayState.ledgerEntries[j];
-            if (e.status === 'VOID') continue;
+          for (var j = 0; j < activeEntries.length; j++) {
+            var e = activeEntries[j];
             var isPaid = e.status === 'PAID' || e.status === 'CREDIT_COVERED';
             var safeEntryIdJs = window.CourtPayUI.escapeJsStr(e.entryId);
             var safePlayerNameHtml = window.CourtPayUI.escapeHtml(e.playerName);
@@ -3138,76 +3508,341 @@
       bContainer.innerHTML = html;
     },
 
-    copyWhatsAppSummary: function () {
-      var pre = document.getElementById('whatsapp-summary-box');
-      if (!pre) return;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(pre.textContent);
+    buildWhatsAppTextFromSession: function (sessionObj) {
+      if (!sessionObj) return '';
+      var sId = sessionObj.sessionId;
+      var title = sessionObj.title || 'Badminton Session';
+      var totalCost = Number(sessionObj.totalCostEUR || 0);
+      var totalShares = Number(sessionObj.totalShares || 1);
+      var perShare = Number(sessionObj.perShareEUR || 0);
+
+      var lines = [];
+      lines.push(title);
+      lines.push('Total: €' + totalCost.toFixed(2) + ' | ' + totalShares + ' Players (€' + perShare.toFixed(2) + ' each)');
+      lines.push('');
+      lines.push('To Pay:');
+
+      var creditLines = [];
+      var entries = (window.CourtPayState.ledgerEntries || []).filter(function (le) {
+        return le.sessionId === sId && le.status !== 'VOID';
+      });
+      var playersMap = {};
+      for (var p = 0; p < window.CourtPayState.players.length; p++) {
+        playersMap[window.CourtPayState.players[p].playerId] = window.CourtPayState.players[p];
+      }
+
+      for (var k = 0; k < entries.length; k++) {
+        var ent = entries[k];
+        var pl = playersMap[ent.playerId];
+        if (pl && pl.isOrganizer) continue;
+        var sh = Number(ent.shares || 1);
+        var badge = sh > 1 ? (' (x' + sh + ')') : '';
+        if (ent.status === 'CREDIT_COVERED') {
+          creditLines.push('• ' + ent.playerName + ' (Wallet Credit)');
+        } else {
+          var totalOwed = pl ? Number(pl.unpaidDebtEUR || ent.amountOwedEUR || 0) : Number(ent.amountOwedEUR || 0);
+          var netToday = Number(ent.amountOwedEUR || 0);
+          var prior = Math.max(0, Math.round((totalOwed - netToday) * 100) / 100);
+          if (prior > 0.005 && netToday > 0) {
+            lines.push('• ' + ent.playerName + badge + ': €' + totalOwed.toFixed(2) + ' (€' + netToday.toFixed(2) + ' today + €' + prior.toFixed(2) + ' prior)');
+          } else {
+            lines.push('• ' + ent.playerName + badge + ': €' + (totalOwed > 0 ? totalOwed : netToday).toFixed(2));
+          }
+        }
+      }
+
+      if (creditLines.length > 0) {
+        lines.push('');
+        lines.push('Paid / Credit:');
+        for (var c = 0; c < creditLines.length; c++) lines.push(creditLines[c]);
+      }
+
+      var revTag = (window.CourtPayState.config && window.CourtPayState.config.revolutTag) || 'mingbadminton';
+      lines.push('');
+      lines.push('Revolut: https://revolut.me/' + revTag + '/' + perShare.toFixed(2) + 'eur (@' + revTag + ')');
+      return lines.join('\n');
+    },
+
+    openWhatsAppModal: function (whatsAppText, metaSummary) {
+      var modal = document.getElementById('whatsapp-share-modal');
+      var textarea = document.getElementById('modal-whatsapp-textarea');
+      var metaEl = document.getElementById('whatsapp-modal-meta');
+      var copyBtn = document.getElementById('btn-modal-copy-text');
+      var copyLabel = document.getElementById('btn-modal-copy-label');
+      if (textarea) textarea.value = String(whatsAppText || '');
+      if (metaEl) metaEl.textContent = String(metaSummary || 'Session saved to Google Sheet');
+      if (copyBtn) copyBtn.classList.remove('copied-state');
+      if (copyLabel) copyLabel.textContent = 'Copy Text';
+      if (modal) modal.classList.remove('hidden');
+    },
+
+    closeWhatsAppModal: function (switchToLedger) {
+      var modal = document.getElementById('whatsapp-share-modal');
+      if (modal) modal.classList.add('hidden');
+      if (switchToLedger) {
+        window.CourtPayUI.switchTab('ledger');
       }
     },
 
-    submitNewSession: function () {
-      var preview = window.CourtPayUI.computeLivePreviewData();
-      window.CourtPayUI.copyWhatsAppSummary();
-      var usageArr = [];
-      var types = Object.keys(window.CourtPayState.shuttleUsageMap);
-      for (var i = 0; i < types.length; i++) {
-        var cnt = Number(window.CourtPayState.shuttleUsageMap[types[i]] || 0);
-        if (cnt > 0) usageArr.push({ shuttleType: types[i], count: cnt });
+    openWhatsAppFromModal: function () {
+      var textarea = document.getElementById('modal-whatsapp-textarea');
+      var txt = textarea ? String(textarea.value || '').trim() : '';
+      if (!txt) {
+        window.CourtPayUI.showToast('Message is empty.', 'error');
+        return;
       }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try { navigator.clipboard.writeText(txt); } catch (_) {}
+      }
+      var waUrl = 'https://wa.me/?text=' + encodeURIComponent(txt);
+      var win = window.open(waUrl, '_blank', 'noopener,noreferrer');
+      if (!win) {
+        window.location.href = waUrl;
+      }
+    },
+
+    copyWhatsAppFromModal: function () {
+      var textarea = document.getElementById('modal-whatsapp-textarea');
+      var txt = textarea ? String(textarea.value || '').trim() : '';
+      if (!txt) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt);
+      }
+      var copyBtn = document.getElementById('btn-modal-copy-text');
+      var copyLabel = document.getElementById('btn-modal-copy-label');
+      if (copyBtn) copyBtn.classList.add('copied-state');
+      if (copyLabel) copyLabel.textContent = 'Copied to Clipboard';
+      window.CourtPayUI.showToast('WhatsApp summary copied to clipboard', 'success');
+      setTimeout(function () {
+        if (copyBtn) copyBtn.classList.remove('copied-state');
+        if (copyLabel) copyLabel.textContent = 'Copy Text';
+      }, 2200);
+    },
+
+    openLastSessionWhatsAppModal: function () {
+      var lastActive = null;
+      var sessions = window.CourtPayState.sessions || [];
+      for (var i = sessions.length - 1; i >= 0; i--) {
+        if (sessions[i].status !== 'VOID') {
+          lastActive = sessions[i];
+          break;
+        }
+      }
+      if (!lastActive) {
+        window.CourtPayUI.showToast('No active session in Ledger yet. Commit a session in Tab 1 first.', 'error');
+        return;
+      }
+      var savedText = '';
+      try {
+        var raw = localStorage.getItem(window.CourtPayState.LAST_WHATSAPP_KEY);
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          if (parsed && parsed.sessionId === lastActive.sessionId && parsed.text) {
+            savedText = parsed.text;
+          }
+        }
+      } catch (_) {}
+      var finalText = savedText || window.CourtPayUI.buildWhatsAppTextFromSession(lastActive);
+      var meta = (lastActive.title || 'Session') + ' • €' + Number(lastActive.totalCostEUR || 0).toFixed(2) + ' Total • €' + Number(lastActive.perShareEUR || 0).toFixed(2) + ' / share';
+      window.CourtPayUI.openWhatsAppModal(finalText, meta);
+    },
+
+    submitNewSession: function () {
       var attendees = window.CourtPayState.players
         .filter(function (p) { return p.selected; })
         .map(function (p) { return { playerId: p.playerId, shares: Number(p.sessionShares || 1) }; });
 
+      if (attendees.length === 0) {
+        if (!window.CourtPayState.isRosterExpanded) {
+          window.CourtPayUI.toggleRosterCollapse();
+        }
+        window.CourtPayUI.showToast('Select at least 1 player in Section 3 before committing.', 'error');
+        return;
+      }
+
+      var usageArr = [];
+      var types = Object.keys(window.CourtPayState.shuttleUsageMap);
+      for (var i = 0; i < types.length; i++) {
+        var sType = types[i];
+        var cnt = Number(window.CourtPayState.shuttleUsageMap[sType] || 0);
+        if (cnt > 0) {
+          var avail = 0;
+          for (var b = 0; b < window.CourtPayState.batches.length; b++) {
+            if (window.CourtPayState.batches[b].shuttleType === sType) {
+              avail += Number(window.CourtPayState.batches[b].remainingShuttles || 0);
+            }
+          }
+          if (cnt > avail) {
+            window.CourtPayUI.showToast('Not enough ' + sType + ' shuttles in FIFO stock (' + avail + ' left).', 'error');
+            return;
+          }
+          usageArr.push({ shuttleType: sType, count: cnt });
+        }
+      }
+
+      var preview = window.CourtPayUI.computeLivePreviewData();
+      var sessionTitle = (document.getElementById('input-session-title') || {}).value || 'Badminton Session';
+
       window.CourtPayState.callServer('createSession', {
-        title: (document.getElementById('input-session-title') || {}).value || 'Badminton Session',
+        title: sessionTitle,
         courtsCount: Number(window.CourtPayState.courtsCount || 1),
         courtHours: Number(window.CourtPayState.courtHours || 2.0),
         courtRatePerHourEUR: Number(window.CourtPayState.courtRatePerHourEUR || 16.00),
         courtCostEUR: preview.courtCost,
         shuttleUsage: usageArr,
         attendees: attendees
-      }, function () {
+      }, function (res) {
+        var finalWhatsAppText = (res && res.whatsAppText) ? res.whatsAppText : preview.whatsAppText;
+        var committedId = (res && res.sessionId) ? res.sessionId : '';
+        try {
+          localStorage.setItem(window.CourtPayState.LAST_WHATSAPP_KEY, JSON.stringify({
+            sessionId: committedId,
+            title: sessionTitle,
+            totalCostEUR: preview.totalCost,
+            totalShares: preview.totalShares,
+            perShareEUR: preview.perShare,
+            text: finalWhatsAppText
+          }));
+        } catch (_) {}
         window.CourtPayUI.switchTab('ledger');
+        var meta = sessionTitle + ' • €' + preview.totalCost.toFixed(2) + ' Total • €' + preview.perShare.toFixed(2) + ' / share';
+        window.CourtPayUI.openWhatsAppModal(finalWhatsAppText, meta);
+        if (res && res.deduplicated) {
+          window.CourtPayUI.showToast('Duplicate prevented — showing existing session summary', 'success');
+        }
       });
     },
 
     toggleEntryPaid: function (entryId) {
       window.CourtPayState.callServer('toggleSessionEntryPaid', { entryId: entryId }, function () {
         window.CourtPayUI.renderAll();
+        window.CourtPayUI.showToast('Payment status updated in Google Sheet', 'success');
       });
     },
 
     promptRecordPayment: function (playerId, playerName) {
-      var raw = window.prompt('Record Revolut Payment / Top-Up for ' + playerName + ' (€):', '20.00');
-      var amount = Number(raw);
-      if (!amount || amount <= 0) return;
+      window.CourtPayState.pendingPaymentPlayerId = playerId;
+      window.CourtPayState.pendingPaymentPlayerName = playerName;
+      var targetPlayer = null;
+      for (var i = 0; i < window.CourtPayState.players.length; i++) {
+        if (window.CourtPayState.players[i].playerId === playerId) {
+          targetPlayer = window.CourtPayState.players[i];
+          break;
+        }
+      }
+      var debt = targetPlayer ? Number(targetPlayer.unpaidDebtEUR || 0) : 0;
+      var wallet = targetPlayer ? Number(targetPlayer.walletBalance || 0) : 0;
+
+      var nameEl = document.getElementById('payment-modal-player-name');
+      if (nameEl) nameEl.textContent = 'Revolut Top-Up — ' + playerName;
+
+      var statusBar = document.getElementById('payment-modal-status-bar');
+      if (statusBar) {
+        statusBar.textContent = debt > 0
+          ? ('Current Unpaid Debt: €' + debt.toFixed(2) + ' • Wallet Credit: €' + wallet.toFixed(2))
+          : ('Settled • Current Wallet Credit: €' + wallet.toFixed(2));
+      }
+
+      var presetsContainer = document.getElementById('payment-preset-pills');
+      if (presetsContainer) {
+        var pillsHtml = '';
+        if (debt > 0) {
+          pillsHtml += '<button type="button" class="pill-btn active tabular-nums" onclick="CourtPayUI.setPaymentPresetAmount(' + debt.toFixed(2) + ')">Exact Debt (€' + debt.toFixed(2) + ')</button>';
+        }
+        var stdAmounts = [10, 20, 50];
+        for (var a = 0; a < stdAmounts.length; a++) {
+          var amt = stdAmounts[a];
+          var isDefault = (debt <= 0 && amt === 20);
+          pillsHtml += '<button type="button" class="pill-btn ' + (isDefault ? 'active ' : '') + 'tabular-nums" onclick="CourtPayUI.setPaymentPresetAmount(' + amt + ')">€' + amt.toFixed(2) + '</button>';
+        }
+        presetsContainer.innerHTML = pillsHtml;
+      }
+
+      var amtInp = document.getElementById('input-payment-amount');
+      if (amtInp) {
+        amtInp.value = (debt > 0 ? debt : 20).toFixed(2);
+      }
+
+      var modal = document.getElementById('record-payment-modal');
+      if (modal) modal.classList.remove('hidden');
+    },
+
+    setPaymentPresetAmount: function (amount) {
+      var amtInp = document.getElementById('input-payment-amount');
+      if (amtInp) amtInp.value = Number(amount).toFixed(2);
+    },
+
+    closeRecordPaymentModal: function () {
+      var modal = document.getElementById('record-payment-modal');
+      if (modal) modal.classList.add('hidden');
+    },
+
+    confirmRecordPayment: function () {
+      var playerId = window.CourtPayState.pendingPaymentPlayerId;
+      var playerName = window.CourtPayState.pendingPaymentPlayerName || 'Player';
+      var amtInp = document.getElementById('input-payment-amount');
+      var amount = amtInp ? Number(amtInp.value) : 0;
+      if (!playerId || !amount || amount <= 0) {
+        window.CourtPayUI.showToast('Enter a valid payment amount greater than €0.', 'error');
+        return;
+      }
+      window.CourtPayUI.closeRecordPaymentModal();
       window.CourtPayState.callServer('recordPayment', { playerId: playerId, paymentAmountEUR: amount }, function () {
         window.CourtPayUI.renderAll();
+        window.CourtPayUI.showToast('Recorded €' + amount.toFixed(2) + ' payment for ' + playerName, 'success');
       });
     },
 
     handleVoidLastSession: function () {
+      var lastActive = null;
+      var sessions = window.CourtPayState.sessions || [];
+      for (var i = sessions.length - 1; i >= 0; i--) {
+        if (sessions[i].status !== 'VOID') {
+          lastActive = sessions[i];
+          break;
+        }
+      }
+      if (!lastActive) {
+        window.CourtPayUI.showToast('No active session in Google Sheet to void.', 'error');
+        return;
+      }
+      var descEl = document.getElementById('void-modal-desc');
+      if (descEl) {
+        descEl.textContent = 'Void "' + (lastActive.title || 'Last Session') + '" (€' + Number(lastActive.totalCostEUR || 0).toFixed(2) + ')? This marks the session as VOID in Google Sheets, reverses all player charges for this session, and restores shuttle usage back to the FIFO queue.';
+      }
+      var modal = document.getElementById('void-session-modal');
+      if (modal) modal.classList.remove('hidden');
+    },
+
+    closeVoidModal: function () {
+      var modal = document.getElementById('void-session-modal');
+      if (modal) modal.classList.add('hidden');
+    },
+
+    confirmVoidLastSession: function () {
+      window.CourtPayUI.closeVoidModal();
       window.CourtPayState.callServer('voidLastSession', {}, function () {
         window.CourtPayUI.renderAll();
+        window.CourtPayUI.showToast('Voided last session & restored shuttle stock', 'success');
       });
     },
 
     adjustBatchStock: function (batchId, delta) {
-      for (var i = 0; i < window.CourtPayState.batches.length; i++) {
-        if (window.CourtPayState.batches[i].batchId === batchId) {
-          window.CourtPayState.batches[i].remainingShuttles = Math.max(0, Number(window.CourtPayState.batches[i].remainingShuttles || 0) + delta);
-        }
-      }
-      window.CourtPayUI.renderAll();
-      window.CourtPayState.callServer('adjustBatchStock', { batchId: batchId, delta: delta });
+      window.CourtPayState.callServer('adjustBatchStock', { batchId: batchId, delta: delta }, function () {
+        window.CourtPayUI.renderAll();
+        window.CourtPayUI.showToast('Shuttle stock updated in Google Sheet', 'success');
+      });
     },
 
     submitAddShuttleBatch: function () {
-      var sType = (document.getElementById('batch-type') || {}).value || 'Yonex AS-30';
+      var sType = String((document.getElementById('batch-type') || {}).value || 'Yonex AS-30').trim();
       var cost = Number((document.getElementById('batch-cost') || {}).value || 30);
       var perTube = Number((document.getElementById('batch-per-tube') || {}).value || 12);
       var rem = Number((document.getElementById('batch-remaining') || {}).value || 12);
+      if (!sType || cost < 0 || perTube <= 0) {
+        window.CourtPayUI.showToast('Please enter a valid shuttle type and tube cost.', 'error');
+        return;
+      }
       window.CourtPayState.callServer('addShuttleBatch', {
         shuttleType: sType,
         totalCostEUR: cost,
@@ -3215,6 +3850,7 @@
         initialRemainingShuttles: rem
       }, function () {
         window.CourtPayUI.renderAll();
+        window.CourtPayUI.showToast('Added ' + sType + ' tube to FIFO queue', 'success');
       });
     },
 
