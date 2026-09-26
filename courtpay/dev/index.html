@@ -939,7 +939,7 @@
 
   <meta name="apple-mobile-web-app-title" content="[DEV] CourtPay">
   <meta name="application-name" content="CourtPay">
-  <meta name="app-version" content="dev-v6">
+  <meta name="app-version" content="dev-v7">
   <meta name="theme-color" content="#080d16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -962,9 +962,9 @@
   <link rel="mask-icon" href="/assets/images/courtpay/icon-courtpay-dev.svg" color="#f59e0b">
   <link rel="manifest" href="/courtpay/dev/manifest.json">
   <script>
-    window.__FF_VERSION__ = 'dev-v6';
+    window.__FF_VERSION__ = 'dev-v7';
     window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
-    console.log('%c[CourtPay]%c Running version dev-v6', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
+    console.log('%c[CourtPay]%c Running version dev-v7', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
@@ -1052,7 +1052,7 @@
       <p id="login-error-msg" class="login-error hidden"></p>
     </div>
     <div class="brand-footer" style="margin-top: 20px; position: relative; z-index: 2;">
-      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v6</span>
+      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v7</span>
     </div>
   </div>
 
@@ -1143,7 +1143,6 @@
           </svg>
           <span>Session Saved to Sheet</span>
         </div>
-        <button type="button" class="btn-secondary" style="padding: 5px 10px;" onclick="CourtPayUI.closeWhatsAppModal(true)">Close</button>
       </div>
 
       <div id="whatsapp-modal-meta" class="calc-formula-bar tabular-nums" style="margin-bottom: 10px;">
@@ -1174,7 +1173,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20 6 9 17l-5-5"/>
           </svg>
-          <span>Done (View Ledger)</span>
+          <span>Done</span>
         </button>
       </div>
     </div>
@@ -1192,7 +1191,6 @@
           </svg>
           <span>Void Last Session?</span>
         </div>
-        <button type="button" class="btn-secondary" style="padding: 5px 10px;" onclick="CourtPayUI.closeVoidModal()">Cancel</button>
       </div>
       <p id="void-modal-desc" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45; margin: 0 0 16px 0;">
         This will mark the most recent session as VOID in Google Sheets, reverse all player ledger charges for that session, and restore its shuttle usage back to the FIFO stock queue.
@@ -1325,7 +1323,6 @@
             <span>Court &amp; Session Setup</span>
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
-            <span class="badge badge-gold tabular-nums" id="live-per-share-badge">€0.00 / share</span>
             <button type="button" id="btn-toggle-court-setup" class="action-chip-btn" onclick="event.stopPropagation(); CourtPayUI.toggleCourtSetupCollapse()">Edit</button>
           </div>
         </div>
@@ -1390,9 +1387,15 @@
             <button type="button" id="btn-reset-court-auto" class="hidden" style="background:none;border:none;color:var(--brand-primary);font-weight:700;font-size:0.75rem;cursor:pointer;text-decoration:underline;" onclick="CourtPayUI.resetCourtCostToAuto()">Auto-Calc</button>
           </div>
 
-          <div class="input-group">
-            <label for="input-session-title">Session Title</label>
-            <input id="input-session-title" class="input-control" type="text" value="Friday Night Badminton" oninput="window.CourtPayState._titleManuallyEdited = true; CourtPayUI.syncCourtCalculatorUI(); CourtPayUI.recalculatePreview()">
+          <div class="field-row" style="margin-bottom: 0;">
+            <div class="input-group">
+              <label for="input-session-title">Session Title</label>
+              <input id="input-session-title" class="input-control" type="text" value="Friday Night Badminton" oninput="window.CourtPayState._titleManuallyEdited = true; CourtPayUI.syncCourtCalculatorUI(); CourtPayUI.recalculatePreview()">
+            </div>
+            <div class="input-group">
+              <label for="input-session-date">Session Date</label>
+              <input id="input-session-date" class="input-control tabular-nums" type="date" oninput="CourtPayUI.syncCourtCalculatorUI(); CourtPayUI.recalculatePreview()">
+            </div>
           </div>
         </div>
       </div>
@@ -1473,7 +1476,7 @@
             </svg>
             <span>Session Summary Preview</span>
           </div>
-          <span class="badge badge-emerald tabular-nums" id="live-total-cost-badge">€0.00 Total</span>
+          <span class="badge badge-emerald tabular-nums" id="live-per-share-badge">€0.00 / share</span>
         </div>
 
         <pre id="whatsapp-summary-box" class="summary-pre tabular-nums"></pre>
@@ -1498,25 +1501,28 @@
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
             </svg>
-            <span>Session Entries (1-Tap Paid / Unpaid)</span>
+            <span>Session Entries</span>
           </div>
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <button type="button" id="btn-ledger-share-whatsapp" class="btn-secondary" style="padding: 5px 9px; font-size: 0.74rem;" onclick="CourtPayUI.openLastSessionWhatsAppModal()">
+          <span class="badge badge-emerald tabular-nums" id="ledger-entries-status-badge">All Paid</span>
+        </div>
+        <div id="ledger-session-meta" class="calc-formula-bar tabular-nums hidden" style="flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 10px;">
+          <div id="ledger-session-meta-text" style="font-weight: 600;"></div>
+          <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+            <button type="button" id="btn-ledger-share-whatsapp" class="btn-secondary" style="padding: 5px 10px; font-size: 0.74rem;" onclick="CourtPayUI.openLastSessionWhatsAppModal()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
               </svg>
               <span>Share Summary</span>
             </button>
-            <button type="button" id="btn-ledger-void-session" class="btn-secondary" style="padding: 5px 9px; font-size: 0.74rem;" onclick="CourtPayUI.handleVoidLastSession()">
+            <button type="button" id="btn-ledger-void-session" class="btn-secondary" style="padding: 5px 10px; font-size: 0.74rem;" onclick="CourtPayUI.handleVoidLastSession()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 7v6h6"/>
                 <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
               </svg>
-              <span>Void Last Session</span>
+              <span>Void Session</span>
             </button>
           </div>
         </div>
-        <div id="ledger-session-meta" class="calc-formula-bar tabular-nums hidden" style="margin-bottom: 10px;"></div>
         <div id="ledger-inline-error" class="inline-alert hidden" role="alert" style="margin-bottom: 10px;"></div>
         <div id="ledger-entries-list"></div>
       </div>
@@ -1611,7 +1617,7 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3z" />
     </svg>
-    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v6</span></span>
+    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v7</span></span>
   </div>
 </footer>
 
@@ -1926,9 +1932,21 @@
       updateConfig: 'SAVING CLUB SETTINGS TO SHEET...'
     },
 
+    getLocalTodayStr: function () {
+      var d = new Date();
+      var yr = d.getFullYear();
+      var mo = String(d.getMonth() + 1).padStart(2, '0');
+      var dy = String(d.getDate()).padStart(2, '0');
+      return yr + '-' + mo + '-' + dy;
+    },
+
     resetDraftAfterCommit: function () {
       window.CourtPayState.draftSessionRequestId = 'ses_draft_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
       window.CourtPayState._userModifiedDraft = false;
+      var dateInp = document.getElementById('input-session-date');
+      if (dateInp) {
+        dateInp.value = window.CourtPayState.getLocalTodayStr();
+      }
       if (Array.isArray(window.CourtPayState.players)) {
         for (var i = 0; i < window.CourtPayState.players.length; i++) {
           window.CourtPayState.players[i].selected = false;
@@ -2186,7 +2204,7 @@
         }
         var createdSession = {
           sessionId: sId,
-          dateStr: new Date().toISOString().slice(0, 10),
+          dateStr: payload.dateISO || window.CourtPayState.getLocalTodayStr(),
           title: payload.title,
           courtCostEUR: preview.courtCost,
           shuttleCostEUR: preview.shuttleCost,
@@ -3147,10 +3165,18 @@
       var titleVal = (document.getElementById('input-session-title') || {}).value ||
         (window.CourtPayState.config && window.CourtPayState.config.defaultSessionTitle) ||
         'Friday Night Badminton';
+      var dateInp = document.getElementById('input-session-date');
+      var todayStr = window.CourtPayState.getLocalTodayStr();
+      if (dateInp && !dateInp.value) {
+        dateInp.value = todayStr;
+      }
+      var dateVal = (dateInp && dateInp.value) ? dateInp.value : todayStr;
       var sumTitleEl = document.getElementById('court-setup-summary-title');
       var sumDetailsEl = document.getElementById('court-setup-summary-details');
       var sumCostEl = document.getElementById('court-setup-summary-cost');
-      if (sumTitleEl) sumTitleEl.textContent = titleVal;
+      if (sumTitleEl) {
+        sumTitleEl.textContent = dateVal !== todayStr ? (titleVal + ' (' + dateVal + ')') : titleVal;
+      }
       if (sumDetailsEl) {
         sumDetailsEl.textContent = cLabel + ' × ' + hLabel + ' @ €' + rate.toFixed(2) + '/hr = €' + effectiveCost.toFixed(2);
       }
@@ -3382,8 +3408,6 @@
       if (shuttleBadge) shuttleBadge.textContent = '€' + data.shuttleCost.toFixed(2);
       var sharesCountBadge = document.getElementById('live-total-shares-badge');
       if (sharesCountBadge) sharesCountBadge.textContent = data.totalShares + ' Shares';
-      var totalCostBadge = document.getElementById('live-total-cost-badge');
-      if (totalCostBadge) totalCostBadge.textContent = '€' + data.totalCost.toFixed(2) + ' Total';
       var pre = document.getElementById('whatsapp-summary-box');
       if (pre) pre.textContent = data.whatsAppText;
       window.CourtPayUI.syncRosterSummaryBar();
@@ -3516,16 +3540,19 @@
 
       // 1. Render Card 1 (Top): Session Entries (Scoped to Latest Active Session + Unpaid Stragglers, sorted Unpaid first)
       var metaBar = document.getElementById('ledger-session-meta');
+      var metaTextEl = document.getElementById('ledger-session-meta-text');
       if (metaBar) {
         if (lastActiveSession) {
           var sDate = String(lastActiveSession.dateStr || '').slice(0, 10);
-          metaBar.textContent = (lastActiveSession.title || 'Latest Session') +
-            (sDate ? (' (' + sDate + ')') : '') +
-            ' • €' + Number(lastActiveSession.totalCostEUR || 0).toFixed(2) + ' Total • €' +
-            Number(lastActiveSession.perShareEUR || 0).toFixed(2) + ' / share';
+          if (metaTextEl) {
+            metaTextEl.textContent = (lastActiveSession.title || 'Latest Session') +
+              (sDate ? (' (' + sDate + ')') : '') +
+              ' • €' + Number(lastActiveSession.totalCostEUR || 0).toFixed(2) + ' Total • €' +
+              Number(lastActiveSession.perShareEUR || 0).toFixed(2) + ' / share';
+          }
           metaBar.classList.remove('hidden');
         } else {
-          metaBar.textContent = '';
+          if (metaTextEl) metaTextEl.textContent = '';
           metaBar.classList.add('hidden');
         }
       }
@@ -3557,6 +3584,29 @@
           }
           return String(a.playerName || '').localeCompare(String(b.playerName || ''));
         });
+
+        var unpaidEntriesCount = 0;
+        for (var uIdx = 0; uIdx < relevantEntries.length; uIdx++) {
+          var uEnt = relevantEntries[uIdx];
+          var uPl = playersMap[uEnt.playerId];
+          var uIsOrg = Boolean(uPl && uPl.isOrganizer);
+          if (!uIsOrg && (uEnt.status === 'UNPAID' || uEnt.status === 'PARTIAL' || Number(uEnt.amountOwedEUR || 0) > 0.005)) {
+            unpaidEntriesCount++;
+          }
+        }
+        var entriesBadge = document.getElementById('ledger-entries-status-badge');
+        if (entriesBadge) {
+          if (relevantEntries.length === 0) {
+            entriesBadge.textContent = '0 Entries';
+            entriesBadge.className = 'badge badge-gold tabular-nums';
+          } else if (unpaidEntriesCount > 0) {
+            entriesBadge.textContent = unpaidEntriesCount + ' Unpaid';
+            entriesBadge.className = 'badge badge-crimson tabular-nums';
+          } else {
+            entriesBadge.textContent = 'All Paid';
+            entriesBadge.className = 'badge badge-emerald tabular-nums';
+          }
+        }
 
         if (relevantEntries.length === 0) {
           eContainer.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.84rem; padding: 8px 0;">Commit a session in New Session to reconcile 1-tap player payments here.</div>';
@@ -3930,9 +3980,11 @@
       window.CourtPayUI.setInlineAlert('commit-inline-error', '');
       var preview = window.CourtPayUI.computeLivePreviewData();
       var sessionTitle = (document.getElementById('input-session-title') || {}).value || 'Badminton Session';
+      var sessionDate = (document.getElementById('input-session-date') || {}).value || window.CourtPayState.getLocalTodayStr();
 
       window.CourtPayState.callServer('createSession', {
         title: sessionTitle,
+        dateISO: sessionDate,
         courtsCount: Number(window.CourtPayState.courtsCount || 1),
         courtHours: Number(window.CourtPayState.courtHours || 2.0),
         courtRatePerHourEUR: Number(window.CourtPayState.courtRatePerHourEUR || 16.00),
