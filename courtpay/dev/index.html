@@ -939,7 +939,7 @@
 
   <meta name="apple-mobile-web-app-title" content="[DEV] CourtPay">
   <meta name="application-name" content="CourtPay">
-  <meta name="app-version" content="dev-v7">
+  <meta name="app-version" content="dev-v8">
   <meta name="theme-color" content="#080d16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -962,9 +962,9 @@
   <link rel="mask-icon" href="/assets/images/courtpay/icon-courtpay-dev.svg" color="#f59e0b">
   <link rel="manifest" href="/courtpay/dev/manifest.json">
   <script>
-    window.__FF_VERSION__ = 'dev-v7';
+    window.__FF_VERSION__ = 'dev-v8';
     window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
-    console.log('%c[CourtPay]%c Running version dev-v7', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
+    console.log('%c[CourtPay]%c Running version dev-v8', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
@@ -1052,7 +1052,7 @@
       <p id="login-error-msg" class="login-error hidden"></p>
     </div>
     <div class="brand-footer" style="margin-top: 20px; position: relative; z-index: 2;">
-      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v7</span>
+      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v8</span>
     </div>
   </div>
 
@@ -1408,7 +1408,7 @@
               <path d="M12 20a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
               <path d="M9.5 14.5 5 4l4.5 2L12 3l2.5 3L19 4l-4.5 10.5"/>
             </svg>
-            <span>Shuttles Used (FIFO Auto-Split)</span>
+            <span>Shuttles Used</span>
           </div>
           <span class="badge badge-gold tabular-nums" id="live-shuttle-cost-badge">€0.00</span>
         </div>
@@ -1565,7 +1565,7 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
             </svg>
-            <span>Active Shuttle Tubes (FIFO Queue)</span>
+            <span>Active Shuttle Tubes</span>
           </div>
         </div>
         <div id="inventory-batches-list"></div>
@@ -1617,7 +1617,7 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3z" />
     </svg>
-    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v7</span></span>
+    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v8</span></span>
   </div>
 </footer>
 
@@ -1874,6 +1874,7 @@
     isRosterExpanded: true,
     isAddGuestExpanded: false,
     isBalancesCardExpanded: true,
+    showSettledEntries: false,
     showSettledBalances: false,
     showDepletedBatches: false,
     config: {
@@ -1943,6 +1944,7 @@
     resetDraftAfterCommit: function () {
       window.CourtPayState.draftSessionRequestId = 'ses_draft_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
       window.CourtPayState._userModifiedDraft = false;
+      window.CourtPayState.showSettledEntries = false;
       var dateInp = document.getElementById('input-session-date');
       if (dateInp) {
         dateInp.value = window.CourtPayState.getLocalTodayStr();
@@ -2976,6 +2978,11 @@
       if (btnEl) btnEl.textContent = expanded ? 'Collapse' : 'Expand';
     },
 
+    toggleShowSettledEntries: function () {
+      window.CourtPayState.showSettledEntries = !window.CourtPayState.showSettledEntries;
+      window.CourtPayUI.renderLedgerView();
+    },
+
     toggleShowSettledBalances: function () {
       window.CourtPayState.showSettledBalances = !window.CourtPayState.showSettledBalances;
       window.CourtPayUI.renderLedgerView();
@@ -3351,12 +3358,12 @@
       var rawShare = totalShares > 0 ? (totalCost / totalShares) : 0;
       var perShare = totalShares > 0 ? (Math.ceil((rawShare - 1e-9) * 100) / 100) : 0;
 
+      var headerLine = /thank you/i.test(title) ? title : (title + ' — Thank you for the games folks!');
       var lines = [];
-      lines.push(title);
+      lines.push(headerLine);
       lines.push('Total: €' + totalCost.toFixed(2) + ' | ' + totalShares + ' Players (€' + perShare.toFixed(2) + ' each)');
-      lines.push('');
-      lines.push('To Pay:');
 
+      var toPayLines = [];
       var creditLines = [];
       for (var k = 0; k < selectedPlayers.length; k++) {
         var pl = selectedPlayers[k];
@@ -3373,11 +3380,17 @@
           var netToday = Math.max(0, Math.round((gross - wallet) * 100) / 100);
           var totalOwed = Math.round((netToday + prior) * 100) / 100;
           if (prior > 0.005) {
-            lines.push('• ' + pl.name + badge + ': €' + totalOwed.toFixed(2) + ' (€' + netToday.toFixed(2) + ' today + €' + prior.toFixed(2) + ' prior)');
+            toPayLines.push('• ' + pl.name + badge + ': €' + totalOwed.toFixed(2) + ' (€' + netToday.toFixed(2) + ' today + €' + prior.toFixed(2) + ' prior)');
           } else {
-            lines.push('• ' + pl.name + badge + ': €' + totalOwed.toFixed(2));
+            toPayLines.push('• ' + pl.name + badge + ': €' + totalOwed.toFixed(2));
           }
         }
+      }
+
+      if (toPayLines.length > 0) {
+        lines.push('');
+        lines.push('To Pay:');
+        for (var tp = 0; tp < toPayLines.length; tp++) lines.push(toPayLines[tp]);
       }
 
       if (creditLines.length > 0) {
@@ -3568,29 +3581,35 @@
           return isLatest || isUnpaidPrior;
         });
 
-        // Sort: 1) Unpaid/Partial first (prior unpaid first, then latest unpaid), 2) Paid/Credit Covered, 3) Host (Organizer) last
+        // 4-Tier Sort:
+        // 0) Unpaid / Partial (debt descending, then alphabetical)
+        // 1) Manually Paid (interactive PAID buttons grouped together, alphabetical)
+        // 2) Wallet Credit Covered (static Wallet Covered badges grouped together, alphabetical)
+        // 3) Host / Organizer (static Host • Auto-Settled badges at bottom, alphabetical)
+        var getEntrySortRank = function (ent) {
+          var pl = playersMap[ent.playerId];
+          var isOrg = Boolean(pl && pl.isOrganizer);
+          if (isOrg) return 3;
+          var isUnpaid = ent.status === 'UNPAID' || ent.status === 'PARTIAL' || Number(ent.amountOwedEUR || 0) > 0.005;
+          if (isUnpaid) return 0;
+          if (ent.status === 'CREDIT_COVERED') return 2;
+          return 1;
+        };
+
         relevantEntries.sort(function (a, b) {
-          var pA = playersMap[a.playerId];
-          var pB = playersMap[b.playerId];
-          var isOrgA = Boolean(pA && pA.isOrganizer);
-          var isOrgB = Boolean(pB && pB.isOrganizer);
-          var isUnpaidA = !isOrgA && (a.status === 'UNPAID' || a.status === 'PARTIAL' || Number(a.amountOwedEUR || 0) > 0.005);
-          var isUnpaidB = !isOrgB && (b.status === 'UNPAID' || b.status === 'PARTIAL' || Number(b.amountOwedEUR || 0) > 0.005);
-          var rankA = isUnpaidA ? 0 : (!isOrgA ? 1 : 2);
-          var rankB = isUnpaidB ? 0 : (!isOrgB ? 1 : 2);
+          var rankA = getEntrySortRank(a);
+          var rankB = getEntrySortRank(b);
           if (rankA !== rankB) return rankA - rankB;
-          if (isUnpaidA && isUnpaidB) {
-            return Number(b.amountOwedEUR || 0) - Number(a.amountOwedEUR || 0);
+          if (rankA === 0 && rankB === 0) {
+            var diff = Number(b.amountOwedEUR || 0) - Number(a.amountOwedEUR || 0);
+            if (Math.abs(diff) > 0.005) return diff;
           }
           return String(a.playerName || '').localeCompare(String(b.playerName || ''));
         });
 
         var unpaidEntriesCount = 0;
         for (var uIdx = 0; uIdx < relevantEntries.length; uIdx++) {
-          var uEnt = relevantEntries[uIdx];
-          var uPl = playersMap[uEnt.playerId];
-          var uIsOrg = Boolean(uPl && uPl.isOrganizer);
-          if (!uIsOrg && (uEnt.status === 'UNPAID' || uEnt.status === 'PARTIAL' || Number(uEnt.amountOwedEUR || 0) > 0.005)) {
+          if (getEntrySortRank(relevantEntries[uIdx]) === 0) {
             unpaidEntriesCount++;
           }
         }
@@ -3611,13 +3630,17 @@
         if (relevantEntries.length === 0) {
           eContainer.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.84rem; padding: 8px 0;">Commit a session in New Session to reconcile 1-tap player payments here.</div>';
         } else {
-          var eHtml = '';
+          var unpaidRowsHtml = '';
+          var settledRowsHtml = '';
+          var settledEntriesCount = 0;
+
           for (var j = 0; j < relevantEntries.length; j++) {
             var e = relevantEntries[j];
             var plObj = playersMap[e.playerId];
             var isOrg = Boolean(plObj && plObj.isOrganizer);
             var isCreditCovered = e.status === 'CREDIT_COVERED';
-            var isPaid = e.status === 'PAID' || isCreditCovered;
+            var isUnpaidRow = getEntrySortRank(e) === 0;
+            var isPaid = !isUnpaidRow;
             var isPriorSession = Boolean(lastActiveSession && e.sessionId !== lastActiveSession.sessionId);
             var priorSesObj = isPriorSession ? sessionsMap[e.sessionId] : null;
             var priorLabel = isPriorSession
@@ -3625,6 +3648,8 @@
               : '';
             var safeEntryIdJs = window.CourtPayUI.escapeJsStr(e.entryId);
             var safePlayerNameHtml = window.CourtPayUI.escapeHtml(e.playerName);
+            var sharesNum = Number(e.shares || 1);
+            var shareBadgeHtml = sharesNum > 1 ? (' (x' + sharesNum + ')') : '';
 
             var rightControl = '';
             if (isOrg) {
@@ -3637,15 +3662,34 @@
               '</button>';
             }
 
-            eHtml += '<div class="stepper-row" style="' + (isPaid ? 'opacity: 0.78;' : '') + '">' +
+            var rowHtml = '<div class="stepper-row" style="' + (isPaid ? 'opacity: 0.78;' : '') + '">' +
               '<div>' +
-                '<div style="font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">' + safePlayerNameHtml + ' (x' + Number(e.shares || 1) + ')' + priorLabel + '</div>' +
+                '<div style="font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">' + safePlayerNameHtml + shareBadgeHtml + priorLabel + '</div>' +
                 '<div class="tabular-nums" style="font-size: 0.75rem; color: var(--text-secondary);">Gross: €' + Number(e.grossShareEUR || 0).toFixed(2) + ' • Owed: €' + Number(e.amountOwedEUR || 0).toFixed(2) + '</div>' +
               '</div>' +
               rightControl +
             '</div>';
+
+            if (isUnpaidRow) {
+              unpaidRowsHtml += rowHtml;
+            } else {
+              settledEntriesCount++;
+              settledRowsHtml += rowHtml;
+            }
           }
-          eContainer.innerHTML = eHtml;
+
+          var finalEntriesHtml = unpaidRowsHtml;
+          if (settledEntriesCount > 0) {
+            var showSettledEntries = Boolean(window.CourtPayState.showSettledEntries);
+            var entryNoun = settledEntriesCount === 1 ? 'Paid / Auto-Settled Entry' : 'Paid & Auto-Settled Entries';
+            finalEntriesHtml += '<button type="button" class="tucked-toggle-row" style="' + (unpaidRowsHtml === '' ? 'margin-top: 0;' : '') + '" onclick="CourtPayUI.toggleShowSettledEntries()">' +
+              '<span>' + (showSettledEntries ? ('Hide ' + settledEntriesCount + ' ' + entryNoun) : ('Show ' + settledEntriesCount + ' ' + entryNoun)) + '</span>' +
+            '</button>';
+            if (showSettledEntries) {
+              finalEntriesHtml += '<div style="margin-top: 8px;">' + settledRowsHtml + '</div>';
+            }
+          }
+          eContainer.innerHTML = finalEntriesHtml;
         }
       }
 
@@ -3816,12 +3860,12 @@
       var totalShares = Number(sessionObj.totalShares || 1);
       var perShare = Number(sessionObj.perShareEUR || 0);
 
+      var headerLine = /thank you/i.test(title) ? title : (title + ' — Thank you for the games folks!');
       var lines = [];
-      lines.push(title);
+      lines.push(headerLine);
       lines.push('Total: €' + totalCost.toFixed(2) + ' | ' + totalShares + ' Players (€' + perShare.toFixed(2) + ' each)');
-      lines.push('');
-      lines.push('To Pay:');
 
+      var toPayLines = [];
       var creditLines = [];
       var entries = (window.CourtPayState.ledgerEntries || []).filter(function (le) {
         return le.sessionId === sId && le.status !== 'VOID';
@@ -3839,16 +3883,24 @@
         var badge = sh > 1 ? (' (x' + sh + ')') : '';
         if (ent.status === 'CREDIT_COVERED') {
           creditLines.push('• ' + ent.playerName + ' (Wallet Credit)');
+        } else if (ent.status === 'PAID' || Number(ent.amountOwedEUR || 0) <= 0.005) {
+          creditLines.push('• ' + ent.playerName + ' (Paid)');
         } else {
           var totalOwed = pl ? Number(pl.unpaidDebtEUR || ent.amountOwedEUR || 0) : Number(ent.amountOwedEUR || 0);
           var netToday = Number(ent.amountOwedEUR || 0);
           var prior = Math.max(0, Math.round((totalOwed - netToday) * 100) / 100);
           if (prior > 0.005 && netToday > 0) {
-            lines.push('• ' + ent.playerName + badge + ': €' + totalOwed.toFixed(2) + ' (€' + netToday.toFixed(2) + ' today + €' + prior.toFixed(2) + ' prior)');
+            toPayLines.push('• ' + ent.playerName + badge + ': €' + totalOwed.toFixed(2) + ' (€' + netToday.toFixed(2) + ' today + €' + prior.toFixed(2) + ' prior)');
           } else {
-            lines.push('• ' + ent.playerName + badge + ': €' + (totalOwed > 0 ? totalOwed : netToday).toFixed(2));
+            toPayLines.push('• ' + ent.playerName + badge + ': €' + (totalOwed > 0 ? totalOwed : netToday).toFixed(2));
           }
         }
+      }
+
+      if (toPayLines.length > 0) {
+        lines.push('');
+        lines.push('To Pay:');
+        for (var tp = 0; tp < toPayLines.length; tp++) lines.push(toPayLines[tp]);
       }
 
       if (creditLines.length > 0) {
@@ -3929,17 +3981,26 @@
         return;
       }
       window.CourtPayUI.setInlineAlert('ledger-inline-error', '');
-      var savedText = '';
-      try {
-        var raw = localStorage.getItem(window.CourtPayState.LAST_WHATSAPP_KEY);
-        if (raw) {
-          var parsed = JSON.parse(raw);
-          if (parsed && parsed.sessionId === lastActive.sessionId && parsed.text) {
-            savedText = parsed.text;
+      var liveEntries = (window.CourtPayState.ledgerEntries || []).filter(function (le) {
+        return le.sessionId === lastActive.sessionId && le.status !== 'VOID';
+      });
+      var finalText = '';
+      if (liveEntries.length > 0) {
+        finalText = window.CourtPayUI.buildWhatsAppTextFromSession(lastActive);
+      } else {
+        try {
+          var raw = localStorage.getItem(window.CourtPayState.LAST_WHATSAPP_KEY);
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (parsed && parsed.sessionId === lastActive.sessionId && parsed.text) {
+              finalText = parsed.text;
+            }
           }
+        } catch (_) {}
+        if (!finalText) {
+          finalText = window.CourtPayUI.buildWhatsAppTextFromSession(lastActive);
         }
-      } catch (_) {}
-      var finalText = savedText || window.CourtPayUI.buildWhatsAppTextFromSession(lastActive);
+      }
       var meta = (lastActive.title || 'Session') + ' • €' + Number(lastActive.totalCostEUR || 0).toFixed(2) + ' Total • €' + Number(lastActive.perShareEUR || 0).toFixed(2) + ' / share';
       window.CourtPayUI.openWhatsAppModal(finalText, meta);
     },
