@@ -939,7 +939,7 @@
 
   <meta name="apple-mobile-web-app-title" content="[DEV] CourtPay">
   <meta name="application-name" content="CourtPay">
-  <meta name="app-version" content="dev-v14">
+  <meta name="app-version" content="dev-v15">
   <meta name="theme-color" content="#080d16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -962,9 +962,9 @@
   <link rel="mask-icon" href="/assets/images/courtpay/icon-courtpay-dev.svg" color="#f59e0b">
   <link rel="manifest" href="/courtpay/dev/manifest.json">
   <script>
-    window.__FF_VERSION__ = 'dev-v14';
+    window.__FF_VERSION__ = 'dev-v15';
     window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
-    console.log('%c[CourtPay]%c Running version dev-v14', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
+    console.log('%c[CourtPay]%c Running version dev-v15', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
@@ -1052,7 +1052,7 @@
       <p id="login-error-msg" class="login-error hidden"></p>
     </div>
     <div class="brand-footer" style="margin-top: 20px; position: relative; z-index: 2;">
-      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v14</span>
+      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v15</span>
     </div>
   </div>
 
@@ -1579,7 +1579,7 @@
         <div class="field-row">
           <div class="input-group">
             <label for="batch-type">Shuttle Brand / Type</label>
-            <input id="batch-type" class="input-control" type="text" list="batch-brand-list" value="" placeholder="Select or type brand" oninput="CourtPayUI.onBatchBrandInput()">
+            <input id="batch-type" class="input-control" type="text" list="batch-brand-list" value="" placeholder="Select or type..." onfocus="CourtPayUI.onBatchBrandFocus()" onmousedown="CourtPayUI.onBatchBrandFocus()" onblur="CourtPayUI.onBatchBrandBlur()" oninput="CourtPayUI.onBatchBrandInput()">
             <datalist id="batch-brand-list"></datalist>
           </div>
           <div class="input-group">
@@ -1616,7 +1616,7 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3z" />
     </svg>
-    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v14</span></span>
+    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v15</span></span>
   </div>
 </footer>
 
@@ -4404,9 +4404,43 @@
       });
     },
 
+    onBatchBrandFocus: function () {
+      var bTypeEl = document.getElementById('batch-type');
+      if (!bTypeEl) return;
+      var cur = String(bTypeEl.value || '').trim();
+      if (!cur || !window.CourtPayState.batches) return;
+      var lower = cur.toLowerCase();
+      var isKnownBrand = false;
+      for (var i = 0; i < window.CourtPayState.batches.length; i++) {
+        if (String(window.CourtPayState.batches[i].shuttleType || '').trim().toLowerCase() === lower) {
+          isKnownBrand = true;
+          break;
+        }
+      }
+      if (isKnownBrand) {
+        bTypeEl.dataset.prevBrand = cur;
+        bTypeEl.placeholder = cur;
+        bTypeEl.value = '';
+      }
+    },
+
+    onBatchBrandBlur: function () {
+      var bTypeEl = document.getElementById('batch-type');
+      if (!bTypeEl) return;
+      if (!String(bTypeEl.value || '').trim() && bTypeEl.dataset && bTypeEl.dataset.prevBrand) {
+        bTypeEl.value = bTypeEl.dataset.prevBrand;
+      }
+      if (bTypeEl.dataset) bTypeEl.dataset.prevBrand = '';
+      bTypeEl.placeholder = 'Select or type...';
+    },
+
     onBatchBrandInput: function () {
       window.CourtPayUI.setInlineAlert('inventory-inline-error', '');
       var bTypeEl = document.getElementById('batch-type');
+      if (bTypeEl) {
+        if (bTypeEl.dataset) bTypeEl.dataset.prevBrand = '';
+        bTypeEl.placeholder = 'Select or type...';
+      }
       var typed = String((bTypeEl && bTypeEl.value) || '').trim().toLowerCase();
       if (typed && window.CourtPayState.batches && window.CourtPayState.batches.length > 0) {
         var matchedBatch = null;
@@ -4453,7 +4487,8 @@
     },
 
     submitAddShuttleBatch: function () {
-      var sType = String((document.getElementById('batch-type') || {}).value || '').trim();
+      var bTypeEl = document.getElementById('batch-type');
+      var sType = String((bTypeEl && (bTypeEl.value || (bTypeEl.dataset && bTypeEl.dataset.prevBrand))) || '').trim();
       var tubeCost = Number((document.getElementById('batch-cost') || {}).value);
       var tubesRaw = Number((document.getElementById('batch-tubes') || {}).value);
       var perTube = Number((document.getElementById('batch-per-tube') || {}).value);
@@ -4470,9 +4505,13 @@
         totalCostEUR: totalCostEUR,
         shuttlesPerTube: perTube
       }, function () {
-        var bTypeEl = document.getElementById('batch-type');
+        var bTypeAfter = document.getElementById('batch-type');
         var bTubesEl = document.getElementById('batch-tubes');
-        if (bTypeEl) bTypeEl.value = '';
+        if (bTypeAfter) {
+          bTypeAfter.value = '';
+          if (bTypeAfter.dataset) bTypeAfter.dataset.prevBrand = '';
+          bTypeAfter.placeholder = 'Select or type...';
+        }
         if (bTubesEl) bTubesEl.value = '1';
         window.CourtPayUI.syncBatchCalculatorUI();
         window.CourtPayUI.renderAll();
