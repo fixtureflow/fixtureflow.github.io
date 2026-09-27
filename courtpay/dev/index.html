@@ -939,7 +939,7 @@
 
   <meta name="apple-mobile-web-app-title" content="[DEV] CourtPay">
   <meta name="application-name" content="CourtPay">
-  <meta name="app-version" content="dev-v10">
+  <meta name="app-version" content="dev-v11">
   <meta name="theme-color" content="#080d16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -962,9 +962,9 @@
   <link rel="mask-icon" href="/assets/images/courtpay/icon-courtpay-dev.svg" color="#f59e0b">
   <link rel="manifest" href="/courtpay/dev/manifest.json">
   <script>
-    window.__FF_VERSION__ = 'dev-v10';
+    window.__FF_VERSION__ = 'dev-v11';
     window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
-    console.log('%c[CourtPay]%c Running version dev-v10', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
+    console.log('%c[CourtPay]%c Running version dev-v11', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
@@ -1052,7 +1052,7 @@
       <p id="login-error-msg" class="login-error hidden"></p>
     </div>
     <div class="brand-footer" style="margin-top: 20px; position: relative; z-index: 2;">
-      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v10</span>
+      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v11</span>
     </div>
   </div>
 
@@ -1251,7 +1251,7 @@
         </div>
         <div>
           <div class="brand-title font-display">CourtPay</div>
-          <div class="brand-subtitle">Shuttle &amp; Court Split Ledger</div>
+          <div class="brand-subtitle">Session Cost Ledger</div>
         </div>
       </div>
 
@@ -1583,7 +1583,7 @@
           </div>
           <div class="input-group">
             <label for="batch-cost">Tube Cost (€)</label>
-            <input id="batch-cost" class="input-control tabular-nums" type="number" step="0.10" value="30.00" oninput="CourtPayUI.setInlineAlert('inventory-inline-error', '')">
+            <input id="batch-cost" class="input-control tabular-nums" type="number" step="0.10" value="45.00" oninput="CourtPayUI.setInlineAlert('inventory-inline-error', '')">
           </div>
         </div>
         <div class="field-row">
@@ -1612,7 +1612,7 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3z" />
     </svg>
-    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v10</span></span>
+    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v11</span></span>
   </div>
 </footer>
 
@@ -1889,18 +1889,17 @@
     courtRatePerHourEUR: 16.00,
     courtCostManualOverride: false,
     players: _isLiveServerMode ? [] : [
-      { playerId: 'p_org_1', name: 'Ming (You)', type: 'ORGANIZER', defaultShares: 1, isOrganizer: true, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
-      { playerId: 'p_org_2', name: 'Sarah (Partner)', type: 'PARTNER', defaultShares: 1, isOrganizer: true, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
-      { playerId: 'p_reg_0', name: 'David Chen', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
-      { playerId: 'p_reg_1', name: 'Alex Rivera', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 4.10, active: true, selected: false, sessionShares: 1 },
-      { playerId: 'p_reg_2', name: 'Emma Walsh', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
-      { playerId: 'p_reg_3', name: 'Liam O\'Connor', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
-      { playerId: 'p_reg_4', name: 'Noah Patel', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 12.50, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
-      { playerId: 'p_occ_1', name: 'Sofia Martinez', type: 'OCCASIONAL', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 }
+      { playerId: 'p_org_1', name: 'Ming (You)', type: 'ORGANIZER', defaultShares: 1, isOrganizer: true, walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
+      { playerId: 'p_reg_0', name: 'David Chen', type: 'REGULAR', defaultShares: 1, isOrganizer: false, walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
+      { playerId: 'p_reg_1', name: 'Alex Rivera', type: 'REGULAR', defaultShares: 1, isOrganizer: false, walletBalance: 0, unpaidDebtEUR: 4.10, active: true, selected: false, sessionShares: 1 },
+      { playerId: 'p_reg_2', name: 'Emma Walsh', type: 'REGULAR', defaultShares: 1, isOrganizer: false, walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
+      { playerId: 'p_reg_3', name: 'Liam O\'Connor', type: 'REGULAR', defaultShares: 1, isOrganizer: false, walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
+      { playerId: 'p_reg_4', name: 'Noah Patel', type: 'REGULAR', defaultShares: 1, isOrganizer: false, walletBalance: 12.50, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
+      { playerId: 'p_occ_1', name: 'Sofia Martinez', type: 'OCCASIONAL', defaultShares: 1, isOrganizer: false, walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 }
     ],
     batches: _isLiveServerMode ? [] : [
       { batchId: 'b_as30_1', shuttleType: 'Yonex AS-30', category: 'Feather', tubesCount: 1, shuttlesPerTube: 12, totalShuttles: 12, remainingShuttles: 9, totalCostEUR: 28.80, costPerShuttleEUR: 2.40, status: 'ACTIVE' },
-      { batchId: 'b_as30_2', shuttleType: 'Yonex AS-30', category: 'Feather', tubesCount: 1, shuttlesPerTube: 12, totalShuttles: 12, remainingShuttles: 12, totalCostEUR: 30.00, costPerShuttleEUR: 2.50, status: 'ACTIVE' },
+      { batchId: 'b_as30_2', shuttleType: 'Yonex AS-30', category: 'Feather', tubesCount: 1, shuttlesPerTube: 12, totalShuttles: 12, remainingShuttles: 12, totalCostEUR: 45.00, costPerShuttleEUR: 3.75, status: 'ACTIVE' },
       { batchId: 'b_mavis_1', shuttleType: 'Mavis 300', category: 'Nylon', tubesCount: 1, shuttlesPerTube: 6, totalShuttles: 6, remainingShuttles: 6, totalCostEUR: 9.00, costPerShuttleEUR: 1.50, status: 'ACTIVE' }
     ],
     shuttleUsageMap: _isLiveServerMode ? {} : {
@@ -2354,7 +2353,7 @@
       } else if (action === 'addShuttleBatch') {
         var perTube = Math.max(1, Number(payload.shuttlesPerTube || 12));
         var remInit = Math.max(0, Number(payload.initialRemainingShuttles !== undefined ? payload.initialRemainingShuttles : perTube));
-        var costTot = Number(payload.totalCostEUR || 30);
+        var costTot = Number(payload.totalCostEUR || 45);
         var uCost = Math.round((costTot / perTube) * 100) / 100;
         var sName = String(payload.shuttleType || 'Yonex AS-30').trim();
         st.batches.push({
@@ -2386,10 +2385,11 @@
           if (existingP) {
             existingP.selected = true;
           } else {
+            var newPType = String((payload && payload.type) || 'OCCASIONAL').trim().toUpperCase();
             st.players.push({
               playerId: 'p_' + Date.now().toString(36).slice(-4),
               name: newPName,
-              type: 'REGULAR',
+              type: newPType === 'REGULAR' ? 'REGULAR' : 'OCCASIONAL',
               defaultShares: 1,
               sessionShares: 1,
               isOrganizer: false,
@@ -2570,6 +2570,17 @@
           window.CourtPayState.shuttleUsageMap = (savedDraft && savedDraft.shuttleUsageMap)
             ? Object.assign({}, savedDraft.shuttleUsageMap)
             : {};
+          if (serverState.batches.length > 0) {
+            var lastBatch = serverState.batches[serverState.batches.length - 1];
+            var bTypeEl = document.getElementById('batch-type');
+            var bCostEl = document.getElementById('batch-cost');
+            var bPerTubeEl = document.getElementById('batch-per-tube');
+            var bRemEl = document.getElementById('batch-remaining');
+            if (bTypeEl && lastBatch.shuttleType) bTypeEl.value = String(lastBatch.shuttleType);
+            if (bCostEl && Number(lastBatch.totalCostEUR) > 0) bCostEl.value = Number(lastBatch.totalCostEUR).toFixed(2);
+            if (bPerTubeEl && Number(lastBatch.shuttlesPerTube) > 0) bPerTubeEl.value = String(lastBatch.shuttlesPerTube);
+            if (bRemEl && Number(lastBatch.shuttlesPerTube) > 0) bRemEl.value = String(lastBatch.shuttlesPerTube);
+          }
         }
         for (var b = 0; b < serverState.batches.length; b++) {
           var stName = serverState.batches[b].shuttleType;
