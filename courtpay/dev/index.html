@@ -939,7 +939,7 @@
 
   <meta name="apple-mobile-web-app-title" content="[DEV] CourtPay">
   <meta name="application-name" content="CourtPay">
-  <meta name="app-version" content="dev-v12">
+  <meta name="app-version" content="dev-v13">
   <meta name="theme-color" content="#080d16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -962,9 +962,9 @@
   <link rel="mask-icon" href="/assets/images/courtpay/icon-courtpay-dev.svg" color="#f59e0b">
   <link rel="manifest" href="/courtpay/dev/manifest.json">
   <script>
-    window.__FF_VERSION__ = 'dev-v12';
+    window.__FF_VERSION__ = 'dev-v13';
     window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
-    console.log('%c[CourtPay]%c Running version dev-v12', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
+    console.log('%c[CourtPay]%c Running version dev-v13', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
@@ -1052,7 +1052,7 @@
       <p id="login-error-msg" class="login-error hidden"></p>
     </div>
     <div class="brand-footer" style="margin-top: 20px; position: relative; z-index: 2;">
-      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v12</span>
+      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v13</span>
     </div>
   </div>
 
@@ -1579,7 +1579,8 @@
         <div class="field-row">
           <div class="input-group">
             <label for="batch-type">Shuttle Brand / Type</label>
-            <input id="batch-type" class="input-control" type="text" value="Yonex AS-30" oninput="CourtPayUI.onBatchInput()">
+            <input id="batch-type" class="input-control" type="text" list="batch-brand-list" value="Yonex AS-30" oninput="CourtPayUI.onBatchBrandInput()">
+            <datalist id="batch-brand-list"></datalist>
           </div>
           <div class="input-group">
             <label for="batch-cost">Cost per Tube (€)</label>
@@ -1588,12 +1589,8 @@
         </div>
         <div class="field-row">
           <div class="input-group">
-            <label>Tubes Purchased</label>
-            <div class="stepper-row" style="margin-bottom: 0;">
-              <button type="button" class="step-btn" aria-label="Decrease Tubes" onclick="CourtPayUI.adjustBatchTubes(-1)">-</button>
-              <span id="display-batch-tubes" class="tabular-nums" style="font-weight: 700; font-size: 0.9rem;">1 Tube</span>
-              <button type="button" class="step-btn" aria-label="Increase Tubes" onclick="CourtPayUI.adjustBatchTubes(1)">+</button>
-            </div>
+            <label for="batch-tubes">Tubes Purchased</label>
+            <input id="batch-tubes" class="input-control tabular-nums" type="number" min="1" step="1" value="1" oninput="CourtPayUI.onBatchInput()">
           </div>
           <div class="input-group">
             <label for="batch-per-tube">Shuttles per Tube</label>
@@ -1619,7 +1616,7 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3z" />
     </svg>
-    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v12</span></span>
+    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v13</span></span>
   </div>
 </footer>
 
@@ -1879,7 +1876,6 @@
     newPlayerType: 'OCCASIONAL',
     showSettledEntries: false,
     showSettledBalances: false,
-    showDepletedBatches: false,
     config: {
       defaultSessionTitle: 'Friday Night Badminton',
       revolutTag: 'mingbadminton',
@@ -1895,7 +1891,6 @@
     courtHoursStep: 1,
     courtRatePerHourEUR: 16.00,
     courtCostManualOverride: false,
-    batchTubesCount: 1,
     players: _isLiveServerMode ? [] : [
       { playerId: 'p_org_1', name: 'Ming (You)', type: 'ORGANIZER', defaultShares: 1, isOrganizer: true, walletBalance: 0, unpaidDebtEUR: 0, selected: false, sessionShares: 1 },
       { playerId: 'p_reg_0', name: 'David Chen', type: 'REGULAR', defaultShares: 1, isOrganizer: false, walletBalance: 0, unpaidDebtEUR: 0, selected: false, sessionShares: 1 },
@@ -2233,10 +2228,13 @@
         var usage = payload.shuttleUsage || [];
         for (var u = 0; u < usage.length; u++) {
           var rem = Number(usage[u].count || 0);
+          var uKey = String(usage[u].shuttleType || '').trim().toLowerCase();
           for (var b = 0; b < st.batches.length; b++) {
-            if (st.batches[b].shuttleType === usage[u].shuttleType && st.batches[b].remainingShuttles > 0 && rem > 0) {
+            var bKey = String(st.batches[b].shuttleType || '').trim().toLowerCase();
+            if (bKey === uKey && st.batches[b].remainingShuttles > 0 && rem > 0) {
               var take = Math.min(st.batches[b].remainingShuttles, rem);
               st.batches[b].remainingShuttles -= take;
+              st.batches[b].status = st.batches[b].remainingShuttles > 0 ? 'ACTIVE' : 'DEPLETED';
               rem -= take;
             }
           }
@@ -2366,6 +2364,13 @@
         var costTot = Number(payload.totalCostEUR !== undefined ? payload.totalCostEUR : (45 * tubes));
         var uCost = Math.round((costTot / totShuttles) * 100) / 100;
         var sName = String(payload.shuttleType || 'Yonex AS-30').trim();
+        for (var exIdx = 0; exIdx < st.batches.length; exIdx++) {
+          var exBrand = String(st.batches[exIdx].shuttleType || '').trim();
+          if (exBrand && exBrand.toLowerCase() === sName.toLowerCase()) {
+            sName = exBrand;
+            break;
+          }
+        }
         st.batches.push({
           batchId: 'b_' + Date.now().toString(36).slice(-4),
           shuttleType: sName,
@@ -2380,13 +2385,6 @@
         });
         if (st.shuttleUsageMap[sName] === undefined) {
           st.shuttleUsageMap[sName] = 0;
-        }
-      } else if (action === 'adjustBatchStock') {
-        for (var bi = 0; bi < st.batches.length; bi++) {
-          if (st.batches[bi].batchId === payload.batchId) {
-            st.batches[bi].remainingShuttles = Math.max(0, Number(st.batches[bi].remainingShuttles || 0) + Number(payload.delta || 0));
-            st.batches[bi].status = st.batches[bi].remainingShuttles > 0 ? 'ACTIVE' : 'DEPLETED';
-          }
         }
       } else if (action === 'addPlayer') {
         var newPName = String((payload && payload.name) || '').trim();
@@ -2584,6 +2582,7 @@
             var lastBatch = serverState.batches[serverState.batches.length - 1];
             var bTypeEl = document.getElementById('batch-type');
             var bCostEl = document.getElementById('batch-cost');
+            var bTubesEl = document.getElementById('batch-tubes');
             var bPerTubeEl = document.getElementById('batch-per-tube');
             var lastTubes = Math.max(1, Number(lastBatch.tubesCount) || 1);
             var singleTubeCost = Number(lastBatch.totalCostEUR) > 0
@@ -2591,8 +2590,8 @@
               : 45;
             if (bTypeEl && lastBatch.shuttleType) bTypeEl.value = String(lastBatch.shuttleType);
             if (bCostEl && singleTubeCost > 0) bCostEl.value = singleTubeCost.toFixed(2);
+            if (bTubesEl) bTubesEl.value = '1';
             if (bPerTubeEl && Number(lastBatch.shuttlesPerTube) > 0) bPerTubeEl.value = String(lastBatch.shuttlesPerTube);
-            window.CourtPayState.batchTubesCount = 1;
           }
         }
         for (var b = 0; b < serverState.batches.length; b++) {
@@ -3143,11 +3142,6 @@
       window.CourtPayUI.renderLedgerView();
     },
 
-    toggleShowDepletedBatches: function () {
-      window.CourtPayState.showDepletedBatches = !window.CourtPayState.showDepletedBatches;
-      window.CourtPayUI.renderInventoryView();
-    },
-
     syncRosterSummaryBar: function () {
       var selectedPlayers = (window.CourtPayState.players || []).filter(function (p) { return p.selected; });
       var totalShares = 0;
@@ -3497,17 +3491,21 @@
       var courtCost = Number((document.getElementById('input-court-cost') || {}).value || 32);
       var title = (document.getElementById('input-session-title') || {}).value || 'Badminton Session';
 
-      // Calculate FIFO shuttle cost
+      // Calculate FIFO shuttle cost across active batches of the same brand
       var shuttleCost = 0;
       var batchesClone = window.CourtPayState.batches.map(function (b) { return Object.assign({}, b); });
       var types = Object.keys(window.CourtPayState.shuttleUsageMap);
       for (var t = 0; t < types.length; t++) {
         var sType = types[t];
+        var sTypeKey = String(sType || '').trim().toLowerCase();
         var needed = Number(window.CourtPayState.shuttleUsageMap[sType] || 0);
         for (var b = 0; b < batchesClone.length; b++) {
-          if (batchesClone[b].shuttleType === sType && batchesClone[b].remainingShuttles > 0 && needed > 0) {
+          var bKey = String(batchesClone[b].shuttleType || '').trim().toLowerCase();
+          if (bKey === sTypeKey && batchesClone[b].remainingShuttles > 0 && needed > 0) {
             var take = Math.min(batchesClone[b].remainingShuttles, needed);
-            shuttleCost += take * Number(batchesClone[b].costPerShuttleEUR || 2.40);
+            var sub = Math.round(take * Number(batchesClone[b].costPerShuttleEUR || 2.40) * 100) / 100;
+            shuttleCost = Math.round((shuttleCost + sub) * 100) / 100;
+            batchesClone[b].remainingShuttles -= take;
             needed -= take;
           }
         }
@@ -3604,11 +3602,12 @@
         var types = Object.keys(window.CourtPayState.shuttleUsageMap || {});
         for (var i = 0; i < types.length; i++) {
           var sType = types[i];
+          var sTypeKey = String(sType || '').trim().toLowerCase();
           var cnt = Number(window.CourtPayState.shuttleUsageMap[sType] || 0);
           if (cnt > 0) {
             var avail = 0;
             for (var b = 0; b < window.CourtPayState.batches.length; b++) {
-              if (window.CourtPayState.batches[b].shuttleType === sType) {
+              if (String(window.CourtPayState.batches[b].shuttleType || '').trim().toLowerCase() === sTypeKey) {
                 avail += Number(window.CourtPayState.batches[b].remainingShuttles || 0);
               }
             }
@@ -3632,21 +3631,36 @@
         return;
       }
       var typesMap = {};
+      var orderedKeys = [];
       for (var i = 0; i < window.CourtPayState.batches.length; i++) {
         var b = window.CourtPayState.batches[i];
-        if (!typesMap[b.shuttleType]) {
-          typesMap[b.shuttleType] = { remaining: 0, unitCost: b.costPerShuttleEUR };
+        var rawName = String(b.shuttleType || '').trim();
+        if (!rawName) continue;
+        var key = rawName.toLowerCase();
+        var rem = Number(b.remainingShuttles || 0);
+        if (!typesMap[key]) {
+          typesMap[key] = {
+            displayName: rawName,
+            remaining: 0,
+            unitCost: Number(b.costPerShuttleEUR || 0),
+            hasActiveUnitCost: false
+          };
+          orderedKeys.push(key);
         }
-        typesMap[b.shuttleType].remaining += Number(b.remainingShuttles || 0);
+        typesMap[key].remaining += rem;
+        if (rem > 0 && !typesMap[key].hasActiveUnitCost) {
+          typesMap[key].unitCost = Number(b.costPerShuttleEUR || 0);
+          typesMap[key].hasActiveUnitCost = true;
+        }
       }
       var html = '';
-      var typeKeys = Object.keys(typesMap);
-      for (var k = 0; k < typeKeys.length; k++) {
-        var tName = typeKeys[k];
+      for (var k = 0; k < orderedKeys.length; k++) {
+        var info = typesMap[orderedKeys[k]];
+        var tName = info.displayName;
+        var usedCount = Number(window.CourtPayState.shuttleUsageMap[tName] || 0);
+        if (info.remaining <= 0 && usedCount <= 0) continue;
         var safeNameHtml = window.CourtPayUI.escapeHtml(tName);
         var safeNameJs = window.CourtPayUI.escapeJsStr(tName);
-        var usedCount = Number(window.CourtPayState.shuttleUsageMap[tName] || 0);
-        var info = typesMap[tName];
         html += '<div class="stepper-row">' +
           '<div>' +
             '<div style="font-weight: 600; font-size: 0.9rem;">' + safeNameHtml + '</div>' +
@@ -3659,7 +3673,7 @@
           '</div>' +
         '</div>';
       }
-      container.innerHTML = html;
+      container.innerHTML = html || '<div style="color: var(--text-secondary); font-size: 0.84rem; padding: 6px 0;">No active shuttle stock. Add a shuttle tube in Shuttle Tubes.</div>';
     },
 
     renderRosterSelection: function () {
@@ -4006,51 +4020,47 @@
       if (typeof window.CourtPayUI.syncBatchCalculatorUI === 'function') {
         window.CourtPayUI.syncBatchCalculatorUI();
       }
+      var datalistEl = document.getElementById('batch-brand-list');
+      if (datalistEl) {
+        var seenBrands = {};
+        var dlHtml = '';
+        for (var d = 0; d < window.CourtPayState.batches.length; d++) {
+          var bBrand = String(window.CourtPayState.batches[d].shuttleType || '').trim();
+          var bKey = bBrand.toLowerCase();
+          if (bBrand && !seenBrands[bKey]) {
+            seenBrands[bKey] = true;
+            dlHtml += '<option value="' + window.CourtPayUI.escapeHtml(bBrand) + '"></option>';
+          }
+        }
+        datalistEl.innerHTML = dlHtml;
+      }
+
       var bContainer = document.getElementById('inventory-batches-list');
       if (!bContainer) return;
       var activeHtml = '';
-      var depletedHtml = '';
-      var depletedCount = 0;
 
       for (var i = 0; i < window.CourtPayState.batches.length; i++) {
         var b = window.CourtPayState.batches[i];
         var rem = Number(b.remainingShuttles || 0);
+        if (rem <= 0) continue;
         var tubes = Math.max(1, Number(b.tubesCount) || 1);
-        var tubeNoun = tubes === 1 ? '1 Tube' : (tubes + ' Tubes');
+        var perTube = Math.max(1, Number(b.shuttlesPerTube) || 12);
+        var unitCost = Number(b.costPerShuttleEUR || 0);
+        var tubeCost = Number(b.totalCostEUR) > 0
+          ? (Number(b.totalCostEUR) / tubes)
+          : (unitCost * perTube);
         var safeShuttleHtml = window.CourtPayUI.escapeHtml(b.shuttleType);
-        var safeBatchIdHtml = window.CourtPayUI.escapeHtml(b.batchId);
-        var safeBatchIdJs = window.CourtPayUI.escapeJsStr(b.batchId);
         var badgeClass = rem <= 3 ? 'badge-crimson' : (rem <= 6 ? 'badge-amber' : 'badge-emerald');
-        var rowHtml = '<div class="stepper-row" style="' + (rem <= 0 ? 'opacity: 0.65;' : '') + '">' +
+        activeHtml += '<div class="stepper-row">' +
           '<div>' +
-            '<div style="font-weight: 600; font-size: 0.9rem;">' + safeShuttleHtml + ' <span class="badge ' + badgeClass + ' tabular-nums">' + rem + ' / ' + Number(b.totalShuttles || 0) + ' left</span></div>' +
-            '<div class="tabular-nums" style="font-size: 0.75rem; color: var(--text-secondary);">Batch ' + safeBatchIdHtml + ' • ' + tubeNoun + ' • €' + Number(b.costPerShuttleEUR || 0).toFixed(2) + ' / shuttle</div>' +
+            '<div style="font-weight: 600; font-size: 0.9rem;">' + safeShuttleHtml + '</div>' +
+            '<div class="tabular-nums" style="font-size: 0.75rem; color: var(--text-secondary);">€' + unitCost.toFixed(2) + ' / shuttle • €' + tubeCost.toFixed(2) + ' / tube</div>' +
           '</div>' +
-          '<div class="stepper-controls">' +
-            '<button type="button" class="step-btn" onclick="CourtPayUI.adjustBatchStock(\'' + safeBatchIdJs + '\', -1)">-</button>' +
-            '<button type="button" class="step-btn" onclick="CourtPayUI.adjustBatchStock(\'' + safeBatchIdJs + '\', 1)">+</button>' +
-          '</div>' +
+          '<span class="badge ' + badgeClass + ' tabular-nums">' + rem + ' / ' + Number(b.totalShuttles || 0) + ' left</span>' +
         '</div>';
-
-        if (rem > 0) {
-          activeHtml += rowHtml;
-        } else {
-          depletedCount++;
-          depletedHtml += rowHtml;
-        }
       }
 
-      var finalHtml = activeHtml || '<div style="color: var(--text-secondary); font-size: 0.84rem; padding: 6px 0;">No active shuttle tubes with remaining stock. Add a tube below.</div>';
-      if (depletedCount > 0) {
-        var showDep = Boolean(window.CourtPayState.showDepletedBatches);
-        finalHtml += '<button type="button" class="tucked-toggle-row" onclick="CourtPayUI.toggleShowDepletedBatches()">' +
-          '<span>' + (showDep ? ('Hide ' + depletedCount + ' Depleted Tube' + (depletedCount === 1 ? '' : 's')) : ('Show ' + depletedCount + ' Depleted Tube' + (depletedCount === 1 ? '' : 's') + ' (0 left)')) + '</span>' +
-        '</button>';
-        if (showDep) {
-          finalHtml += '<div style="margin-top: 8px;">' + depletedHtml + '</div>';
-        }
-      }
-      bContainer.innerHTML = finalHtml;
+      bContainer.innerHTML = activeHtml || '<div style="color: var(--text-secondary); font-size: 0.84rem; padding: 6px 0;">No active shuttle tubes with remaining stock. Add a tube below.</div>';
     },
 
     buildWhatsAppTextFromSession: function (sessionObj) {
@@ -4229,11 +4239,12 @@
       var types = Object.keys(window.CourtPayState.shuttleUsageMap);
       for (var i = 0; i < types.length; i++) {
         var sType = types[i];
+        var sTypeKey = String(sType || '').trim().toLowerCase();
         var cnt = Number(window.CourtPayState.shuttleUsageMap[sType] || 0);
         if (cnt > 0) {
           var avail = 0;
           for (var b = 0; b < window.CourtPayState.batches.length; b++) {
-            if (window.CourtPayState.batches[b].shuttleType === sType) {
+            if (String(window.CourtPayState.batches[b].shuttleType || '').trim().toLowerCase() === sTypeKey) {
               avail += Number(window.CourtPayState.batches[b].remainingShuttles || 0);
             }
           }
@@ -4393,16 +4404,30 @@
       });
     },
 
-    adjustBatchStock: function (batchId, delta) {
-      window.CourtPayState.callServer('adjustBatchStock', { batchId: batchId, delta: delta }, function () {
-        window.CourtPayUI.renderAll();
-      });
-    },
-
-    adjustBatchTubes: function (delta) {
+    onBatchBrandInput: function () {
       window.CourtPayUI.setInlineAlert('inventory-inline-error', '');
-      var cur = Math.max(1, Number(window.CourtPayState.batchTubesCount) || 1);
-      window.CourtPayState.batchTubesCount = Math.max(1, cur + Number(delta || 0));
+      var bTypeEl = document.getElementById('batch-type');
+      var typed = String((bTypeEl && bTypeEl.value) || '').trim().toLowerCase();
+      if (typed && window.CourtPayState.batches && window.CourtPayState.batches.length > 0) {
+        var matchedBatch = null;
+        for (var i = window.CourtPayState.batches.length - 1; i >= 0; i--) {
+          var b = window.CourtPayState.batches[i];
+          if (String(b.shuttleType || '').trim().toLowerCase() === typed) {
+            matchedBatch = b;
+            break;
+          }
+        }
+        if (matchedBatch) {
+          var bCostEl = document.getElementById('batch-cost');
+          var bPerTubeEl = document.getElementById('batch-per-tube');
+          var lastTubes = Math.max(1, Number(matchedBatch.tubesCount) || 1);
+          var singleTubeCost = Number(matchedBatch.totalCostEUR) > 0
+            ? (Number(matchedBatch.totalCostEUR) / lastTubes)
+            : (Number(matchedBatch.costPerShuttleEUR || 0) * Math.max(1, Number(matchedBatch.shuttlesPerTube) || 12));
+          if (bCostEl && singleTubeCost > 0) bCostEl.value = singleTubeCost.toFixed(2);
+          if (bPerTubeEl && Number(matchedBatch.shuttlesPerTube) > 0) bPerTubeEl.value = String(matchedBatch.shuttlesPerTube);
+        }
+      }
       window.CourtPayUI.syncBatchCalculatorUI();
     },
 
@@ -4412,17 +4437,13 @@
     },
 
     syncBatchCalculatorUI: function () {
-      var tubes = Math.max(1, Number(window.CourtPayState.batchTubesCount) || 1);
+      var tubes = Math.max(1, Math.round(Number((document.getElementById('batch-tubes') || {}).value) || 1));
       var tubeCost = Math.max(0, Number((document.getElementById('batch-cost') || {}).value) || 0);
       var perTube = Math.max(1, Number((document.getElementById('batch-per-tube') || {}).value) || 12);
       var totalShuttles = tubes * perTube;
       var totalCost = Math.round(tubes * tubeCost * 100) / 100;
       var unitCost = totalShuttles > 0 ? (Math.round((totalCost / totalShuttles) * 100) / 100) : 0;
 
-      var dispEl = document.getElementById('display-batch-tubes');
-      if (dispEl) {
-        dispEl.textContent = tubes === 1 ? '1 Tube' : (tubes + ' Tubes');
-      }
       var formulaEl = document.getElementById('batch-calc-formula-text');
       if (formulaEl) {
         formulaEl.textContent = (tubes === 1 ? '1 Tube' : (tubes + ' Tubes')) +
@@ -4434,10 +4455,11 @@
     submitAddShuttleBatch: function () {
       var sType = String((document.getElementById('batch-type') || {}).value || '').trim();
       var tubeCost = Number((document.getElementById('batch-cost') || {}).value);
+      var tubesRaw = Number((document.getElementById('batch-tubes') || {}).value);
       var perTube = Number((document.getElementById('batch-per-tube') || {}).value);
-      var tubes = Math.max(1, Number(window.CourtPayState.batchTubesCount) || 1);
-      if (!sType || isNaN(tubeCost) || tubeCost < 0 || isNaN(perTube) || perTube <= 0) {
-        window.CourtPayUI.setInlineAlert('inventory-inline-error', 'Enter a valid shuttle brand/type, cost per tube, and shuttles per tube.');
+      var tubes = Math.max(1, Math.round(tubesRaw || 1));
+      if (!sType || isNaN(tubeCost) || tubeCost < 0 || isNaN(tubesRaw) || tubesRaw <= 0 || isNaN(perTube) || perTube <= 0) {
+        window.CourtPayUI.setInlineAlert('inventory-inline-error', 'Enter a valid shuttle brand/type, cost per tube, tubes purchased, and shuttles per tube.');
         return;
       }
       var totalCostEUR = Math.round(tubeCost * tubes * 100) / 100;
@@ -4448,7 +4470,8 @@
         totalCostEUR: totalCostEUR,
         shuttlesPerTube: perTube
       }, function () {
-        window.CourtPayState.batchTubesCount = 1;
+        var bTubesEl = document.getElementById('batch-tubes');
+        if (bTubesEl) bTubesEl.value = '1';
         window.CourtPayUI.syncBatchCalculatorUI();
         window.CourtPayUI.renderAll();
       });
