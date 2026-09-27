@@ -939,7 +939,7 @@
 
   <meta name="apple-mobile-web-app-title" content="[DEV] CourtPay">
   <meta name="application-name" content="CourtPay">
-  <meta name="app-version" content="dev-v9">
+  <meta name="app-version" content="dev-v10">
   <meta name="theme-color" content="#080d16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -962,9 +962,9 @@
   <link rel="mask-icon" href="/assets/images/courtpay/icon-courtpay-dev.svg" color="#f59e0b">
   <link rel="manifest" href="/courtpay/dev/manifest.json">
   <script>
-    window.__FF_VERSION__ = 'dev-v9';
+    window.__FF_VERSION__ = 'dev-v10';
     window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
-    console.log('%c[CourtPay]%c Running version dev-v9', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
+    console.log('%c[CourtPay]%c Running version dev-v10', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
@@ -1052,7 +1052,7 @@
       <p id="login-error-msg" class="login-error hidden"></p>
     </div>
     <div class="brand-footer" style="margin-top: 20px; position: relative; z-index: 2;">
-      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v9</span>
+      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v10</span>
     </div>
   </div>
 
@@ -1455,7 +1455,13 @@
 
           <!-- Tucked Add Player / Guest Drawer (Hidden by default so Roster starts immediately) -->
           <div id="add-guest-drawer" class="input-group hidden" style="margin-bottom: 12px;">
-            <label for="input-new-player-name">Add New Player / Guest on the Fly</label>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px;">
+              <label for="input-new-player-name" style="margin-bottom: 0;">Add New Player / Guest</label>
+              <div style="display: inline-flex; gap: 4px;">
+                <button type="button" id="btn-new-player-occasional" class="action-chip-btn active" style="padding: 2px 8px; font-size: 0.7rem;" onclick="CourtPayUI.setNewPlayerType('OCCASIONAL')">Occasional</button>
+                <button type="button" id="btn-new-player-regular" class="action-chip-btn" style="padding: 2px 8px; font-size: 0.7rem;" onclick="CourtPayUI.setNewPlayerType('REGULAR')">Regular</button>
+              </div>
+            </div>
             <div style="display: flex; gap: 8px;">
               <input id="input-new-player-name" class="input-control" type="text" placeholder="e.g. Lucas Meyer" oninput="CourtPayUI.setInlineAlert('guest-inline-error', '')" onkeydown="if(event.key==='Enter'){event.preventDefault();CourtPayUI.submitNewPlayer();}">
               <button type="button" class="btn-secondary" style="white-space: nowrap;" onclick="CourtPayUI.submitNewPlayer()">+ Add Player</button>
@@ -1527,9 +1533,9 @@
         <div id="ledger-entries-list"></div>
       </div>
 
-      <!-- CARD 2 (BOTTOM, COLLAPSIBLE): UNPAID DEBTS & WALLET CREDITS -->
+      <!-- CARD 2 (BOTTOM): UNPAID DEBTS & WALLET CREDITS -->
       <div class="glass-card" id="card-ledger-balances">
-        <div class="card-header" style="cursor: pointer;" onclick="CourtPayUI.toggleBalancesCardCollapse()">
+        <div class="card-header">
           <div class="card-title font-display">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="1" x2="12" y2="23"/>
@@ -1537,18 +1543,7 @@
             </svg>
             <span>Unpaid Debts &amp; Wallet Credits</span>
           </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <span class="badge badge-gold tabular-nums" id="balances-header-badge">0 Active</span>
-            <button type="button" id="btn-toggle-balances-card" class="action-chip-btn" onclick="event.stopPropagation(); CourtPayUI.toggleBalancesCardCollapse()">Collapse</button>
-          </div>
-        </div>
-
-        <div id="balances-summary-bar" class="court-summary-bar hidden" onclick="CourtPayUI.toggleBalancesCardCollapse()">
-          <div>
-            <div id="balances-summary-title" style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">All players settled</div>
-            <div id="balances-summary-details" style="font-size: 0.76rem; color: var(--text-secondary); margin-top: 2px;">Tap to expand player balances &amp; Revolut top-ups</div>
-          </div>
-          <span class="badge badge-emerald tabular-nums" id="balances-summary-count-badge">Settled</span>
+          <span class="badge badge-emerald tabular-nums hidden" id="balances-header-badge">All Settled</span>
         </div>
 
         <div id="balances-card-body">
@@ -1617,7 +1612,7 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3z" />
     </svg>
-    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v9</span></span>
+    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v10</span></span>
   </div>
 </footer>
 
@@ -1873,7 +1868,8 @@
     isCourtSetupExpanded: false,
     isRosterExpanded: true,
     isAddGuestExpanded: false,
-    isBalancesCardExpanded: true,
+    showOccasionalPlayers: false,
+    newPlayerType: 'OCCASIONAL',
     showSettledEntries: false,
     showSettledBalances: false,
     showDepletedBatches: false,
@@ -1895,11 +1891,12 @@
     players: _isLiveServerMode ? [] : [
       { playerId: 'p_org_1', name: 'Ming (You)', type: 'ORGANIZER', defaultShares: 1, isOrganizer: true, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
       { playerId: 'p_org_2', name: 'Sarah (Partner)', type: 'PARTNER', defaultShares: 1, isOrganizer: true, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
-      { playerId: 'p_fam_1', name: 'David Chen', type: 'FAMILY', defaultShares: 4, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 4 },
+      { playerId: 'p_reg_0', name: 'David Chen', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
       { playerId: 'p_reg_1', name: 'Alex Rivera', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 4.10, active: true, selected: false, sessionShares: 1 },
       { playerId: 'p_reg_2', name: 'Emma Walsh', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
       { playerId: 'p_reg_3', name: 'Liam O\'Connor', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
-      { playerId: 'p_reg_4', name: 'Noah Patel', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 12.50, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 }
+      { playerId: 'p_reg_4', name: 'Noah Patel', type: 'REGULAR', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 12.50, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 },
+      { playerId: 'p_occ_1', name: 'Sofia Martinez', type: 'OCCASIONAL', defaultShares: 1, isOrganizer: false, payerPlayerId: '', walletBalance: 0, unpaidDebtEUR: 0, active: true, selected: false, sessionShares: 1 }
     ],
     batches: _isLiveServerMode ? [] : [
       { batchId: 'b_as30_1', shuttleType: 'Yonex AS-30', category: 'Feather', tubesCount: 1, shuttlesPerTube: 12, totalShuttles: 12, remainingShuttles: 9, totalCostEUR: 28.80, costPerShuttleEUR: 2.40, status: 'ACTIVE' },
@@ -1943,12 +1940,23 @@
       return yr + '-' + mo + '-' + dy;
     },
 
+    isOccasionalPlayer: function (p) {
+      if (!p || p.isOrganizer) return false;
+      var t = String(p.type || '').trim().toUpperCase();
+      return t === 'OCCASIONAL' || t === 'GUEST';
+    },
+
     sortRosterPlayers: function (playersArr) {
       if (!Array.isArray(playersArr)) return [];
+      var getTier = function (p) {
+        if (p && p.isOrganizer) return 0;
+        if (window.CourtPayState.isOccasionalPlayer(p)) return 2;
+        return 1;
+      };
       return playersArr.sort(function (a, b) {
-        var orgA = Boolean(a && a.isOrganizer);
-        var orgB = Boolean(b && b.isOrganizer);
-        if (orgA !== orgB) return orgA ? -1 : 1;
+        var tierA = getTier(a);
+        var tierB = getTier(b);
+        if (tierA !== tierB) return tierA - tierB;
         return String((a && a.name) || '').localeCompare(String((b && b.name) || ''));
       });
     },
@@ -3084,15 +3092,18 @@
       window.CourtPayUI.syncRosterSummaryBar();
     },
 
-    toggleBalancesCardCollapse: function () {
-      window.CourtPayState.isBalancesCardExpanded = !window.CourtPayState.isBalancesCardExpanded;
-      var bodyEl = document.getElementById('balances-card-body');
-      var sumEl = document.getElementById('balances-summary-bar');
-      var btnEl = document.getElementById('btn-toggle-balances-card');
-      var expanded = Boolean(window.CourtPayState.isBalancesCardExpanded);
-      if (bodyEl) bodyEl.classList.toggle('hidden', !expanded);
-      if (sumEl) sumEl.classList.toggle('hidden', expanded);
-      if (btnEl) btnEl.textContent = expanded ? 'Collapse' : 'Expand';
+    toggleShowOccasionalPlayers: function () {
+      window.CourtPayState.showOccasionalPlayers = !window.CourtPayState.showOccasionalPlayers;
+      window.CourtPayUI.renderRosterSelection();
+    },
+
+    setNewPlayerType: function (typeStr) {
+      var norm = String(typeStr || 'OCCASIONAL').toUpperCase() === 'REGULAR' ? 'REGULAR' : 'OCCASIONAL';
+      window.CourtPayState.newPlayerType = norm;
+      var occBtn = document.getElementById('btn-new-player-occasional');
+      var regBtn = document.getElementById('btn-new-player-regular');
+      if (occBtn) occBtn.classList.toggle('active', norm === 'OCCASIONAL');
+      if (regBtn) regBtn.classList.toggle('active', norm === 'REGULAR');
     },
 
     toggleShowSettledEntries: function () {
@@ -3213,7 +3224,14 @@
       window.CourtPayState._userModifiedDraft = true;
       var flag = Boolean(isSelected);
       for (var i = 0; i < window.CourtPayState.players.length; i++) {
-        window.CourtPayState.players[i].selected = flag;
+        var pl = window.CourtPayState.players[i];
+        if (flag) {
+          if (!window.CourtPayState.isOccasionalPlayer(pl)) {
+            pl.selected = true;
+          }
+        } else {
+          pl.selected = false;
+        }
       }
       window.CourtPayUI.renderRosterSelection();
       window.CourtPayUI.recalculatePreview();
@@ -3430,8 +3448,10 @@
         }
         return;
       }
+      var selectedType = window.CourtPayState.newPlayerType === 'REGULAR' ? 'REGULAR' : 'OCCASIONAL';
       window.CourtPayUI.setInlineAlert('guest-inline-error', '');
       if (input) input.value = '';
+      window.CourtPayUI.setNewPlayerType('OCCASIONAL');
       window.CourtPayState.isAddGuestExpanded = false;
       var drawer = document.getElementById('add-guest-drawer');
       var btn = document.getElementById('btn-toggle-add-guest');
@@ -3440,7 +3460,7 @@
       window.CourtPayState.callServer('addPlayer', {
         name: name,
         defaultShares: 1,
-        type: 'REGULAR'
+        type: selectedType
       }, function () {
         window.CourtPayUI.renderAll();
       });
@@ -3629,20 +3649,29 @@
           '</div>';
         return;
       }
-      var html = '';
+
+      window.CourtPayState.sortRosterPlayers(window.CourtPayState.players);
+
+      var regularAndHostHtml = '';
+      var selectedOccasionalHtml = '';
+      var allOccasionalHtml = '';
+      var totalOccasionalCount = 0;
+      var unselectedOccasionalCount = 0;
+
       for (var i = 0; i < window.CourtPayState.players.length; i++) {
         var p = window.CourtPayState.players[i];
         var safeIdJs = window.CourtPayUI.escapeJsStr(p.playerId);
         var safeNameHtml = window.CourtPayUI.escapeHtml(p.name);
+        var isOcc = window.CourtPayState.isOccasionalPlayer(p);
         var roleTag = p.isOrganizer
           ? '<span style="display: inline-block; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; background: rgba(16, 185, 129, 0.14); color: var(--status-emerald); border: 1px solid rgba(16, 185, 129, 0.28); white-space: nowrap;">Host</span>'
-          : (p.sessionShares > 1
-              ? '<span style="display: inline-block; font-size: 0.64rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: rgba(245, 158, 11, 0.14); color: var(--status-amber); border: 1px solid rgba(245, 158, 11, 0.28); white-space: nowrap;">Family ×' + Number(p.sessionShares || 1) + '</span>'
+          : (isOcc
+              ? '<span style="display: inline-block; font-size: 0.64rem; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: rgba(148, 163, 184, 0.14); color: var(--text-secondary); border: 1px solid var(--border-subtle); white-space: nowrap;">Occasional</span>'
               : '');
         var metaLine = p.isOrganizer
           ? '<div style="font-size: 0.72rem; color: var(--status-emerald); font-weight: 500; white-space: nowrap;">Organizer • Auto-settled</div>'
           : '<div class="tabular-nums" style="font-size: 0.72rem; color: var(--text-secondary); white-space: nowrap;">Wallet: €' + Number(p.walletBalance || 0).toFixed(2) + ' • Debt: €' + Number(p.unpaidDebtEUR || 0).toFixed(2) + '</div>';
-        html += '<div class="stepper-row" style="opacity: ' + (p.selected ? '1' : '0.48') + ';">' +
+        var rowHtml = '<div class="stepper-row" style="opacity: ' + (p.selected ? '1' : '0.48') + ';">' +
           '<div style="display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; flex: 1;" onclick="CourtPayUI.togglePlayerSelected(\'' + safeIdJs + '\')">' +
             '<input type="checkbox" ' + (p.selected ? 'checked' : '') + ' style="width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--brand-primary);">' +
             '<div style="min-width: 0;">' +
@@ -3656,8 +3685,36 @@
             '<button type="button" class="step-btn" onclick="CourtPayUI.adjustPlayerShares(\'' + safeIdJs + '\', 1)">+</button>' +
           '</div>' +
         '</div>';
+
+        if (isOcc) {
+          totalOccasionalCount++;
+          allOccasionalHtml += rowHtml;
+          if (p.selected) {
+            selectedOccasionalHtml += rowHtml;
+          } else {
+            unselectedOccasionalCount++;
+          }
+        } else {
+          regularAndHostHtml += rowHtml;
+        }
       }
-      container.innerHTML = html;
+
+      var showOcc = Boolean(window.CourtPayState.showOccasionalPlayers);
+      var finalHtml = regularAndHostHtml;
+      if (showOcc && totalOccasionalCount > 0) {
+        finalHtml += '<button type="button" class="tucked-toggle-row" onclick="CourtPayUI.toggleShowOccasionalPlayers()">' +
+          '<span>Hide ' + totalOccasionalCount + ' Occasional Player' + (totalOccasionalCount === 1 ? '' : 's') + '</span>' +
+        '</button>' +
+        '<div style="margin-top: 8px;">' + allOccasionalHtml + '</div>';
+      } else {
+        finalHtml += selectedOccasionalHtml;
+        if (unselectedOccasionalCount > 0) {
+          finalHtml += '<button type="button" class="tucked-toggle-row" onclick="CourtPayUI.toggleShowOccasionalPlayers()">' +
+            '<span>Show ' + unselectedOccasionalCount + ' Occasional Player' + (unselectedOccasionalCount === 1 ? '' : 's') + '</span>' +
+          '</button>';
+        }
+      }
+      container.innerHTML = finalHtml;
     },
 
     renderLedgerView: function () {
@@ -3842,29 +3899,17 @@
         nonOrgPlayers.push(p);
       }
 
-      // Update Card 2 summary badges
+      // Update Card 2 header badge (hidden when active rows are visible below; shows All Settled when 0 active balances)
       var headerBadge = document.getElementById('balances-header-badge');
-      var sumTitle = document.getElementById('balances-summary-title');
-      var sumDetails = document.getElementById('balances-summary-details');
-      var sumCountBadge = document.getElementById('balances-summary-count-badge');
       var activeBalanceCount = debtCount + creditCount;
       if (headerBadge) {
-        headerBadge.textContent = debtCount > 0
-          ? (debtCount + ' Owing (€' + totalDebtEUR.toFixed(2) + ')')
-          : (creditCount > 0 ? (creditCount + ' Credit') : 'All Settled');
-        headerBadge.className = 'badge tabular-nums ' + (debtCount > 0 ? 'badge-crimson' : 'badge-emerald');
-      }
-      if (sumTitle) {
-        sumTitle.textContent = activeBalanceCount === 0
-          ? 'All players settled (€0.00 owed)'
-          : (debtCount + (debtCount === 1 ? ' Player Owes €' : ' Players Owe €') + totalDebtEUR.toFixed(2) +
-             (creditCount > 0 ? (' • ' + creditCount + ' Credit (€' + totalCreditEUR.toFixed(2) + ')') : ''));
-      }
-      if (sumDetails) {
-        sumDetails.textContent = 'Tap to expand player balances & Revolut top-ups';
-      }
-      if (sumCountBadge) {
-        sumCountBadge.textContent = activeBalanceCount > 0 ? (activeBalanceCount + ' Active') : 'Settled';
+        if (activeBalanceCount === 0) {
+          headerBadge.textContent = 'All Settled';
+          headerBadge.className = 'badge badge-emerald tabular-nums';
+        } else {
+          headerBadge.textContent = '';
+          headerBadge.className = 'badge badge-emerald tabular-nums hidden';
+        }
       }
 
       if (pContainer) {
@@ -3918,14 +3963,12 @@
 
         var finalPlayersHtml = activeRowsHtml;
         if (settledCount > 0) {
-          var showSettled = Boolean(window.CourtPayState.showSettledBalances) || activeRowsHtml === '';
-          if (activeRowsHtml !== '') {
-            finalPlayersHtml += '<button type="button" class="tucked-toggle-row" onclick="CourtPayUI.toggleShowSettledBalances()">' +
-              '<span>' + (showSettled ? ('Hide ' + settledCount + ' Settled Players') : ('Show ' + settledCount + ' Settled Players (+ Revolut Top-Up)')) + '</span>' +
-            '</button>';
-          }
+          var showSettled = Boolean(window.CourtPayState.showSettledBalances);
+          finalPlayersHtml += '<button type="button" class="tucked-toggle-row" onclick="CourtPayUI.toggleShowSettledBalances()">' +
+            '<span>' + (showSettled ? ('Hide ' + settledCount + ' Settled Players') : ('Show ' + settledCount + ' Settled Players (+ Revolut Top-Up)')) + '</span>' +
+          '</button>';
           if (showSettled) {
-            finalPlayersHtml += '<div style="' + (activeRowsHtml !== '' ? 'margin-top: 8px;' : '') + '">' + settledRowsHtml + '</div>';
+            finalPlayersHtml += '<div style="margin-top: 8px;">' + settledRowsHtml + '</div>';
           }
         }
         pContainer.innerHTML = finalPlayersHtml;
