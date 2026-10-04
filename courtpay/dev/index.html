@@ -939,7 +939,7 @@
 
   <meta name="apple-mobile-web-app-title" content="[DEV] CourtPay">
   <meta name="application-name" content="CourtPay">
-  <meta name="app-version" content="dev-v15">
+  <meta name="app-version" content="dev-v16">
   <meta name="theme-color" content="#080d16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -962,9 +962,9 @@
   <link rel="mask-icon" href="/assets/images/courtpay/icon-courtpay-dev.svg" color="#f59e0b">
   <link rel="manifest" href="/courtpay/dev/manifest.json">
   <script>
-    window.__FF_VERSION__ = 'dev-v15';
+    window.__FF_VERSION__ = 'dev-v16';
     window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
-    console.log('%c[CourtPay]%c Running version dev-v15', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
+    console.log('%c[CourtPay]%c Running version dev-v16', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
@@ -1052,7 +1052,7 @@
       <p id="login-error-msg" class="login-error hidden"></p>
     </div>
     <div class="brand-footer" style="margin-top: 20px; position: relative; z-index: 2;">
-      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v15</span>
+      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v16</span>
     </div>
   </div>
 
@@ -1223,10 +1223,11 @@
       </div>
       <div id="payment-modal-status-bar" class="calc-formula-bar tabular-nums" style="margin-bottom: 10px;"></div>
       <div id="payment-preset-pills" class="preset-pills" style="margin-bottom: 10px;"></div>
-      <div class="input-group" style="margin-bottom: 14px;">
+      <div class="input-group" style="margin-bottom: 10px;">
         <label for="input-payment-amount">Payment / Top-Up Amount (€)</label>
-        <input id="input-payment-amount" class="input-control tabular-nums" type="number" step="0.01" min="0.01" placeholder="20.00" oninput="CourtPayUI.setInlineAlert('payment-inline-error', '')" onkeydown="if(event.key==='Enter'){event.preventDefault();CourtPayUI.confirmRecordPayment();}">
+        <input id="input-payment-amount" class="input-control tabular-nums" type="number" step="0.01" min="0.01" placeholder="20.00" oninput="CourtPayUI.setInlineAlert('payment-inline-error', ''); CourtPayUI.updatePaymentSplitPreview();" onkeydown="if(event.key==='Enter'){event.preventDefault();CourtPayUI.confirmRecordPayment();}">
       </div>
+      <div id="payment-modal-split-preview" class="calc-formula-bar tabular-nums" style="margin-bottom: 12px; color: var(--status-emerald); border-color: rgba(16, 185, 129, 0.38); background: rgba(16, 185, 129, 0.08); font-weight: 600;"></div>
       <div id="payment-inline-error" class="inline-alert hidden" role="alert" style="margin-bottom: 12px;"></div>
       <button type="button" class="btn-primary" onclick="CourtPayUI.confirmRecordPayment()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -1616,7 +1617,7 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3z" />
     </svg>
-    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v15</span></span>
+    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v16</span></span>
   </div>
 </footer>
 
@@ -1876,6 +1877,7 @@
     newPlayerType: 'OCCASIONAL',
     showSettledEntries: false,
     showSettledBalances: false,
+    selectedUnpaidEntryIds: {},
     config: {
       defaultSessionTitle: 'Friday Night Badminton',
       revolutTag: 'mingbadminton',
@@ -1926,6 +1928,7 @@
       validateAdminPin: 'VERIFYING PIN & SYNCING GOOGLE SHEET...',
       createSession: 'COMMITTING SESSION TO GOOGLE SHEET...',
       toggleSessionEntryPaid: 'UPDATING PAYMENT STATUS IN SHEET...',
+      markEntriesPaidBatch: 'MARKING SELECTED ENTRIES PAID IN SHEET...',
       recordPayment: 'RECORDING REVOLUT PAYMENT IN SHEET...',
       voidLastSession: 'VOIDING SESSION & RESTORING STOCK...',
       addPlayer: 'ADDING PLAYER TO GOOGLE SHEET...',
@@ -2015,6 +2018,7 @@
       window.CourtPayState.draftSessionRequestId = 'ses_draft_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
       window.CourtPayState._userModifiedDraft = false;
       window.CourtPayState.showSettledEntries = false;
+      window.CourtPayState.selectedUnpaidEntryIds = {};
       try {
         localStorage.removeItem(window.CourtPayState.DRAFT_STORAGE_KEY);
       } catch (_) {}
@@ -2325,6 +2329,27 @@
             }
           }
         }
+      } else if (action === 'markEntriesPaidBatch') {
+        var batchIds = Array.isArray(payload && payload.entryIds) ? payload.entryIds : [];
+        var idLookup = {};
+        for (var bi = 0; bi < batchIds.length; bi++) {
+          idLookup[String(batchIds[bi] || '').trim()] = true;
+        }
+        for (var be = 0; be < st.ledgerEntries.length; be++) {
+          var bEnt = st.ledgerEntries[be];
+          if (idLookup[bEnt.entryId]) {
+            var bPl = st.players.find(function (p) { return p.playerId === bEnt.playerId; });
+            if ((bPl && bPl.isOrganizer) || bEnt.status === 'CREDIT_COVERED' || bEnt.status === 'PAID' || bEnt.status === 'VOID') {
+              continue;
+            }
+            var bClear = Number(bEnt.amountOwedEUR || 0);
+            bEnt.amountPaidEUR = Math.round((Number(bEnt.amountPaidEUR || 0) + bClear) * 100) / 100;
+            bEnt.amountOwedEUR = 0;
+            bEnt.status = 'PAID';
+            if (bPl) bPl.unpaidDebtEUR = Math.max(0, Math.round((Number(bPl.unpaidDebtEUR || 0) - bClear) * 100) / 100);
+          }
+        }
+        st.selectedUnpaidEntryIds = {};
       } else if (action === 'recordPayment') {
         var cash = Number(payload.paymentAmountEUR || 0);
         var pRec = st.players.find(function (p) { return p.playerId === payload.playerId; });
@@ -2602,7 +2627,18 @@
         }
       }
       if (Array.isArray(serverState.sessions)) window.CourtPayState.sessions = serverState.sessions;
-      if (Array.isArray(serverState.ledgerEntries)) window.CourtPayState.ledgerEntries = serverState.ledgerEntries;
+      if (Array.isArray(serverState.ledgerEntries)) {
+        window.CourtPayState.ledgerEntries = serverState.ledgerEntries;
+        var currentSelected = window.CourtPayState.selectedUnpaidEntryIds || {};
+        var prunedSelected = {};
+        for (var leIdx = 0; leIdx < serverState.ledgerEntries.length; leIdx++) {
+          var leItem = serverState.ledgerEntries[leIdx];
+          if (leItem && currentSelected[leItem.entryId] && Number(leItem.amountOwedEUR || 0) > 0.005 && leItem.status !== 'PAID' && leItem.status !== 'CREDIT_COVERED' && leItem.status !== 'VOID') {
+            prunedSelected[leItem.entryId] = true;
+          }
+        }
+        window.CourtPayState.selectedUnpaidEntryIds = prunedSelected;
+      }
       window.CourtPayState._hydratedOnce = true;
       if (window.CourtPayUI) {
         if (typeof window.CourtPayUI.syncVersionBadges === 'function') {
@@ -3831,10 +3867,18 @@
           return String(a.playerName || '').localeCompare(String(b.playerName || ''));
         });
 
+        var selectedMap = window.CourtPayState.selectedUnpaidEntryIds || {};
         var unpaidEntriesCount = 0;
+        var selectedCount = 0;
+        var selectedTotalEUR = 0;
         for (var uIdx = 0; uIdx < relevantEntries.length; uIdx++) {
-          if (getEntrySortRank(relevantEntries[uIdx]) === 0) {
+          var uEntry = relevantEntries[uIdx];
+          if (getEntrySortRank(uEntry) === 0) {
             unpaidEntriesCount++;
+            if (selectedMap[uEntry.entryId]) {
+              selectedCount++;
+              selectedTotalEUR = Math.round((selectedTotalEUR + Number(uEntry.amountOwedEUR || 0)) * 100) / 100;
+            }
           }
         }
         var entriesBadge = document.getElementById('ledger-entries-status-badge');
@@ -3854,6 +3898,19 @@
         if (relevantEntries.length === 0) {
           eContainer.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.84rem; padding: 8px 0;">Commit a session in New Session to reconcile 1-tap player payments here.</div>';
         } else {
+          var batchToolbarHtml = '';
+          if (unpaidEntriesCount >= 2 || selectedCount > 0) {
+            batchToolbarHtml = '<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px;">' +
+              '<div style="display: flex; align-items: center; gap: 6px;">' +
+                '<button type="button" class="action-chip-btn tabular-nums" onclick="CourtPayUI.setAllUnpaidEntriesSelected(true)">Select All (' + unpaidEntriesCount + ')</button>' +
+                '<button type="button" class="action-chip-btn" onclick="CourtPayUI.setAllUnpaidEntriesSelected(false)">Clear</button>' +
+              '</div>' +
+              '<span class="badge ' + (selectedCount > 0 ? 'badge-emerald' : 'badge-gold') + ' tabular-nums">' +
+                (selectedCount > 0 ? (selectedCount + ' Selected • €' + selectedTotalEUR.toFixed(2)) : 'Tap rows to batch pay') +
+              '</span>' +
+            '</div>';
+          }
+
           var unpaidRowsHtml = '';
           var settledRowsHtml = '';
           var settledEntriesCount = 0;
@@ -3877,32 +3934,55 @@
 
             var rightControl = '';
             if (isOrg) {
-              rightControl = '<span class="badge badge-emerald">Host • Auto-Settled</span>';
+              rightControl = '<span class="badge badge-emerald" style="flex-shrink: 0;">Host • Auto-Settled</span>';
             } else if (isCreditCovered) {
-              rightControl = '<span class="badge badge-emerald">Wallet Covered</span>';
+              rightControl = '<span class="badge badge-emerald" style="flex-shrink: 0;">Wallet Covered</span>';
             } else {
-              rightControl = '<button type="button" class="pill-btn ' + (isPaid ? 'active' : '') + '" onclick="CourtPayUI.toggleEntryPaid(\'' + safeEntryIdJs + '\')">' +
+              rightControl = '<button type="button" class="pill-btn ' + (isPaid ? 'active' : '') + '" style="flex-shrink: 0;" onclick="CourtPayUI.toggleEntryPaid(\'' + safeEntryIdJs + '\')">' +
                 (isPaid ? 'PAID' : 'Mark Paid') +
               '</button>';
             }
 
-            var rowHtml = '<div class="stepper-row" style="' + (isPaid ? 'opacity: 0.78;' : '') + '">' +
-              '<div>' +
-                '<div style="font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">' + safePlayerNameHtml + shareBadgeHtml + priorLabel + '</div>' +
-                '<div class="tabular-nums" style="font-size: 0.75rem; color: var(--text-secondary);">Gross: €' + Number(e.grossShareEUR || 0).toFixed(2) + ' • Owed: €' + Number(e.amountOwedEUR || 0).toFixed(2) + '</div>' +
-              '</div>' +
-              rightControl +
-            '</div>';
-
             if (isUnpaidRow) {
-              unpaidRowsHtml += rowHtml;
+              var isEntrySelected = Boolean(selectedMap[e.entryId]);
+              var unpaidRowStyle = isEntrySelected
+                ? 'border-color: rgba(16, 185, 129, 0.48); background: rgba(16, 185, 129, 0.07);'
+                : '';
+              var unpaidRowHtml = '<div class="stepper-row" style="' + unpaidRowStyle + '">' +
+                '<div style="display: flex; align-items: center; gap: 10px; cursor: pointer; min-width: 0; flex: 1;" onclick="CourtPayUI.toggleUnpaidEntrySelected(\'' + safeEntryIdJs + '\')">' +
+                  '<input type="checkbox" ' + (isEntrySelected ? 'checked' : '') + ' style="width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--status-emerald); cursor: pointer;">' +
+                  '<div style="min-width: 0;">' +
+                    '<div style="font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">' + safePlayerNameHtml + shareBadgeHtml + priorLabel + '</div>' +
+                    '<div class="tabular-nums" style="font-size: 0.75rem; color: var(--text-secondary);">Gross: €' + Number(e.grossShareEUR || 0).toFixed(2) + ' • Owed: €' + Number(e.amountOwedEUR || 0).toFixed(2) + '</div>' +
+                  '</div>' +
+                '</div>' +
+                rightControl +
+              '</div>';
+              unpaidRowsHtml += unpaidRowHtml;
             } else {
               settledEntriesCount++;
-              settledRowsHtml += rowHtml;
+              var settledRowHtml = '<div class="stepper-row" style="opacity: 0.78;">' +
+                '<div>' +
+                  '<div style="font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">' + safePlayerNameHtml + shareBadgeHtml + priorLabel + '</div>' +
+                  '<div class="tabular-nums" style="font-size: 0.75rem; color: var(--text-secondary);">Gross: €' + Number(e.grossShareEUR || 0).toFixed(2) + ' • Owed: €' + Number(e.amountOwedEUR || 0).toFixed(2) + '</div>' +
+                '</div>' +
+                rightControl +
+              '</div>';
+              settledRowsHtml += settledRowHtml;
             }
           }
 
-          var finalEntriesHtml = unpaidRowsHtml;
+          var batchBtnHtml = '';
+          if (selectedCount > 0) {
+            batchBtnHtml = '<button type="button" id="btn-batch-mark-paid" class="btn-primary" style="margin-top: 4px; margin-bottom: 8px; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; box-shadow: 0 6px 18px rgba(16, 185, 129, 0.28);" onclick="CourtPayUI.submitBatchMarkPaid()">' +
+              '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">' +
+                '<path d="M20 6 9 17l-5-5"/>' +
+              '</svg>' +
+              '<span class="tabular-nums">Mark ' + selectedCount + ' Paid (€' + selectedTotalEUR.toFixed(2) + ')</span>' +
+            '</button>';
+          }
+
+          var finalEntriesHtml = batchToolbarHtml + unpaidRowsHtml + batchBtnHtml;
           if (settledEntriesCount > 0) {
             var showSettledEntries = Boolean(window.CourtPayState.showSettledEntries);
             var entryNoun = settledEntriesCount === 1 ? 'Paid / Auto-Settled Entry' : 'Paid & Auto-Settled Entries';
@@ -4295,6 +4375,99 @@
       });
     },
 
+    toggleUnpaidEntrySelected: function (entryId) {
+      if (!entryId) return;
+      if (!window.CourtPayState.selectedUnpaidEntryIds) {
+        window.CourtPayState.selectedUnpaidEntryIds = {};
+      }
+      if (window.CourtPayState.selectedUnpaidEntryIds[entryId]) {
+        delete window.CourtPayState.selectedUnpaidEntryIds[entryId];
+      } else {
+        window.CourtPayState.selectedUnpaidEntryIds[entryId] = true;
+      }
+      window.CourtPayUI.renderLedgerView();
+    },
+
+    setAllUnpaidEntriesSelected: function (selectAll) {
+      if (!selectAll) {
+        window.CourtPayState.selectedUnpaidEntryIds = {};
+        window.CourtPayUI.renderLedgerView();
+        return;
+      }
+      var nextMap = {};
+      var playersMap = {};
+      var allPlayers = window.CourtPayState.players || [];
+      for (var pm = 0; pm < allPlayers.length; pm++) {
+        playersMap[allPlayers[pm].playerId] = allPlayers[pm];
+      }
+      var allSessions = window.CourtPayState.sessions || [];
+      var lastActiveSession = null;
+      for (var s = 0; s < allSessions.length; s++) {
+        if (allSessions[s].status !== 'VOID') {
+          lastActiveSession = allSessions[s];
+        }
+      }
+      var entries = window.CourtPayState.ledgerEntries || [];
+      for (var i = 0; i < entries.length; i++) {
+        var item = entries[i];
+        if (!item || item.status === 'VOID') continue;
+        var pl = playersMap[item.playerId];
+        var isOrg = Boolean(pl && pl.isOrganizer);
+        var isUnpaid = !isOrg && item.status !== 'PAID' && item.status !== 'CREDIT_COVERED' && Number(item.amountOwedEUR || 0) > 0.005;
+        if (isUnpaid && (isUnpaid || (lastActiveSession && item.sessionId === lastActiveSession.sessionId))) {
+          nextMap[item.entryId] = true;
+        }
+      }
+      window.CourtPayState.selectedUnpaidEntryIds = nextMap;
+      window.CourtPayUI.renderLedgerView();
+    },
+
+    submitBatchMarkPaid: function () {
+      var selectedMap = window.CourtPayState.selectedUnpaidEntryIds || {};
+      var entryIds = Object.keys(selectedMap).filter(function (id) { return Boolean(selectedMap[id]); });
+      if (entryIds.length === 0) return;
+      window.CourtPayUI.setInlineAlert('ledger-inline-error', '');
+      window.CourtPayState.callServer('markEntriesPaidBatch', { entryIds: entryIds }, function () {
+        window.CourtPayState.selectedUnpaidEntryIds = {};
+        window.CourtPayUI.renderAll();
+      });
+    },
+
+    updatePaymentSplitPreview: function () {
+      var previewEl = document.getElementById('payment-modal-split-preview');
+      if (!previewEl) return;
+      var playerId = window.CourtPayState.pendingPaymentPlayerId;
+      var targetPlayer = null;
+      var allPlayers = window.CourtPayState.players || [];
+      for (var i = 0; i < allPlayers.length; i++) {
+        if (allPlayers[i].playerId === playerId) {
+          targetPlayer = allPlayers[i];
+          break;
+        }
+      }
+      var debt = targetPlayer ? Number(targetPlayer.unpaidDebtEUR || 0) : 0;
+      var amtInp = document.getElementById('input-payment-amount');
+      var amt = amtInp ? Number(amtInp.value || 0) : 0;
+      if (!amt || amt <= 0) {
+        previewEl.textContent = 'Enter payment amount above to preview debt & wallet split.';
+        return;
+      }
+      if (debt > 0.005) {
+        var debtCovered = Math.min(amt, debt);
+        var walletAdded = Math.max(0, Math.round((amt - debtCovered) * 100) / 100);
+        var remainingDebt = Math.max(0, Math.round((debt - debtCovered) * 100) / 100);
+        if (walletAdded > 0.005) {
+          previewEl.textContent = '€' + debtCovered.toFixed(2) + ' settles unpaid session (auto-marks PAID) • +€' + walletAdded.toFixed(2) + ' to Wallet Credit';
+        } else if (remainingDebt > 0.005) {
+          previewEl.textContent = '€' + debtCovered.toFixed(2) + ' applied to debt • €' + remainingDebt.toFixed(2) + ' remaining unpaid';
+        } else {
+          previewEl.textContent = '€' + debtCovered.toFixed(2) + ' settles unpaid session (auto-marks PAID in Session Entries)';
+        }
+      } else {
+        previewEl.textContent = 'Already settled • Full +€' + amt.toFixed(2) + ' added to Wallet Credit';
+      }
+    },
+
     promptRecordPayment: function (playerId, playerName) {
       window.CourtPayState.pendingPaymentPlayerId = playerId;
       window.CourtPayState.pendingPaymentPlayerName = playerName;
@@ -4338,6 +4511,7 @@
       if (amtInp) {
         amtInp.value = (debt > 0 ? debt : 20).toFixed(2);
       }
+      window.CourtPayUI.updatePaymentSplitPreview();
 
       var modal = document.getElementById('record-payment-modal');
       if (modal) modal.classList.remove('hidden');
@@ -4347,6 +4521,7 @@
       window.CourtPayUI.setInlineAlert('payment-inline-error', '');
       var amtInp = document.getElementById('input-payment-amount');
       if (amtInp) amtInp.value = Number(amount).toFixed(2);
+      window.CourtPayUI.updatePaymentSplitPreview();
     },
 
     closeRecordPaymentModal: function () {
