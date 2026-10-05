@@ -939,7 +939,7 @@
 
   <meta name="apple-mobile-web-app-title" content="[DEV] CourtPay">
   <meta name="application-name" content="CourtPay">
-  <meta name="app-version" content="dev-v16">
+  <meta name="app-version" content="dev-v17">
   <meta name="theme-color" content="#080d16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -962,9 +962,9 @@
   <link rel="mask-icon" href="/assets/images/courtpay/icon-courtpay-dev.svg" color="#f59e0b">
   <link rel="manifest" href="/courtpay/dev/manifest.json">
   <script>
-    window.__FF_VERSION__ = 'dev-v16';
+    window.__FF_VERSION__ = 'dev-v17';
     window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
-    console.log('%c[CourtPay]%c Running version dev-v16', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
+    console.log('%c[CourtPay]%c Running version dev-v17', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
@@ -1032,8 +1032,8 @@
             type="password"
             inputmode="numeric"
             pattern="[0-9]*"
-            maxlength="8"
-            autocomplete="current-password"
+            maxlength="12"
+            autocomplete="off"
             placeholder="••••"
             oninput="CourtPayUI.onPinInputChange(this.value)"
             onkeydown="if(event.key==='Enter'){event.preventDefault();CourtPayUI.submitLoginPin();}"
@@ -1052,7 +1052,7 @@
       <p id="login-error-msg" class="login-error hidden"></p>
     </div>
     <div class="brand-footer" style="margin-top: 20px; position: relative; z-index: 2;">
-      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v16</span>
+      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v17</span>
     </div>
   </div>
 
@@ -1106,8 +1106,8 @@
           <input id="setting-revolut-tag" class="input-control" type="text" placeholder="765xu">
         </div>
         <div class="input-group">
-          <label for="setting-admin-pin">New Organizer PIN (Optional)</label>
-          <input id="setting-admin-pin" class="input-control tabular-nums" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Keep current PIN">
+          <label for="setting-admin-pin">New Organizer PIN (4–12 digits)</label>
+          <input id="setting-admin-pin" class="input-control tabular-nums" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="off" placeholder="Keep current PIN">
         </div>
       </div>
 
@@ -1617,7 +1617,7 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3z" />
     </svg>
-    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge">dev-v16</span></span>
+    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge" data-env="DEV">dev-v17</span></span>
   </div>
 </footer>
 
@@ -1653,14 +1653,43 @@
 
   <script>
   /**
+   * Detects active environment ('DEV' vs 'PROD') from URL path, version badge data-env, or __FF_VERSION__.
+   * @returns {'DEV' | 'PROD'}
+   */
+  function detectActiveEnvClient() {
+    try {
+      if (typeof window !== 'undefined' && window.location && typeof window.location.pathname === 'string') {
+        if (window.location.pathname.indexOf('/courtpay/dev') !== -1) return 'DEV';
+        if (window.location.pathname.indexOf('/courtpay/pay') !== -1) return 'PROD';
+      }
+      if (typeof window !== 'undefined' && typeof window.__FF_VERSION__ === 'string' && window.__FF_VERSION__.indexOf('dev-v') === 0) {
+        return 'DEV';
+      }
+      if (typeof document !== 'undefined') {
+        var badge = document.getElementById('ff-app-version-badge');
+        if (badge) {
+          var attrEnv = String(badge.getAttribute('data-env') || '').trim().toUpperCase();
+          if (attrEnv === 'DEV' || attrEnv === 'PROD') return attrEnv;
+          var txt = String(badge.textContent || '').trim();
+          if (txt.indexOf('dev-v') === 0) return 'DEV';
+        }
+      }
+    } catch (e) {}
+    return 'PROD';
+  }
+
+  var _activeEnv = detectActiveEnvClient();
+  var _storagePrefix = _activeEnv === 'DEV' ? 'courtpay_dev_' : 'courtpay_';
+
+  /**
    * Reusable Cross-Platform WebAuthn Biometric & Synced Passkey Engine
    * (iOS Face ID / Touch ID, Android BiometricPrompt, iCloud Keychain, Bitwarden, 1Password).
-   * Encodes the HMAC session token into WebAuthn `user.id` (`userHandle`, 46 bytes <= 64-byte W3C limit)
-   * so a single passkey enrolled on Mobile unlocks Desktop (and vice-versa) with zero server state.
+   * Encodes the Organizer PIN and/or HMAC session token into WebAuthn `user.id` (`userHandle`, <= 64-byte W3C limit)
+   * AND registers `credentialId` in `Config.PASSKEY_CREDENTIAL_ID` (max 5 devices) for per-device revocation.
    */
   window.CourtPayBiometrics = {
-    VAULT_KEY: 'courtpay_biometric_vault_v1',
-    DISMISS_KEY: 'courtpay_biometric_dismissed_v1',
+    VAULT_KEY: _storagePrefix + 'biometric_vault_v1',
+    DISMISS_KEY: _storagePrefix + 'biometric_dismissed_v1',
 
     _bytesToBase64: function (buffer) {
       var bytes = new Uint8Array(buffer);
@@ -1732,7 +1761,7 @@
         var raw = localStorage.getItem(this.VAULT_KEY);
         if (!raw) return null;
         var parsed = JSON.parse(raw);
-        if (parsed && parsed.authToken) {
+        if (parsed && (parsed.authToken || parsed.credentialIdB64)) {
           return parsed;
         }
       } catch (e) {}
@@ -1743,10 +1772,13 @@
       return Boolean(this.getVault());
     },
 
-    updateVaultToken: function (newToken) {
+    updateVaultToken: function (newToken, optPin) {
       var vault = this.getVault();
       if (vault && newToken && vault.authToken !== newToken) {
         vault.authToken = newToken;
+        if (optPin && /^\d{4,12}$/.test(String(optPin).trim())) {
+          vault.pin = String(optPin).trim();
+        }
         vault.tokenRotated = true;
         localStorage.setItem(this.VAULT_KEY, JSON.stringify(vault));
       }
@@ -1756,7 +1788,7 @@
       localStorage.removeItem(this.VAULT_KEY);
     },
 
-    enrollPasskey: function (authToken) {
+    enrollPasskey: function (authToken, optPin) {
       var self = this;
       if (!authToken) {
         return Promise.reject(new Error('Unlock with your PIN first before enabling biometrics.'));
@@ -1766,9 +1798,11 @@
       }
       var challenge = new Uint8Array(32);
       window.crypto.getRandomValues(challenge);
-      // Encode the 46-byte HMAC token (`cpsig_<40hex>`) directly into `user.id` (<= 64 bytes per W3C WebAuthn spec)
-      // so synced passkey managers (Bitwarden, 1Password, iCloud Keychain) carry the token across all devices.
-      var userIdBytes = self._stringToBytes(String(authToken).slice(0, 64));
+      var cleanPin = optPin && /^\d{4,12}$/.test(String(optPin).trim()) ? String(optPin).trim() : '';
+      // Encode either `cp_pin:<pin>` or the 46-byte HMAC token (`cpsig_<40hex>`) into `user.id` (<= 64 bytes per W3C WebAuthn spec)
+      // so synced passkey managers (iCloud Keychain, Google Password Manager, Bitwarden, 1Password) work across all devices.
+      var handlePayload = cleanPin ? ('cp_pin:' + cleanPin) : String(authToken).slice(0, 64);
+      var userIdBytes = self._stringToBytes(handlePayload.slice(0, 64));
 
       var rpOption = { name: 'CourtPay · FixtureFlow' };
       if (window.location && window.location.hostname && window.location.hostname !== '') {
@@ -1835,9 +1869,17 @@
           throw new Error('Biometric verification failed.');
         }
         var handleToken = '';
+        var recoveredPin = '';
         if (assertion.response && assertion.response.userHandle) {
           var decoded = self._bytesToString(assertion.response.userHandle).trim();
-          if (decoded.indexOf('cpsig_') === 0) {
+          if (decoded.indexOf('cp_pin:') === 0) {
+            var pinCandidate = decoded.slice(7).trim();
+            if (/^\d{4,12}$/.test(pinCandidate)) {
+              recoveredPin = pinCandidate;
+            }
+          } else if (/^\d{4,12}$/.test(decoded)) {
+            recoveredPin = decoded;
+          } else if (decoded.indexOf('cpsig_') === 0) {
             handleToken = decoded;
           }
         }
@@ -1845,31 +1887,41 @@
           ? vault.authToken
           : (handleToken || (vault && vault.authToken) || '');
 
-        if (!resolvedToken) {
+        var credIdB64 = assertion.rawId ? self._bytesToBase64(assertion.rawId) : (vault && vault.credentialIdB64 ? vault.credentialIdB64 : '');
+        if (!resolvedToken && !recoveredPin && !credIdB64) {
           throw new Error('This passkey was created before multi-device sync. Please sign in with your PIN once and re-enable Passkey.');
         }
 
-        var credIdB64 = assertion.rawId ? self._bytesToBase64(assertion.rawId) : (vault && vault.credentialIdB64 ? vault.credentialIdB64 : 'synced');
         var syncedVault = {
-          credentialIdB64: credIdB64,
+          credentialIdB64: credIdB64 || 'synced',
           authToken: resolvedToken,
           tokenRotated: Boolean(vault && vault.tokenRotated),
           enrolledAt: (vault && vault.enrolledAt) ? vault.enrolledAt : new Date().toISOString()
         };
         localStorage.setItem(self.VAULT_KEY, JSON.stringify(syncedVault));
         localStorage.removeItem(self.DISMISS_KEY);
-        return resolvedToken;
+        return {
+          credentialIdB64: credIdB64,
+          token: resolvedToken,
+          pin: recoveredPin
+        };
       });
     }
   };
 
   var _isLiveServerMode = Boolean(window.COURTPAY_API_URL || (typeof google !== 'undefined' && google.script && google.script.run));
   window.CourtPayState = {
+    activeEnv: _activeEnv,
     activeTab: 'session',
     isLoadingServer: _isLiveServerMode,
-    isAuthenticated: Boolean(localStorage.getItem('courtpay_token')),
+    TOKEN_STORAGE_KEY: _storagePrefix + 'token',
+    STATE_CACHE_KEY: _storagePrefix + 'state_cache_v1',
+    LAST_WHATSAPP_KEY: _storagePrefix + 'last_whatsapp_v1',
+    DRAFT_STORAGE_KEY: _storagePrefix + 'session_draft_v1',
+    isAuthenticated: Boolean(localStorage.getItem(_storagePrefix + 'token')),
     theme: (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark',
-    authToken: localStorage.getItem('courtpay_token') || '',
+    authToken: localStorage.getItem(_storagePrefix + 'token') || '',
+    lastUnlockedPin: '',
     isCourtSetupExpanded: false,
     isRosterExpanded: true,
     isAddGuestExpanded: false,
@@ -1886,7 +1938,8 @@
       defaultCourtsCount: 1,
       defaultCourtHours: 2,
       courtHoursStep: 1,
-      defaultCourtCostEUR: 32.00
+      defaultCourtCostEUR: 32.00,
+      hasPasskey: false
     },
     courtsCount: 1,
     courtHours: 2,
@@ -1913,10 +1966,6 @@
     },
     sessions: [],
     ledgerEntries: [],
-
-    STATE_CACHE_KEY: 'courtpay_state_cache_v1',
-    LAST_WHATSAPP_KEY: 'courtpay_last_whatsapp_v1',
-    DRAFT_STORAGE_KEY: 'courtpay_session_draft_v1',
     DRAFT_TTL_MS: 12 * 60 * 60 * 1000,
     draftSessionRequestId: 'ses_draft_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
     isActionInFlight: false,
@@ -1924,8 +1973,23 @@
     pendingPaymentPlayerId: '',
     pendingPaymentPlayerName: '',
 
+    configureStorageKeysForEnv: function (env) {
+      var norm = String(env || '').trim().toUpperCase() === 'DEV' ? 'DEV' : 'PROD';
+      var pfx = norm === 'DEV' ? 'courtpay_dev_' : 'courtpay_';
+      window.CourtPayState.activeEnv = norm;
+      window.CourtPayState.TOKEN_STORAGE_KEY = pfx + 'token';
+      window.CourtPayState.STATE_CACHE_KEY = pfx + 'state_cache_v1';
+      window.CourtPayState.LAST_WHATSAPP_KEY = pfx + 'last_whatsapp_v1';
+      window.CourtPayState.DRAFT_STORAGE_KEY = pfx + 'session_draft_v1';
+      window.CourtPayBiometrics.VAULT_KEY = pfx + 'biometric_vault_v1';
+      window.CourtPayBiometrics.DISMISS_KEY = pfx + 'biometric_dismissed_v1';
+      window.CourtPayState.authToken = localStorage.getItem(window.CourtPayState.TOKEN_STORAGE_KEY) || '';
+      window.CourtPayState.isAuthenticated = Boolean(window.CourtPayState.authToken);
+    },
+
     ACTION_STATUS_LABELS: {
       validateAdminPin: 'VERIFYING PIN & SYNCING GOOGLE SHEET...',
+      verifyPasskey: 'VERIFYING PASSKEY & SYNCING GOOGLE SHEET...',
       createSession: 'COMMITTING SESSION TO GOOGLE SHEET...',
       toggleSessionEntryPaid: 'UPDATING PAYMENT STATUS IN SHEET...',
       markEntriesPaidBatch: 'MARKING SELECTED ENTRIES PAID IN SHEET...',
@@ -2081,7 +2145,7 @@
         google.script.run
           .withSuccessHandler(function (res) {
             clearActionOverlay();
-            if (res && res.success === false && action !== 'validateAdminPin') {
+            if (res && res.success === false && action !== 'validateAdminPin' && action !== 'verifyPasskey') {
               if (window.CourtPayUI) {
                 window.CourtPayUI.setInlineAlert('global-inline-error', res.error || 'Operation could not be completed.');
               }
@@ -2093,8 +2157,8 @@
             if (res && res.token) {
               window.CourtPayState.authToken = res.token;
               window.CourtPayState.isAuthenticated = true;
-              localStorage.setItem('courtpay_token', res.token);
-              window.CourtPayBiometrics.updateVaultToken(res.token);
+              localStorage.setItem(window.CourtPayState.TOKEN_STORAGE_KEY, res.token);
+              window.CourtPayBiometrics.updateVaultToken(res.token, window.CourtPayState.lastUnlockedPin);
             }
             if (action === 'createSession') {
               window.CourtPayState.resetDraftAfterCommit();
@@ -2114,7 +2178,7 @@
             }
           })[action](reqPayload);
       } else if (window.COURTPAY_API_URL) {
-        var activeToken = window.CourtPayState.authToken || localStorage.getItem('courtpay_token') || '';
+        var activeToken = window.CourtPayState.authToken || localStorage.getItem(window.CourtPayState.TOKEN_STORAGE_KEY) || '';
         var sep = window.COURTPAY_API_URL.indexOf('?') === -1 ? '?' : '&';
         var targetUrl = window.COURTPAY_API_URL + sep +
           'rpc=1&action=' + encodeURIComponent(action) +
@@ -2162,7 +2226,7 @@
               window.CourtPayState.isLoadingServer = false;
               window.CourtPayState.isAuthenticated = false;
               window.CourtPayState.authToken = '';
-              localStorage.removeItem('courtpay_token');
+              localStorage.removeItem(window.CourtPayState.TOKEN_STORAGE_KEY);
               localStorage.removeItem(window.CourtPayState.STATE_CACHE_KEY);
               if (window.CourtPayUI) {
                 window.CourtPayUI.showLoginScreen(res && res.error ? res.error : '');
@@ -2170,7 +2234,7 @@
               if (onSuccess) onSuccess(res || { success: false, requiresAuth: true });
               return;
             }
-            if (((res && res.success === false) || (serverData && serverData.success === false)) && action !== 'validateAdminPin') {
+            if (((res && res.success === false) || (serverData && serverData.success === false)) && action !== 'validateAdminPin' && action !== 'verifyPasskey') {
               var failMsg = (res && res.error) || (serverData && serverData.error) || 'Action could not be completed.';
               if (window.CourtPayUI) {
                 window.CourtPayUI.setInlineAlert('global-inline-error', failMsg);
@@ -2184,8 +2248,8 @@
             if (serverData && serverData.token) {
               window.CourtPayState.authToken = serverData.token;
               window.CourtPayState.isAuthenticated = true;
-              localStorage.setItem('courtpay_token', serverData.token);
-              window.CourtPayBiometrics.updateVaultToken(serverData.token);
+              localStorage.setItem(window.CourtPayState.TOKEN_STORAGE_KEY, serverData.token);
+              window.CourtPayBiometrics.updateVaultToken(serverData.token, window.CourtPayState.lastUnlockedPin);
             }
             if (action === 'createSession') {
               window.CourtPayState.resetDraftAfterCommit();
@@ -2450,14 +2514,33 @@
         }
       } else if (action === 'validateAdminPin') {
         var entered = String((payload && payload.pin) || '').trim();
-        if (entered === '2026' || entered.length >= 4) {
+        if (/^\d{4,12}$/.test(entered)) {
           var simTok = 'cpsig_local_' + entered;
           st.authToken = simTok;
           st.isAuthenticated = true;
-          localStorage.setItem('courtpay_token', simTok);
+          localStorage.setItem(st.TOKEN_STORAGE_KEY, simTok);
           return { success: true, token: simTok };
         }
         return { success: false, error: 'Invalid Organizer PIN' };
+      } else if (action === 'enrollPasskey') {
+        var credId = String((payload && payload.credentialId) || '').trim();
+        if (credId) {
+          st.config.hasPasskey = true;
+          var enrolledTok = st.authToken || 'cpsig_local_passkey';
+          localStorage.setItem(st.TOKEN_STORAGE_KEY, enrolledTok);
+          return { success: true, token: enrolledTok, credentialCount: 1 };
+        }
+        return { success: false, error: 'Passkey credentialId is required' };
+      } else if (action === 'verifyPasskey') {
+        var verifyCredId = String((payload && payload.credentialId) || '').trim();
+        if (verifyCredId) {
+          var passkeyTok = st.authToken || 'cpsig_local_passkey';
+          st.authToken = passkeyTok;
+          st.isAuthenticated = true;
+          localStorage.setItem(st.TOKEN_STORAGE_KEY, passkeyTok);
+          return { success: true, token: passkeyTok };
+        }
+        return { success: false, error: 'Passkey credential is not registered or has been revoked.' };
       }
     },
 
@@ -2488,13 +2571,14 @@
           window.CourtPayState.draftSessionRequestId = String(savedDraft.draftSessionRequestId);
         }
       }
-      var shouldApplyInitialDefaults = !savedDraft && (isFirstHydration || (!fromCache && !window.CourtPayState._liveServerHydratedOnce && !window.CourtPayState._userModifiedDraft));
+      var shouldApplyInitialDefaults = !savedDraft && (isFirstHydration || (!fromCache && !window.CourtPayState._userModifiedDraft));
 
       window.CourtPayState.isLoadingServer = false;
       window.CourtPayState.syncError = '';
 
       if (!fromCache) {
         window.CourtPayState._liveServerHydratedOnce = true;
+        window.CourtPayState._lastServerSyncMs = Date.now();
         try {
           localStorage.setItem(window.CourtPayState.STATE_CACHE_KEY, JSON.stringify({
             version: serverState.version || '',
@@ -2508,7 +2592,7 @@
       }
 
       if (serverState.config) {
-        window.CourtPayState.config = serverState.config;
+        window.CourtPayState.config = Object.assign({ hasPasskey: false }, serverState.config);
         var titleEl = document.getElementById('input-session-title');
         if (titleEl && (shouldApplyInitialDefaults || (!window.CourtPayState._titleManuallyEdited && !(savedDraft && savedDraft.titleManuallyEdited)))) {
           titleEl.value = serverState.config.defaultSessionTitle || 'Friday Night Badminton';
@@ -2722,8 +2806,38 @@
       if (loginBadge) loginBadge.textContent = resolvedVer;
     },
 
+    setupForegroundSync: function () {
+      if (window.CourtPayState._foregroundSyncBound || typeof document === 'undefined') return;
+      window.CourtPayState._foregroundSyncBound = true;
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState !== 'visible') return;
+        // 1. Roll forward session date if local midnight passed and user hasn't manually edited the draft
+        var dateInp = document.getElementById('input-session-date');
+        var todayStr = window.CourtPayState.getLocalTodayStr();
+        if (dateInp && !window.CourtPayState._userModifiedDraft && dateInp.value !== todayStr) {
+          dateInp.value = todayStr;
+          window.CourtPayUI.syncCourtCalculatorUI();
+        }
+        // 2. Re-sync with Google Sheet if authenticated and backgrounded for > 5 minutes
+        var elapsed = Date.now() - Number(window.CourtPayState._lastServerSyncMs || 0);
+        if (_isLiveServerMode && window.CourtPayState.authToken && !window.CourtPayState.isActionInFlight && elapsed > 5 * 60 * 1000) {
+          window.CourtPayState.callServer('getInitialState', {}, function (res) {
+            if (res && res.players) {
+              window.CourtPayState.hydrateFromServer(res);
+              window.CourtPayUI.syncCourtCalculatorUI();
+              window.CourtPayUI.recalculatePreview();
+            }
+          });
+        }
+      });
+    },
+
     init: function () {
+      if (typeof detectActiveEnvClient === 'function' && window.CourtPayState && typeof window.CourtPayState.configureStorageKeysForEnv === 'function') {
+        window.CourtPayState.configureStorageKeysForEnv(detectActiveEnvClient());
+      }
       window.CourtPayUI.initSystemThemeListener();
+      window.CourtPayUI.setupForegroundSync();
       window.CourtPayUI.syncVersionBadges();
       var rateInp = document.getElementById('input-court-rate');
       if (rateInp && window.CourtPayState.courtRatePerHourEUR) {
@@ -2798,7 +2912,10 @@
       }
 
       var webAuthnReady = Boolean(window.CourtPayBiometrics && window.CourtPayBiometrics.isWebAuthnSupported());
-      var hasBioVault = Boolean(window.CourtPayBiometrics && window.CourtPayBiometrics.hasEnrolledVault());
+      var hasBioVault = Boolean(
+        (window.CourtPayBiometrics && window.CourtPayBiometrics.hasEnrolledVault()) ||
+        (window.CourtPayState.config && window.CourtPayState.config.hasPasskey)
+      );
       var bioBtn = document.getElementById('btn-biometric-unlock');
       var bioDiv = document.getElementById('login-divider');
       var pinSection = document.getElementById('login-pin-section');
@@ -2806,7 +2923,7 @@
 
       if (bioBtn) bioBtn.classList.toggle('hidden', !webAuthnReady);
 
-      // When Biometrics is already enrolled on this device, hide the PIN input & Unlock button by default
+      // When Biometrics is already enrolled on this device (or registered in Sheet), hide the PIN input & Unlock button by default
       // so there is only 1 primary unlock action on screen, with a "Use Organizer PIN instead" link below.
       if (hasBioVault && webAuthnReady) {
         if (pinSection) pinSection.classList.add('hidden');
@@ -2886,21 +3003,18 @@
     onPinInputChange: function (val) {
       var errEl = document.getElementById('login-error-msg');
       if (errEl) errEl.classList.add('hidden');
-      var clean = String(val || '').replace(/\D/g, '');
+      var clean = String(val || '').replace(/\D/g, '').slice(0, 12);
       var pinInp = document.getElementById('login-pin-input');
       if (pinInp && pinInp.value !== clean) {
         pinInp.value = clean;
-      }
-      if (clean.length === 4 && !window.CourtPayState._isSubmittingPin) {
-        window.CourtPayUI.submitLoginPin();
       }
     },
 
     submitLoginPin: function () {
       var pinInp = document.getElementById('login-pin-input');
       var enteredPin = pinInp ? String(pinInp.value || '').trim() : '';
-      if (!enteredPin || enteredPin.length < 4) {
-        window.CourtPayUI.showLoginScreen('Please enter your 4-digit Organizer PIN.');
+      if (!/^\d{4,12}$/.test(enteredPin)) {
+        window.CourtPayUI.showLoginScreen('Please enter your 4–12 digit numeric Organizer PIN.');
         window.CourtPayUI.showPinFallbackOnLogin();
         return;
       }
@@ -2920,11 +3034,12 @@
         if (btnText) btnText.textContent = 'Unlock CourtPay';
 
         if (res && res.success && res.token) {
+          window.CourtPayState.lastUnlockedPin = enteredPin;
           window.CourtPayState.authToken = res.token;
           window.CourtPayState.isAuthenticated = true;
-          localStorage.setItem('courtpay_token', res.token);
+          localStorage.setItem(window.CourtPayState.TOKEN_STORAGE_KEY, res.token);
           if (window.CourtPayBiometrics) {
-            window.CourtPayBiometrics.updateVaultToken(res.token);
+            window.CourtPayBiometrics.updateVaultToken(res.token, enteredPin);
           }
           window.CourtPayUI.hideLoginScreen();
           if (res.state) {
@@ -2960,34 +3075,95 @@
       if (bioBtnText) bioBtnText.textContent = 'Scanning Face ID / Passkey...';
 
       window.CourtPayBiometrics.unlockWithPasskey()
-        .then(function (storedToken) {
+        .then(function (unlockRes) {
           if (bioBtnText) bioBtnText.textContent = 'Unlock with Face ID / Biometrics';
-          window.CourtPayState.authToken = storedToken;
-          window.CourtPayState.isAuthenticated = true;
-          localStorage.setItem('courtpay_token', storedToken);
-          window.CourtPayUI.hideLoginScreen();
+          var credId = (unlockRes && typeof unlockRes === 'object') ? String(unlockRes.credentialIdB64 || '') : '';
+          var storedToken = (unlockRes && typeof unlockRes === 'object') ? String(unlockRes.token || '') : String(unlockRes || '');
+          var recoveredPin = (unlockRes && typeof unlockRes === 'object') ? String(unlockRes.pin || '') : '';
 
-          // Hydrate from local cache in 0ms if available, otherwise show connecting screen while fetching
-          var hadCache = window.CourtPayState.hydrateFromCache();
-          if (!hadCache) {
-            window.CourtPayState.isLoadingServer = true;
-          }
-          window.CourtPayUI.syncStatusScreenOverlay();
-
-          window.CourtPayState.callServer('getInitialState', {}, function (res) {
-            if (res && res.requiresAuth) {
-              window.CourtPayBiometrics.clearVault();
-              localStorage.removeItem(window.CourtPayBiometrics.DISMISS_KEY);
-              window.CourtPayUI.showLoginScreen('Organizer PIN was changed in Google Sheet. Please enter the new PIN.');
-              return;
+          var finalizePasskeySession = function (tokenToUse, stateSnapshot) {
+            window.CourtPayState.authToken = tokenToUse;
+            window.CourtPayState.isAuthenticated = true;
+            localStorage.setItem(window.CourtPayState.TOKEN_STORAGE_KEY, tokenToUse);
+            if (window.CourtPayBiometrics) {
+              window.CourtPayBiometrics.updateVaultToken(tokenToUse, recoveredPin);
             }
-            if (res && res.players) {
-              window.CourtPayState.hydrateFromServer(res);
+            window.CourtPayUI.hideLoginScreen();
+            if (stateSnapshot && stateSnapshot.players) {
+              window.CourtPayState.hydrateFromServer(stateSnapshot);
               window.CourtPayUI.syncStatusScreenOverlay();
               window.CourtPayUI.syncCourtCalculatorUI();
               window.CourtPayUI.recalculatePreview();
+              return;
             }
-          });
+            var hadCache = window.CourtPayState.hydrateFromCache();
+            if (!hadCache) {
+              window.CourtPayState.isLoadingServer = true;
+            }
+            window.CourtPayUI.syncStatusScreenOverlay();
+            window.CourtPayState.callServer('getInitialState', {}, function (res) {
+              if (res && res.requiresAuth) {
+                window.CourtPayBiometrics.clearVault();
+                localStorage.removeItem(window.CourtPayBiometrics.DISMISS_KEY);
+                window.CourtPayUI.showLoginScreen('Organizer PIN was changed in Google Sheet. Please enter the new PIN.');
+                return;
+              }
+              if (res && res.players) {
+                window.CourtPayState.hydrateFromServer(res);
+                window.CourtPayUI.syncStatusScreenOverlay();
+                window.CourtPayUI.syncCourtCalculatorUI();
+                window.CourtPayUI.recalculatePreview();
+              }
+            });
+          };
+
+          if (credId && credId !== 'synced') {
+            window.CourtPayState.callServer('verifyPasskey', { credentialId: credId }, function (vRes) {
+              if (vRes && vRes.success && vRes.token) {
+                finalizePasskeySession(vRes.token, vRes.state);
+                return;
+              }
+              // Fallback for synced passkeys across iCloud Keychain / Google Password Manager not yet registered in Sheet
+              if (recoveredPin && /^\d{4,12}$/.test(recoveredPin)) {
+                window.CourtPayState.callServer('validateAdminPin', { pin: recoveredPin }, function (pRes) {
+                  if (pRes && pRes.success && pRes.token) {
+                    window.CourtPayState.lastUnlockedPin = recoveredPin;
+                    finalizePasskeySession(pRes.token, pRes.state);
+                    window.CourtPayState.callServer('enrollPasskey', { credentialId: credId });
+                  } else {
+                    window.CourtPayBiometrics.clearVault();
+                    window.CourtPayUI.showLoginScreen((pRes && pRes.error) || 'Organizer PIN was changed in Google Sheet. Please enter the new PIN.');
+                    window.CourtPayUI.showPinFallbackOnLogin();
+                  }
+                });
+                return;
+              }
+              if (storedToken) {
+                finalizePasskeySession(storedToken, null);
+                return;
+              }
+              window.CourtPayBiometrics.clearVault();
+              window.CourtPayUI.showLoginScreen((vRes && vRes.error) || 'Passkey credential is not registered or has been revoked.');
+              window.CourtPayUI.showPinFallbackOnLogin();
+            });
+            return;
+          }
+
+          if (recoveredPin && /^\d{4,12}$/.test(recoveredPin)) {
+            window.CourtPayState.callServer('validateAdminPin', { pin: recoveredPin }, function (pRes) {
+              if (pRes && pRes.success && pRes.token) {
+                window.CourtPayState.lastUnlockedPin = recoveredPin;
+                finalizePasskeySession(pRes.token, pRes.state);
+              } else {
+                window.CourtPayBiometrics.clearVault();
+                window.CourtPayUI.showLoginScreen((pRes && pRes.error) || 'Organizer PIN was changed in Google Sheet.');
+                window.CourtPayUI.showPinFallbackOnLogin();
+              }
+            });
+            return;
+          }
+
+          finalizePasskeySession(storedToken, null);
         })
         .catch(function (err) {
           if (bioBtnText) bioBtnText.textContent = 'Unlock with Face ID / Biometrics';
@@ -3004,15 +3180,30 @@
     },
 
     enableBiometricLogin: function () {
-      var token = window.CourtPayState.authToken || localStorage.getItem('courtpay_token') || '';
+      var token = window.CourtPayState.authToken || localStorage.getItem(window.CourtPayState.TOKEN_STORAGE_KEY) || '';
       if (!token) {
         window.CourtPayUI.showLoginScreen('Unlock with your PIN first.');
         return;
       }
-      window.CourtPayBiometrics.enrollPasskey(token)
-        .then(function () {
-          window.CourtPayUI.refreshBiometricEnrollmentBanner();
-          window.CourtPayUI.syncBiometricSettingsBox();
+      window.CourtPayBiometrics.enrollPasskey(token, window.CourtPayState.lastUnlockedPin)
+        .then(function (vaultRecord) {
+          if (vaultRecord && vaultRecord.credentialIdB64) {
+            window.CourtPayState.callServer('enrollPasskey', { credentialId: vaultRecord.credentialIdB64 }, function (res) {
+              if (res && res.token) {
+                window.CourtPayState.authToken = res.token;
+                localStorage.setItem(window.CourtPayState.TOKEN_STORAGE_KEY, res.token);
+                window.CourtPayBiometrics.updateVaultToken(res.token, window.CourtPayState.lastUnlockedPin);
+              }
+              if (window.CourtPayState.config) {
+                window.CourtPayState.config.hasPasskey = true;
+              }
+              window.CourtPayUI.refreshBiometricEnrollmentBanner();
+              window.CourtPayUI.syncBiometricSettingsBox();
+            });
+          } else {
+            window.CourtPayUI.refreshBiometricEnrollmentBanner();
+            window.CourtPayUI.syncBiometricSettingsBox();
+          }
         })
         .catch(function (err) {
           window.CourtPayUI.setInlineAlert('global-inline-error', 'Could not enroll Face ID / Biometrics: ' + String(err && err.message ? err.message : err));
@@ -3055,7 +3246,7 @@
     lockSession: function () {
       window.CourtPayState.authToken = '';
       window.CourtPayState.isAuthenticated = false;
-      localStorage.removeItem('courtpay_token');
+      localStorage.removeItem(window.CourtPayState.TOKEN_STORAGE_KEY);
       localStorage.removeItem(window.CourtPayState.STATE_CACHE_KEY);
       window.CourtPayUI.closeSettingsModal();
       window.CourtPayUI.showLoginScreen('');
@@ -3266,8 +3457,13 @@
         defaultCourtCostEUR: costVal,
         revolutTag: revVal
       };
-      if (/^\d{4,8}$/.test(newPinVal)) {
+      if (newPinVal !== '') {
+        if (!/^\d{4,12}$/.test(newPinVal)) {
+          window.CourtPayUI.setInlineAlert('session-inline-error', 'Organizer PIN must be 4 to 12 digits.');
+          return;
+        }
         updatePayload.adminPin = newPinVal;
+        window.CourtPayState.lastUnlockedPin = newPinVal;
       }
 
       window.CourtPayUI.closeSettingsModal();
@@ -3386,9 +3582,6 @@
       window.CourtPayState._userModifiedDraft = true;
       var nextStep = Number(window.CourtPayState.courtHoursStep) === 0.5 ? 1 : 0.5;
       window.CourtPayState.courtHoursStep = nextStep;
-      try {
-        localStorage.setItem('courtpay_hours_step', String(nextStep));
-      } catch (_) {}
       if (nextStep === 1 && window.CourtPayState.courtHours % 1 !== 0) {
         window.CourtPayState.courtHours = Math.max(1, Math.round(window.CourtPayState.courtHours));
       }
@@ -3432,9 +3625,6 @@
       var rateInp = document.getElementById('input-court-rate');
       var rate = rateInp ? Math.max(0, Number(rateInp.value) || 0) : 16.00;
       window.CourtPayState.courtRatePerHourEUR = rate;
-      try {
-        localStorage.setItem('courtpay_court_rate', String(rate));
-      } catch (_) {}
       window.CourtPayState.courtCostManualOverride = false;
       window.CourtPayUI.syncCourtCalculatorUI();
       window.CourtPayUI.recalculatePreview();
