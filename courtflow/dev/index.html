@@ -134,8 +134,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v98";
-  console.log("%c[CourtFlow]%c Running version dev-v98", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "dev-v100";
+  console.log("%c[CourtFlow]%c Running version dev-v100", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -2503,7 +2503,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="app-version" content="dev-v98">
+  <meta name="app-version" content="dev-v100">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/courtflow/dev/">
@@ -2591,20 +2591,20 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v98</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v100</span>
 
         </div>
       </div>
 
       <!-- Zero-Footprint Standalone PWA Pull-to-Refresh Indicator -->
-      <div id="ptr-indicator" class="ptr-indicator" aria-hidden="true" style="display: none;">
+      <div id="ptr-indicator" class="ptr-indicator" aria-hidden="true">
         <div class="ptr-pill glass-card">
           <svg id="ptr-icon" class="ptr-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="23 4 23 10 17 10"></polyline>
             <polyline points="1 20 1 14 7 14"></polyline>
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
           </svg>
-          <span id="ptr-label" class="ptr-label">Pull to sync with Google Sheet</span>
+          <span id="ptr-text" class="ptr-label">Pull to sync with Google Sheet</span>
         </div>
       </div>
 
@@ -2618,6 +2618,12 @@ function resolveCourtflowHost(input) {
             <h1 style="margin: 0; font-size: 20px; font-weight: 850; letter-spacing: -0.03em; line-height: 1.1;">CourtFlow</h1>
           </div>
           <div class="header-actions" style="display: flex; gap: 8px;">
+            <button id="header-settings-btn" class="icon-button" onclick="openSettingsModal()" aria-label="Open Settings" title="Settings & Passkey">
+              <svg class="gear-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </button>
             <button id="logout-btn" class="icon-button" onclick="handleAdminLogout()" aria-label="Log Out" title="Log Out">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -2800,7 +2806,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v98</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v100</span>
 
       </div>
 
@@ -3049,6 +3055,14 @@ function resolveCourtflowHost(input) {
                   <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                 </svg>
                 <span>Sync Now with Google Sheet</span>
+              </button>
+              <button type="button" id="btn-settings-register-passkey" class="btn btn-outline-primary" onclick="closeSettingsModal(); confirmPasskeyEnrollment();" style="font-size: 14px; font-weight: 700; padding: 10px 16px; justify-content: center; display: inline-flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="7.5" cy="15.5" r="5.5"></circle>
+                  <path d="m21 2-9.6 9.6"></path>
+                  <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
+                </svg>
+                <span id="btn-settings-register-passkey-text">Register Face ID / Touch ID Passkey</span>
               </button>
               <button type="button" class="btn btn-outline-danger" onclick="closeSettingsModal(); triggerResetPlayCounts();" style="font-size: 14px; font-weight: 700; padding: 10px 16px; justify-content: center; display: inline-flex; align-items: center; gap: 8px;">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3805,7 +3819,12 @@ function resolveCourtflowHost(input) {
   function confirmPasskeyEnrollment() {
     const modal = document.getElementById("passkey-enroll-modal");
     if (modal) modal.style.display = "none";
-    if (!isWebAuthnSupported_()) return;
+    if (!isWebAuthnSupported_()) {
+      if (typeof showAlertModal === "function") {
+        showAlertModal("Passkey Unavailable", "Passkeys require opening CourtFlow from the standalone PWA (fixtureflow.github.io) on a device with Face ID, Touch ID, or Windows Hello.");
+      }
+      return;
+    }
 
     const challenge = new Uint8Array(32);
     if (window.crypto && typeof window.crypto.getRandomValues === "function") {
@@ -3846,10 +3865,20 @@ function resolveCourtflowHost(input) {
           const res = typeof raw === "string" ? JSON.parse(raw) : raw;
           if (res && res.success) {
             setStoredPasskeyCredentialId_(credId);
+            const btnText = document.getElementById("btn-settings-register-passkey-text");
+            if (btnText) btnText.innerText = "Passkey Registered on This Device";
+            if (typeof showAlertModal === "function") {
+              showAlertModal("Passkey Enabled", "Face ID / Touch ID Passkey has been registered for this device.");
+            }
+          } else if (typeof showAlertModal === "function") {
+            showAlertModal("Passkey Error", (res && res.error) || "Could not save Passkey to club settings.");
           }
         })
         .withFailureHandler(err => {
           console.warn("Passkey registration failed:", err);
+          if (typeof showAlertModal === "function") {
+            showAlertModal("Passkey Error", "Failed to save Passkey: " + (err && err.message ? err.message : String(err)));
+          }
         })
         .registerPasskey(credId, token);
     }).catch(err => {
@@ -5102,6 +5131,13 @@ function resolveCourtflowHost(input) {
     if (sliderVariety) sliderVariety.value = uiVariety;
     if (displaySkill) displaySkill.innerText = uiSkill;
     if (displayVariety) displayVariety.innerText = uiVariety;
+
+    const passkeyBtnText = document.getElementById("btn-settings-register-passkey-text");
+    if (passkeyBtnText && typeof getStoredPasskeyCredentialId_ === "function") {
+      passkeyBtnText.innerText = getStoredPasskeyCredentialId_()
+        ? "Passkey Registered on This Device (Re-register)"
+        : "Register Face ID / Touch ID Passkey";
+    }
 
     // Show modal
     modalEl.style.display = "flex";
