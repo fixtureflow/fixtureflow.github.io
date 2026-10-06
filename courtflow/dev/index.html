@@ -134,8 +134,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v93";
-  console.log("%c[CourtFlow]%c Running version dev-v93", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "dev-v98";
+  console.log("%c[CourtFlow]%c Running version dev-v98", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -290,6 +290,11 @@ function resolveCourtflowHost(input) {
       payload.token = args[0] || null;
     } else if (action === "validateAdminPin") {
       payload.pin = args[0];
+    } else if (action === "verifyPasskey") {
+      payload.credentialId = args[0];
+    } else if (action === "registerPasskey") {
+      payload.credentialId = args[0];
+      payload.token = args[1] || null;
     }
     if (action === "saveSessionState") {
       payload.payload = args[0];
@@ -2452,10 +2457,53 @@ function resolveCourtflowHost(input) {
     line-height: 1.4;
   }
 
+  /* Zero-Footprint Standalone PWA Pull-to-Refresh Indicator */
+  .ptr-indicator {
+    height: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: height 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 60;
+    width: 100%;
+  }
+
+  .ptr-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-panel);
+    color: var(--text-primary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .ptr-icon {
+    transition: transform 0.2s ease;
+    color: #0ea5e9;
+  }
+
+  .ptr-icon.spinning {
+    animation: spin 0.8s linear infinite;
+  }
+
+  .offline-inline-banner {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: var(--text-primary);
+  }
+
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="app-version" content="dev-v93">
+  <meta name="app-version" content="dev-v98">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/courtflow/dev/">
@@ -2521,11 +2569,20 @@ function resolveCourtflowHost(input) {
           
           <!-- PIN Form -->
           <form id="admin-login-form" onsubmit="handleAdminLogin(event)" style="margin-top: 24px; display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 250px; margin-left: auto; margin-right: auto;">
-            <input type="password" id="admin-pin-input" class="ff-input text-center" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="PIN" required autocomplete="one-time-code" style="letter-spacing: 4px; font-size: 1.25rem; font-weight: bold; text-align: center; height: 50px; min-height: 50px; border-radius: 12px; box-sizing: border-box;">
+            <input type="password" id="admin-pin-input" class="ff-input text-center" inputmode="numeric" pattern="[0-9]*" maxlength="12" placeholder="PIN" required autocomplete="off" style="letter-spacing: 4px; font-size: 1.25rem; font-weight: bold; text-align: center; height: 50px; min-height: 50px; border-radius: 12px; box-sizing: border-box;">
             
             <button type="submit" id="admin-login-btn" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 1.1rem; min-height: 50px; height: 50px; font-weight: 600; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px; box-sizing: border-box;">
               <span id="admin-login-btn-text">ENTER</span>
               <span id="admin-login-spinner" style="display: none;">VERIFYING...</span>
+            </button>
+
+            <button type="button" id="passkey-unlock-btn" class="btn btn-outline-primary" onclick="handlePasskeyLogin()" style="display: none; width: 100%; padding: 12px 14px; font-size: 0.92rem; min-height: 46px; font-weight: 600; border-radius: 12px; align-items: center; justify-content: center; gap: 8px; box-sizing: border-box; background: transparent; border: 1.5px solid var(--border-panel); color: var(--text-primary); cursor: pointer;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="7.5" cy="15.5" r="5.5"></circle>
+                <path d="m21 2-9.6 9.6"></path>
+                <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
+              </svg>
+              <span id="passkey-unlock-btn-text">Unlock with Passkey</span>
             </button>
 
             <div id="login-error-msg" class="error-msg text-center" style="display: none; color: #ef4444; font-size: 0.875rem; font-weight: 600; line-height: 1.3;"></div>
@@ -2534,8 +2591,20 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v93</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v98</span>
 
+        </div>
+      </div>
+
+      <!-- Zero-Footprint Standalone PWA Pull-to-Refresh Indicator -->
+      <div id="ptr-indicator" class="ptr-indicator" aria-hidden="true" style="display: none;">
+        <div class="ptr-pill glass-card">
+          <svg id="ptr-icon" class="ptr-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span id="ptr-label" class="ptr-label">Pull to sync with Google Sheet</span>
         </div>
       </div>
 
@@ -2577,9 +2646,33 @@ function resolveCourtflowHost(input) {
           </div>
         </header>
 
+        <!-- Offline Cache Fallback & Sync Warning Banner -->
+        <div id="global-inline-error" class="contextual-banner offline-inline-banner" role="status" aria-live="polite" style="display: none;">
+          <span class="banner-text" style="display: inline-flex; align-items: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+              <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+              <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+              <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+              <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+              <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+              <line x1="12" y1="20" x2="12.01" y2="20"></line>
+            </svg>
+            <span id="global-inline-error-text">Offline mode — viewing last cached club state.</span>
+          </span>
+          <button type="button" class="banner-link-btn" onclick="refreshLiveSheetState({ showOverlay: true })">Sync Now</button>
+        </div>
+
         <!-- Contextual Alert Banner for Old Sessions -->
         <div id="contextual-banner" class="contextual-banner" style="display: none;">
-          <span class="banner-text">⚠️ Active session from a previous day detected.</span>
+          <span class="banner-text" style="display: inline-flex; align-items: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span>Active session from a previous day detected.</span>
+          </span>
           <button class="banner-link-btn" onclick="triggerSessionReset()">Reset Session</button>
         </div>
 
@@ -2707,7 +2800,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v93</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v98</span>
 
       </div>
 
@@ -2750,7 +2843,13 @@ function resolveCourtflowHost(input) {
     <div id="custom-alert-modal" class="modal-overlay" style="display: none;">
       <div class="modal-card glass-card">
         <div class="modal-header">
-          <span class="modal-title-icon">⚠️</span>
+          <span class="modal-title-icon" style="display: inline-flex; align-items: center;">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </span>
           <h3 id="modal-title">Alert</h3>
         </div>
         <div class="modal-body">
@@ -2766,7 +2865,13 @@ function resolveCourtflowHost(input) {
     <div id="custom-confirm-modal" class="modal-overlay" style="display: none;">
       <div class="modal-card glass-card">
         <div class="modal-header">
-          <span class="modal-title-icon">❓</span>
+          <span class="modal-title-icon" style="display: inline-flex; align-items: center;">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </span>
           <h3 id="confirm-modal-title">Confirm Action</h3>
         </div>
         <div class="modal-body">
@@ -2783,7 +2888,14 @@ function resolveCourtflowHost(input) {
     <div id="add-guest-modal" class="modal-overlay" style="display: none;">
       <div class="modal-card glass-card">
         <div class="modal-header">
-          <span class="modal-title-icon">👤</span>
+          <span class="modal-title-icon" style="display: inline-flex; align-items: center;">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="8.5" cy="7" r="4"></circle>
+              <line x1="20" y1="8" x2="20" y2="14"></line>
+              <line x1="23" y1="11" x2="17" y2="11"></line>
+            </svg>
+          </span>
           <h3>Add Guest Player</h3>
         </div>
         <div class="modal-body">
@@ -2799,10 +2911,22 @@ function resolveCourtflowHost(input) {
               <label class="form-label-compact">Gender</label>
               <div class="segmented-control">
                 <input type="radio" name="guest-gender" id="gender-male-toggle" value="Male" checked style="display: none;" />
-                <label for="gender-male-toggle" class="segment-label">♂ Male</label>
+                <label for="gender-male-toggle" class="segment-label" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="10" cy="14" r="5"></circle>
+                    <path d="M14 10l6-6M14 4h6v6"></path>
+                  </svg>
+                  <span>Male</span>
+                </label>
                 
                 <input type="radio" name="guest-gender" id="gender-female-toggle" value="Female" style="display: none;" />
-                <label for="gender-female-toggle" class="segment-label">♀ Female</label>
+                <label for="gender-female-toggle" class="segment-label" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="8" r="5"></circle>
+                    <path d="M12 13v8M9 17h6"></path>
+                  </svg>
+                  <span>Female</span>
+                </label>
               </div>
             </div>
 
@@ -2841,7 +2965,12 @@ function resolveCourtflowHost(input) {
     <div id="settings-modal" class="modal-overlay" style="display: none;">
       <form id="settings-form" class="modal-card glass-card" onsubmit="saveSettingsForm(event)">
         <div class="modal-header" style="flex-shrink: 0;">
-          <span class="modal-title-icon">⚙️</span>
+          <span class="modal-title-icon" style="display: inline-flex; align-items: center;">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </span>
           <h3>Matchmaking Settings</h3>
         </div>
         <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px; overflow-y: auto; min-height: 0; padding-right: 4px;">
@@ -2913,11 +3042,27 @@ function resolveCourtflowHost(input) {
 
             <!-- Utility Admin Actions -->
             <div class="utility-actions-row" style="display: flex; flex-direction: column; gap: 10px; border-top: 1px dashed var(--border-panel); padding-top: 14px; margin-top: 8px;">
-              <button type="button" class="btn btn-outline-danger" onclick="closeSettingsModal(); triggerResetPlayCounts();" style="font-size: 14px; font-weight: 700; padding: 10px 16px; justify-content: center;">
-                🔄 Reset Gender Play Counts
+              <button type="button" id="btn-settings-sync-now" class="btn btn-outline-primary" onclick="closeSettingsModal(); refreshLiveSheetState({ showOverlay: true });" style="font-size: 14px; font-weight: 700; padding: 10px 16px; justify-content: center; display: inline-flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <polyline points="1 20 1 14 7 14"></polyline>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                <span>Sync Now with Google Sheet</span>
               </button>
-              <button type="button" class="btn btn-outline-danger" onclick="closeSettingsModal(); triggerResetToDefaults();" style="font-size: 14px; font-weight: 700; padding: 10px 16px; justify-content: center;">
-                🗑️ Restore Spreadsheet Defaults
+              <button type="button" class="btn btn-outline-danger" onclick="closeSettingsModal(); triggerResetPlayCounts();" style="font-size: 14px; font-weight: 700; padding: 10px 16px; justify-content: center; display: inline-flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="1 4 1 10 7 10"></polyline>
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+                <span>Reset Gender Play Counts</span>
+              </button>
+              <button type="button" class="btn btn-outline-danger" onclick="closeSettingsModal(); triggerResetToDefaults();" style="font-size: 14px; font-weight: 700; padding: 10px 16px; justify-content: center; display: inline-flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <span>Restore Spreadsheet Defaults</span>
               </button>
             </div>
           </div>
@@ -2928,6 +3073,29 @@ function resolveCourtflowHost(input) {
             <button type="submit" class="btn btn-primary">Apply & Save</button>
           </div>
         </form>
+    </div>
+
+    <!-- Non-Blocking WebAuthn Passkey Enrollment Modal -->
+    <div id="passkey-enroll-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card glass-card">
+        <div class="modal-header">
+          <span class="modal-title-icon" style="display: inline-flex; align-items: center;">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="7.5" cy="15.5" r="5.5"></circle>
+              <path d="m21 2-9.6 9.6"></path>
+              <path d="m15.5 7.5 3 3L22 7l-3-3"></path>
+            </svg>
+          </span>
+          <h3>Enable Fast Unlock</h3>
+        </div>
+        <div class="modal-body">
+          <p>Would you like to enable Face ID / Touch ID Passkey unlock on this device so you can open CourtFlow without typing your PIN next time?</p>
+        </div>
+        <div class="modal-footer modal-footer-gap">
+          <button type="button" class="btn btn-outline-danger" id="passkey-enroll-dismiss-btn" onclick="dismissPasskeyEnrollment()">Not Now</button>
+          <button type="button" class="btn btn-primary" id="passkey-enroll-confirm-btn" onclick="confirmPasskeyEnrollment()">Enable Passkey</button>
+        </div>
+      </div>
     </div>
 
     <!-- Full-Screen Loading Overlay -->
@@ -3050,7 +3218,60 @@ function resolveCourtflowHost(input) {
       localStorage.removeItem(getCourtflowStorageKey("auth_token"));
     } catch (e) {}
   }
+
+  /**
+   * Retrieves the tenant-scoped offline fallback cached state from browser storage.
+   * Only used inside RPC failure handlers when offline; never used to skip live Sheet reads on normal boot.
+   * @returns {Object|null}
+   */
+  function getCachedState() {
+    try {
+      var raw = localStorage.getItem(getCourtflowStorageKey("cached_state"));
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      return (parsed && typeof parsed === "object" && Array.isArray(parsed.players)) ? parsed : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Persists the latest authenticated state snapshot to tenant-scoped browser storage
+   * for offline sports-hall resilience.
+   * @param {Object} payload
+   */
+  function setCachedState(payload) {
+    if (!payload || payload.authenticated === false || !Array.isArray(payload.players)) return;
+    try {
+      var snapshot = {
+        authenticated: true,
+        clubName: payload.clubName || (payload.config && payload.config.clubName) || "CourtFlow",
+        clubLogoUrl: payload.clubLogoUrl || (payload.config && payload.config.clubLogoUrl) || "",
+        hasPasskey: Boolean(payload.hasPasskey),
+        players: payload.players || [],
+        activeCourts: payload.activeCourts || [],
+        history: payload.history || [],
+        opponentHistory: payload.opponentHistory || [],
+        maxCourts: payload.maxCourts || (payload.config && payload.config.maxCourts) || 3,
+        config: payload.config || {},
+        matchHistory: payload.matchHistory || [],
+        timestamp: payload.timestamp || Date.now(),
+        cachedAt: Date.now()
+      };
+      localStorage.setItem(getCourtflowStorageKey("cached_state"), JSON.stringify(snapshot));
+    } catch (e) {}
+  }
+
+  /**
+   * Evicts the tenant-scoped cached state from browser storage.
+   */
+  function removeCachedState() {
+    try {
+      localStorage.removeItem(getCourtflowStorageKey("cached_state"));
+    } catch (e) {}
+  }
 </script>
+
 
 
     <!--
@@ -3227,6 +3448,14 @@ function resolveCourtflowHost(input) {
       }
     }
     
+    const passkeyBtn = document.getElementById("passkey-unlock-btn");
+    if (passkeyBtn) {
+      const hasPasskeyAvailable = typeof isWebAuthnSupported_ === "function" &&
+        isWebAuthnSupported_() &&
+        Boolean((payload && payload.hasPasskey) || (typeof getStoredPasskeyCredentialId_ === "function" && getStoredPasskeyCredentialId_()));
+      passkeyBtn.style.display = hasPasskeyAvailable ? "inline-flex" : "none";
+    }
+
     const pinInput = document.getElementById("admin-pin-input");
     if (pinInput) {
       pinInput.value = "";
@@ -3338,9 +3567,9 @@ function resolveCourtflowHost(input) {
     const spinner = document.getElementById("admin-login-spinner");
     const form = document.getElementById("admin-login-form");
     
-    if (!pin || pin.length !== 4) {
+    if (!pin || !/^\d{4,12}$/.test(pin)) {
       if (errEl) {
-        errEl.innerText = "Please enter a 4-digit PIN.";
+        errEl.innerText = "Please enter a 4 to 12 digit numeric PIN.";
         errEl.style.display = "block";
       }
       if (form) {
@@ -3372,6 +3601,9 @@ function resolveCourtflowHost(input) {
           }
           const payload = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
           initializeDashboard(payload);
+          if (typeof maybePromptPasskeyEnrollment_ === "function") {
+            maybePromptPasskeyEnrollment_(payload);
+          }
         } else {
           if (errEl) {
             errEl.innerText = res.error || "Incorrect PIN.";
@@ -3435,7 +3667,11 @@ function resolveCourtflowHost(input) {
       if (typeof removeAuthToken === "function") {
         removeAuthToken();
       }
+      if (typeof removeCachedState === "function") {
+        removeCachedState();
+      }
       localStorage.removeItem("cf_dev_auth_token");
+      localStorage.removeItem("cf_dev_cached_state");
       localStorage.removeItem("clubflow-theme");
       localStorage.removeItem("clubflow-collapsed");
       try {
@@ -3464,13 +3700,241 @@ function resolveCourtflowHost(input) {
       }
       showLoginScreen({ 
         clubName: state.config.clubName || "CourtFlow",
-        clubLogoUrl: state.config.clubLogoUrl || ""
+        clubLogoUrl: state.config.clubLogoUrl || "",
+        hasPasskey: typeof getStoredPasskeyCredentialId_ === "function" ? Boolean(getStoredPasskeyCredentialId_()) : false
       });
     }
   }
 
+  // =========================================================================
+  // WebAuthn Passkey Enrollment & Fast Unlock (Multi-Device)
+  // =========================================================================
+
+  function isWebAuthnSupported_() {
+    return Boolean(
+      typeof window !== "undefined" &&
+      window.PublicKeyCredential &&
+      typeof navigator !== "undefined" &&
+      navigator.credentials &&
+      typeof navigator.credentials.create === "function" &&
+      typeof navigator.credentials.get === "function"
+    );
+  }
+
+  function bufferToBase64Url_(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  }
+
+  function base64UrlToUint8Array_(base64Url) {
+    const padded = String(base64Url || "").replace(/-/g, "+").replace(/_/g, "/");
+    const padLen = (4 - (padded.length % 4)) % 4;
+    const binary = atob(padded + "=".repeat(padLen));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+  }
+
+  function getStoredPasskeyCredentialId_() {
+    try {
+      const key = typeof getCourtflowStorageKey === "function"
+        ? getCourtflowStorageKey("passkey_cred_id")
+        : "cf_passkey_cred_id";
+      return localStorage.getItem(key) || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function setStoredPasskeyCredentialId_(credId) {
+    try {
+      const key = typeof getCourtflowStorageKey === "function"
+        ? getCourtflowStorageKey("passkey_cred_id")
+        : "cf_passkey_cred_id";
+      if (credId) {
+        localStorage.setItem(key, credId);
+      } else {
+        localStorage.removeItem(key);
+      }
+    } catch (e) {}
+  }
+
+  function isPasskeyPromptDismissed_() {
+    try {
+      const key = typeof getCourtflowStorageKey === "function"
+        ? getCourtflowStorageKey("passkey_prompt_dismissed")
+        : "cf_passkey_prompt_dismissed";
+      return localStorage.getItem(key) === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function maybePromptPasskeyEnrollment_(payload) {
+    if (!isWebAuthnSupported_()) return;
+    if (getStoredPasskeyCredentialId_()) return;
+    if (isPasskeyPromptDismissed_()) return;
+    if (typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === "function") {
+      window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+        .then(available => {
+          if (!available) return;
+          const modal = document.getElementById("passkey-enroll-modal");
+          if (modal) modal.style.display = "flex";
+        })
+        .catch(() => {});
+    }
+  }
+
+  function dismissPasskeyEnrollment() {
+    try {
+      const key = typeof getCourtflowStorageKey === "function"
+        ? getCourtflowStorageKey("passkey_prompt_dismissed")
+        : "cf_passkey_prompt_dismissed";
+      localStorage.setItem(key, "1");
+    } catch (e) {}
+    const modal = document.getElementById("passkey-enroll-modal");
+    if (modal) modal.style.display = "none";
+  }
+
+  function confirmPasskeyEnrollment() {
+    const modal = document.getElementById("passkey-enroll-modal");
+    if (modal) modal.style.display = "none";
+    if (!isWebAuthnSupported_()) return;
+
+    const challenge = new Uint8Array(32);
+    if (window.crypto && typeof window.crypto.getRandomValues === "function") {
+      window.crypto.getRandomValues(challenge);
+    }
+    const userId = new Uint8Array(16);
+    if (window.crypto && typeof window.crypto.getRandomValues === "function") {
+      window.crypto.getRandomValues(userId);
+    }
+    const clubLabel = (state && state.config && state.config.clubName) ? state.config.clubName : "CourtFlow";
+
+    navigator.credentials.create({
+      publicKey: {
+        challenge: challenge,
+        rp: { name: "CourtFlow · FixtureFlow" },
+        user: {
+          id: userId,
+          name: "organizer@" + clubLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+          displayName: clubLabel + " Organizer"
+        },
+        pubKeyCredParams: [
+          { type: "public-key", alg: -7 },
+          { type: "public-key", alg: -257 }
+        ],
+        authenticatorSelection: {
+          authenticatorAttachment: "platform",
+          userVerification: "required",
+          residentKey: "preferred"
+        },
+        timeout: 60000
+      }
+    }).then(cred => {
+      if (!cred || !cred.rawId) return;
+      const credId = bufferToBase64Url_(cred.rawId);
+      const token = typeof getAuthToken === "function" ? getAuthToken() : "";
+      google.script.run
+        .withSuccessHandler(raw => {
+          const res = typeof raw === "string" ? JSON.parse(raw) : raw;
+          if (res && res.success) {
+            setStoredPasskeyCredentialId_(credId);
+          }
+        })
+        .withFailureHandler(err => {
+          console.warn("Passkey registration failed:", err);
+        })
+        .registerPasskey(credId, token);
+    }).catch(err => {
+      console.warn("Passkey creation cancelled or failed:", err);
+    });
+  }
+
+  function handlePasskeyLogin() {
+    if (!isWebAuthnSupported_()) return;
+    const errEl = document.getElementById("login-error-msg");
+    const passkeyBtn = document.getElementById("passkey-unlock-btn");
+    const passkeyBtnText = document.getElementById("passkey-unlock-btn-text");
+    if (errEl) errEl.style.display = "none";
+    if (passkeyBtn) passkeyBtn.disabled = true;
+    if (passkeyBtnText) passkeyBtnText.innerText = "Verifying Passkey...";
+
+    const challenge = new Uint8Array(32);
+    if (window.crypto && typeof window.crypto.getRandomValues === "function") {
+      window.crypto.getRandomValues(challenge);
+    }
+
+    const storedCredId = getStoredPasskeyCredentialId_();
+    const publicKeyOptions = {
+      challenge: challenge,
+      userVerification: "required",
+      timeout: 60000
+    };
+    if (storedCredId) {
+      try {
+        publicKeyOptions.allowCredentials = [{
+          type: "public-key",
+          id: base64UrlToUint8Array_(storedCredId)
+        }];
+      } catch (e) {}
+    }
+
+    navigator.credentials.get({ publicKey: publicKeyOptions })
+      .then(assertion => {
+        if (!assertion || !assertion.rawId) {
+          throw new Error("No passkey assertion returned.");
+        }
+        const credId = bufferToBase64Url_(assertion.rawId);
+        google.script.run
+          .withSuccessHandler(raw => {
+            if (passkeyBtn) passkeyBtn.disabled = false;
+            if (passkeyBtnText) passkeyBtnText.innerText = "Unlock with Passkey";
+            const res = typeof raw === "string" ? JSON.parse(raw) : raw;
+            if (res && res.success) {
+              setStoredPasskeyCredentialId_(credId);
+              if (typeof setAuthToken === "function") {
+                setAuthToken(res.token);
+              } else {
+                localStorage.setItem("cf_dev_auth_token", res.token);
+              }
+              const payload = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+              initializeDashboard(payload);
+            } else {
+              setStoredPasskeyCredentialId_("");
+              if (errEl) {
+                errEl.innerText = (res && res.error) || "Passkey not recognized. Please enter your PIN.";
+                errEl.style.display = "block";
+              }
+            }
+          })
+          .withFailureHandler(err => {
+            if (passkeyBtn) passkeyBtn.disabled = false;
+            if (passkeyBtnText) passkeyBtnText.innerText = "Unlock with Passkey";
+            if (errEl) {
+              errEl.innerText = "Passkey verification failed. Please enter your PIN.";
+              errEl.style.display = "block";
+            }
+          })
+          .verifyPasskey(credId);
+      })
+      .catch(() => {
+        if (passkeyBtn) passkeyBtn.disabled = false;
+        if (passkeyBtnText) passkeyBtnText.innerText = "Unlock with Passkey";
+      });
+  }
+
   if (typeof window !== "undefined") {
     window.handleAdminLogout = handleAdminLogout;
+    window.handlePasskeyLogin = handlePasskeyLogin;
+    window.confirmPasskeyEnrollment = confirmPasskeyEnrollment;
+    window.dismissPasskeyEnrollment = dismissPasskeyEnrollment;
   }
 </script>
 
@@ -3565,7 +4029,7 @@ function resolveCourtflowHost(input) {
       
       const genderRule = state.config && state.config.genderRule ? state.config.genderRule : "standard";
       const isBypassed = (genderRule === "mixedOnly" && !p.plays_mixed && !playing);
-      const bypassedBadge = isBypassed ? `<span class="chip-bypassed-badge" title="Bypassed: Mixed Doubles Only (XD) mode active but player has plays mixed disabled">⚠️ Bypassed</span>` : "";
+      const bypassedBadge = isBypassed ? `<span class="chip-bypassed-badge" title="Bypassed: Mixed Doubles Only (XD) mode active but player has plays mixed disabled"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 2px;" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>Bypassed</span>` : "";
 
       const genderClass = p.gender === "Female" ? "gender-female" : "gender-male";
       const escapedName = escapeHtml(p.name);
@@ -4945,7 +5409,14 @@ function resolveCourtflowHost(input) {
     renderBadges();
   }
 
-  function initializeDashboard(payload) {
+  var RESUME_SYNC_THRESHOLD_MS = 5 * 60 * 1000;
+  var lastSheetSyncAt = Date.now();
+  var lastHiddenAt = 0;
+  var isSheetRefreshInFlight = false;
+
+  function initializeDashboard(payload, options) {
+    var fromOfflineCache = !!(options && options.fromOfflineCache);
+
     state.players = payload.players || [];
     state.activeCourts = payload.activeCourts || [];
     state.history = payload.history || [];
@@ -4957,10 +5428,12 @@ function resolveCourtflowHost(input) {
     
     // Update branding title if clubName is set
     const clubTitle = state.config.clubName || payload.clubName || "CourtFlow";
-    const brandingH1 = document.querySelector(".branding h1");
+    const brandingH1 = (typeof document !== "undefined" && typeof document.querySelector === "function")
+      ? document.querySelector(".branding h1")
+      : null;
     if (brandingH1) brandingH1.innerText = clubTitle;
     if (clubTitle && clubTitle !== "CourtFlow") {
-      updatePortalTabTitle_(clubTitle);
+      if (typeof updatePortalTabTitle_ === "function") updatePortalTabTitle_(clubTitle);
       try { localStorage.setItem("cf_dev_club_name", clubTitle); } catch (e) {}
     }
 
@@ -4978,8 +5451,29 @@ function resolveCourtflowHost(input) {
     
     state.matchHistory = payload.matchHistory || [];
     state.timestamp = payload.timestamp || null;
+
+    if (!fromOfflineCache) {
+      lastSheetSyncAt = Date.now();
+      if (typeof setCachedState === "function") {
+        setCachedState(payload);
+      }
+    }
+
     const statusScreen = document.getElementById("status-screen");
     if (statusScreen) statusScreen.style.display = "none";
+
+    const inlineErrEl = document.getElementById("global-inline-error");
+    const inlineErrMsgEl = document.getElementById("global-inline-error-msg");
+    if (inlineErrEl) {
+      if (fromOfflineCache) {
+        if (inlineErrMsgEl && options && options.warningMessage) {
+          inlineErrMsgEl.innerText = options.warningMessage;
+        }
+        inlineErrEl.style.display = "flex";
+      } else {
+        inlineErrEl.style.display = "none";
+      }
+    }
     
     // Show authenticated view, hide login view, show logout button
     const loginView = document.getElementById("portal-view-login");
@@ -5031,6 +5525,176 @@ function resolveCourtflowHost(input) {
     hideLoadingOverlay();
   }
 
+  /**
+   * Attempts offline-only hydration from localStorage cached_state strictly when
+   * the live Google Sheet RPC fails (e.g. inside a sports hall with no signal).
+   * @param {Error|Object} err - The RPC failure error.
+   * @returns {boolean} True if offline cache was available and hydrated.
+   */
+  function tryHydrateFromOfflineCache_(err) {
+    if (typeof getCachedState !== "function") return false;
+    const cached = getCachedState();
+    if (!cached || (!Array.isArray(cached.players) && !Array.isArray(cached.activeCourts))) {
+      return false;
+    }
+    const errText = err && err.message ? err.message : "Network unavailable";
+    initializeDashboard(cached, {
+      fromOfflineCache: true,
+      warningMessage: "Offline mode — showing last synced club state (" + errText + ")."
+    });
+    return true;
+  }
+
+  /**
+   * Performs a live-first Google Sheet state sync via getInitialState(token).
+   * @param {Object=} options - Optional { showStatusScreen, showOverlay, onComplete }.
+   */
+  function refreshLiveSheetState(options) {
+    const opts = options || {};
+    if (isSheetRefreshInFlight) {
+      if (typeof opts.onComplete === "function") opts.onComplete();
+      return;
+    }
+    isSheetRefreshInFlight = true;
+
+    if (opts.showStatusScreen) {
+      const statusScreen = document.getElementById("status-screen");
+      const spinner = document.getElementById("spinner-loader");
+      const statusTxt = document.getElementById("status-text");
+      const offlinePanel = document.getElementById("offline-panel");
+      if (offlinePanel) offlinePanel.style.display = "none";
+      if (spinner) spinner.style.display = "block";
+      if (statusTxt) {
+        statusTxt.style.display = "block";
+        statusTxt.innerText = "SYNCING WITH GOOGLE SHEET...";
+      }
+      if (statusScreen) statusScreen.style.display = "flex";
+    } else if (opts.showOverlay && typeof showLoadingOverlay === "function") {
+      showLoadingOverlay("Syncing with Google Sheet...");
+    }
+
+    const token = typeof getAuthToken === "function" ? getAuthToken() : "";
+    google.script.run
+      .withSuccessHandler(data => {
+        isSheetRefreshInFlight = false;
+        const payload = typeof data === "string" ? JSON.parse(data) : data;
+        if (payload.authenticated === false) {
+          if (typeof removeAuthToken === "function") removeAuthToken();
+          if (typeof removeCachedState === "function") removeCachedState();
+          try {
+            localStorage.removeItem("cf_dev_auth_token");
+            localStorage.removeItem("cf_dev_cached_state");
+          } catch (e) {}
+          showLoginScreen(payload);
+        } else {
+          initializeDashboard(payload, { fromOfflineCache: false });
+        }
+        if (typeof opts.onComplete === "function") opts.onComplete();
+      })
+      .withFailureHandler(err => {
+        isSheetRefreshInFlight = false;
+        hideLoadingOverlay();
+        if (tryHydrateFromOfflineCache_(err)) {
+          if (typeof opts.onComplete === "function") opts.onComplete();
+          return;
+        }
+        const statusScreen = document.getElementById("status-screen");
+        const spinner = document.getElementById("spinner-loader");
+        const statusTxt = document.getElementById("status-text");
+        const offlinePanel = document.getElementById("offline-panel");
+        const errorMsgEl = document.getElementById("offline-error-msg");
+        if (spinner) spinner.style.display = "none";
+        if (statusTxt) statusTxt.style.display = "none";
+        if (errorMsgEl) errorMsgEl.innerText = "Failed to load club state: " + (err && err.message ? err.message : String(err));
+        if (offlinePanel) offlinePanel.style.display = "block";
+        if (statusScreen) statusScreen.style.display = "flex";
+        if (typeof opts.onComplete === "function") opts.onComplete();
+      })
+      .getInitialState(token);
+  }
+
+  /**
+   * Initializes zero-footprint standalone PWA Pull-to-Refresh gesture handling.
+   */
+  function initPullToRefresh_() {
+    if (typeof window === "undefined" || typeof document === "undefined" || typeof window.addEventListener !== "function") return;
+    let startY = 0;
+    let pulling = false;
+    let triggered = false;
+    const THRESHOLD_PX = 68;
+
+    window.addEventListener("touchstart", e => {
+      const mainView = document.getElementById("portal-view-main");
+      if (!mainView || mainView.style.display === "none") return;
+      if ((window.scrollY || document.documentElement.scrollTop || 0) > 0) return;
+      if (!e.touches || e.touches.length !== 1) return;
+      startY = e.touches[0].clientY;
+      pulling = true;
+      triggered = false;
+    }, { passive: true });
+
+    window.addEventListener("touchmove", e => {
+      if (!pulling || isSheetRefreshInFlight) return;
+      if ((window.scrollY || document.documentElement.scrollTop || 0) > 0) {
+        pulling = false;
+        return;
+      }
+      const currentY = e.touches && e.touches[0] ? e.touches[0].clientY : startY;
+      const deltaY = currentY - startY;
+      if (deltaY <= 8) return;
+
+      const ptrEl = document.getElementById("ptr-indicator");
+      const ptrText = document.getElementById("ptr-text");
+      const ptrIcon = document.getElementById("ptr-icon");
+      if (!ptrEl) return;
+
+      const pullHeight = Math.min(76, Math.round(deltaY * 0.55));
+      ptrEl.style.height = pullHeight + "px";
+      ptrEl.style.opacity = String(Math.min(1, pullHeight / 48));
+      triggered = deltaY >= THRESHOLD_PX;
+
+      if (ptrText) {
+        ptrText.innerText = triggered ? "Release to sync with Sheet" : "Pull down to sync with Sheet";
+      }
+      if (ptrIcon) {
+        ptrIcon.style.transform = triggered ? "rotate(180deg)" : "rotate(0deg)";
+      }
+    }, { passive: true });
+
+    window.addEventListener("touchend", () => {
+      if (!pulling) return;
+      pulling = false;
+      const ptrEl = document.getElementById("ptr-indicator");
+      const ptrText = document.getElementById("ptr-text");
+      const ptrIcon = document.getElementById("ptr-icon");
+      if (!ptrEl) return;
+
+      if (triggered && !isSheetRefreshInFlight) {
+        ptrEl.style.height = "52px";
+        ptrEl.style.opacity = "1";
+        if (ptrText) ptrText.innerText = "Syncing with Google Sheet...";
+        if (ptrIcon) ptrIcon.classList.add("spinning");
+        refreshLiveSheetState({
+          showStatusScreen: false,
+          showOverlay: false,
+          onComplete: () => {
+            if (ptrIcon) {
+              ptrIcon.classList.remove("spinning");
+              ptrIcon.style.transform = "rotate(0deg)";
+            }
+            ptrEl.style.height = "0px";
+            ptrEl.style.opacity = "0";
+          }
+        });
+      } else {
+        ptrEl.style.height = "0px";
+        ptrEl.style.opacity = "0";
+        if (ptrIcon) ptrIcon.style.transform = "rotate(0deg)";
+      }
+      triggered = false;
+    }, { passive: true });
+  }
+
   // Override standard browser alert and bind ok button
   if (typeof window !== "undefined") {
     window.alert = function(msg) {
@@ -5038,7 +5702,7 @@ function resolveCourtflowHost(input) {
     };
 
     const okBtn = document.getElementById("confirm-modal-ok-btn");
-    if (okBtn) {
+    if (okBtn && typeof okBtn.addEventListener === "function") {
       okBtn.addEventListener("click", () => {
         // Capture the action before closeConfirmModal clears it, then run it
         // only once the modal has left the render tree. Confirmed actions open
@@ -5052,50 +5716,45 @@ function resolveCourtflowHost(input) {
     }
   }
 
-  // Initialize UI on window load
-  window.addEventListener("load", () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const clubParam = urlParams.get("c") || urlParams.get("club") || localStorage.getItem("cf_dev_club_slug") || "";
-    let initialClubName = localStorage.getItem("cf_dev_club_name") || null;
-    if (typeof resolveCourtflowHost === "function" && clubParam) {
-      const resolved = resolveCourtflowHost(clubParam);
-      if (resolved && resolved.name) {
-        initialClubName = resolved.name;
-        try { localStorage.setItem("cf_dev_club_name", resolved.name); } catch (e) {}
-      }
-    }
-    updatePortalTabTitle_(initialClubName);
-    updatePortalSplashText_(initialClubName, clubParam);
-
-    const token = getAuthToken();
-    
-    // Initial fetch from GAS (combines master roster and persistent state properties)
-    google.script.run
-      .withSuccessHandler(data => {
-        const payload = typeof data === "string" ? JSON.parse(data) : data;
-        if (payload.authenticated === false) {
-          if (typeof removeAuthToken === "function") removeAuthToken();
-          localStorage.removeItem("cf_dev_auth_token");
-          showLoginScreen(payload);
-        } else {
-          initializeDashboard(payload);
+  // Foreground resume sync (> 5 minutes hidden/stale)
+  if (typeof document !== "undefined" && typeof document.addEventListener === "function") {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        lastHiddenAt = Date.now();
+      } else if (document.visibilityState === "visible") {
+        const now = Date.now();
+        const hiddenDuration = lastHiddenAt > 0 ? (now - lastHiddenAt) : 0;
+        const sinceLastSync = now - lastSheetSyncAt;
+        const mainView = document.getElementById("portal-view-main");
+        const isMainVisible = mainView && mainView.style.display !== "none";
+        if (isMainVisible && (hiddenDuration >= RESUME_SYNC_THRESHOLD_MS || sinceLastSync >= RESUME_SYNC_THRESHOLD_MS)) {
+          refreshLiveSheetState({ showStatusScreen: true });
         }
-      })
-      .withFailureHandler(err => {
-        hideLoadingOverlay();
-        const statusScreen = document.getElementById("status-screen");
-        const spinner = document.getElementById("spinner-loader");
-        const statusTxt = document.getElementById("status-text");
-        const offlinePanel = document.getElementById("offline-panel");
-        const errorMsgEl = document.getElementById("offline-error-msg");
-        if (spinner) spinner.style.display = "none";
-        if (statusTxt) statusTxt.style.display = "none";
-        if (errorMsgEl) errorMsgEl.innerText = "Failed to load club state: " + err.message;
-        if (offlinePanel) offlinePanel.style.display = "block";
-        if (statusScreen) statusScreen.style.display = "flex";
-      })
-      .getInitialState(token);
-  });
+      }
+    });
+  }
+
+  // Initialize UI on window load
+  if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+    window.addEventListener("load", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const clubParam = urlParams.get("c") || urlParams.get("club") || localStorage.getItem("cf_dev_club_slug") || "";
+      let initialClubName = localStorage.getItem("cf_dev_club_name") || null;
+      if (typeof resolveCourtflowHost === "function" && clubParam) {
+        const resolved = resolveCourtflowHost(clubParam);
+        if (resolved && resolved.name) {
+          initialClubName = resolved.name;
+          try { localStorage.setItem("cf_dev_club_name", resolved.name); } catch (e) {}
+        }
+      }
+      updatePortalTabTitle_(initialClubName);
+      updatePortalSplashText_(initialClubName, clubParam);
+      initPullToRefresh_();
+
+      // Live-first boot: keep #status-screen visible until getInitialState returns from Google Sheet
+      refreshLiveSheetState({ showStatusScreen: false });
+    });
+  }
 
   /**
    * Switches active tab on mobile devices by updating classes on the app container.
@@ -5122,6 +5781,7 @@ function resolveCourtflowHost(input) {
     }
   }
 </script>
+
 
     <script>
   let syncTimeout = null;
@@ -5200,6 +5860,10 @@ function resolveCourtflowHost(input) {
       config: (state && state.config) || {},
       timestamp: Date.now()
     };
+
+    if (typeof setCachedState === "function" && state) {
+      setCachedState(state);
+    }
 
     google.script.run
       .withSuccessHandler(success => {
