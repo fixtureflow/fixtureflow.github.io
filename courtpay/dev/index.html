@@ -115,6 +115,43 @@
     box-shadow: var(--shadow-card);
   }
 
+  .ptr-pill {
+    position: fixed;
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    left: 50%;
+    transform: translate(-50%, -20px);
+    z-index: 950;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: var(--bg-elevated);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border-focus);
+    color: var(--text-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-card);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .ptr-pill svg {
+    transition: transform 0.18s ease;
+  }
+
+  .ptr-pill.ready {
+    border-color: var(--status-emerald);
+    color: var(--status-emerald);
+  }
+
+  .ptr-pill.ready svg {
+    transform: rotate(180deg);
+  }
+
   .brand-lockup {
     display: flex;
     align-items: center;
@@ -939,7 +976,7 @@
 
   <meta name="apple-mobile-web-app-title" content="[DEV] CourtPay">
   <meta name="application-name" content="CourtPay">
-  <meta name="app-version" content="dev-v19">
+  <meta name="app-version" content="dev-v20">
   <meta name="theme-color" content="#080d16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -962,9 +999,9 @@
   <link rel="mask-icon" href="/assets/images/courtpay/icon-courtpay-dev.svg" color="#f59e0b">
   <link rel="manifest" href="/courtpay/dev/manifest.json">
   <script>
-    window.__FF_VERSION__ = 'dev-v19';
+    window.__FF_VERSION__ = 'dev-v20';
     window.COURTPAY_API_URL = 'https://script.google.com/macros/s/AKfycby8bdbEBdd-T32OW8B0hlE8Apl8o751x5tBkYG1BGfdsusrJzE2xuvj4-Qvu9jckCtZ/exec';
-    console.log('%c[CourtPay]%c Running version dev-v19', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
+    console.log('%c[CourtPay]%c Running version dev-v20', 'background: #d97706; color: #ffffff; border: 1px solid #b45309; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;', 'color: inherit; margin-left: 4px;');
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('/courtpay/dev/sw.js').catch(function () {});
@@ -1052,7 +1089,7 @@
       <p id="login-error-msg" class="login-error hidden"></p>
     </div>
     <div class="brand-footer" style="margin-top: 20px; position: relative; z-index: 2;">
-      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v19</span>
+      Powered by FixtureFlow &middot; <span id="ff-login-version-badge">dev-v20</span>
     </div>
   </div>
 
@@ -1109,6 +1146,23 @@
           <label for="setting-admin-pin">New Organizer PIN (4–12 digits)</label>
           <input id="setting-admin-pin" class="input-control tabular-nums" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="off" placeholder="Keep current PIN">
         </div>
+      </div>
+
+      <!-- Live Google Sheet Sync Status & Manual Refresh (Desktop / Modal Fallback) -->
+      <div id="settings-sync-box" class="biometric-settings-box" style="margin-top: 0; margin-bottom: 10px;">
+        <div>
+          <div style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary);">Google Sheet Sync</div>
+          <div id="setting-last-sync-text" class="tabular-nums" style="font-size: 0.74rem; color: var(--text-secondary);">Live-synced on open</div>
+        </div>
+        <button type="button" id="btn-settings-sync-now" class="btn-secondary" style="padding: 6px 10px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;" onclick="CourtPayUI.triggerManualSheetSync(true)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+            <path d="M16 16h5v5"/>
+          </svg>
+          <span>Sync Now</span>
+        </button>
       </div>
 
       <!-- Biometric Passkey Device Management -->
@@ -1239,6 +1293,15 @@
   </div>
 
   <div id="portal-view-main" class="app-shell">
+    <!-- Zero-Footprint Pull-to-Refresh Hint Pill (Only visible while dragging down from top) -->
+    <div id="ptr-indicator" class="ptr-pill hidden" aria-hidden="true">
+      <svg id="ptr-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14"/>
+        <path d="m19 12-7 7-7-7"/>
+      </svg>
+      <span id="ptr-label">Pull to sync with Sheet</span>
+    </div>
+
     <!-- Header Bar -->
     <header class="app-header">
       <div class="brand-lockup">
@@ -1617,7 +1680,7 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 2L15 9l7 3-7 3-3 7-3-7-7-3 7-3z" />
     </svg>
-    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge" data-env="DEV">dev-v19</span></span>
+    <span>Powered by FixtureFlow &middot; <span id="ff-app-version-badge" data-env="DEV">dev-v20</span></span>
   </div>
 </footer>
 
@@ -2132,12 +2195,33 @@
       };
 
       var clearActionOverlay = function () {
-        if (statusLabel) {
+        if (statusLabel || window.CourtPayState.isActionInFlight) {
           window.CourtPayState.isActionInFlight = false;
           window.CourtPayState.actionStatusText = '';
           if (window.CourtPayUI) {
             window.CourtPayUI.syncStatusScreenOverlay();
           }
+        }
+      };
+
+      var handleRpcFailure = function (err) {
+        clearActionOverlay();
+        window.CourtPayState.isLoadingServer = false;
+        var errMsg = String(err && err.message ? err.message : err);
+        var usedOfflineCache = false;
+        if (action === 'getInitialState' && !window.CourtPayState._hydratedOnce) {
+          usedOfflineCache = window.CourtPayState.hydrateFromCache();
+        }
+        window.CourtPayState.syncError = errMsg;
+        if (window.CourtPayUI) {
+          window.CourtPayUI.syncStatusScreenOverlay();
+          window.CourtPayUI.renderAll();
+          window.CourtPayUI.setInlineAlert(
+            'global-inline-error',
+            usedOfflineCache
+              ? ('Offline — showing cached data (' + errMsg + '). Pull down to retry when back online.')
+              : errMsg
+          );
         }
       };
 
@@ -2168,14 +2252,7 @@
             if (onSuccess) onSuccess(res);
           })
           .withFailureHandler(function (err) {
-            clearActionOverlay();
-            window.CourtPayState.isLoadingServer = false;
-            var errMsg = String(err && err.message ? err.message : err);
-            window.CourtPayState.syncError = errMsg;
-            if (window.CourtPayUI) {
-              window.CourtPayUI.renderAll();
-              window.CourtPayUI.setInlineAlert('global-inline-error', errMsg);
-            }
+            handleRpcFailure(err);
           })[action](reqPayload);
       } else if (window.COURTPAY_API_URL) {
         var activeToken = window.CourtPayState.authToken || localStorage.getItem(window.CourtPayState.TOKEN_STORAGE_KEY) || '';
@@ -2268,18 +2345,15 @@
               }, 800);
               return;
             }
-            clearActionOverlay();
-            window.CourtPayState.isLoadingServer = false;
-            var errMsg = String(err && err.message ? err.message : err);
-            window.CourtPayState.syncError = errMsg;
-            if (window.CourtPayUI) {
-              window.CourtPayUI.renderAll();
-              window.CourtPayUI.setInlineAlert('global-inline-error', errMsg);
-            }
+            handleRpcFailure(err);
           });
       } else {
+        window.CourtPayState._lastServerSyncMs = Date.now();
         var simRes = window.CourtPayState.simulateLocalServer(action, reqPayload);
         clearActionOverlay();
+        if (window.CourtPayUI && typeof window.CourtPayUI.syncLastSyncSettingsLabel === 'function') {
+          window.CourtPayUI.syncLastSyncSettingsLabel();
+        }
         if (onSuccess) onSuccess(simRes || { success: true, localMode: true });
       }
     },
@@ -2728,6 +2802,9 @@
         if (typeof window.CourtPayUI.syncVersionBadges === 'function') {
           window.CourtPayUI.syncVersionBadges(serverState.version);
         }
+        if (typeof window.CourtPayUI.syncLastSyncSettingsLabel === 'function') {
+          window.CourtPayUI.syncLastSyncSettingsLabel();
+        }
         window.CourtPayUI.syncCourtCalculatorUI();
         if (typeof window.CourtPayUI.syncBatchCalculatorUI === 'function') {
           window.CourtPayUI.syncBatchCalculatorUI();
@@ -2806,6 +2883,134 @@
       if (loginBadge) loginBadge.textContent = resolvedVer;
     },
 
+    syncLastSyncSettingsLabel: function () {
+      var el = document.getElementById('setting-last-sync-text');
+      if (!el) return;
+      var ts = Number(window.CourtPayState._lastServerSyncMs || 0);
+      if (!ts) {
+        el.textContent = _isLiveServerMode ? 'Waiting for live Sheet sync...' : 'Local preview mode';
+        return;
+      }
+      var d = new Date(ts);
+      var hh = String(d.getHours()).padStart(2, '0');
+      var mm = String(d.getMinutes()).padStart(2, '0');
+      var ss = String(d.getSeconds()).padStart(2, '0');
+      el.textContent = 'Synced with Sheet at ' + hh + ':' + mm + ':' + ss;
+    },
+
+    triggerManualSheetSync: function (fromModal) {
+      if (fromModal) {
+        window.CourtPayUI.closeSettingsModal();
+      }
+      if (window.CourtPayState.isActionInFlight || window.CourtPayState.isLoadingServer) {
+        return;
+      }
+      window.CourtPayState.isActionInFlight = true;
+      window.CourtPayState.actionStatusText = 'SYNCING WITH GOOGLE SHEET...';
+      window.CourtPayState.syncError = '';
+      window.CourtPayUI.syncStatusScreenOverlay();
+      window.CourtPayState.callServer('getInitialState', {}, function (res) {
+        if (res && res.requiresAuth) {
+          window.CourtPayUI.showLoginScreen('');
+          return;
+        }
+        if (res && res.players) {
+          window.CourtPayState.hydrateFromServer(res);
+          window.CourtPayUI.syncStatusScreenOverlay();
+          window.CourtPayUI.syncCourtCalculatorUI();
+          window.CourtPayUI.recalculatePreview();
+        }
+      });
+    },
+
+    setupPullToRefresh: function () {
+      if (window.CourtPayState._pullToRefreshBound || typeof document === 'undefined' || typeof window === 'undefined') return;
+      window.CourtPayState._pullToRefreshBound = true;
+      var startY = 0;
+      var startX = 0;
+      var pulling = false;
+      var currentDeltaY = 0;
+      var THRESHOLD_PX = 65;
+
+      var hidePill = function () {
+        var pill = document.getElementById('ptr-indicator');
+        if (!pill) return;
+        pill.classList.add('hidden');
+        pill.classList.remove('ready');
+        pill.style.opacity = '0';
+        pill.style.transform = 'translate(-50%, -20px)';
+      };
+
+      var canStartPull = function (ev) {
+        if (window.scrollY > 0) return false;
+        if (window.CourtPayState.isActionInFlight || window.CourtPayState.isLoadingServer) return false;
+        var mainView = document.getElementById('portal-view-main');
+        if (!mainView || mainView.classList.contains('hidden')) return false;
+        var openModal = document.querySelector('.modal-overlay:not(.hidden)');
+        if (openModal) return false;
+        var tgt = ev && ev.target;
+        if (tgt && tgt.closest && tgt.closest('input, textarea, select, button')) return false;
+        return true;
+      };
+
+      document.addEventListener('touchstart', function (ev) {
+        if (!ev.touches || ev.touches.length !== 1 || !canStartPull(ev)) {
+          pulling = false;
+          return;
+        }
+        startY = ev.touches[0].clientY;
+        startX = ev.touches[0].clientX;
+        currentDeltaY = 0;
+        pulling = true;
+      }, { passive: true });
+
+      document.addEventListener('touchmove', function (ev) {
+        if (!pulling || !ev.touches || ev.touches.length !== 1) return;
+        if (window.scrollY > 0) {
+          pulling = false;
+          hidePill();
+          return;
+        }
+        var dy = ev.touches[0].clientY - startY;
+        var dx = ev.touches[0].clientX - startX;
+        if (dy <= 10 || Math.abs(dy) < Math.abs(dx) * 1.8) {
+          if (dy < 0) {
+            pulling = false;
+            hidePill();
+          }
+          return;
+        }
+        currentDeltaY = dy;
+        var pill = document.getElementById('ptr-indicator');
+        var label = document.getElementById('ptr-label');
+        if (!pill) return;
+        var progress = Math.min(1, (dy - 10) / (THRESHOLD_PX - 10));
+        var translateY = Math.min(18, Math.round(-20 + progress * 32));
+        var isReady = dy >= THRESHOLD_PX;
+        pill.classList.remove('hidden');
+        pill.classList.toggle('ready', isReady);
+        pill.style.opacity = String(Math.min(1, 0.25 + progress * 0.75));
+        pill.style.transform = 'translate(-50%, ' + translateY + 'px)';
+        if (label) {
+          label.textContent = isReady ? 'Release to sync with Sheet' : 'Pull to sync with Sheet';
+        }
+      }, { passive: true });
+
+      var onTouchEnd = function () {
+        if (!pulling) return;
+        var shouldTrigger = currentDeltaY >= THRESHOLD_PX && window.scrollY <= 0;
+        pulling = false;
+        currentDeltaY = 0;
+        hidePill();
+        if (shouldTrigger) {
+          window.CourtPayUI.triggerManualSheetSync(false);
+        }
+      };
+
+      document.addEventListener('touchend', onTouchEnd, { passive: true });
+      document.addEventListener('touchcancel', onTouchEnd, { passive: true });
+    },
+
     setupForegroundSync: function () {
       if (window.CourtPayState._foregroundSyncBound || typeof document === 'undefined') return;
       window.CourtPayState._foregroundSyncBound = true;
@@ -2818,16 +3023,10 @@
           dateInp.value = todayStr;
           window.CourtPayUI.syncCourtCalculatorUI();
         }
-        // 2. Re-sync with Google Sheet if authenticated and backgrounded for > 5 minutes
+        // 2. Live-First Re-sync with Google Sheet (#status-screen visible) if authenticated and backgrounded for > 5 minutes
         var elapsed = Date.now() - Number(window.CourtPayState._lastServerSyncMs || 0);
         if (_isLiveServerMode && window.CourtPayState.authToken && !window.CourtPayState.isActionInFlight && elapsed > 5 * 60 * 1000) {
-          window.CourtPayState.callServer('getInitialState', {}, function (res) {
-            if (res && res.players) {
-              window.CourtPayState.hydrateFromServer(res);
-              window.CourtPayUI.syncCourtCalculatorUI();
-              window.CourtPayUI.recalculatePreview();
-            }
-          });
+          window.CourtPayUI.triggerManualSheetSync(false);
         }
       });
     },
@@ -2838,6 +3037,7 @@
       }
       window.CourtPayUI.initSystemThemeListener();
       window.CourtPayUI.setupForegroundSync();
+      window.CourtPayUI.setupPullToRefresh();
       window.CourtPayUI.syncVersionBadges();
       var rateInp = document.getElementById('input-court-rate');
       if (rateInp && window.CourtPayState.courtRatePerHourEUR) {
@@ -2853,11 +3053,9 @@
         return;
       }
 
-      // 0ms Instant Local Cache Hydration for returning authenticated sessions while background sync runs
-      if (_isLiveServerMode && window.CourtPayState.authToken) {
-        window.CourtPayState.hydrateFromCache();
-      }
-
+      // Live-First Boot (aligned with DDLC & CourtFlow): keep #status-screen visible until live Google Sheet responds.
+      // localStorage cache (hydrateFromCache) is used strictly inside callServer's error handler as an offline fallback.
+      window.CourtPayState.isLoadingServer = _isLiveServerMode;
       window.CourtPayUI.hideLoginScreen();
       window.CourtPayUI.syncStatusScreenOverlay();
       window.CourtPayUI.renderAll();
@@ -3096,10 +3294,7 @@
               window.CourtPayUI.recalculatePreview();
               return;
             }
-            var hadCache = window.CourtPayState.hydrateFromCache();
-            if (!hadCache) {
-              window.CourtPayState.isLoadingServer = true;
-            }
+            window.CourtPayState.isLoadingServer = true;
             window.CourtPayUI.syncStatusScreenOverlay();
             window.CourtPayState.callServer('getInitialState', {}, function (res) {
               if (res && res.requiresAuth) {
@@ -3415,6 +3610,7 @@
       if (revEl) revEl.value = cfg.revolutTag || '';
       if (pinEl) pinEl.value = '';
 
+      window.CourtPayUI.syncLastSyncSettingsLabel();
       window.CourtPayUI.syncBiometricSettingsBox();
 
       var modal = document.getElementById('settings-modal');
