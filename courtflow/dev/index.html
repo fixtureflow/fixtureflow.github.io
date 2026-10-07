@@ -134,8 +134,8 @@ function resolveCourtflowHost(input) {
 
 
   // Version Observability
-  window.__FF_VERSION__ = "dev-v107";
-  console.log("%c[CourtFlow]%c Running version dev-v107", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+  window.__FF_VERSION__ = "dev-v108";
+  console.log("%c[CourtFlow]%c Running version dev-v108", "background: #0284c7; color: #ffffff; border: 1px solid #0369a1; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
   // Google Apps Script Headless PWA API Mock Wrapper
   // Source: Antigravity PWA Integration Plan
@@ -2547,7 +2547,7 @@ function resolveCourtflowHost(input) {
 </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="app-version" content="dev-v107">
+  <meta name="app-version" content="dev-v108">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://fixtureflow.github.io; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/courtflow/dev/">
@@ -2635,7 +2635,7 @@ function resolveCourtflowHost(input) {
 
         <!-- BRANDING FOOTER (Login View) -->
         <div class="brand-footer login-footer">
-          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v107</span>
+          Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v108</span>
 
         </div>
       </div>
@@ -2850,7 +2850,7 @@ function resolveCourtflowHost(input) {
 
       <!-- BRANDING FOOTER (Main View) -->
       <div class="brand-footer main-footer">
-        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v107</span>
+        Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v108</span>
 
       </div>
 
@@ -3139,16 +3139,23 @@ function resolveCourtflowHost(input) {
           <button type="button" class="btn-secondary" style="padding: 6px 12px;" onclick="closeAppSecurityModal()">Close</button>
         </div>
         <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px; padding-right: 0;">
-          <!-- Live Google Sheet Sync & Build Info -->
+          <!-- Connected Club & Build Status Card -->
+          <div class="security-settings-box" style="flex-direction: column; align-items: stretch; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+              <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Club</span>
+              <span id="app-security-club-name" style="font-size: 14px; font-weight: 700; color: var(--text-primary);">CourtFlow</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+              <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Build</span>
+              <span id="app-security-version" class="badge" style="padding: 2px 8px; font-size: 11px; color: var(--accent-primary);">v2.5.3</span>
+            </div>
+          </div>
+
+          <!-- Live Google Sheet Sync -->
           <div id="settings-sync-box" class="security-settings-box">
             <div style="min-width: 0;">
-              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <span style="font-weight: 700; font-size: 14px; color: var(--text-primary);">Google Sheet Sync</span>
-                <span id="app-security-version" class="badge" style="padding: 2px 8px; font-size: 11px; color: var(--accent-primary);">v2.5.3</span>
-              </div>
-              <div id="setting-last-sync-text" style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">
-                <span id="app-security-club-name" style="font-weight: 600;">CourtFlow</span> &bull; Live-synced on open
-              </div>
+              <div style="font-weight: 700; font-size: 14px; color: var(--text-primary);">Google Sheet Sync</div>
+              <div id="setting-last-sync-text" style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Live-synced on open</div>
             </div>
             <button type="button" id="btn-settings-sync-now" class="btn-secondary" onclick="closeAppSecurityModal(); refreshLiveSheetState({ showOverlay: true });">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3163,8 +3170,8 @@ function resolveCourtflowHost(input) {
           <!-- Biometric Passkey Device Management -->
           <div id="settings-biometric-box" class="security-settings-box">
             <div style="min-width: 0;">
-              <div style="font-weight: 700; font-size: 14px; color: var(--text-primary);">Face ID / Touch ID Unlock</div>
-              <div id="settings-biometric-status" style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">Skip typing your PIN with 1-tap passkey unlock</div>
+              <div style="font-weight: 700; font-size: 14px; color: var(--text-primary);">Passkey Unlock</div>
+              <div id="settings-biometric-status" style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Face ID / Touch ID sign-in</div>
             </div>
             <button type="button" id="btn-settings-register-passkey" class="btn-secondary" onclick="closeAppSecurityModal(); confirmPasskeyEnrollment();">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -5284,8 +5291,8 @@ function resolveCourtflowHost(input) {
     const passkeyStatusEl = document.getElementById("settings-biometric-status");
     if (passkeyStatusEl) {
       passkeyStatusEl.innerText = hasPasskey
-        ? "Passkey enrolled on this device"
-        : "Skip typing your PIN with 1-tap passkey unlock";
+        ? "Enrolled on this device"
+        : "Face ID / Touch ID sign-in";
     }
 
     const passkeyBtnText = document.getElementById("btn-settings-register-passkey-text");
