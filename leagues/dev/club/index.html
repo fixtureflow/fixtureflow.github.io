@@ -883,7 +883,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v143";
+  window.__FF_VERSION__ = "dev-v144";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Club Admin]%c Running version " + window.__FF_VERSION__, "background: #0f172a; color: #ffffff; border: 1px solid #334155; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -1994,6 +1994,21 @@ function resolveCourtflowHost(input) {
     }
   }
 
+  /**
+   * Combines a club name and team identifier without duplicating the club prefix.
+   * @param {string} club
+   * @param {string} team
+   * @returns {string}
+   */
+  function formatClubTeamSide(club, team) {
+    var c = String(club || '').trim();
+    var t = String(team || '').trim();
+    if (!t) return c;
+    if (!c) return t;
+    if (t.toUpperCase().indexOf(c.toUpperCase()) === 0) return t;
+    return c + ' ' + t;
+  }
+
   if (typeof window !== 'undefined') {
     window.isHostClubHome = isHostClubHome;
     window.getHostTeamName = getHostTeamName;
@@ -2001,6 +2016,7 @@ function resolveCourtflowHost(input) {
     window.getHostClubName = getHostClubName;
     window.getActiveUserClubName = getActiveUserClubName;
     window.setActiveUserClubName = setActiveUserClubName;
+    window.formatClubTeamSide = formatClubTeamSide;
   }
 
   /**
@@ -3086,7 +3102,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v143">
+  <meta name="app-version" content="dev-v144">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/leagues/dev/club/">
@@ -3837,7 +3853,7 @@ function onLoginFailure(error) {
 
     
     <div id="native-app-footer" style="display:none; width: 100%; margin-top: auto;" class="brand-footer login-footer">
-      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v143</span>
+      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v144</span>
 
     </div>
 
@@ -5661,13 +5677,11 @@ function onLoginFailure(error) {
       const actionButtonsContainer = document.getElementById('rr-action-buttons-container');
       if (actionButtonsContainer) actionButtonsContainer.classList.remove('hidden');
 
-      const copyBtn = document.getElementById('rr-copy-btn');
       const submitBtn = document.getElementById('rr-submit-btn');
       const previewBtn = document.getElementById('rr-preview-btn');
       const warningEl = document.getElementById('rr-desktop-email-warning');
       if (submitBtn) { submitBtn.style.removeProperty('display'); submitBtn.classList.add('hidden'); submitBtn.disabled = false; }
       if (previewBtn) { previewBtn.style.removeProperty('display'); previewBtn.classList.remove('hidden'); previewBtn.disabled = false; }
-      if (copyBtn) { copyBtn.style.removeProperty('display'); copyBtn.classList.remove('hidden'); copyBtn.classList.remove('btn-primary'); copyBtn.classList.add('btn-secondary'); copyBtn.disabled = false; }
       if (warningEl) { warningEl.style.removeProperty('display'); warningEl.classList.add('hidden'); }
 
       const previewContainer = document.getElementById('rr-message-preview-container');
@@ -5727,7 +5741,6 @@ function onLoginFailure(error) {
       const reasonContainer = document.getElementById('rr-reason-container');
       const submitBtn = document.getElementById('rr-submit-btn');
       const previewBtn = document.getElementById('rr-preview-btn');
-      const copyBtn = document.getElementById('rr-copy-btn');
       const detailsEl = document.getElementById('rr-fixture-details');
 
       if (subheaderEl) subheaderEl.style.display = 'none';
@@ -5735,7 +5748,6 @@ function onLoginFailure(error) {
       if (reasonContainer) reasonContainer.style.display = 'none';
       if (submitBtn) submitBtn.style.display = 'none';
       if (previewBtn) previewBtn.style.display = 'none';
-      if (copyBtn) copyBtn.classList.add('hidden');
 
       const isCapt = (activeRescheduleContext === 'Captain');
       const homeClub = getActiveClubName();
@@ -6263,48 +6275,6 @@ function onLoginFailure(error) {
 
   function buildCaptainRescheduleMessage(match, reason) {
     return ''; // Optional personal note box starts empty so email does not duplicate greeting/reason
-  }
-
-  function copyRescheduleMessage() {
-    const reason = document.getElementById('rr-reason')?.value || 'Reschedule Request';
-    const dates = getProposedDateStrings_(true);
-    const dateStr = dates.length > 0 ? dates.join(' | ') : 'Open court release';
-    const hostClub = getActiveClubName() || 'Host Club';
-    const copyText = `Fixture Reschedule Request: ${hostClub} ${activeRescheduleMatch.ourTeam} vs ${activeRescheduleMatch.opponent || activeRescheduleMatch.oppClub}\nReason: ${reason}\nCandidate Dates: ${dateStr}`;
-
-    const copyBtn = document.getElementById('rr-copy-btn');
-    if (copyBtn) copyBtn.disabled = true;
-    const originalText = copyBtn ? copyBtn.textContent : 'Copy to Clipboard';
-
-    try {
-      navigator.clipboard.writeText(copyText).then(() => {
-        if (copyBtn) {
-          copyBtn.textContent = '✓ Copied!';
-          copyBtn.style.borderColor = '#10b981';
-          copyBtn.style.color = '#10b981';
-          setTimeout(() => {
-            copyBtn.textContent = originalText;
-            copyBtn.style.borderColor = '';
-            copyBtn.style.color = '';
-          }, 2000);
-        }
-      }).catch(err => _legacyCopy(copyText, copyBtn, originalText));
-    } catch (err) {
-      _legacyCopy(copyText, copyBtn, originalText);
-    }
-  }
-
-  function _legacyCopy(text, copyBtn, originalText) {
-    const tempInput = document.createElement('textarea');
-    tempInput.value = text;
-    document.body.appendChild(tempInput);
-    tempInput.select();
-    document.execCommand('copy');
-    document.body.removeChild(tempInput);
-    if (copyBtn) {
-      copyBtn.textContent = '✓ Copied!';
-      setTimeout(() => { copyBtn.textContent = originalText; }, 2000);
-    }
   }
 
   function hideReschedulePreview() {
@@ -7255,7 +7225,7 @@ function onLoginFailure(error) {
     var oppClub = (typeof getActiveUserClubName === 'function' ? getActiveUserClubName(match, 'Visiting Club') : '') || (typeof localStorage !== 'undefined' && (localStorage.getItem('ff_club_active_name') || localStorage.getItem('FF_CLUB_NAME'))) || match.oppClub || (typeof userClubName !== 'undefined' && userClubName) || match.clubName || 'Visiting Club';
 
     // Helper for club prefix deduplication (e.g. avoid "Ailesbury Ailesbury X5")
-    var formatSide = function(club, team) {
+    var formatSide = typeof formatClubTeamSide === 'function' ? formatClubTeamSide : function(club, team) {
       var c = String(club || '').trim();
       var t = String(team || '').trim();
       if (!t) return c;
