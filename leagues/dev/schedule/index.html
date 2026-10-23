@@ -883,7 +883,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v148";
+  window.__FF_VERSION__ = "dev-v150";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Schedule]%c Running version " + window.__FF_VERSION__, "background: #be123c; color: #ffffff; border: 1px solid #e11d48; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -2228,54 +2228,77 @@ function resolveCourtflowHost(input) {
   <style>
   /* Ruby Crimson Theme Override for Shared Club Match Schedule Portal */
   :root {
+    --bg: #fdf8f9;
+    --surface: #ffffff;
     --primary: #e11d48;
+    --primary-hover: #be123c;
     --primary-variant: #be123c;
     --on-primary: #ffffff;
-    --primary-glow: rgba(225, 29, 72, 0.14);
+    --secondary: #be123c;
+    --surface-hover: #f1f5f9;
+    --badge-home-dot: #00838f;
+    --badge-away-dot: #ad1457;
+    --splash-glow: rgba(225, 29, 72, 0.14);
+    --bg-glow: radial-gradient(circle at 50% 10%, rgba(225, 29, 72, 0.05) 0%, var(--bg) 60%);
   }
+
   @media (prefers-color-scheme: dark) {
     :root {
+      --bg: #141115;
+      --surface: #1e1b20;
       --primary: #fb7185;
+      --primary-hover: #fda4af;
       --primary-variant: #e11d48;
-      --on-primary: #4c0519;
-      --primary-glow: rgba(251, 113, 133, 0.16);
+      --on-primary: #141115;
+      --secondary: #fb7185;
+      --border: #332d38;
+      --surface-hover: #2d2733;
+      --badge-home-dot: #26c6da;
+      --badge-away-dot: #ff80ab;
+      --splash-bg: radial-gradient(circle at center, #221a20 0%, var(--bg) 100%);
+      --splash-glow: rgba(251, 113, 133, 0.18);
+      --bg-glow: radial-gradient(circle at 50% 10%, rgba(251, 113, 133, 0.08) 0%, var(--bg) 60%);
     }
   }
 
-  /* Match Card Styles (Shared with Portal_Captain_CSS.html) */
+  body {
+    background-image: var(--bg-glow);
+    background-attachment: fixed;
+  }
+
+  /* Match Card (Exact from Portal_Captain_CSS.html & schedule_portal_preview.html) */
   .match-card {
     background: var(--surface);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 16px;
-    margin-bottom: 12px;
-    box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-md);
     border: 1px solid var(--border);
     border-left: 4px solid var(--primary);
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
-  }
-  .match-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-  .match-card.away {
-    border-left-color: var(--badge-away-dot);
-  }
-  .match-card.home {
-    border-left-color: var(--badge-home-dot);
   }
   .match-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .match-date {
+    font-weight: bold;
+    color: var(--secondary);
+    font-size: 1.05rem;
+  }
+  .match-time {
+    font-family: monospace;
+    font-size: 1.05rem;
     font-weight: 600;
+    color: var(--on-surface);
   }
   .match-body {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
   }
   .match-left-col {
@@ -2283,115 +2306,114 @@ function resolveCourtflowHost(input) {
     min-width: 0;
   }
   .match-right-col {
-    flex-shrink: 0;
     display: flex;
     align-items: center;
+    flex-shrink: 0;
   }
   .match-teams {
-    font-size: 1.05rem;
+    font-size: 1.12rem;
     font-weight: 700;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
     color: var(--on-surface);
   }
   .match-details {
-    font-size: 0.85rem;
-    color: var(--text-muted);
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     align-items: center;
-    margin-top: 6px;
+    font-size: 0.9rem;
   }
   .badge {
-    display: inline-block;
-    padding: 2px 6px;
+    padding: 2px 7px;
     border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 700;
+    background: var(--border);
+    font-size: 0.75rem;
     text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 0.3px;
   }
   .badge.home {
-    background: var(--badge-home-bg);
-    color: var(--badge-home-text);
+    background-color: var(--badge-home-bg);
+    color: var(--badge-home-color);
     border: 1px solid var(--badge-home-border);
   }
   .badge.away {
-    background: var(--badge-away-bg);
-    color: var(--badge-away-text);
+    background-color: var(--badge-away-bg);
+    color: var(--badge-away-color);
     border: 1px solid var(--badge-away-border);
   }
-  .badge.cup {
-    background: var(--badge-cup-bg);
-    color: var(--badge-cup-text);
-    border: 1px solid var(--badge-cup-border);
-  }
-  .badge.league {
-    background: var(--bg);
+  .badge.match-type {
+    background: var(--surface);
     color: var(--text-muted);
     border: 1px solid var(--border);
   }
-
-  /* Smart Venue Truncation + Tap-to-Expand */
-  .venue-row {
+  .match-venue {
+    margin-top: 8px;
+    font-size: 0.88rem;
+    color: var(--text-muted);
     display: flex;
     align-items: flex-start;
     gap: 5px;
-    margin-top: 8px;
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    cursor: pointer;
+    min-width: 0;
   }
-  .venue-text {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
+  .venue-text-clamp {
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.35;
-    word-break: break-word;
+    flex: 1;
+    min-width: 0;
   }
-  .venue-row.expanded .venue-text {
-    -webkit-line-clamp: unset;
-    overflow: visible;
+  .venue-text-expanded {
+    white-space: normal;
+    word-break: break-word;
+    flex: 1;
+    min-width: 0;
   }
 
-  /* Toggle Filter Pills */
+  /* Filter Pill Bar (Reusing .btn-toggle from Portal_Captain_CSS.html) */
   .filter-pill-group {
     display: flex;
-    gap: 4px;
     background: var(--surface);
-    padding: 4px;
-    border-radius: 10px;
     border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+    box-shadow: var(--shadow-sm);
     flex: 1;
   }
   .btn-toggle {
     flex: 1;
-    padding: 7px 8px;
+    border-radius: 16px;
     font-size: 0.78rem;
-    border-radius: 7px;
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--text-muted);
+    padding: 6px 8px;
     font-weight: 600;
-    transition: all 0.2s;
-    text-align: center;
+    background: transparent;
+    color: var(--on-bg);
+    opacity: 0.65;
+    border: none;
     cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    text-align: center;
   }
   .btn-toggle.active {
-    background: color-mix(in srgb, var(--primary) 15%, transparent);
-    color: var(--primary);
-    border-color: var(--primary);
-    font-weight: 700;
+    background: var(--primary) !important;
+    color: var(--on-primary) !important;
+    opacity: 1 !important;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-toggle:hover:not(.active) {
+    opacity: 0.9;
+    background: rgba(150, 150, 150, 0.1);
   }
 
-  /* Scrollable Multi-Month Season Calendar (Shared with Player & Captain Portals) */
+  /* Season Grid Scroll Area & Month Grid (Exact from Portal_Captain_CSS.html & schedule_portal_preview.html) */
   .season-grid-scroll-area {
     display: flex;
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
     gap: 16px;
-    padding: 8px 4px 12px 4px;
+    padding: 4px 0 12px 0;
+    scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
@@ -2399,97 +2421,101 @@ function resolveCourtflowHost(input) {
     display: none;
   }
   .month-grid {
-    flex: 0 0 100%;
-    scroll-snap-align: center;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+    min-width: 285px;
+    scroll-snap-align: start;
+    flex-shrink: 0;
     background: var(--surface);
-    padding: 12px;
-    border-radius: 12px;
     border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: var(--shadow-sm);
   }
-  .month-label {
-    grid-column: 1 / -1;
+  .month-header-title {
     text-align: center;
     font-weight: 800;
-    color: var(--primary);
-    padding-bottom: 8px;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 4px;
+    color: var(--on-surface);
+    margin-bottom: 12px;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
   }
-  .day-header {
-    font-size: 0.65rem;
-    color: var(--text-muted);
+  .dow-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
     text-align: center;
-    padding-bottom: 4px;
-    font-weight: 700;
+    font-size: 0.72rem;
+    color: var(--on-bg);
+    opacity: 0.7;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
   }
   .day-cell {
-    aspect-ratio: 1;
-    border-radius: 8px;
-    background: var(--bg);
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+    padding: 4px 2px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 3px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    position: relative;
-    cursor: pointer;
-    user-select: none;
-    border: 2px solid transparent;
-    transition: transform 0.1s;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    background: var(--bg);
     color: var(--on-surface);
-    padding: 2px 1px;
-  }
-  .day-cell:active {
-    transform: scale(0.92);
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.15s ease;
+    user-select: none;
+    font-weight: 500;
+    position: relative;
   }
   .day-cell.empty {
     background: transparent;
     cursor: default;
   }
-  .day-cell.selected-day {
-    border-color: var(--on-surface) !important;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
-    transform: scale(1.06);
-    z-index: 2;
+  .day-cell.no-matches {
+    opacity: 0.55;
   }
-  .day-cell.has-home:not(.has-away) {
-    background: var(--badge-home-bg);
-    border-color: var(--badge-home-border);
-  }
-  .day-cell.has-away:not(.has-home) {
-    background: var(--badge-away-bg);
-    border-color: var(--badge-away-border);
-  }
-  .day-cell.has-home.has-away {
-    background: linear-gradient(135deg, var(--badge-home-bg) 50%, var(--badge-away-bg) 50%);
-    border-color: var(--primary);
-  }
-  .day-num {
-    line-height: 1;
-    font-size: 0.8rem;
+  .day-cell.has-matches {
+    background: var(--surface-hover);
+    border-color: var(--border);
     font-weight: 700;
   }
-  .day-cell-indicators {
+  .day-cell:not(.empty):hover {
+    border-color: var(--primary);
+    opacity: 1;
+  }
+  .day-cell:active {
+    transform: scale(0.95);
+  }
+  .day-cell.selected {
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface)) !important;
+    border: 2px solid var(--primary) !important;
+    color: var(--primary) !important;
+    font-weight: 800;
+    opacity: 1 !important;
+    z-index: 5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  }
+  .day-indicators {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    min-height: 9px;
+    gap: 3px;
+    min-height: 12px;
     line-height: 1;
   }
   .day-dot {
-    width: 5px;
-    height: 5px;
+    width: 5.5px;
+    height: 5.5px;
     border-radius: 50%;
     display: inline-block;
+    flex-shrink: 0;
   }
   .day-dot.home {
     background: var(--badge-home-dot);
@@ -2501,22 +2527,25 @@ function resolveCourtflowHost(input) {
     display: inline-flex;
     align-items: center;
     gap: 1.5px;
-    font-size: 0.56rem;
+    font-size: 0.62rem;
     font-weight: 800;
     line-height: 1;
-    padding: 1px 3px;
-    border-radius: 4px;
+    letter-spacing: -0.02em;
   }
   .day-pip.home {
-    color: var(--badge-home-text);
-    background: color-mix(in srgb, var(--badge-home-dot) 18%, transparent);
+    color: var(--badge-home-dot);
   }
   .day-pip.away {
-    color: var(--badge-away-text);
-    background: color-mix(in srgb, var(--badge-away-dot) 18%, transparent);
+    color: var(--badge-away-dot);
   }
 
-  /* Bottom Navigation (Shared with Portal_Captain_CSS.html) */
+  /* Hard guard for hiding tabs */
+  #tab-calendar.hidden,
+  #tab-matches.hidden {
+    display: none !important;
+  }
+
+  /* Bottom Navigation (Shared with Portal_Captain_CSS.html & schedule_portal_preview.html) */
   .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -2525,29 +2554,28 @@ function resolveCourtflowHost(input) {
     background: var(--surface);
     border-top: 1px solid var(--border);
     display: flex;
-    justify-content: space-around;
-    padding-top: 8px;
-    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    justify-content: center;
+    padding: 10px 12px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
     z-index: 100;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
   }
   .nav-item {
-    flex: 1;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 0.75rem;
+    color: var(--on-bg);
+    font-size: 0.78rem;
     font-weight: 600;
-    padding: 4px;
-    background: none;
-    border: none;
-    cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: 3px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 4px 24px;
   }
   .nav-item.active {
+    opacity: 1;
     color: var(--primary);
   }
 
@@ -2569,53 +2597,54 @@ function resolveCourtflowHost(input) {
     height: 44px;
   }
 
-  /* Responsive Header & Multi-Month Desktop Grid */
-  .portal-header-desktop { display: none; }
-  .portal-header-mobile { display: block; }
+  /* Responsive Header & Multi-Month Desktop Grid (Matches Portal_Captain_CSS.html) */
+  .portal-header-mobile { display: block !important; }
+  .portal-header-desktop { display: none !important; }
 
-  @media (min-width: 768px) {
-    .portal-header-desktop { display: block; }
-    .portal-header-mobile { display: none; }
+  @media (min-width: 601px) {
+    .portal-header-mobile { display: none !important; }
+    .portal-header-desktop { display: block !important; }
   }
 
-  @media (min-width: 1024px) {
-    .container {
-      max-width: 1200px !important;
-      padding: 20px !important;
-    }
-    #matches-list-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 16px;
-    }
-    .match-card {
-      margin-bottom: 0;
-    }
-    #tab-calendar:not(.hidden) {
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 24px;
-      align-items: start;
-    }
+  @media (min-width: 768px) {
     .season-grid-scroll-area {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      overflow-x: visible;
-      gap: 16px;
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(260px, 1fr)) !important;
+      overflow-y: visible !important;
+      overflow-x: hidden !important;
+      gap: 16px !important;
+      align-content: start;
     }
     .month-grid {
-      flex: none;
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+    #tab-calendar:not(.hidden) {
+      display: flex !important;
+      flex-direction: row !important;
+      max-width: 1050px !important;
+      gap: 20px !important;
+      align-items: flex-start !important;
+      margin: 0 auto !important;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    #calendar-card-container {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      margin: 0 !important;
     }
     #roster-sidebar-container {
-      position: sticky;
-      top: 90px;
+      flex: 0 0 340px !important;
+      position: sticky !important;
+      top: 132px !important;
+      margin: 0 !important;
     }
   }
 </style>
 
-
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v148">
+  <meta name="app-version" content="dev-v150">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/leagues/dev/schedule/">
@@ -2755,7 +2784,9 @@ function resolveCourtflowHost(input) {
   </div>
 
   <!-- TOAST FEEDBACK -->
-  <div id="toast-banner" class="hidden" style="margin: 8px 16px 0 16px; padding: 8px 12px; border-radius: 8px; background: var(--primary); color: var(--on-primary); font-size: 0.8rem; font-weight: 700; text-align: center;"></div>
+  <div class="container">
+    <div id="toast-banner" class="hidden" style="margin-top: 8px; padding: 8px 12px; border-radius: 8px; background: var(--primary); color: var(--on-primary); font-size: 0.8rem; font-weight: 700; text-align: center;"></div>
+  </div>
 
   <!-- TAB 1: UPCOMING MATCHES LIST -->
   <div id="tab-matches" class="container" style="padding-top: 12px; padding-bottom: 24px;">
@@ -2792,26 +2823,28 @@ function resolveCourtflowHost(input) {
 
 <!-- BOTTOM NAVIGATION -->
 <nav id="bottom-nav" class="bottom-nav hidden">
-  <button type="button" class="nav-item active" onclick="switchScheduleTab('matches')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="8" y1="6" x2="21" y2="6"></line>
-      <line x1="8" y1="12" x2="21" y2="12"></line>
-      <line x1="8" y1="18" x2="21" y2="18"></line>
-      <line x1="3" y1="6" x2="3.01" y2="6"></line>
-      <line x1="3" y1="12" x2="3.01" y2="12"></line>
-      <line x1="3" y1="18" x2="3.01" y2="18"></line>
-    </svg>
-    <span>Matches</span>
-  </button>
-  <button type="button" class="nav-item" onclick="switchScheduleTab('calendar')">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-      <line x1="16" y1="2" x2="16" y2="6"></line>
-      <line x1="8" y1="2" x2="8" y2="6"></line>
-      <line x1="3" y1="10" x2="21" y2="10"></line>
-    </svg>
-    <span>Calendar</span>
-  </button>
+  <div style="width: 100%; max-width: 600px; display: flex; justify-content: space-around;">
+    <button type="button" class="nav-item active" onclick="switchScheduleTab('matches')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"></line>
+        <line x1="8" y1="12" x2="21" y2="12"></line>
+        <line x1="8" y1="18" x2="21" y2="18"></line>
+        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+      </svg>
+      <span>Matches</span>
+    </button>
+    <button type="button" class="nav-item" onclick="switchScheduleTab('calendar')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+      <span>Calendar</span>
+    </button>
+  </div>
 </nav>
 
 <!-- Generic Bottom Sheet Picker Component -->
@@ -3056,40 +3089,38 @@ function resolveCourtflowHost(input) {
     renderSelectedDayPanel();
   }
 
-  // --- MATCH CARD BUILDER ---
+  // --- MATCH CARD BUILDER (Exact structure from Portal_Captain_JS_Matches.html & schedule_portal_preview.html) ---
   function buildMatchCardHtml(match, idx) {
     const isHome = isHostClubHome(match);
     const badgeClass = isHome ? 'home' : 'away';
     const roleLabel = isHome ? 'Home' : 'Away';
-    const isCup = String(match.leagueCup || '').toUpperCase().includes('CUP');
-    const compClass = isCup ? 'cup' : 'league';
     const compLabel = match.leagueCup || 'League';
     const venueStr = String(match.venue || '');
     const matchKey = `${match.date}_${match.ourTeam}_${match.opponent}`;
     const isExpanded = expandedVenues.has(matchKey);
-    const isLongVenue = venueStr.length > 36;
+    const isLongVenue = venueStr.length > 34;
 
     return `
-      <div class="match-card ${badgeClass}">
+      <div class="match-card">
         <div class="match-header">
-          <span>${escapeHtml(match.displayDate)}</span>
-          <span>${escapeHtml(match.time)}</span>
+          <span class="match-date">${escapeHtml(match.displayDate)}</span>
+          <span class="match-time">${escapeHtml(match.time)}</span>
         </div>
         <div class="match-body">
           <div class="match-left-col">
             <div class="match-teams">
-              ${escapeHtml(match.ourTeam)} <span style="opacity:0.5; font-size:0.85em; font-weight:500;">vs</span> <span style="color: var(--primary);">${escapeHtml(match.opponent)}</span>
+              ${escapeHtml(match.ourTeam)} <span style="opacity:0.5; font-size:0.8em; font-weight:400;">vs</span> ${escapeHtml(match.opponent)}
             </div>
             <div class="match-details">
               <span class="badge ${badgeClass}">${roleLabel}</span>
-              <span class="badge ${compClass}">${escapeHtml(compLabel)}</span>
+              <span class="badge match-type">${escapeHtml(compLabel)}</span>
             </div>
-            <div class="venue-row ${isExpanded ? 'expanded' : ''}" onclick="toggleVenueExpand('${escapeHtml(matchKey)}')" title="Tap to expand full venue address">
+            <div class="match-venue" onclick="${isLongVenue ? `toggleVenueExpand('${escapeHtml(matchKey)}')` : ''}" style="${isLongVenue ? 'cursor: pointer;' : ''}" title="${escapeHtml(venueStr)}">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                 <circle cx="12" cy="10" r="3"></circle>
               </svg>
-              <span class="venue-text">${escapeHtml(venueStr)}</span>
+              <span class="${isExpanded ? 'venue-text-expanded' : 'venue-text-clamp'}">${escapeHtml(venueStr)}</span>
               ${isLongVenue ? `<span style="font-size:0.75rem; color:var(--primary); font-weight:700; flex-shrink:0; margin-left:4px;">${isExpanded ? 'Less' : 'More'}</span>` : ''}
             </div>
           </div>
@@ -3119,7 +3150,7 @@ function resolveCourtflowHost(input) {
     const filtered = getFilteredFixtures(true);
 
     if (filtered.length === 0) {
-      container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding: 40px 16px; opacity: 0.65;">No upcoming confirmed matches found for the current filter.</div>`;
+      container.innerHTML = `<div style="text-align:center; padding: 40px 16px; opacity: 0.65;">No upcoming confirmed matches found for the current filter.</div>`;
       return;
     }
 
@@ -3129,7 +3160,7 @@ function resolveCourtflowHost(input) {
     }).join('');
 
     const bulkExportFooterHtml = `
-      <div style="grid-column: 1 / -1; margin-top: 16px; padding-top: 8px; text-align: center;">
+      <div style="margin-top: 16px; padding-top: 8px; text-align: center;">
         <button type="button" onclick="handleBulkExport()" style="width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--on-surface); border-radius: 12px; padding: 12px 16px; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: var(--shadow-sm);">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -3178,70 +3209,74 @@ function resolveCourtflowHost(input) {
       const month = parseInt(parts[1], 10) - 1;
       if (isNaN(year) || isNaN(month)) return;
 
-      const grid = document.createElement('div');
-      grid.className = 'month-grid';
+      const div = document.createElement('div');
+      div.className = 'month-grid';
 
-      const dateObj = new Date(year, month, 1);
-      const monthName = dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
-      const title = document.createElement('div');
-      title.className = 'month-label';
-      title.textContent = monthName;
-      grid.appendChild(title);
+      const header = document.createElement('div');
+      header.className = 'month-header-title';
+      header.textContent = new Date(year, month, 1).toLocaleString('en-IE', { month: 'long', year: 'numeric' });
+      div.appendChild(header);
 
-      ['M', 'T', 'W', 'T', 'F', 'S', 'S'].forEach(d => {
-        const dh = document.createElement('div');
-        dh.className = 'day-header';
-        dh.textContent = d;
-        grid.appendChild(dh);
+      const dowRow = document.createElement('div');
+      dowRow.className = 'dow-row';
+      ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(d => {
+        const dDiv = document.createElement('div');
+        dDiv.textContent = d;
+        dowRow.appendChild(dDiv);
       });
+      div.appendChild(dowRow);
+
+      const daysGrid = document.createElement('div');
+      daysGrid.className = 'days-grid';
 
       const firstDay = new Date(year, month, 1).getDay();
-      const offset = (firstDay === 0) ? 6 : firstDay - 1;
-      for (let i = 0; i < offset; i++) {
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement('div');
         empty.className = 'day-cell empty';
-        grid.appendChild(empty);
+        daysGrid.appendChild(empty);
       }
 
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
       for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement('div');
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const dayMatches = byDate[dateStr] || [];
         const homeCount = dayMatches.filter(m => isHostClubHome(m)).length;
         const awayCount = dayMatches.length - homeCount;
 
-        const cell = document.createElement('div');
-        cell.className = 'day-cell';
-        if (homeCount > 0) cell.classList.add('has-home');
-        if (awayCount > 0) cell.classList.add('has-away');
-        if (selectedCalendarDate === dateStr) cell.classList.add('selected-day');
+        cell.className = 'day-cell ' + (dayMatches.length > 0 ? 'has-matches' : 'no-matches');
+        if (selectedCalendarDate === dateStr) {
+          cell.classList.add('selected');
+        }
 
         let indicatorHtml = '';
-        const total = dayMatches.length;
-        if (total > 0 && total <= 3) {
+        if (dayMatches.length > 0 && dayMatches.length <= 3) {
           const dots = [];
           for (let h = 0; h < homeCount; h++) dots.push('<span class="day-dot home"></span>');
           for (let a = 0; a < awayCount; a++) dots.push('<span class="day-dot away"></span>');
-          indicatorHtml = `<div class="day-cell-indicators">${dots.join('')}</div>`;
-        } else if (total >= 4) {
+          indicatorHtml = `<div class="day-indicators">${dots.join('')}</div>`;
+        } else if (dayMatches.length >= 4) {
           const pips = [];
           if (homeCount > 0) pips.push(`<span class="day-pip home"><span class="day-dot home"></span>${homeCount}</span>`);
           if (awayCount > 0) pips.push(`<span class="day-pip away"><span class="day-dot away"></span>${awayCount}</span>`);
-          indicatorHtml = `<div class="day-cell-indicators">${pips.join('')}</div>`;
+          indicatorHtml = `<div class="day-indicators">${pips.join('')}</div>`;
         } else {
-          indicatorHtml = `<div class="day-cell-indicators"></div>`;
+          indicatorHtml = `<div class="day-indicators"></div>`;
         }
 
-        cell.innerHTML = `<span class="day-num">${d}</span>${indicatorHtml}`;
+        cell.innerHTML = `<span style="line-height:1;">${d}</span>${indicatorHtml}`;
         cell.onclick = () => {
           selectedCalendarDate = dateStr;
           renderCalendarGrid();
           renderSelectedDayPanel();
         };
-        grid.appendChild(cell);
+
+        daysGrid.appendChild(cell);
       }
 
-      container.appendChild(grid);
+      div.appendChild(daysGrid);
+      container.appendChild(div);
     });
 
     renderSelectedDayPanel();
@@ -3256,34 +3291,31 @@ function resolveCourtflowHost(input) {
     const dayMatches = selectedCalendarDate ? filtered.filter(m => m.date === selectedCalendarDate) : [];
 
     if (!selectedCalendarDate) {
-      panel.innerHTML = `<div style="text-align:center; padding: 16px; color: var(--text-muted); font-size: 0.85rem;">Tap any date in the calendar to view confirmed matches.</div>`;
+      panel.innerHTML = `<div style="text-align:center; padding: 24px 8px; color: var(--text-muted); font-size: 0.85rem;">Tap any highlighted date in the calendar to view confirmed matches.</div>`;
       return;
     }
 
     const parts = selectedCalendarDate.split('-');
     const dObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-    const niceDate = dObj.toLocaleDateString('en-IE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const dateLabel = dObj.toLocaleDateString('en-IE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const homeCount = dayMatches.filter(m => isHostClubHome(m)).length;
 
-    if (dayMatches.length === 0) {
-      panel.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-weight:800; font-size:0.95rem;">${escapeHtml(niceDate)}</span>
-          <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">0 Matches</span>
+    let html = `
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 12px;">
+        <div>
+          <h3 style="margin: 0; font-size: 1.05rem; color: var(--on-surface);">${escapeHtml(dateLabel)}</h3>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">${dayMatches.length} Confirmed ${dayMatches.length === 1 ? 'Match' : 'Matches'}</div>
         </div>
-        <div style="font-size:0.85rem; color:var(--text-muted); padding: 12px 0;">No confirmed matches on this date for the current filter.</div>
-      `;
-      return;
-    }
-
-    panel.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border);">
-        <span style="font-weight:800; font-size:1rem;">${escapeHtml(niceDate)}</span>
-        <span style="font-size:0.78rem; color:var(--primary); font-weight:700;">${dayMatches.length} Confirmed ${dayMatches.length === 1 ? 'Match' : 'Matches'}</span>
-      </div>
-      <div>
-        ${dayMatches.map(m => buildMatchCardHtml(m, allFixtures.indexOf(m))).join('')}
+        ${homeCount > 0 ? `<span class="badge home">${homeCount} Home</span>` : ''}
       </div>
     `;
+
+    if (dayMatches.length === 0) {
+      html += `<div style="text-align: center; padding: 24px 8px; color: var(--text-muted); font-size: 0.85rem;">No confirmed matches on this date for the current filter.</div>`;
+    } else {
+      html += dayMatches.map(m => buildMatchCardHtml(m, allFixtures.indexOf(m))).join('');
+    }
+    panel.innerHTML = html;
   }
 
   // --- UI SYNCHRONIZATION ---
