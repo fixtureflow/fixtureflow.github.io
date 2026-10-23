@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-schedule-dev-cache-v7';
+const CACHE_NAME = 'ff-schedule-dev-cache-v8';
 const CACHE_PREFIX = 'ff-schedule-dev-cache-';
 const ASSETS_TO_CACHE = [
   './',

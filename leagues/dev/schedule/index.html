@@ -883,7 +883,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v152";
+  window.__FF_VERSION__ = "dev-v153";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Schedule]%c Running version " + window.__FF_VERSION__, "background: #be123c; color: #ffffff; border: 1px solid #e11d48; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -2401,6 +2401,27 @@ function resolveCourtflowHost(input) {
     opacity: 0.9;
     background: rgba(150, 150, 150, 0.1);
   }
+  #desktop-bulk-ics-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--on-surface);
+    padding: 12px 14px;
+    font-size: 0.82rem;
+    border-radius: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  #desktop-bulk-ics-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
 
   /* Season Grid Scroll Area & Month Grid (Exact from Portal_Captain_CSS.html & schedule_portal_preview.html) */
   .season-grid-scroll-area {
@@ -2655,7 +2676,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v152">
+  <meta name="app-version" content="dev-v153">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/leagues/dev/schedule/">
@@ -2737,9 +2758,20 @@ function resolveCourtflowHost(input) {
         </span>
       </div>
     </div>
-    <div class="container" style="margin-top: 0; padding-top: 0; padding-bottom: 12px;">
-      <button type="button" id="desktop-team-picker-btn" onclick="event.stopPropagation(); openTeamPicker()" class="btn" style="background: color-mix(in srgb, var(--primary) 10%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent); color: var(--primary); padding: 12px 16px; font-size: 0.9rem; border-radius: 12px; font-weight: 700; text-align: center; width: 100%; display: block; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;">
+    <div class="container" style="display: flex; gap: 10px; align-items: stretch; margin-top: 0; padding-top: 0; padding-bottom: 12px;">
+      <button type="button" id="desktop-team-picker-btn" onclick="event.stopPropagation(); openTeamPicker()" class="btn" style="flex: 1; min-width: 0; background: color-mix(in srgb, var(--primary) 10%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent); color: var(--primary); padding: 12px 16px; font-size: 0.9rem; border-radius: 12px; font-weight: 700; text-align: center; display: block; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;">
         <span id="desktop-team-select-text">TEAM: ALL TEAMS</span>
+      </button>
+      <button type="button" id="desktop-bulk-ics-btn" onclick="event.stopPropagation(); handleBulkExport()" title="Export upcoming filtered matches to .ics calendar file">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary); flex-shrink: 0;">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+          <line x1="12" y1="14" x2="12" y2="18"></line>
+          <line x1="10" y1="16" x2="14" y2="16"></line>
+        </svg>
+        <span id="desktop-export-ics-text">Export .ics</span>
       </button>
     </div>
   </header>
@@ -3156,23 +3188,7 @@ function resolveCourtflowHost(input) {
       return buildMatchCardHtml(m, globalIdx);
     }).join('');
 
-    const bulkExportFooterHtml = `
-      <div style="margin-top: 16px; padding-top: 8px; text-align: center;">
-        <button type="button" onclick="handleBulkExport()" style="width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--on-surface); border-radius: 12px; padding: 12px 16px; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: var(--shadow-sm);">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-            <line x1="12" y1="14" x2="12" y2="18"></line>
-            <line x1="10" y1="16" x2="14" y2="16"></line>
-          </svg>
-          <span>Export Filtered Schedule (${filtered.length} ${filtered.length === 1 ? 'Match' : 'Matches'}) (.ics)</span>
-        </button>
-      </div>
-    `;
-
-    container.innerHTML = cardsHtml + bulkExportFooterHtml;
+    container.innerHTML = cardsHtml;
   }
 
   // --- TAB 2: MULTI-MONTH SEASON CALENDAR RENDERER ---
@@ -3336,12 +3352,15 @@ function resolveCourtflowHost(input) {
       if (btn) btn.classList.toggle('active', compFilter === c);
     });
 
+    const upcomingCount = getFilteredFixtures(true).length;
+    const exportTxt = document.getElementById('desktop-export-ics-text');
+    if (exportTxt) exportTxt.textContent = `Export .ics (${upcomingCount})`;
+
     const isFiltered = selectedTeam !== 'ALL' || venueFilter !== 'ALL' || compFilter !== 'ALL';
     const filterBar = document.getElementById('active-filter-bar');
     const filterText = document.getElementById('active-filter-text');
     if (filterBar && filterText) {
       if (isFiltered) {
-        const upcomingCount = getFilteredFixtures(true).length;
         const parts = [];
         if (selectedTeam !== 'ALL') parts.push(selectedTeam);
         if (venueFilter !== 'ALL') parts.push(venueFilter === 'HOME' ? 'Home' : 'Away');
