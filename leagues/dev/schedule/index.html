@@ -1,0 +1,3647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>[DEV] Schedule · FixtureFlow</title>
+  
+  <style>
+  /* =========================================================================
+     1. DESIGN TOKENS (VARIABLES)
+     ========================================================================= */
+  :root {
+    color-scheme: light dark;
+    /* --- LIGHT THEME --- */
+    --bg: #f8f6fc; /* Subtle purple tint for Captain Portal */
+    --surface: #ffffff;
+    --primary: #6200ee;
+    --primary-hover: #3700b3;
+    --on-primary: #ffffff;
+    --secondary: #018786;
+    --error: #b00020;
+    --success: #00897b;
+    --warning: #ef6c00;
+    
+    --on-bg: #1d1d1f;
+    --on-surface: #1d1d1f;
+    --text-muted: #6e6e73;
+    --text: var(--on-surface);
+    
+    --border: #d2d2d7;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+    /* Elevated surfaces (modal/dialog cards).
+     *
+     * A modal card is painted on top of its own scrim, so it needs a colour the
+     * scrim does not already occupy. Portals are free to tint --surface to match
+     * their brand; where that tint collides with the scrim the card disappears
+     * entirely (the Club portal's Obsidian #0f172a card sat on an
+     * rgba(15,23,42,0.88) scrim — the same colour, so it had no visible edge).
+     *
+     * These default to the plain surface with no edge, so a portal that has no
+     * collision renders exactly as before. A portal that does collide overrides
+     * them to lift the card clear of its scrim.
+     */
+    --surface-elevated: var(--surface);
+    --surface-edge: transparent;
+    --shadow-modal: 0 20px 45px -12px rgba(0, 0, 0, 0.25);
+
+    /* Status Colors (Light) */
+    --c-avail: #00897b;
+    --bg-avail: rgba(0, 137, 123, 0.1);
+    --c-match: #3b82f6;
+    --bg-match: rgba(59, 130, 246, 0.1);
+    --c-rest: #ef6c00;
+    --bg-rest: rgba(239, 108, 0, 0.1);
+    --c-unav: #c62828;
+    --bg-unav: rgba(198, 40, 40, 0.1);
+
+    /* Venue Badges (Light) */
+    --badge-home-bg: #e0f7fa;
+    --badge-home-color: #006064;
+    --badge-home-border: #b2ebf2;
+    --badge-away-bg: #fce4ec;
+    --badge-away-color: #880e4f;
+    --badge-away-border: #f8bbd0;
+
+    /* Splash Screen Tokens (Light) - Captain Base */
+    --splash-bg: radial-gradient(circle at center, #ffffff 0%, var(--bg) 100%);
+    --splash-glow: rgba(98, 0, 238, 0.12);
+    --splash-loader-bg: rgba(15, 23, 42, 0.08);
+    --splash-loader-accent: var(--primary);
+    --splash-text: var(--text-muted);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      /* --- DARK THEME --- */
+      --bg: #131216; /* Subtle warm tint for Captain Portal */
+      --surface: #1e1e1e;
+      --primary: #bb86fc;
+      --primary-hover: #dfbcf9;
+      --on-primary: #000000;
+      --secondary: #03dac6;
+      --error: #cf6679;
+      --success: #03dac6;
+      --warning: #ffb74d;
+      
+      --on-bg: #e0e0e0;
+      --on-surface: #ffffff;
+      --text-muted: #a0a0a0;
+      
+      --border: #333333;
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+      /* Deeper than the light equivalent: a 25%-black shadow is invisible
+       * against a dark scrim, which is why modal cards previously read as
+       * floating text rather than as a panel. */
+      --shadow-modal: 0 24px 50px -12px rgba(0, 0, 0, 0.75);
+
+      /* Splash Screen Tokens (Dark) - Captain Base */
+      --splash-bg: radial-gradient(circle at center, #1c1b22 0%, var(--bg) 100%);
+      --splash-glow: rgba(187, 134, 252, 0.18);
+      --splash-loader-bg: rgba(255, 255, 255, 0.08);
+      --splash-loader-accent: var(--primary);
+      --splash-text: #a0a0a0;
+
+      /* Status Colors (Dark) */
+      --c-avail: #03dac6;
+      --bg-avail: rgba(3, 218, 198, 0.15);
+      --c-match: #60a5fa;
+      --bg-match: rgba(96, 165, 250, 0.15);
+      --c-rest: #ffb74d;
+      --bg-rest: rgba(255, 183, 77, 0.15);
+      --c-unav: #cf6679;
+      --bg-unav: rgba(207, 102, 121, 0.15);
+
+      /* Venue Badges (Dark) */
+      --badge-home-bg: rgba(0, 151, 167, 0.2);
+      --badge-home-color: #84ffff;
+      --badge-home-border: #00838f;
+      --badge-away-bg: rgba(194, 24, 91, 0.2);
+      --badge-away-color: #ff80ab;
+      --badge-away-border: #ad1457;
+    }
+  }
+
+  /* =========================================================================
+     2. GLOBAL RESETS & BASE HTML
+     ========================================================================= */
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scrollbar-gutter: stable; /* Modern scrollbar gutter to prevent layout shift */
+  }
+
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg);
+    color: var(--on-bg);
+    line-height: 1.4;
+    border-top: 4px solid var(--primary);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--on-surface);
+    margin-top: 0;
+    line-height: 1.2;
+  }
+  
+  a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+  }
+
+  /* =========================================================================
+     3. LAYOUT & CONTAINERS
+     ========================================================================= */
+  .container {
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Wide container specifically for Desktop Dashboards (Data Tables) */
+  .container-wide {
+    width: 100%;
+    max-width: 1050px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+  
+  .team-select-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 16px auto 16px auto; /* Balanced 16px top and bottom margin */
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+
+  /* =========================================================================
+     4. TYPOGRAPHY & TEXT UTILITIES
+     ========================================================================= */
+  .text-center { text-align: center; }
+  .text-left { text-align: left; }
+  .text-right { text-align: right; }
+  .text-muted { color: var(--text-muted); }
+  .font-bold { font-weight: bold; }
+  .font-semibold { font-weight: 600; }
+  .text-sm { font-size: 0.875rem; }
+  .text-lg { font-size: 1.125rem; }
+  .text-xl { font-size: 1.25rem; }
+  .text-2xl { font-size: 1.5rem; }
+
+  /* =========================================================================
+     5. COMPONENT CLASSES (BEM-Lite)
+     ========================================================================= */
+     
+  /* Forms & Inputs */
+  .ff-input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    font-size: 1rem;
+    background-color: var(--surface);
+    color: var(--on-surface);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .ff-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(98, 0, 238, 0.25);
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .ff-input:focus {
+       box-shadow: 0 0 0 3px rgba(187, 134, 252, 0.25);
+    }
+  }
+
+  .ff-select {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    font-size: 1rem;
+    background-color: var(--surface);
+    color: var(--on-surface);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .ff-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(98, 0, 238, 0.25);
+  }
+
+  .ff-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  
+  .ff-fieldset {
+    border: none;
+    border-radius: 12px;
+    padding: 25px;
+    background-color: var(--surface);
+    margin: 0;
+    margin-bottom: 25px;
+    box-shadow: var(--shadow-sm);
+  }
+  .ff-legend {
+    font-weight: 700;
+    padding: 0 10px;
+    font-size: 1.2rem;
+    color: var(--on-surface);
+    margin-bottom: 10px;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-block;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    appearance: none;
+    -webkit-appearance: none;
+    text-decoration: none;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .btn:disabled, .btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .btn-primary {
+    background-color: var(--primary);
+    color: #ffffff;
+  }
+  
+  .btn-submit {
+    background-color: var(--success);
+    color: #ffffff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .btn-primary {
+      color: #121212;
+    }
+    .btn-submit {
+      color: #121212;
+    }
+    /* --border is tuned for dividers on a page background, where it only has to
+     * separate two similar tones. As a button outline on a dark card it is far
+     * too faint to read as a control at all: the Club portal's #1e293b border
+     * on an Obsidian card left "Close" looking like plain text. Outline the
+     * button against the card instead of against the page. */
+    .btn-secondary {
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+  }
+
+  /* Use opacity/color transition for hover per UI/UX rules */
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    color: var(--on-surface);
+    border-color: var(--border);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--bg);
+    border-color: var(--primary);
+  }
+
+  .btn-danger {
+    background-color: var(--error);
+    color: #ffffff;
+  }
+  
+  .btn-danger:hover:not(:disabled) {
+    background-color: #d32f2f;
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn-block {
+    display: block;
+    width: 100%;
+  }
+
+  /* Cards */
+  .card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .match-card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
+  }
+  @media (max-width: 600px) {
+    .card, .match-card {
+      padding: 16px;
+    }
+  }
+
+  /* Status Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .badge-avail { background-color: var(--bg-avail); color: var(--c-avail); }
+  .badge-match { background-color: var(--bg-match); color: var(--c-match); }
+  .badge-rest  { background-color: var(--bg-rest); color: var(--c-rest); }
+  .badge-unav  { background-color: var(--bg-unav); color: var(--c-unav); }
+  
+  .badge-neutral { 
+    background-color: rgba(241, 243, 244, 0.8); 
+    color: var(--text-muted); 
+    border: 1px solid var(--border); 
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .badge-neutral {
+      background-color: rgba(255, 255, 255, 0.1); 
+    }
+  }
+
+  /* App Header & Structure */
+  .app-container {
+    max-width: 1050px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-bottom: 80px;
+  }
+
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: var(--surface);
+    width: 100%;
+    padding: 15px 20px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .app-logo {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .app-title {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  /* Footer */
+  .app-footer {
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--surface);
+    z-index: 100;
+  }
+
+  .view-login-container {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .brand-footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 0.85rem;
+    color: var(--on-bg);
+    opacity: 0.5;
+    width: 100%;
+  }
+
+  .brand-footer a {
+    color: inherit;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .brand-footer a:hover {
+    text-decoration: underline;
+  }
+
+  .brand-footer strong {
+    font-weight: 700;
+  }
+
+  .login-footer {
+    margin-top: auto;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  .dashboard-footer {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  /* =========================================================================
+     6. UTILITIES & LAYOUT
+     ========================================================================= */
+  .d-none { display: none !important; }
+  .d-flex { display: flex; }
+  .d-block { display: block; }
+  .d-inline-block { display: inline-block; }
+  
+  .align-items-center { align-items: center; }
+  .justify-content-center { justify-content: center; }
+  .justify-content-between { justify-content: space-between; }
+  
+  .gap-2 { gap: 0.5rem; }
+  .gap-3 { gap: 1rem; }
+  .gap-4 { gap: 1.5rem; }
+  
+  .mt-2 { margin-top: 0.5rem; }
+  .mt-3 { margin-top: 1rem; }
+  .mt-4 { margin-top: 1.5rem; }
+  .mb-2 { margin-bottom: 0.5rem; }
+  .mb-3 { margin-bottom: 1rem; }
+  .mb-4 { margin-bottom: 1.5rem; }
+  
+  .p-3 { padding: 1rem; }
+  .p-4 { padding: 1.5rem; }
+  
+  .w-100 { width: 100%; }
+
+  /* Error States */
+  .input-error {
+    border-color: var(--error) !important;
+  }
+  .input-error:focus {
+    box-shadow: 0 0 0 3px rgba(176, 0, 32, 0.25) !important;
+  }
+  .error-text,
+  .error-msg {
+    color: var(--error, #ef4444);
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-top: 12px;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  @keyframes ff-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+  .shake {
+    animation: ff-shake 0.35s ease-in-out;
+  }
+  
+  /* Loading States */
+  .loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .loading-spinner {
+        border: 3px solid rgba(18,18,18,.3);
+        border-top-color: #121212;
+    }
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Messages */
+  .alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+  }
+  
+  .alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile Overrides */
+  .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    .app-header {
+      padding: 10px 15px;
+      gap: 10px;
+    }
+    .app-logo {
+      height: 40px;
+    }
+    .app-title {
+      font-size: 1.2rem;
+    }
+    .app-container {
+      padding: 15px;
+      padding-bottom: 70px;
+    }
+  }
+  .ff-spinner {
+    border: 4px solid rgba(150, 150, 150, 0.2);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: var(--primary);
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* =========================================================================
+     7. PICKER MODAL COMPONENT
+     ========================================================================= */
+  .picker-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: flex-end; justify-content: center; padding: 16px; padding-bottom: 0; transition: opacity 0.3s; }
+  @media (min-width: 601px) { .picker-overlay { align-items: center; padding-bottom: 16px; } }
+  .picker-modal { background: var(--surface); width: 100%; max-width: 450px; height: 80vh; max-height: 600px; border-radius: 16px 16px 0 0; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border); }
+  @media (min-width: 601px) { .picker-modal { border-radius: 16px; } }
+  .picker-header-block { padding: 16px; border-bottom: 1px solid var(--border); background: var(--bg); }
+  .picker-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .picker-title-text { font-weight: bold; font-size: 1.125rem; color: var(--on-surface); margin: 0; }
+  .picker-close-btn { appearance: none; background: none; border: none; padding: 8px; margin-right: -8px; color: var(--on-bg); opacity: 0.5; cursor: pointer; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+  .picker-close-btn:hover { opacity: 1; background: var(--border); }
+  
+  .search-wrapper { position: relative; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--on-bg); opacity: 0.5; width: 20px; height: 20px; pointer-events: none; }
+  /* font-size must stay >= 16px: iOS Safari auto-zooms on focus below that,
+     and pinch-zoom is now enabled (no maximum-scale lock) for WCAG 1.4.4. */
+  .search-input { width: 100%; padding: 12px 16px 12px 40px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--on-surface); font-size: 1rem; outline: none; transition: all 0.2s; box-sizing: border-box; margin: 0; height: auto;}
+  .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(98, 0, 238, 0.2); }
+  
+  .picker-list { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+  .picker-list-btn { width: 100%; text-align: left; padding: 16px 20px; border: none; border-bottom: 1px solid var(--border); background: transparent; font-weight: 500; color: var(--on-surface); cursor: pointer; transition: background 0.2s; outline: none; font-size: 1rem; margin: 0; display: block; box-sizing: border-box; }
+  .picker-list-btn:hover, .picker-list-btn:focus { background: var(--bg); }
+
+  /* =========================================================================
+     8. RESPONSIVE HEADERS
+     ========================================================================= */
+  .portal-header-group { display: flex; flex-direction: row; align-items: baseline; gap: 6px; }
+  .portal-header-club { font-weight: 500; font-size: 1.1rem; margin: 0;}
+  .portal-header-title { font-weight: bold; font-size: 1.1rem; margin: 0;}
+  .header-club-logo { display: none; }
+  .header-club-logo[src]:not([src=""]) { display: inline-block; }
+
+  /* Login Screen Dynamic Branding */
+  #login-club-logo-container { display: none; }
+  #login-club-title { display: none; }
+  #login-club-title-large { display: block; }
+
+  .login-has-logo #login-club-logo-container { display: block; }
+  .login-has-logo #login-club-title { display: block; }
+  .login-has-logo #login-club-title-large { display: none; }
+
+  .login-no-logo #login-club-logo-container { display: none; }
+  .login-no-logo #login-club-title { display: none; }
+  .login-no-logo #login-club-title-large { display: block; }
+  
+
+  
+  @media (max-width: 480px) {
+    .portal-header-group { flex-direction: column; align-items: flex-start; gap: 0; }
+    .portal-header-club { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--on-bg); opacity: 0.7; margin-bottom: -2px; }
+    .portal-header-title { font-size: 1.1rem; }
+  }
+
+  /* Season Indicator Utilities */
+  .short-season { display: none; }
+  .full-season { display: inline; }
+
+  @media (max-width: 600px) {
+    .short-season { display: inline; }
+    .full-season { display: none; }
+  }
+
+  /* =========================================================================
+     9. DATE CHIP GRID (BOOKING PORTAL)
+     ========================================================================= */
+  .date-chip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .date-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Hide actual radio button accessibly */
+  .date-chip input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .date-chip:hover {
+    border-color: var(--primary);
+    background: var(--bg);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .date-chip:active {
+    transform: translateY(0);
+  }
+  
+  .date-chip:focus-within {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* Structural pseudo-selector to target the label when radio inside is checked */
+  .date-chip:has(input[type="radio"]:checked) {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(98, 0, 238, 0.25);
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .date-chip:has(input[type="radio"]:checked) {
+      color: #121212;
+      box-shadow: 0 4px 12px rgba(187, 134, 252, 0.25);
+    }
+  }
+
+  .chip-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none; /* Let clicks pass to the label */
+  }
+
+  .chip-day-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+  }
+
+  .chip-day-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 4px 0;
+  }
+
+  .chip-month {
+    font-size: 0.8rem;
+    font-weight: 500;
+    opacity: 0.9;
+  }
+
+  /* Connecting Splash Loading Overlay (Standalone Headless PWA - Aligned with CourtFlow) */
+  .screen-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    box-sizing: border-box;
+    padding: 24px;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    background: var(--splash-bg);
+  }
+
+  .glow-backdrop {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, var(--splash-glow) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  #spinner-loader {
+    width: 44px;
+    height: 44px;
+    border: 4px solid var(--splash-loader-bg);
+    border-top-color: var(--splash-loader-accent, var(--primary));
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+    display: block;
+    z-index: 2;
+  }
+
+  .screen-overlay .loading-text {
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    margin: 16px auto 0 auto;
+    color: var(--splash-text);
+    z-index: 2;
+    text-transform: uppercase;
+    text-align: center;
+    max-width: 85%;
+    display: block;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .offline-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    max-width: 320px;
+    z-index: 2;
+    box-shadow: var(--shadow-md);
+  }
+</style>
+
+  <script>
+  // --- Application Version Stamp ---
+  window.__FF_VERSION__ = "dev-v148";
+  window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
+  console.log("%c[FixtureFlow · Schedule]%c Running version " + window.__FF_VERSION__, "background: #be123c; color: #ffffff; border: 1px solid #e11d48; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
+
+  // --- Central Leagues & CourtFlow Club Registry ---
+  /**
+ * Fixture Flow - Central Leagues Club Registry
+ * 
+ * Maps human-readable club slugs to Google Apps Script Web App Host IDs.
+ * Enables clean PWA URLs (e.g. /leagues/player/?c=mount-pleasant).
+ */
+
+const CLUBS_REGISTRY = {
+  "mount-pleasant": {
+    name: "Mount Pleasant Badminton Club",
+    shortName: "MP",
+    aliases: ["mp", "mpbc", "mountpleasant", "mount_pleasant"],
+    hostId: "AKfycbwytXb33k1qFxppC6VF_HJhHfg9TrQ4vUNSWFFrzlN-_-OMfaA1lSfjC5YUt-8viMvo",
+    courtflowHostId: "AKfycbx_LtOWLocI6-J_apimSsoVrHSS3Mc419OnGnYlnz5e6nf4gCYacOMbxcrpILCDdjRyfg"
+  },
+  "dev": {
+    name: "Development / Staging",
+    shortName: "Dev",
+    aliases: ["test", "local"],
+    hostId: "AKfycbyBNsvDMn81v0WQoYO1Hm0xt6t6wUDH-iBvnwH0RgEVzi_magEqZxtO_Nk4aZUiQ6ys6Q",
+    courtflowHostId: "AKfycbyYadCqcW4iMp5QZcsTu74lhJJz8zL_ba65SKxMWZ7ycpaDsWBYYCbm2ocqH_gsCXl1"
+  }
+};
+
+/**
+ * Resolves a URL parameter (slug, alias, or raw hash) to a Leagues club record.
+ * 
+ * @param {string} input The query parameter value (e.g. "mount-pleasant", "mp", "AKfy...").
+ * @returns {{ name: string, shortName: string, hostId: string, slug: string } | null} The resolved club or null if invalid.
+ */
+function resolveClubHost(input) {
+  if (!input || typeof input !== 'string') return null;
+  const normalized = input.trim().toLowerCase();
+
+  // 1. Direct slug match
+  if (CLUBS_REGISTRY[normalized]) {
+    return {
+      slug: normalized,
+      name: CLUBS_REGISTRY[normalized].name,
+      shortName: CLUBS_REGISTRY[normalized].shortName || normalized.toUpperCase(),
+      hostId: CLUBS_REGISTRY[normalized].hostId
+    };
+  }
+
+  // 2. Alias match
+  for (const [slug, club] of Object.entries(CLUBS_REGISTRY)) {
+    if (club.aliases && club.aliases.includes(normalized)) {
+      return {
+        slug: slug,
+        name: club.name,
+        shortName: club.shortName || slug.toUpperCase(),
+        hostId: club.hostId
+      };
+    }
+  }
+
+  // 3. Fallback: Raw Google Apps Script deployment hash (strictly validated format)
+  const trimmed = input.trim();
+  if (/^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmed)) {
+    return {
+      slug: 'custom',
+      name: 'Custom Club',
+      shortName: 'Club',
+      hostId: trimmed
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Resolves a URL parameter (slug, alias, or raw hash) to a CourtFlow club record.
+ * 
+ * @param {string} input The query parameter value (e.g. "mount-pleasant", "mp", "AKfy...").
+ * @returns {{ name: string, shortName: string, hostId: string, slug: string } | null} The resolved club or null if invalid.
+ */
+function resolveCourtflowHost(input) {
+  if (!input || typeof input !== 'string') return null;
+  const normalized = input.trim().toLowerCase();
+
+  // 1. Direct slug match
+  if (CLUBS_REGISTRY[normalized] && CLUBS_REGISTRY[normalized].courtflowHostId) {
+    return {
+      slug: normalized,
+      name: CLUBS_REGISTRY[normalized].name,
+      shortName: CLUBS_REGISTRY[normalized].shortName || normalized.toUpperCase(),
+      hostId: CLUBS_REGISTRY[normalized].courtflowHostId
+    };
+  }
+
+  // 2. Alias match
+  for (const [slug, club] of Object.entries(CLUBS_REGISTRY)) {
+    if (club.aliases && club.aliases.includes(normalized) && club.courtflowHostId) {
+      return {
+        slug: slug,
+        name: club.name,
+        shortName: club.shortName || slug.toUpperCase(),
+        hostId: club.courtflowHostId
+      };
+    }
+  }
+
+  // 3. Fallback: Raw Google Apps Script deployment hash (strictly validated format)
+  const trimmedCf = input.trim();
+  if (/^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmedCf)) {
+    return {
+      slug: 'custom',
+      name: 'Custom Club',
+      shortName: 'Club',
+      hostId: trimmedCf
+    };
+  }
+
+  return null;
+}
+
+
+  // --- Google Apps Script Headless PWA API Mock Wrapper ---
+  let _portalViewReported = false;
+
+  function _detectClientDevice() {
+    const ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
+    if (/Tablet|iPad/i.test(ua)) return 'tablet';
+    if (/Mobi|Android|iPhone|iPod/i.test(ua)) return 'mobile';
+    return 'desktop';
+  }
+
+  function createRunner(successHandler, failureHandler) {
+    const handlers = {
+      withSuccessHandler(fn) {
+        return createRunner(fn, failureHandler);
+      },
+      withFailureHandler(fn) {
+        return createRunner(successHandler, fn);
+      },
+      withUserObject(obj) {
+        return this;
+      }
+    };
+    return new Proxy(handlers, {
+      get(target, propKey) {
+        if (propKey in target) {
+          return target[propKey];
+        }
+        return function(...args) {
+          callHostApi(propKey, args, successHandler, failureHandler);
+        };
+      }
+    });
+  }
+
+  const google = window.google = {
+    script: {
+      run: createRunner(null, null)
+    }
+  };
+
+  function callHostApi(action, args, successHandler, failureHandler) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const rawClubParam = urlParams.get('c') || urlParams.get('club') || '';
+    const rawHostParam = urlParams.get('h');
+    let hostId = null;
+    let clubName = '';
+    let clubShort = '';
+
+    // Format is not authorisation. /^AKfy[a-zA-Z0-9_-]{20,}$/ is satisfied by any
+    // string of the right shape, so honouring one on trust lets a link to this
+    // genuine origin repoint the app at someone else's Apps Script and collect the
+    // PINs typed into it. Only a host the compiled registry vouches for is trusted.
+    function isRegisteredHost(candidate) {
+      if (!candidate || !/^AKfy[a-zA-Z0-9_-]{20,}$/.test(candidate)) return false;
+      if (typeof CLUBS_REGISTRY !== 'object' || !CLUBS_REGISTRY) return false;
+      return Object.keys(CLUBS_REGISTRY).some(function(slug) {
+        return CLUBS_REGISTRY[slug] && CLUBS_REGISTRY[slug].hostId === candidate;
+      });
+    }
+
+    // Unregistered hosts are a testing affordance, not a feature. DEV honours them
+    // for the current page load only; PROD refuses them outright.
+    const ALLOW_UNREGISTERED_HOSTS = true;
+
+    if (rawClubParam && typeof resolveClubHost === 'function') {
+      const resolved = resolveClubHost(rawClubParam);
+      if (resolved && resolved.hostId) {
+        // resolveClubHost falls back to slug 'custom' for any well-formed hash, so a
+        // resolved result is not by itself evidence that the club is known.
+        if (isRegisteredHost(resolved.hostId)) {
+          hostId = resolved.hostId;
+          clubName = resolved.name;
+          clubShort = resolved.shortName || '';
+          if (resolved.slug !== 'custom') {
+            localStorage.setItem('leagues_dev_pwa_host_id', hostId);
+            localStorage.setItem('leagues_dev_pwa_club_name', clubName);
+            localStorage.setItem('leagues_dev_pwa_club_short', clubShort);
+            localStorage.setItem('leagues_dev_pwa_club_slug', resolved.slug);
+          }
+        } else if (ALLOW_UNREGISTERED_HOSTS) {
+          hostId = resolved.hostId; // session only, never persisted
+          clubName = resolved.name;
+          clubShort = resolved.shortName || '';
+          console.warn("[FixtureFlow · Testing] Session-only connection to an unregistered club:", rawClubParam);
+        } else {
+          console.warn("[Security] Rejected club parameter that is not in the club registry (?c=):", rawClubParam);
+        }
+      }
+    }
+
+    if (rawHostParam) {
+      const trimmedHost = rawHostParam.trim();
+      if (isRegisteredHost(trimmedHost)) {
+        // Registered, but still treated as a testing override: not persisted, so it
+        // does not silently become the club this device talks to from now on.
+        hostId = trimmedHost;
+      } else if (ALLOW_UNREGISTERED_HOSTS && /^AKfy[a-zA-Z0-9_-]{20,}$/.test(trimmedHost)) {
+        hostId = trimmedHost;
+        console.warn("%c[FixtureFlow · Testing]%c Connecting via Custom Testing Host ID: " + hostId, "background: #d97706; color: #ffffff; padding: 2px 6px; border-radius: 3px; font-weight: 600;", "color: inherit; margin-left: 4px;");
+      } else {
+        const invalidHostErr = "Configuration Error: host parameter is not a registered deployment.";
+        console.error(invalidHostErr);
+        if (failureHandler) failureHandler(new Error(invalidHostErr));
+        return;
+      }
+    }
+
+    if (!hostId) {
+      const storedHostId = localStorage.getItem('leagues_dev_pwa_host_id');
+      if (isRegisteredHost(storedHostId)) {
+        hostId = storedHostId;
+        clubName = localStorage.getItem('leagues_dev_pwa_club_name') || '';
+        clubShort = localStorage.getItem('leagues_dev_pwa_club_short') || '';
+        const storedSlug = localStorage.getItem('leagues_dev_pwa_club_slug') || '';
+        if (storedSlug && !rawClubParam && typeof window !== 'undefined' && window.history && window.history.replaceState) {
+          try {
+            const nextUrl = new URL(window.location.href);
+            nextUrl.searchParams.set('c', storedSlug);
+            window.history.replaceState(null, '', nextUrl.toString());
+          } catch (e) {}
+        }
+      } else if (storedHostId) {
+        // A client poisoned by an older build must not stay poisoned.
+        console.warn("[Security] Discarding a stored host that is not in the club registry.");
+        localStorage.removeItem('leagues_dev_pwa_host_id');
+        localStorage.removeItem('leagues_dev_pwa_club_slug');
+      }
+    }
+
+    
+    // DEV Environment Default Resolution
+    if (!rawClubParam && !hostId) {
+      const devResolved = (typeof resolveClubHost === 'function') ? resolveClubHost('dev') : null;
+      if (devResolved) {
+        hostId = devResolved.hostId;
+        clubName = devResolved.name;
+        clubShort = devResolved.shortName || 'Dev';
+        localStorage.setItem('leagues_dev_pwa_host_id', hostId);
+        localStorage.setItem('leagues_dev_pwa_club_name', clubName);
+        localStorage.setItem('leagues_dev_pwa_club_short', clubShort);
+        localStorage.setItem('leagues_dev_pwa_club_slug', devResolved.slug);
+      }
+    }
+    
+
+    if (!hostId) {
+      const errorMsg = "Configuration Error: Missing host ID or club parameter (?c=... or ?h=...)";
+      console.error(errorMsg);
+      if (failureHandler) failureHandler(new Error(errorMsg));
+      return;
+    }
+
+    const payload = {};
+    if (action === "getPortalData" || action === "authPlayer") {
+      payload.pin = args[0];
+      payload.token = args[0];
+    } else if (action === "submitPlayerAvailability" || action === "submitAvailability") {
+      payload.pin = args[0];
+      payload.token = args[0];
+      payload.payload = args[1];
+    } else if (action === "getCaptainDashboardData" || action === "authCaptain") {
+      payload.pin = args[0];
+      payload.token = args[0];
+      payload.settings = args[1];
+    } else if (action === "validateOpponentPin" || action === "authOpponent") {
+      payload.pin = args[0];
+    } else if (action === "getClubPortalBootstrapData") {
+      payload.token = args[0] || (typeof activeSessionToken !== 'undefined' ? activeSessionToken : ((typeof getPortalStorage === 'function' ? getPortalStorage('club_session_token') : null) || localStorage.getItem('leagues_dev_pwa_club_session_token') || localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN')));
+      // Carries the same meaning as it does for getClubFixtures, and is resolved
+      // by the same server-side rule, because the bootstrap response now also
+      // carries that club's fixtures. Sending it saves the dashboard a second
+      // round trip, and each round trip is an independent chance of hitting
+      // Google's Web App response-pickup stall.
+      payload.clubName = args[1];
+    } else if (action === "getClubFixtures") {
+      payload.clubName = args[0];
+      payload.token = args[1] || (typeof activeSessionToken !== 'undefined' ? activeSessionToken : ((typeof getPortalStorage === 'function' ? getPortalStorage('club_session_token') : null) || localStorage.getItem('leagues_dev_pwa_club_session_token') || localStorage.getItem('ff_club_session_token') || localStorage.getItem('FF_SESSION_TOKEN')));
+    } else if (action === "getTimeSlotsForDate") {
+      payload.dateStr = args[0];
+      payload.settings = args[1];
+    } else if (action === "findAvailableDatesForTeam") {
+      payload.teamName = args[0];
+      payload.isHome = true;
+      payload.excludeRowIndex = (args[1] !== undefined && typeof args[1] === 'number') ? args[1] : -1;
+    } else if (action === "findAvailableDatesForAwayMatch") {
+      payload.teamName = args[0];
+      payload.isHome = false;
+      payload.excludeRowIndex = (args[1] !== undefined && typeof args[1] === 'number') ? args[1] : -1;
+    } else if (action === "getAvailableDates") {
+      payload.teamName = args[0];
+      payload.isHome = args[1] !== undefined ? args[1] : true;
+      payload.excludeRowIndex = args[2] !== undefined ? args[2] : -1;
+    } else if (action === "confirmBooking") {
+      payload.booking = args[0];
+      payload.proposal = args[0];
+      payload.isAway = args[0] && args[0].isAway;
+    } else if (action === "submitBookingRequest") {
+      payload.booking = args[0];
+      payload.settings = args[1];
+    } else if (action === "submitAwayBookingRequest") {
+      payload.proposal = args[0];
+      payload.settings = args[1];
+    } else if (action === "logRescheduleRequest") {
+      payload.match = args[0];
+      payload.reason = args[1];
+      payload.requestorType = args[2];
+      payload.requestorName = args[3];
+      payload.selectedDates = args[4];
+      payload.customMessage = args[5];
+      payload.coordinatorEmails = args[6];
+    } else if (action === "processCaptainRescheduleReview") {
+      payload.match = args[0];
+      payload.action = args[1];
+      payload.justification = args[2];
+      payload.selectedDate = args[3];
+      payload.requestorType = args[4];
+    } else if (action === "getPublicClubMetadata" || action === "getPublicMatchSchedule") {
+      // Zero params needed
+    } else {
+      if (args && args.length === 1 && typeof args[0] === 'object') {
+        Object.assign(payload, args[0]);
+      } else {
+        payload.args = args;
+      }
+    }
+
+    // Attach this portal's session token to any request that does not already
+    // carry a credential. The library requires a verified session for every
+    // action beyond the pre-authentication tier once the host marks a request
+    // as originating from the public web, and doing it here covers every call
+    // site at once rather than each of them individually.
+    if (!payload.token) {
+      var carriedSession = null;
+      if (typeof getPortalStorage === 'function') {
+        carriedSession = getPortalStorage('schedule_session_token');
+      }
+      if (!carriedSession) {
+        carriedSession = localStorage.getItem('leagues_dev_pwa_schedule_session_token')
+          || localStorage.getItem('ff_schedule_session_token')
+          || localStorage.getItem('FF_SESSION_TOKEN');
+      }
+      if (carriedSession) {
+        payload.token = carriedSession;
+      }
+    }
+
+    // Actions that change something. A retried read costs a little time; a
+    // retried write used to cost a duplicate booking, a second rate-limit slot
+    // and a second email to the opposing club.
+    const FF_WRITE_ACTIONS = [
+      'confirmBooking',
+      'submitBookingRequest',
+      'submitAwayBookingRequest',
+      'submitAvailability',
+      'submitPlayerAvailability',
+      'logRescheduleRequest',
+      'processCaptainRescheduleReview'
+    ];
+    const isWriteAction = FF_WRITE_ACTIONS.indexOf(action) !== -1;
+
+    // One id per user intent, deliberately generated HERE rather than inside
+    // executeFetch: the envelope is built once and closed over by every
+    // attempt, so all retries of this click - ours and the host's - carry the
+    // same id and the library replays the first result instead of writing
+    // again. Regenerating per attempt would silently disable the guard.
+    if (isWriteAction) {
+      payload.requestId = (window.crypto && typeof window.crypto.randomUUID === 'function')
+        ? window.crypto.randomUUID()
+        : (Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12));
+    }
+
+    const requestEnvelope = {
+      action: action,
+      payload: payload
+    };
+
+    let pendingClientView = null;
+    if (!_portalViewReported) {
+      pendingClientView = {
+        portal: 'schedule',
+        device: _detectClientDevice()
+      };
+      requestEnvelope.clientView = pendingClientView;
+    }
+
+    const targetUrl = `https://script.google.com/macros/s/${hostId}/exec`;
+
+    // Reads and writes fail differently, so they wait differently.
+    //
+    // These values are the OUTER half of an ordering invariant. The host gives
+    // up on the Central Library first (CONFIG.WRITE_ACTIONS decides which
+    // budget it uses: 30s reads, 40s writes, in ddlc-host/Delegate_Library.js),
+    // so by the time these timeouts fire the host has already returned. They
+    // are a backstop for a host that never answers at all, not the primary
+    // deadline. tests/contracts/retry_budget.test.js enforces the ordering.
+    //
+    // Attempts are 3 for reads and 2 for writes. While Host->Library UrlFetchApp
+    // pickup stalls remain possible (~30-50% during bad spells), 2 read attempts
+    // caused two consecutive stalls on login to hard-fail after 42s and force a
+    // manual refresh. With 3 read attempts, a double-stall streak recovers on
+    // Attempt #3 automatically.
+    const FF_TIMEOUT_MS = isWriteAction ? 50000 : 40000;
+    const FF_MAX_ATTEMPTS = isWriteAction ? 2 : 3;
+
+    function executeFetch(attemptNumber) {
+      const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      const timeoutId = controller ? setTimeout(() => controller.abort(), FF_TIMEOUT_MS) : null;
+
+      const fetchOptions = {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain"
+        },
+        body: JSON.stringify(requestEnvelope)
+      };
+      if (controller) {
+        fetchOptions.signal = controller.signal;
+      }
+
+      fetch(targetUrl, fetchOptions)
+      .then(response => {
+        if (timeoutId) clearTimeout(timeoutId);
+        if (pendingClientView) {
+          _portalViewReported = true;
+        }
+        return response.text().then(text => {
+          let result;
+          try {
+            result = JSON.parse(text);
+          } catch (parseErr) {
+            if (text.trim().startsWith('<')) {
+              // Google served an HTML page where JSON was expected. That means
+              // the club host script failed, timed out, or its response could
+              // not be retrieved - it is not a parsing problem, and it is not
+              // automatically a cold start. Name the real status: labelling
+              // every one of these a "cold-start" is precisely how a hard
+              // transport fault stayed hidden behind a reassuring badge.
+              const htmlErr = new Error('Server returned HTML instead of JSON (HTTP ' + response.status + '). The club host script failed or took too long to respond.');
+              htmlErr.httpStatus = response.status;
+              // Worth exactly one retry whatever the status: a genuine Apps
+              // Script cold start arrives as HTTP 200 carrying a login page,
+              // so status alone cannot separate it from a hard failure. The
+              // retry policy is therefore unchanged - only the diagnosis is.
+              htmlErr.retryable = true;
+              throw htmlErr;
+            }
+            throw new Error('Invalid JSON response (HTTP ' + response.status + '): ' + text.slice(0, 100));
+          }
+          if (!response.ok) {
+            const httpErr = new Error('API Error: HTTP status ' + response.status);
+            httpErr.httpStatus = response.status;
+            httpErr.retryable = (response.status >= 500 || response.status === 429);
+            throw httpErr;
+          }
+          return result;
+        });
+      })
+      .then(result => {
+        if (!result.success) {
+          if (result.code === 'AUTH_REQUIRED' || (result.error && (result.error.includes('Unauthorized') || result.error.includes('AUTH_REQUIRED')))) {
+            console.warn('[FixtureFlow · Auth] Received AUTH_REQUIRED. Evicting session and resetting login view.');
+            if (typeof handleAuthRequired_ === 'function') {
+              handleAuthRequired_();
+            }
+          }
+          const serverErr = new Error(result.error || "Unknown server error");
+          // The host now relays the library's code. Keep it on the error so the
+          // catch below can tell "already running, wait for it" apart from
+          // "this genuinely failed".
+          if (result.code) {
+            serverErr.serverCode = result.code;
+          }
+          throw serverErr;
+        }
+        if (successHandler) {
+          successHandler(result.data !== undefined ? result.data : result);
+        }
+      })
+      .catch(err => {
+        if (timeoutId) clearTimeout(timeoutId);
+        const isAbort = err && err.name === 'AbortError';
+        // Retryability is decided by the status the server actually returned,
+        // not by searching our own error text for a word we chose ourselves.
+        // The previous version matched 'cold-start' - a phrase it had just
+        // attached to *every* HTML response - so a permanent transport fault
+        // was indistinguishable from a genuine slow start, and got the same
+        // soothing blue badge.
+        const isTransient = isAbort || (err && (
+          err.retryable === true ||
+          err.serverCode === 'HOST_RETRY_EXHAUSTED' ||
+          (err.message && (
+            err.message.includes('[HostDelegate] Gave up') ||
+            err.message.includes('Failed to fetch') ||
+            err.message.includes('NetworkError')
+          ))
+        ));
+
+        // The server has this exact requestId running already - almost always
+        // our own earlier attempt, whose response was lost in transit rather
+        // than never computed. Waiting and re-sending the SAME id collects the
+        // stored result instead of reporting a failure for work that succeeded.
+        const isDuplicateInFlight = err && err.serverCode === 'DUPLICATE_IN_FLIGHT';
+        if (isDuplicateInFlight && attemptNumber < FF_MAX_ATTEMPTS + 1) {
+          console.warn(`%c[FixtureFlow · Network]%c ${action} is already being processed. Collecting the result in 4s...`, "background: #7c3aed; color: #ffffff; padding: 2px 6px; border-radius: 3px; font-weight: 600;", "color: inherit; margin-left: 4px;");
+          setTimeout(() => {
+            executeFetch(attemptNumber + 1);
+          }, 4000);
+          return;
+        }
+
+        if (attemptNumber < FF_MAX_ATTEMPTS && isTransient) {
+          const retryReason = isAbort
+            ? 'timed out after ' + Math.round(FF_TIMEOUT_MS / 1000) + 's'
+            : (err && err.httpStatus ? 'HTTP ' + err.httpStatus : ((err && err.message) ? err.message.slice(0, 60) : 'unknown cause'));
+          // Widen the gap between attempts rather than hammering at a fixed
+          // 1.5s. The faults being retried here cluster in time, so a second
+          // immediate attempt is the one most likely to land in the same bad
+          // patch as the first.
+          const backoffMs = 1500 * attemptNumber;
+          console.warn(`%c[FixtureFlow · Network]%c ${action} failed (${retryReason}). Retrying in ${backoffMs / 1000}s (attempt ${attemptNumber + 1}/${FF_MAX_ATTEMPTS})...`, "background: #3b82f6; color: #ffffff; padding: 2px 6px; border-radius: 3px; font-weight: 600;", "color: inherit; margin-left: 4px;");
+          setTimeout(() => {
+            executeFetch(attemptNumber + 1);
+          }, backoffMs);
+          return;
+        }
+
+        const friendlyErr = isAbort
+          ? new Error('Request timed out (' + Math.round(FF_TIMEOUT_MS / 1000) + 's). Google Apps Script took too long to respond. Please try again.')
+          : err;
+        console.error(`API Call failed (${action}):`, friendlyErr);
+        if (failureHandler) {
+          failureHandler(friendlyErr);
+        }
+      });
+    }
+
+    executeFetch(1);
+  }
+
+  /**
+   * Formats a date string (YYYY-MM-DD) or Date object into "Mon, 27 Oct" format.
+   * @param {string|Date} dateInput
+   * @return {string}
+   */
+  function formatPortalDate(dateInput) {
+    if (!dateInput) return '[Date]';
+    let d;
+    if (typeof dateInput === 'string') {
+      const parts = dateInput.split('-');
+      if (parts.length === 3) {
+        d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      } else {
+        d = new Date(dateInput); // Fallback for ISO or other strings
+      }
+    } else {
+      d = dateInput;
+    }
+    
+    if (isNaN(d.getTime())) return dateInput; // Return raw if invalid
+    
+    const dayName = d.toLocaleString('default', { weekday: 'short' });
+    const dayNum = d.getDate();
+    const monthName = d.toLocaleString('default', { month: 'short' });
+    return dayName + ', ' + dayNum + ' ' + monthName;
+  }
+
+  /**
+   * Escapes HTML special characters to prevent XSS.
+   * @param {string} text
+   * @return {string}
+   */
+  function escapeHtml(text) {
+    if (text === undefined || text === null) return '';
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    };
+    return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+  }
+
+  /**
+   * Validates and cleans a list of comma-separated email addresses.
+   * @param {string} rawEmailString
+   * @return {{isValid: boolean, cleaned: string}}
+   */
+  function validateAndCleanEmails(rawEmailString) {
+    if (!rawEmailString) return { isValid: false, cleaned: '' };
+    
+    const emailArray = rawEmailString.split(/[,;]+/).map(e => e.trim()).filter(e => e.length > 0);
+    if (emailArray.length === 0) return { isValid: false, cleaned: '' };
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    for (const email of emailArray) {
+      if (!emailRegex.test(email)) {
+        return { isValid: false, cleaned: '' };
+      }
+    }
+    
+    return { isValid: true, cleaned: emailArray.join(',') };
+  }
+
+  /**
+   * [PURE] Converts a local or international phone number into a valid WhatsApp wa.me URL.
+   * Assumes Irish (+353) numbers if starting with '0'.
+   *
+   * @param {string} phoneStr
+   * @returns {string}
+   */
+  function formatWhatsAppLink(phoneStr) {
+    if (!phoneStr) return '';
+    let cleaned = String(phoneStr).replace(/[^\d+]/g, '');
+    if (cleaned.startsWith('0')) {
+      cleaned = '353' + cleaned.substring(1);
+    } else if (cleaned.startsWith('+')) {
+      cleaned = cleaned.substring(1);
+    }
+    return cleaned ? ('https://wa.me/' + cleaned) : '';
+  }
+
+  /**
+   * [PURE] Extracts a friendly first name from a person's name string,
+   * gracefully handling institutional roles and titles on the client.
+   *
+   * @param {string} name - The raw name string from the sheet or payload.
+   * @param {string} [fallback='Match Secretary'] - The institutional fallback.
+   * @returns {string} The friendly first name or clean fallback.
+   */
+  function formatFriendlyName(name, fallback = 'Match Secretary') {
+    const cleanFallback = String(fallback || 'Match Secretary').trim();
+    if (!name) return cleanFallback;
+    let clean = String(name).trim();
+    if (!clean || clean.toUpperCase() === 'UNKNOWN') return cleanFallback;
+
+    // Strip leading honorifics / title prefixes (Captain, Match Sec, Dr., etc.)
+    clean = clean.replace(/^(Captain|Capt\.?|Match Secretary|Match Sec\.?|Secretary|Sec\.?|Dr\.?|Mr\.?|Ms\.?|Mrs\.?)\s+/i, '').trim();
+    if (!clean) return cleanFallback;
+
+    const upper = clean.toUpperCase();
+    const EXACT_GENERIC_TITLES = [
+      'MATCH SECRETARY', 'MATCH SEC', 'SECRETARY', 'SEC', 'CAPTAIN', 
+      'TEAM CAPTAIN', 'SHUTTLE MANAGER', 'MANAGER', 'UNKNOWN', 'CLUB', 
+      'ADMIN', 'THE MATCH SECRETARY', 'PRIMARY MATCH SECRETARY', 
+      'SECONDARY MATCH SECRETARY', 'OPPONENT', 'GUEST', 'N/A', 'SYSTEM'
+    ];
+    
+    if (EXACT_GENERIC_TITLES.includes(upper) || /\b(MATCH SECRETARY|MATCH SEC|CAPTAIN|SHUTTLE MANAGER)\b/i.test(clean)) {
+      if (upper.includes(' SEC') && !upper.includes('SECRETARY')) {
+        return clean.replace(/\bSec\b/i, 'Secretary');
+      }
+      return cleanFallback;
+    }
+
+    return clean.split(/\s+/)[0];
+  }
+
+  let _loadingOverlayTimeout = null;
+
+  /**
+   * Displays the fullscreen loading overlay with a custom message and safety timeout fallback.
+   * @param {string} [message='Processing...']
+   * @param {number} [timeoutSeconds=15]
+   */
+  function showFullPageLoading(message, timeoutSeconds = 15) {
+    const overlay = document.getElementById('fullscreen-loading');
+    const overlayText = document.getElementById('fullscreen-loading-text');
+    if (overlayText) overlayText.textContent = message || 'Processing...';
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      overlay.style.display = 'flex';
+    }
+    if (_loadingOverlayTimeout) clearTimeout(_loadingOverlayTimeout);
+    if (timeoutSeconds > 0) {
+      _loadingOverlayTimeout = setTimeout(() => {
+        hideFullPageLoading();
+      }, timeoutSeconds * 1000);
+    }
+  }
+
+  /**
+   * Hides the fullscreen loading overlay and clears safety timeouts.
+   */
+  function hideFullPageLoading() {
+    if (_loadingOverlayTimeout) {
+      clearTimeout(_loadingOverlayTimeout);
+      _loadingOverlayTimeout = null;
+    }
+    const overlay = document.getElementById('fullscreen-loading');
+    if (overlay) {
+      overlay.classList.add('hidden');
+      overlay.style.display = 'none';
+    }
+  }
+
+  /**
+   * Updates browser tab title and mobile home screen bookmark title according to environment.
+   * Format:
+   * - DEV:  [DEV] ${roleTitle} · FixtureFlow
+   * - PROD: ${roleTitle} Portal · ${clubName || 'FixtureFlow'}
+   * 
+   * @param {string} [clubName]
+   * @param {string} [portalRole]
+   * @param {string} [clubSlug]
+   * @private
+   */
+  function updatePortalTabTitle_(clubName, portalRole, clubSlug) {
+    let role = portalRole;
+    if (!role) {
+      if (document.title.includes('Player')) role = 'Player';
+      else if (document.title.includes('Captain')) role = 'Captain';
+      else if (document.title.includes('Schedule')) role = 'Schedule';
+      else if (document.title.includes('Opponent') || document.title.includes('Club')) role = 'Club Admin';
+      else role = 'Portal';
+    }
+    const roleTitle = (role === 'Club' || role === 'Opponent') ? 'Club Admin' : ((role === 'Schedule' || role === 'Match Schedule') ? 'Schedule' : role);
+
+    let slug = clubSlug;
+    if (slug === undefined && typeof window !== 'undefined' && window.location && window.location.search) {
+      if (typeof URLSearchParams !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        slug = urlParams.get('c') || urlParams.get('club') || '';
+      } else {
+        const match = window.location.search.match(/[?&](?:c|club)=([^&#]*)/i);
+        slug = match ? decodeURIComponent(match[1]) : '';
+      }
+    }
+    const isDevPath = (typeof window !== 'undefined' && window.location && window.location.pathname && window.location.pathname.includes('/dev/'));
+    if (!slug && typeof localStorage !== 'undefined') {
+      try {
+        slug = localStorage.getItem(isDevPath ? 'leagues_dev_pwa_club_slug' : 'leagues_pwa_club_slug') || '';
+      } catch (e) {}
+    }
+    slug = slug || '';
+
+    const isDev = isDevPath || 
+                  ['dev', 'test', 'local'].includes(slug.toLowerCase()) ||
+                  (typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging')));
+
+    let mobileEnv = '';
+    if (isDev) {
+      document.title = `[DEV] ${roleTitle} · FixtureFlow`;
+      mobileEnv = '[DEV] ';
+    } else {
+      const brandAnchor = (clubName && clubName !== 'Host Club') ? clubName : 'FixtureFlow';
+      document.title = `${roleTitle} Portal · ${brandAnchor}`;
+    }
+
+    const appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if (appleTitleMeta) {
+      appleTitleMeta.setAttribute('content', `${mobileEnv}FF ${roleTitle}`);
+    }
+  }
+
+  /**
+   * Updates the pre-JS / connecting splash screen text dynamically.
+   * Format:
+   * - DEV:  CONNECTING TO [DEV] ${upperRole} · FIXTUREFLOW...
+   * - PROD: CONNECTING TO ${upperRole} · ${(clubName || 'FIXTUREFLOW').toUpperCase()}...
+   * 
+   * @param {string} [portalRole]
+   * @param {string} [clubName]
+   * @param {string} [clubSlug]
+   * @private
+   */
+  function updatePortalSplashText_(portalRole, clubName, clubSlug) {
+    const statusText = document.getElementById('status-text');
+    if (!statusText) return;
+
+    let role = portalRole;
+    if (!role) {
+      if (document.title.includes('Player')) role = 'Player';
+      else if (document.title.includes('Captain')) role = 'Captain';
+      else if (document.title.includes('Schedule')) role = 'Schedule';
+      else if (document.title.includes('Opponent') || document.title.includes('Club')) role = 'Club Admin';
+      else role = 'Portal';
+    }
+    const roleTitle = (role === 'Club' || role === 'Opponent') ? 'Club Admin' : ((role === 'Schedule' || role === 'Match Schedule') ? 'Schedule' : role);
+    const upperRole = roleTitle.toUpperCase();
+
+    let slug = clubSlug;
+    if (slug === undefined && typeof window !== 'undefined' && window.location && window.location.search) {
+      if (typeof URLSearchParams !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        slug = urlParams.get('c') || urlParams.get('club') || '';
+      } else {
+        const match = window.location.search.match(/[?&](?:c|club)=([^&#]*)/i);
+        slug = match ? decodeURIComponent(match[1]) : '';
+      }
+    }
+    const isDevPath = (typeof window !== 'undefined' && window.location && window.location.pathname && window.location.pathname.includes('/dev/'));
+    if (!slug && typeof localStorage !== 'undefined') {
+      try {
+        slug = localStorage.getItem(isDevPath ? 'leagues_dev_pwa_club_slug' : 'leagues_pwa_club_slug') || '';
+      } catch (e) {}
+    }
+    slug = slug || '';
+
+    const isDev = isDevPath || 
+                  ['dev', 'test', 'local'].includes(slug.toLowerCase()) ||
+                  (typeof clubName === 'string' && (clubName.toLowerCase().includes('development') || clubName.toLowerCase().includes('staging')));
+
+    if (isDev) {
+      statusText.textContent = `CONNECTING TO [DEV] ${upperRole} · FIXTUREFLOW...`;
+    } else {
+      let targetClub = 'FIXTUREFLOW';
+      if (clubName && clubName !== 'Host Club') {
+        targetClub = clubName.toUpperCase().trim();
+      }
+      statusText.textContent = `CONNECTING TO ${upperRole} · ${targetClub}...`;
+    }
+  }
+
+  // --- Early Splash & Title Initialization (Zero-Delay Paint) ---
+  (function initPortalBrandingEarly_() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const rawClubParam = urlParams.get('c') || urlParams.get('club') || '';
+      const savedClubName = typeof getPortalStorage === 'function' ? getPortalStorage('club_name') : null;
+
+      const cfgEl = document.getElementById('ff-config');
+      const cfgClubName = cfgEl && cfgEl.dataset && cfgEl.dataset.clubName ? cfgEl.dataset.clubName : '';
+      let initialClubName = cfgClubName || savedClubName || '';
+      const slug = rawClubParam || '';
+      if (typeof resolveClubHost === 'function' && slug && !cfgClubName) {
+        const resolved = resolveClubHost(slug);
+        if (resolved && resolved.name) {
+          initialClubName = resolved.name;
+        }
+      }
+
+      let role = 'Portal';
+      const path = (window.location.pathname || '').toLowerCase();
+      if (path.includes('player')) role = 'Player';
+      else if (path.includes('captain')) role = 'Captain';
+      else if (path.includes('schedule')) role = 'Schedule';
+      else if (path.includes('club')) role = 'Club Admin';
+
+      updatePortalTabTitle_(initialClubName, role, slug);
+
+      const applySplash = () => updatePortalSplashText_(role, initialClubName, slug);
+      if (document.getElementById('status-text')) {
+        applySplash();
+      } else if (typeof document.addEventListener === 'function') {
+        document.addEventListener('DOMContentLoaded', applySplash);
+      }
+    } catch (e) {
+      console.warn('[PWA] Early branding init error:', e);
+    }
+  })();
+
+  /**
+   * Hydrates club branding elements across all portals from public club metadata.
+   * @param {{ clubName?: string, clubLogoUrl?: string, season?: string, seasonShort?: string }} metadata
+   * @param {string} [portalRole] Optional portal role ('Player', 'Captain', 'Opponent')
+   */
+  function hydrateClubBranding(metadata, portalRole) {
+    if (!metadata) return;
+    const name = metadata.clubName || 'Host Club';
+    
+    // 1. Central In-Memory State
+    if (typeof window !== 'undefined') {
+      window.FF_STATE = window.FF_STATE || {};
+      if (metadata.clubName) window.FF_STATE.clubName = metadata.clubName;
+      if (metadata.clubLogoUrl !== undefined) window.FF_STATE.clubLogoUrl = metadata.clubLogoUrl;
+      if (metadata.season) window.FF_STATE.season = metadata.season;
+      if (metadata.seasonShort) window.FF_STATE.seasonShort = metadata.seasonShort;
+      if (metadata.email) window.FF_STATE.email = metadata.email;
+
+      // Safe window attachment for legacy runtime consumers
+      if (metadata.clubName) {
+        window.MAIN_CLUB_NAME = metadata.clubName;
+        window.ORIGINAL_HOST_CLUB_NAME = metadata.clubName;
+      }
+      if (metadata.clubLogoUrl !== undefined) {
+        window.ORIGINAL_HOST_LOGO_URL = metadata.clubLogoUrl;
+      }
+      if (metadata.email) {
+        window.MAIN_CLUB_EMAIL = metadata.email;
+      }
+    }
+
+    // 2. Synchronize legacy runtime globals defensively
+    if (metadata.clubName) {
+      try {
+        if (typeof MAIN_CLUB_NAME !== 'undefined') MAIN_CLUB_NAME = metadata.clubName;
+      } catch (e) {}
+      try {
+        if (typeof ORIGINAL_HOST_CLUB_NAME !== 'undefined') ORIGINAL_HOST_CLUB_NAME = metadata.clubName;
+      } catch (e) {}
+    }
+    if (metadata.clubLogoUrl) {
+      try {
+        if (typeof ORIGINAL_HOST_LOGO_URL !== 'undefined') {
+          ORIGINAL_HOST_LOGO_URL = metadata.clubLogoUrl;
+        }
+      } catch (e) {}
+    }
+    if (metadata.email) {
+      try {
+        if (typeof MAIN_CLUB_EMAIL !== 'undefined') MAIN_CLUB_EMAIL = metadata.email;
+      } catch (e) {}
+    }
+
+    // 3. Update localStorage cache with live authoritative club name
+    if (typeof setPortalStorage === 'function' && metadata.clubName) {
+      try {
+        setPortalStorage('club_name', metadata.clubName);
+      } catch (e) {}
+    }
+
+    // Update browser tab and mobile title
+    updatePortalTabTitle_(name, portalRole);
+    updatePortalSplashText_(portalRole, name);
+    
+    // Update all elements with class .portal-header-club
+    document.querySelectorAll('.portal-header-club').forEach(el => {
+      el.textContent = name;
+    });
+
+    // Update login title elements if present
+    const viewLogin = document.getElementById('view-login');
+    const loginTitle = document.getElementById('login-club-title');
+    const loginTitleLarge = document.getElementById('login-club-title-large');
+    const logoContainer = document.getElementById('login-club-logo-container');
+    const loginLogo = document.getElementById('login-club-logo');
+
+    const fallbackLogo = (typeof ORIGINAL_HOST_LOGO_URL !== 'undefined' && ORIGINAL_HOST_LOGO_URL) ? ORIGINAL_HOST_LOGO_URL : '';
+    const logoUrl = metadata.clubLogoUrl !== undefined ? metadata.clubLogoUrl : fallbackLogo;
+
+    if (logoUrl) {
+      if (viewLogin) {
+        viewLogin.classList.remove('login-no-logo');
+        viewLogin.classList.add('login-has-logo');
+      }
+      if (loginLogo) loginLogo.src = logoUrl;
+      if (logoContainer) logoContainer.style.display = 'block';
+      if (loginTitle) {
+        loginTitle.textContent = name;
+        loginTitle.style.display = 'block';
+      }
+      if (loginTitleLarge) loginTitleLarge.style.display = 'none';
+
+      // Header logos
+      document.querySelectorAll('.header-club-logo').forEach(img => {
+        img.src = logoUrl;
+        img.style.display = 'inline-block';
+      });
+    } else {
+      if (viewLogin) {
+        viewLogin.classList.remove('login-has-logo');
+        viewLogin.classList.add('login-no-logo');
+      }
+      if (logoContainer) logoContainer.style.display = 'none';
+      if (loginTitle) loginTitle.style.display = 'none';
+      if (loginTitleLarge) {
+        loginTitleLarge.textContent = name;
+        loginTitleLarge.style.display = 'block';
+      }
+      document.querySelectorAll('.header-club-logo').forEach(img => {
+        if (!img.getAttribute('src')) {
+          img.style.display = 'none';
+        }
+      });
+    }
+
+    // Season text
+    if (metadata.season) {
+      document.querySelectorAll('.full-season').forEach(el => {
+        el.textContent = 'DDLC ' + metadata.season;
+      });
+    }
+    if (metadata.seasonShort) {
+      document.querySelectorAll('.short-season').forEach(el => {
+        el.textContent = 'DDLC ' + metadata.seasonShort;
+      });
+    }
+  }
+
+  /**
+   * Rule 11.1 Perspective Normalization: Returns true if Host Club is the home team for this fixture.
+   * Un-flips the Opponent Portal flip (where venueRole AWAY meant host is home).
+   * @param {Object} m Fixture object
+   * @returns {boolean}
+   */
+  function isHostClubHome(m) {
+    if (!m) return true;
+    if (m.homeAway !== undefined) return String(m.homeAway).toUpperCase() === 'HOME';
+    if (m.venueRole !== undefined) return String(m.venueRole).toUpperCase() === 'AWAY';
+    if (m.isHome !== undefined) return m.isHome === true;
+    return true;
+  }
+
+  /**
+   * Rule 11.1 Perspective Normalization: Returns the Host Club's team name.
+   * @param {Object} m Fixture object
+   * @returns {string}
+   */
+  function getHostTeamName(m) {
+    if (!m) return '';
+    if (m.venueRole !== undefined && m.homeAway === undefined) {
+      return m.oppTeam || '';
+    }
+    return m.ourTeam || '';
+  }
+
+  /**
+   * Rule 11.1 Perspective Normalization: Returns the Opponent Club's team name.
+   * @param {Object} m Fixture object
+   * @returns {string}
+   */
+  function getOpponentTeamName(m) {
+    if (!m) return '';
+    if (m.venueRole !== undefined && m.homeAway === undefined) {
+      return m.ourTeam || '';
+    }
+    return m.oppTeam || '';
+  }
+
+  /**
+   * Returns the authoritative host club name from active state, cache, or fallback.
+   * @returns {string}
+   */
+  function getHostClubName() {
+    if (typeof window !== 'undefined' && window.FF_STATE && window.FF_STATE.clubName) {
+      return window.FF_STATE.clubName;
+    }
+    if (typeof appData !== 'undefined' && appData && appData.clubName) {
+      return appData.clubName;
+    }
+    if (typeof MAIN_CLUB_NAME !== 'undefined' && MAIN_CLUB_NAME && MAIN_CLUB_NAME !== 'Host Club' && !MAIN_CLUB_NAME.includes('Development / Staging')) {
+      return MAIN_CLUB_NAME;
+    }
+    if (typeof ORIGINAL_HOST_CLUB_NAME !== 'undefined' && ORIGINAL_HOST_CLUB_NAME && ORIGINAL_HOST_CLUB_NAME !== 'Host Club' && !ORIGINAL_HOST_CLUB_NAME.includes('Development / Staging')) {
+      return ORIGINAL_HOST_CLUB_NAME;
+    }
+    const headerEl = typeof document !== 'undefined' ? document.querySelector('.portal-header-club') : null;
+    if (headerEl && headerEl.textContent && headerEl.textContent.trim() && headerEl.textContent.trim() !== 'Host Club') {
+      return headerEl.textContent.trim();
+    }
+    if (typeof getPortalStorage === 'function') {
+      try {
+        const cached = getPortalStorage('shared_public_metadata');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.clubName) return parsed.clubName;
+        }
+      } catch (e) {}
+    }
+    return 'Host Club';
+  }
+
+  /**
+   * Resolves the active user club name using a robust memory-first hierarchy:
+   * 1. The fixture payload itself (match.clubName || match.oppClub)
+   * 2. In-memory application state (window.FF_STATE.activeClub)
+   * 3. Scoped storage fallback (getPortalStorage('club_active_name'))
+   * @param {Object|null} [match=null] - Optional fixture object
+   * @param {string} [fallback=''] - Optional fallback string
+   * @returns {string}
+   */
+  function getActiveUserClubName(match = null, fallback = '') {
+    if (match && typeof match === 'object') {
+      if (match.clubName && match.clubName !== 'Opponent' && match.clubName !== 'Visiting Club') return match.clubName;
+      if (match.oppClub && match.oppClub !== 'Opponent' && match.oppClub !== 'Visiting Club') return match.oppClub;
+    }
+    if (typeof window !== 'undefined' && window.FF_STATE && window.FF_STATE.activeClub) {
+      return window.FF_STATE.activeClub;
+    }
+    if (typeof getPortalStorage === 'function') {
+      const val = getPortalStorage('club_active_name');
+      if (val) return val;
+    }
+    return fallback || 'Opponent';
+  }
+
+  /**
+   * Synchronizes active club selection across in-memory state and scoped storage.
+   * @param {string} clubName
+   */
+  function setActiveUserClubName(clubName) {
+    if (!clubName) return;
+    if (typeof window !== 'undefined') {
+      window.FF_STATE = window.FF_STATE || {};
+      window.FF_STATE.activeClub = clubName;
+    }
+    if (typeof setPortalStorage === 'function') {
+      setPortalStorage('club_active_name', clubName);
+    }
+  }
+
+  /**
+   * Combines a club name and team identifier without duplicating the club prefix.
+   * @param {string} club
+   * @param {string} team
+   * @returns {string}
+   */
+  function formatClubTeamSide(club, team) {
+    var c = String(club || '').trim();
+    var t = String(team || '').trim();
+    if (!t) return c;
+    if (!c) return t;
+    if (t.toUpperCase().indexOf(c.toUpperCase()) === 0) return t;
+    return c + ' ' + t;
+  }
+
+  if (typeof window !== 'undefined') {
+    window.isHostClubHome = isHostClubHome;
+    window.getHostTeamName = getHostTeamName;
+    window.getOpponentTeamName = getOpponentTeamName;
+    window.getHostClubName = getHostClubName;
+    window.getActiveUserClubName = getActiveUserClubName;
+    window.setActiveUserClubName = setActiveUserClubName;
+    window.formatClubTeamSide = formatClubTeamSide;
+  }
+
+  /**
+   * Unified state hydrator for club branding across all portals.
+   * Synchronizes in-memory state, storage cache, and visual DOM.
+   * @param {{ clubName?: string, clubLogoUrl?: string, season?: string, seasonShort?: string }} metadata
+   * @param {string} [portalRole]
+   */
+  function updateClubBrandingState(metadata, portalRole) {
+    if (!metadata) return;
+    hydrateClubBranding(metadata, portalRole);
+  }
+
+  // --- Unified Portal Storage Isolation & Auth Lifecycle ---
+  /**
+   * Resolves the environment- and tenant-scoped storage prefix (ff_{env}_{slug}_).
+   * @returns {string}
+   */
+  function getPortalStoragePrefix() {
+    var isDev = false;
+    var rawClub = "";
+
+    if (typeof window !== "undefined" && window.location) {
+      if (window.location.pathname && window.location.pathname.includes("/dev/")) {
+        isDev = true;
+      }
+      if (window.location.search) {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get("c") === "dev") isDev = true;
+        rawClub = (params.get("c") || params.get("club") || "").trim().toLowerCase();
+      }
+    }
+
+    var env = isDev ? "dev" : "prod";
+    var slug = rawClub;
+
+    if (slug && typeof resolveClubHost === "function") {
+      var resolved = resolveClubHost(slug);
+      if (resolved && resolved.slug) {
+        slug = resolved.slug;
+      }
+    }
+
+    if (!slug) {
+      try {
+        var prefixKey = isDev ? "leagues_dev_pwa_club_slug" : "leagues_pwa_club_slug";
+        var storedSlug = (typeof localStorage !== "undefined" && localStorage.getItem(prefixKey)) || "";
+        slug = storedSlug.trim().toLowerCase();
+      } catch (e) {}
+    }
+
+    if (!slug) {
+      slug = isDev ? "dev" : "mount-pleasant";
+    }
+
+    return "ff_" + env + "_" + slug + "_";
+  }
+
+  /**
+   * Reads a key from localStorage using tenant-scoped prefix.
+   * @param {string} key 
+   * @returns {string|null}
+   */
+  function getPortalStorage(key) {
+    if (typeof localStorage === 'undefined') return null;
+    try {
+      return localStorage.getItem(getPortalStoragePrefix() + key);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Persists a key to localStorage using tenant-scoped prefix.
+   * @param {string} key 
+   * @param {string} value 
+   */
+  function setPortalStorage(key, value) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      localStorage.setItem(getPortalStoragePrefix() + key, value);
+    } catch (e) {}
+  }
+
+  /**
+   * Evicts a key from localStorage across scoped and legacy names.
+   * @param {string} key 
+   */
+  function removePortalStorage(key) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+      var prefix = getPortalStoragePrefix();
+      localStorage.removeItem(prefix + key);
+      localStorage.removeItem('ff_dev_' + key);
+      localStorage.removeItem('ff_' + key);
+      localStorage.removeItem(key);
+    } catch (e) {}
+  }
+
+  /**
+   * Global self-healing handler when an API returns AUTH_REQUIRED.
+   * Evicts active sessions and restores the initial PIN login screen.
+   */
+  
+  /**
+   * Clears transient sessionStorage and triggers a non-destructive Service Worker
+   * update check without wiping offline PWA shells or tenant slug bindings.
+   */
+  function resetPortalClientRuntime_() {
+    try {
+      if (typeof sessionStorage !== "undefined" && typeof sessionStorage.clear === "function") {
+        sessionStorage.clear();
+      }
+      if (typeof navigator !== "undefined" && navigator.serviceWorker && typeof navigator.serviceWorker.getRegistration === "function") {
+        navigator.serviceWorker.getRegistration().then(function(reg) {
+          if (reg && typeof reg.update === "function") {
+            reg.update().catch(function() {});
+          }
+        }).catch(function() {});
+      }
+    } catch (e) {}
+  }
+
+  function handleAuthRequired_() {
+    console.warn('[FixtureFlow · Auth] AUTH_REQUIRED detected. Evicting session and resetting login screen.');
+    removePortalStorage('club_session_token');
+    removePortalStorage('club_is_admin');
+    removePortalStorage('club_active_name');
+    removePortalStorage('club_admin_impersonate_list');
+    removePortalStorage('player_session_token');
+    removePortalStorage('player_pin');
+    removePortalStorage('captain_session_token');
+    removePortalStorage('captain_pin');
+
+    if (typeof handleLogout === 'function') {
+      handleLogout();
+    } else if (typeof logout === 'function') {
+      logout();
+    } else {
+      const loginView = document.getElementById('view-login') || document.getElementById('login-screen') || document.getElementById('login-view');
+      if (loginView) loginView.style.display = 'block';
+      const dashView = document.getElementById('club-dashboard-view') || document.getElementById('dashboard-view');
+      if (dashView) dashView.style.display = 'none';
+      const statusScreen = document.getElementById('status-screen');
+      if (statusScreen) statusScreen.style.display = 'none';
+      const globalLoading = document.getElementById('global-loading');
+      if (globalLoading) globalLoading.style.display = 'none';
+    }
+
+    const errDiv = document.getElementById('login-error') || document.getElementById('error-message');
+    if (errDiv) {
+      errDiv.textContent = 'Session expired or invalid. Please re-enter your PIN.';
+      errDiv.style.display = 'block';
+    }
+  }
+
+  /**
+   * Safely decodes a Base64 string into UTF-8 text across Browser and Node environments.
+   * @param {string} b64 
+   * @returns {string}
+   */
+  function safeBase64Decode_(b64) {
+    if (typeof atob === 'function') {
+      return atob(b64);
+    }
+    if (typeof Buffer !== 'undefined') {
+      return Buffer.from(b64, 'base64').toString('utf8');
+    }
+    return '';
+  }
+
+  /**
+   * Safely extracts and parses the JSON payload portion of an HMAC session token without verifying signature.
+   * Cryptographic verification is strictly enforced by the server on every request.
+   * @param {string|null} token - The signed token string (<payload>.<signature>)
+   * @returns {Object|null} The parsed payload or null if malformed.
+   */
+  function parseSessionTokenPayload_(token) {
+    if (!token || typeof token !== 'string') return null;
+    const parts = token.split('.');
+    if (parts.length !== 2) return null;
+    try {
+      const json = safeBase64Decode_(parts[0]);
+      if (!json) return null;
+      return JSON.parse(json);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Checks if the active session token belongs to System Admin.
+   * Eliminates client-side privilege escalation by deriving admin status from the signed token payload.
+   * @param {string|null} [customToken=null] - Optional token to evaluate.
+   * @returns {boolean} True if token exists and payload.c === 'System Admin'.
+   */
+  function isSystemAdminSession_(customToken = null) {
+    const token = customToken || ((typeof getPortalStorage === 'function') ? getPortalStorage('club_session_token') : null);
+    if (!token) return false;
+    const payload = parseSessionTokenPayload_(token);
+    if (!payload) return false;
+    return payload.c === 'System Admin';
+  }
+</script>
+
+  <style>
+  /* Ruby Crimson Theme Override for Shared Club Match Schedule Portal */
+  :root {
+    --primary: #e11d48;
+    --primary-variant: #be123c;
+    --on-primary: #ffffff;
+    --primary-glow: rgba(225, 29, 72, 0.14);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #fb7185;
+      --primary-variant: #e11d48;
+      --on-primary: #4c0519;
+      --primary-glow: rgba(251, 113, 133, 0.16);
+    }
+  }
+
+  /* Match Card Styles (Shared with Portal_Captain_CSS.html) */
+  .match-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  }
+  .match-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .match-card.away {
+    border-left-color: var(--badge-away-dot);
+  }
+  .match-card.home {
+    border-left-color: var(--badge-home-dot);
+  }
+  .match-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .match-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .match-left-col {
+    flex: 1;
+    min-width: 0;
+  }
+  .match-right-col {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+  .match-teams {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--on-surface);
+  }
+  .match-details {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 6px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge.home {
+    background: var(--badge-home-bg);
+    color: var(--badge-home-text);
+    border: 1px solid var(--badge-home-border);
+  }
+  .badge.away {
+    background: var(--badge-away-bg);
+    color: var(--badge-away-text);
+    border: 1px solid var(--badge-away-border);
+  }
+  .badge.cup {
+    background: var(--badge-cup-bg);
+    color: var(--badge-cup-text);
+    border: 1px solid var(--badge-cup-border);
+  }
+  .badge.league {
+    background: var(--bg);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  /* Smart Venue Truncation + Tap-to-Expand */
+  .venue-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .venue-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.35;
+    word-break: break-word;
+  }
+  .venue-row.expanded .venue-text {
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+
+  /* Toggle Filter Pills */
+  .filter-pill-group {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    flex: 1;
+  }
+  .btn-toggle {
+    flex: 1;
+    padding: 7px 8px;
+    font-size: 0.78rem;
+    border-radius: 7px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    font-weight: 600;
+    transition: all 0.2s;
+    text-align: center;
+    cursor: pointer;
+  }
+  .btn-toggle.active {
+    background: color-mix(in srgb, var(--primary) 15%, transparent);
+    color: var(--primary);
+    border-color: var(--primary);
+    font-weight: 700;
+  }
+
+  /* Scrollable Multi-Month Season Calendar (Shared with Player & Captain Portals) */
+  .season-grid-scroll-area {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 16px;
+    padding: 8px 4px 12px 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .season-grid-scroll-area::-webkit-scrollbar {
+    display: none;
+  }
+  .month-grid {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    background: var(--surface);
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .month-label {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-weight: 800;
+    color: var(--primary);
+    padding-bottom: 8px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .day-header {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-align: center;
+    padding-bottom: 4px;
+    font-weight: 700;
+  }
+  .day-cell {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    border: 2px solid transparent;
+    transition: transform 0.1s;
+    color: var(--on-surface);
+    padding: 2px 1px;
+  }
+  .day-cell:active {
+    transform: scale(0.92);
+  }
+  .day-cell.empty {
+    background: transparent;
+    cursor: default;
+  }
+  .day-cell.selected-day {
+    border-color: var(--on-surface) !important;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+    transform: scale(1.06);
+    z-index: 2;
+  }
+  .day-cell.has-home:not(.has-away) {
+    background: var(--badge-home-bg);
+    border-color: var(--badge-home-border);
+  }
+  .day-cell.has-away:not(.has-home) {
+    background: var(--badge-away-bg);
+    border-color: var(--badge-away-border);
+  }
+  .day-cell.has-home.has-away {
+    background: linear-gradient(135deg, var(--badge-home-bg) 50%, var(--badge-away-bg) 50%);
+    border-color: var(--primary);
+  }
+  .day-num {
+    line-height: 1;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .day-cell-indicators {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 9px;
+    line-height: 1;
+  }
+  .day-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .day-dot.home {
+    background: var(--badge-home-dot);
+  }
+  .day-dot.away {
+    background: var(--badge-away-dot);
+  }
+  .day-pip {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5px;
+    font-size: 0.56rem;
+    font-weight: 800;
+    line-height: 1;
+    padding: 1px 3px;
+    border-radius: 4px;
+  }
+  .day-pip.home {
+    color: var(--badge-home-text);
+    background: color-mix(in srgb, var(--badge-home-dot) 18%, transparent);
+  }
+  .day-pip.away {
+    color: var(--badge-away-text);
+    background: color-mix(in srgb, var(--badge-away-dot) 18%, transparent);
+  }
+
+  /* Bottom Navigation (Shared with Portal_Captain_CSS.html) */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    padding-top: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    z-index: 100;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+  }
+  .nav-item {
+    flex: 1;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+  }
+  .nav-item.active {
+    color: var(--primary);
+  }
+
+  /* Pull-to-Refresh Indicator (#ptr-indicator) */
+  #ptr-indicator {
+    height: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: var(--bg);
+    transition: height 0.2s ease;
+  }
+  #ptr-indicator.ptr-active {
+    height: 44px;
+  }
+
+  /* Responsive Header & Multi-Month Desktop Grid */
+  .portal-header-desktop { display: none; }
+  .portal-header-mobile { display: block; }
+
+  @media (min-width: 768px) {
+    .portal-header-desktop { display: block; }
+    .portal-header-mobile { display: none; }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      max-width: 1200px !important;
+      padding: 20px !important;
+    }
+    #matches-list-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 16px;
+    }
+    .match-card {
+      margin-bottom: 0;
+    }
+    #tab-calendar:not(.hidden) {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      align-items: start;
+    }
+    .season-grid-scroll-area {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      overflow-x: visible;
+      gap: 16px;
+    }
+    .month-grid {
+      flex: none;
+    }
+    #roster-sidebar-container {
+      position: sticky;
+      top: 90px;
+    }
+  }
+</style>
+
+
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="app-version" content="dev-v148">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://fixtureflow.github.io/leagues/dev/schedule/">
+  <meta property="og:title" content="[DEV] Schedule Portal · FixtureFlow">
+  <meta property="og:description" content="View confirmed club match schedules, filter by team or venue, and export to your calendar.">
+  <meta property="og:image" content="https://fixtureflow.github.io/assets/images/leagues/icon-schedule-dev-512.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="[DEV] Schedule Portal · FixtureFlow">
+  <meta name="twitter:description" content="View confirmed club match schedules, filter by team or venue, and export to your calendar.">
+  <meta name="twitter:image" content="https://fixtureflow.github.io/assets/images/leagues/icon-schedule-dev-512.png">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/leagues/icon-schedule-dev.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/leagues/icon-schedule-dev-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/leagues/icon-schedule-dev-180.png">
+  <link rel="mask-icon" href="/assets/images/leagues/icon-schedule-dev.svg" color="#e11d48">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="[DEV] FF Schedule">
+  <meta name="theme-color" content="#e11d48">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <!-- Hidden config container -->
+  <div id="ff-config" style="display: none;"
+       data-portal-type="schedule"
+       data-club-name=""
+       data-club-logo-url="">
+  </div>
+  <div id="app">
+    <!-- Connecting Splash Screen (Live-First Cold Boot) -->
+<div class="screen-overlay" id="status-screen">
+  <div class="glow-backdrop"></div>
+  <div class="spinner" id="spinner-loader"></div>
+  <div class="loading-text" id="status-text">CONNECTING TO [DEV] SCHEDULE · FIXTUREFLOW...</div>
+  <div class="offline-card" id="offline-panel" style="display: none;">
+    <div class="offline-icon" style="margin-bottom: 16px; color: var(--primary); display: flex; justify-content: center;">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+        <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+      </svg>
+    </div>
+    <h2 class="offline-title" style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">Connection Lost</h2>
+    <p class="offline-desc" style="font-size: 14px; line-height: 1.5; margin: 0 0 24px 0;">Unable to connect to club schedule data. Please check your network connection.</p>
+    <button type="button" class="btn btn-primary" onclick="window.location.reload()" style="width: 100%;">RETRY CONNECTION</button>
+  </div>
+</div>
+
+<!-- MAIN SCHEDULE VIEW -->
+<div id="view-main" class="hidden" style="padding-bottom: 84px;">
+  <!-- Pull-to-Refresh Indicator -->
+  <div id="ptr-indicator" aria-live="polite">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 4 23 10 17 10"></polyline>
+      <polyline points="1 20 1 14 7 14"></polyline>
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+    </svg>
+    <span id="ptr-text">Pull to refresh schedule</span>
+  </div>
+
+  <!-- 1A. DESKTOP HEADER (Matches Portal_Captain_Main.html) -->
+  <header class="portal-header-desktop" onclick="handleDeveloperTap()" style="background: var(--surface); position: sticky; top: 0; z-index: 90; box-shadow: var(--shadow-sm); border-bottom: 1px solid var(--border); user-select: none;">
+    <div class="container" style="display: flex; align-items: center; justify-content: center; gap: 16px; padding-top: 12px; padding-bottom: 8px;">
+      <img class="header-club-logo" src="" alt="Logo" style="width: 48px; height: 48px; object-fit: contain; display: ;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="portal-header-club" style="font-weight: 500; color: var(--text);"></span>
+        <span style="color: var(--text-muted);">&bull;</span>
+        <span style="font-weight: 700; color: var(--text);">Match Schedule</span>
+        <span style="color: var(--text-muted);">&bull;</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+          <span class="full-season">DDLC 2025-2026</span>
+        </span>
+      </div>
+    </div>
+    <div class="container" style="margin-top: 0; padding-top: 0; padding-bottom: 12px;">
+      <button type="button" id="desktop-team-picker-btn" onclick="event.stopPropagation(); openTeamPicker()" class="btn" style="background: color-mix(in srgb, var(--primary) 10%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent); color: var(--primary); padding: 12px 16px; font-size: 0.9rem; border-radius: 12px; font-weight: 700; text-align: center; width: 100%; display: block; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;">
+        <span id="desktop-team-select-text">TEAM: ALL TEAMS</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 1B. MOBILE HEADER (Matches Portal_Captain_Main.html) -->
+  <header class="portal-header-mobile" onclick="handleDeveloperTap()" style="background: var(--surface); position: sticky; top: 0; z-index: 90; box-shadow: var(--shadow-sm); border-bottom: 1px solid var(--border); padding: 12px 0; user-select: none;">
+    <div class="container" style="display: flex; align-items: center; justify-content: space-between; margin: 0 auto; padding: 0 16px; width: 100%;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <img class="header-club-logo" src="" alt="Logo" style="width: 32px; height: 32px; object-fit: contain; display: ;">
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+          <span class="portal-header-club" style="font-size: 0.95rem; font-weight: 700; color: var(--on-surface); line-height: 1.1;"></span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.1; font-weight: 500; margin-top: 2px;">
+            Match Schedule &bull; <span class="short-season">DDLC 25-26</span>
+          </span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button type="button" id="mobile-team-picker-btn" onclick="event.stopPropagation(); openTeamPicker()" style="background: var(--bg); border: 1px solid var(--primary); border-radius: 20px; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+          <svg xmlns="http://www.w3.org/2000/svg" style="height: 14px; width: 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span id="mobile-team-select-text" style="max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">All</span>
+          <svg xmlns="http://www.w3.org/2000/svg" style="height: 14px; width: 14px; opacity: 0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. COMPACT VENUE (All/Home/Away) & COMPETITION (All/League/Cup) FILTER BAR -->
+  <div class="container" style="padding-top: 12px; padding-bottom: 4px;">
+    <div style="display: flex; gap: 8px;">
+      <div class="filter-pill-group">
+        <button type="button" id="venue-ALL" class="btn-toggle active" onclick="setVenueFilter('ALL')">All</button>
+        <button type="button" id="venue-HOME" class="btn-toggle" onclick="setVenueFilter('HOME')">Home</button>
+        <button type="button" id="venue-AWAY" class="btn-toggle" onclick="setVenueFilter('AWAY')">Away</button>
+      </div>
+      <div class="filter-pill-group">
+        <button type="button" id="comp-ALL" class="btn-toggle active" onclick="setCompFilter('ALL')">All</button>
+        <button type="button" id="comp-LEAGUE" class="btn-toggle" onclick="setCompFilter('LEAGUE')">League</button>
+        <button type="button" id="comp-CUP" class="btn-toggle" onclick="setCompFilter('CUP')">Cup</button>
+      </div>
+    </div>
+    <div id="active-filter-bar" class="hidden" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 4px 0 4px; font-size: 0.75rem; color: var(--text-muted);">
+      <span id="active-filter-text"></span>
+      <button type="button" onclick="resetScheduleFilters()" style="background: none; border: none; color: var(--primary); font-weight: 700; text-decoration: underline; cursor: pointer; font-size: 0.75rem;">Reset</button>
+    </div>
+  </div>
+
+  <!-- TOAST FEEDBACK -->
+  <div id="toast-banner" class="hidden" style="margin: 8px 16px 0 16px; padding: 8px 12px; border-radius: 8px; background: var(--primary); color: var(--on-primary); font-size: 0.8rem; font-weight: 700; text-align: center;"></div>
+
+  <!-- TAB 1: UPCOMING MATCHES LIST -->
+  <div id="tab-matches" class="container" style="padding-top: 12px; padding-bottom: 24px;">
+    <div id="matches-list-container"></div>
+  </div>
+
+  <!-- TAB 2: MULTI-MONTH SEASON CALENDAR -->
+  <div id="tab-calendar" class="container hidden" style="padding-top: 12px; padding-bottom: 24px;">
+    <div id="calendar-card-container" class="match-card" style="border-left: 1px solid var(--border); padding: 14px; margin-bottom: 16px;">
+      <!-- Simplified Legend: Home & Away dots only -->
+      <div style="display: flex; justify-content: center; gap: 20px; padding-bottom: 10px; margin-bottom: 8px; border-bottom: 1px solid var(--border); font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 9px; height: 9px; border-radius: 50%; background: var(--badge-home-dot); display: inline-block;"></span>
+          <span>Home</span>
+        </span>
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <span style="width: 9px; height: 9px; border-radius: 50%; background: var(--badge-away-dot); display: inline-block;"></span>
+          <span>Away</span>
+        </span>
+      </div>
+      <div style="font-size: 0.72rem; color: var(--text-muted); text-align: center; margin-bottom: 6px;">
+        Swipe months horizontally on mobile &bull; Tap any highlighted date for match details
+      </div>
+      <div id="season-grid-container" class="season-grid-scroll-area"></div>
+    </div>
+
+    <div id="roster-sidebar-container">
+      <div id="action-panel" style="background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-md); border-radius: 16px; padding: 16px;">
+        <div id="selected-day-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAVIGATION -->
+<nav id="bottom-nav" class="bottom-nav hidden">
+  <button type="button" class="nav-item active" onclick="switchScheduleTab('matches')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="8" y1="6" x2="21" y2="6"></line>
+      <line x1="8" y1="12" x2="21" y2="12"></line>
+      <line x1="8" y1="18" x2="21" y2="18"></line>
+      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+    </svg>
+    <span>Matches</span>
+  </button>
+  <button type="button" class="nav-item" onclick="switchScheduleTab('calendar')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+      <line x1="16" y1="2" x2="16" y2="6"></line>
+      <line x1="8" y1="2" x2="8" y2="6"></line>
+      <line x1="3" y1="10" x2="21" y2="10"></line>
+    </svg>
+    <span>Calendar</span>
+  </button>
+</nav>
+
+<!-- Generic Bottom Sheet Picker Component -->
+<div id="ff-picker-overlay" class="picker-overlay hidden">
+    <div class="picker-modal">
+        <!-- Header & Search -->
+        <div class="picker-header-block">
+            <div class="picker-title-row">
+                <h3 id="ff-picker-title" class="picker-title-text">Select Item</h3>
+                <button onclick="ff_pickerClose()" class="picker-close-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="height: 24px; width: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="search-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+                <input type="text" id="ff-picker-search-input" oninput="ff_pickerSearch()" placeholder="Type to search..." class="search-input">
+            </div>
+        </div>
+        <!-- Scrollable List -->
+        <div id="ff-picker-list-container" class="picker-list">
+            <!-- Populated via JS -->
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * GENERIC PICKER API
+     */
+    let ff_picker_data = [];
+    let ff_picker_onSelect = null;
+
+    /**
+     * Opens the picker modal with customized data.
+     * @param {string} title - The title of the modal (e.g. "Find your name")
+     * @param {string} placeholder - Search input placeholder
+     * @param {Array<{label: string, value: string, [key:string]: any}>} items - Array of items to list
+     * @param {function} onSelect - Callback when an item is selected. Receives the full item object.
+     */
+    function ff_openPicker(title, placeholder, items, onSelect) {
+        document.getElementById('ff-picker-title').textContent = title;
+        document.getElementById('ff-picker-search-input').placeholder = placeholder;
+        document.getElementById('ff-picker-search-input').value = '';
+        
+        ff_picker_data = items || [];
+        ff_picker_onSelect = onSelect;
+        
+        ff_pickerRenderList(ff_picker_data);
+        
+        const overlay = document.getElementById('ff-picker-overlay');
+        overlay.classList.remove('hidden');
+        overlay.style.opacity = '0';
+        requestAnimationFrame(() => {
+            overlay.style.opacity = '1';
+        });
+    }
+
+    function ff_pickerClose() {
+        const overlay = document.getElementById('ff-picker-overlay');
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 300);
+    }
+
+    function ff_pickerSearch() {
+        const query = document.getElementById('ff-picker-search-input').value.toLowerCase();
+        const filtered = ff_picker_data.filter(item => 
+            String(item.label).toLowerCase().includes(query)
+        );
+        ff_pickerRenderList(filtered);
+    }
+
+    function ff_pickerRenderList(items) {
+        const listContainer = document.getElementById('ff-picker-list-container');
+        listContainer.innerHTML = '';
+        
+        if (items.length === 0) {
+            listContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted);">No matches found.</div>';
+            return;
+        }
+
+        items.forEach(item => {
+            const btn = document.createElement('button');
+            btn.className = 'picker-list-btn';
+            btn.innerHTML = `<span>${item.label}</span>`;
+            
+            // Allow passing custom subtitle or badge HTML if needed
+            if (item.badgeHtml) {
+                btn.innerHTML += `<span style="float:right;">${item.badgeHtml}</span>`;
+            }
+
+            btn.onclick = () => {
+                if (typeof ff_picker_onSelect === 'function') {
+                    ff_picker_onSelect(item);
+                }
+            };
+            listContainer.appendChild(btn);
+        });
+    }
+</script>
+
+
+
+  </div>
+
+  <script>
+  // --- SCHEDULE PORTAL STATE ---
+  let appData = null;
+  let selectedTeam = 'ALL';
+  let venueFilter = 'ALL'; // 'ALL' | 'HOME' | 'AWAY'
+  let compFilter = 'ALL';  // 'ALL' | 'LEAGUE' | 'CUP'
+  let activeTab = 'matches'; // 'matches' | 'calendar'
+  let selectedCalendarDate = null;
+  let expandedVenues = new Set();
+  let toastTimer = null;
+
+  window.activePortalRole = 'Schedule';
+
+  // --- DEVELOPER 5-TAP RESET ON <HEADER> ---
+  let devTapCount = 0;
+  let devTapTimeout = null;
+  function handleDeveloperTap() {
+    devTapCount++;
+    clearTimeout(devTapTimeout);
+    if (devTapCount >= 5) {
+      const ver = (window && window.__FF_VERSION__) ? ` [${window.__FF_VERSION__}]` : '';
+      if (confirm(`Developer Mode${ver}: Clear cached schedule preferences and reload?`)) {
+        if (typeof resetPortalClientRuntime_ === 'function') resetPortalClientRuntime_();
+        if (typeof removePortalStorage === 'function') {
+          removePortalStorage('schedule_selected_team');
+          removePortalStorage('schedule_venue_filter');
+          removePortalStorage('schedule_comp_filter');
+          removePortalStorage('schedule_active_tab');
+          removePortalStorage('schedule_cached_data');
+        }
+        window.location.reload();
+      }
+      devTapCount = 0;
+    } else {
+      devTapTimeout = setTimeout(() => { devTapCount = 0; }, 1000);
+    }
+  }
+
+  // --- LOCAL MEMORY PERSISTENCE (SCOPED BY TENANT) ---
+  function loadSchedulePrefs() {
+    if (typeof getPortalStorage !== 'function') return;
+    const savedTeam = getPortalStorage('schedule_selected_team');
+    const savedVenue = getPortalStorage('schedule_venue_filter');
+    const savedComp = getPortalStorage('schedule_comp_filter');
+    const savedTab = getPortalStorage('schedule_active_tab');
+
+    if (savedTeam) selectedTeam = savedTeam;
+    if (savedVenue === 'ALL' || savedVenue === 'HOME' || savedVenue === 'AWAY') venueFilter = savedVenue;
+    if (savedComp === 'ALL' || savedComp === 'LEAGUE' || savedComp === 'CUP') compFilter = savedComp;
+    if (savedTab === 'matches' || savedTab === 'calendar') activeTab = savedTab;
+  }
+
+  function saveSchedulePrefs() {
+    if (typeof setPortalStorage !== 'function') return;
+    setPortalStorage('schedule_selected_team', selectedTeam);
+    setPortalStorage('schedule_venue_filter', venueFilter);
+    setPortalStorage('schedule_comp_filter', compFilter);
+    setPortalStorage('schedule_active_tab', activeTab);
+  }
+
+  // --- TEAM PICKER (SHARED PARTIAL_PICKERMODAL WITH NATURAL NUMERIC SORT) ---
+  function openTeamPicker() {
+    const rawTeams = (appData && Array.isArray(appData.teams)) ? appData.teams : [];
+    const sortedTeams = rawTeams.slice().sort((a, b) =>
+      String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+    );
+    const pickerItems = [{ label: 'All Teams', value: 'ALL' }];
+    sortedTeams.forEach(t => pickerItems.push({ label: t, value: t }));
+
+    ff_openPicker(
+      'Select a team',
+      'Search teams (e.g. Mens 2, Ladies 1, Mixed)...',
+      pickerItems,
+      (selectedItem) => {
+        selectedTeam = selectedItem.value;
+        saveSchedulePrefs();
+        ff_pickerClose();
+        syncScheduleUI();
+      }
+    );
+  }
+
+  function setVenueFilter(val) {
+    venueFilter = val;
+    saveSchedulePrefs();
+    syncScheduleUI();
+  }
+
+  function setCompFilter(val) {
+    compFilter = val;
+    saveSchedulePrefs();
+    syncScheduleUI();
+  }
+
+  function resetScheduleFilters() {
+    selectedTeam = 'ALL';
+    venueFilter = 'ALL';
+    compFilter = 'ALL';
+    saveSchedulePrefs();
+    syncScheduleUI();
+  }
+
+  // --- FILTERING HELPERS ---
+  /**
+   * Returns confirmed fixtures matching active Team / Venue / Competition filters.
+   * @param {boolean} [upcomingOnly=false] True for Matches tab (date >= serverToday), false for Calendar tab (all current/upcoming season months).
+   */
+  function getFilteredFixtures(upcomingOnly = false) {
+    const all = (appData && Array.isArray(appData.fixtures)) ? appData.fixtures : [];
+    const todayIso = (appData && appData.serverToday) ? String(appData.serverToday) : '';
+
+    return all.filter(m => {
+      if (upcomingOnly && todayIso && m.date < todayIso) return false;
+      if (selectedTeam !== 'ALL' && m.ourTeam !== selectedTeam) return false;
+      const isHome = isHostClubHome(m);
+      if (venueFilter === 'HOME' && !isHome) return false;
+      if (venueFilter === 'AWAY' && isHome) return false;
+      const isCup = String(m.leagueCup || '').toUpperCase().includes('CUP');
+      if (compFilter === 'LEAGUE' && isCup) return false;
+      if (compFilter === 'CUP' && !isCup) return false;
+      return true;
+    });
+  }
+
+  function toggleVenueExpand(key) {
+    if (expandedVenues.has(key)) {
+      expandedVenues.delete(key);
+    } else {
+      expandedVenues.add(key);
+    }
+    renderMatches();
+    renderSelectedDayPanel();
+  }
+
+  // --- MATCH CARD BUILDER ---
+  function buildMatchCardHtml(match, idx) {
+    const isHome = isHostClubHome(match);
+    const badgeClass = isHome ? 'home' : 'away';
+    const roleLabel = isHome ? 'Home' : 'Away';
+    const isCup = String(match.leagueCup || '').toUpperCase().includes('CUP');
+    const compClass = isCup ? 'cup' : 'league';
+    const compLabel = match.leagueCup || 'League';
+    const venueStr = String(match.venue || '');
+    const matchKey = `${match.date}_${match.ourTeam}_${match.opponent}`;
+    const isExpanded = expandedVenues.has(matchKey);
+    const isLongVenue = venueStr.length > 36;
+
+    return `
+      <div class="match-card ${badgeClass}">
+        <div class="match-header">
+          <span>${escapeHtml(match.displayDate)}</span>
+          <span>${escapeHtml(match.time)}</span>
+        </div>
+        <div class="match-body">
+          <div class="match-left-col">
+            <div class="match-teams">
+              ${escapeHtml(match.ourTeam)} <span style="opacity:0.5; font-size:0.85em; font-weight:500;">vs</span> <span style="color: var(--primary);">${escapeHtml(match.opponent)}</span>
+            </div>
+            <div class="match-details">
+              <span class="badge ${badgeClass}">${roleLabel}</span>
+              <span class="badge ${compClass}">${escapeHtml(compLabel)}</span>
+            </div>
+            <div class="venue-row ${isExpanded ? 'expanded' : ''}" onclick="toggleVenueExpand('${escapeHtml(matchKey)}')" title="Tap to expand full venue address">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span class="venue-text">${escapeHtml(venueStr)}</span>
+              ${isLongVenue ? `<span style="font-size:0.75rem; color:var(--primary); font-weight:700; flex-shrink:0; margin-left:4px;">${isExpanded ? 'Less' : 'More'}</span>` : ''}
+            </div>
+          </div>
+          <div class="match-right-col">
+            <button type="button" onclick="downloadSingleMatchIcs(${idx})" style="background: var(--bg); border: 1px solid var(--border); color: var(--on-surface); border-radius: 8px; padding: 8px 10px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;" title="Add match to Calendar (.ics)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+                <line x1="12" y1="14" x2="12" y2="18"></line>
+                <line x1="10" y1="16" x2="14" y2="16"></line>
+              </svg>
+              <span>+Cal</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // --- TAB 1: UPCOMING MATCHES LIST RENDERER ---
+  function renderMatches() {
+    const container = document.getElementById('matches-list-container');
+    if (!container) return;
+    const allFixtures = (appData && Array.isArray(appData.fixtures)) ? appData.fixtures : [];
+    const filtered = getFilteredFixtures(true);
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding: 40px 16px; opacity: 0.65;">No upcoming confirmed matches found for the current filter.</div>`;
+      return;
+    }
+
+    const cardsHtml = filtered.map(m => {
+      const globalIdx = allFixtures.indexOf(m);
+      return buildMatchCardHtml(m, globalIdx);
+    }).join('');
+
+    const bulkExportFooterHtml = `
+      <div style="grid-column: 1 / -1; margin-top: 16px; padding-top: 8px; text-align: center;">
+        <button type="button" onclick="handleBulkExport()" style="width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--on-surface); border-radius: 12px; padding: 12px 16px; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: var(--shadow-sm);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+            <line x1="12" y1="14" x2="12" y2="18"></line>
+            <line x1="10" y1="16" x2="14" y2="16"></line>
+          </svg>
+          <span>Export Filtered Schedule (${filtered.length} ${filtered.length === 1 ? 'Match' : 'Matches'}) (.ics)</span>
+        </button>
+      </div>
+    `;
+
+    container.innerHTML = cardsHtml + bulkExportFooterHtml;
+  }
+
+  // --- TAB 2: MULTI-MONTH SEASON CALENDAR RENDERER ---
+  function renderCalendarGrid() {
+    const container = document.getElementById('season-grid-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const filtered = getFilteredFixtures(false);
+    const byDate = {};
+    filtered.forEach(m => {
+      if (!byDate[m.date]) byDate[m.date] = [];
+      byDate[m.date].push(m);
+    });
+
+    const months = (appData && Array.isArray(appData.seasonMonths) && appData.seasonMonths.length > 0)
+      ? appData.seasonMonths
+      : Object.keys(byDate).map(d => d.slice(0, 7)).filter((v, i, a) => a.indexOf(v) === i).sort();
+
+    if (!selectedCalendarDate || !byDate[selectedCalendarDate]) {
+      const todayIso = (appData && appData.serverToday) ? String(appData.serverToday) : '';
+      const sortedDates = Object.keys(byDate).sort();
+      const firstUpcoming = sortedDates.find(d => d >= todayIso);
+      selectedCalendarDate = firstUpcoming || sortedDates[0] || null;
+    }
+
+    months.forEach(ym => {
+      const parts = String(ym).split('-');
+      if (parts.length !== 2) return;
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      if (isNaN(year) || isNaN(month)) return;
+
+      const grid = document.createElement('div');
+      grid.className = 'month-grid';
+
+      const dateObj = new Date(year, month, 1);
+      const monthName = dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
+      const title = document.createElement('div');
+      title.className = 'month-label';
+      title.textContent = monthName;
+      grid.appendChild(title);
+
+      ['M', 'T', 'W', 'T', 'F', 'S', 'S'].forEach(d => {
+        const dh = document.createElement('div');
+        dh.className = 'day-header';
+        dh.textContent = d;
+        grid.appendChild(dh);
+      });
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const offset = (firstDay === 0) ? 6 : firstDay - 1;
+      for (let i = 0; i < offset; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'day-cell empty';
+        grid.appendChild(empty);
+      }
+
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const dayMatches = byDate[dateStr] || [];
+        const homeCount = dayMatches.filter(m => isHostClubHome(m)).length;
+        const awayCount = dayMatches.length - homeCount;
+
+        const cell = document.createElement('div');
+        cell.className = 'day-cell';
+        if (homeCount > 0) cell.classList.add('has-home');
+        if (awayCount > 0) cell.classList.add('has-away');
+        if (selectedCalendarDate === dateStr) cell.classList.add('selected-day');
+
+        let indicatorHtml = '';
+        const total = dayMatches.length;
+        if (total > 0 && total <= 3) {
+          const dots = [];
+          for (let h = 0; h < homeCount; h++) dots.push('<span class="day-dot home"></span>');
+          for (let a = 0; a < awayCount; a++) dots.push('<span class="day-dot away"></span>');
+          indicatorHtml = `<div class="day-cell-indicators">${dots.join('')}</div>`;
+        } else if (total >= 4) {
+          const pips = [];
+          if (homeCount > 0) pips.push(`<span class="day-pip home"><span class="day-dot home"></span>${homeCount}</span>`);
+          if (awayCount > 0) pips.push(`<span class="day-pip away"><span class="day-dot away"></span>${awayCount}</span>`);
+          indicatorHtml = `<div class="day-cell-indicators">${pips.join('')}</div>`;
+        } else {
+          indicatorHtml = `<div class="day-cell-indicators"></div>`;
+        }
+
+        cell.innerHTML = `<span class="day-num">${d}</span>${indicatorHtml}`;
+        cell.onclick = () => {
+          selectedCalendarDate = dateStr;
+          renderCalendarGrid();
+          renderSelectedDayPanel();
+        };
+        grid.appendChild(cell);
+      }
+
+      container.appendChild(grid);
+    });
+
+    renderSelectedDayPanel();
+  }
+
+  function renderSelectedDayPanel() {
+    const panel = document.getElementById('selected-day-content');
+    if (!panel) return;
+
+    const allFixtures = (appData && Array.isArray(appData.fixtures)) ? appData.fixtures : [];
+    const filtered = getFilteredFixtures(false);
+    const dayMatches = selectedCalendarDate ? filtered.filter(m => m.date === selectedCalendarDate) : [];
+
+    if (!selectedCalendarDate) {
+      panel.innerHTML = `<div style="text-align:center; padding: 16px; color: var(--text-muted); font-size: 0.85rem;">Tap any date in the calendar to view confirmed matches.</div>`;
+      return;
+    }
+
+    const parts = selectedCalendarDate.split('-');
+    const dObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    const niceDate = dObj.toLocaleDateString('en-IE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
+    if (dayMatches.length === 0) {
+      panel.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-weight:800; font-size:0.95rem;">${escapeHtml(niceDate)}</span>
+          <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">0 Matches</span>
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-muted); padding: 12px 0;">No confirmed matches on this date for the current filter.</div>
+      `;
+      return;
+    }
+
+    panel.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border);">
+        <span style="font-weight:800; font-size:1rem;">${escapeHtml(niceDate)}</span>
+        <span style="font-size:0.78rem; color:var(--primary); font-weight:700;">${dayMatches.length} Confirmed ${dayMatches.length === 1 ? 'Match' : 'Matches'}</span>
+      </div>
+      <div>
+        ${dayMatches.map(m => buildMatchCardHtml(m, allFixtures.indexOf(m))).join('')}
+      </div>
+    `;
+  }
+
+  // --- UI SYNCHRONIZATION ---
+  function syncScheduleUI() {
+    const dText = document.getElementById('desktop-team-select-text');
+    const mText = document.getElementById('mobile-team-select-text');
+    if (dText) dText.textContent = selectedTeam === 'ALL' ? 'TEAM: ALL TEAMS' : `TEAM: ${selectedTeam.toUpperCase()}`;
+    if (mText) mText.textContent = selectedTeam === 'ALL' ? 'All' : selectedTeam;
+
+    ['ALL', 'HOME', 'AWAY'].forEach(v => {
+      const btn = document.getElementById('venue-' + v);
+      if (btn) btn.classList.toggle('active', venueFilter === v);
+    });
+    ['ALL', 'LEAGUE', 'CUP'].forEach(c => {
+      const btn = document.getElementById('comp-' + c);
+      if (btn) btn.classList.toggle('active', compFilter === c);
+    });
+
+    const isFiltered = selectedTeam !== 'ALL' || venueFilter !== 'ALL' || compFilter !== 'ALL';
+    const filterBar = document.getElementById('active-filter-bar');
+    const filterText = document.getElementById('active-filter-text');
+    if (filterBar && filterText) {
+      if (isFiltered) {
+        const upcomingCount = getFilteredFixtures(true).length;
+        const parts = [];
+        if (selectedTeam !== 'ALL') parts.push(selectedTeam);
+        if (venueFilter !== 'ALL') parts.push(venueFilter === 'HOME' ? 'Home' : 'Away');
+        if (compFilter !== 'ALL') parts.push(compFilter === 'LEAGUE' ? 'League' : 'Cup');
+        filterText.textContent = `Showing ${upcomingCount} upcoming ${upcomingCount === 1 ? 'match' : 'matches'} (${parts.join(' • ')})`;
+        filterBar.classList.remove('hidden');
+      } else {
+        filterBar.classList.add('hidden');
+      }
+    }
+
+    renderMatches();
+    renderCalendarGrid();
+    switchScheduleTab(activeTab, true);
+  }
+
+  function switchScheduleTab(tab, skipSave = false) {
+    activeTab = tab;
+    if (!skipSave) saveSchedulePrefs();
+    const tabM = document.getElementById('tab-matches');
+    const tabC = document.getElementById('tab-calendar');
+    const navBtns = document.querySelectorAll('#bottom-nav .nav-item');
+
+    if (tabM && tabC) {
+      if (tab === 'matches') {
+        tabM.classList.remove('hidden');
+        tabC.classList.add('hidden');
+        if (navBtns[0]) navBtns[0].classList.add('active');
+        if (navBtns[1]) navBtns[1].classList.remove('active');
+      } else {
+        tabM.classList.add('hidden');
+        tabC.classList.remove('hidden');
+        if (navBtns[0]) navBtns[0].classList.remove('active');
+        if (navBtns[1]) navBtns[1].classList.add('active');
+        renderCalendarGrid();
+      }
+    }
+  }
+
+  // --- RFC 5545 .ICS CALENDAR EXPORT ---
+  function formatIcsDateTime_(dateStr, timeStr, durationMinutes = 120) {
+    const parts = String(dateStr || '').split('-');
+    const y = parseInt(parts[0], 10) || 2026;
+    const m = (parseInt(parts[1], 10) || 1) - 1;
+    const d = parseInt(parts[2], 10) || 1;
+
+    let hh = 19;
+    let mm = 30;
+    const tMatch = String(timeStr || '').match(/(\d{1,2}):(\d{2})/);
+    if (tMatch) {
+      hh = parseInt(tMatch[1], 10);
+      mm = parseInt(tMatch[2], 10);
+    }
+
+    const start = new Date(y, m, d, hh, mm, 0);
+    const end = new Date(start.getTime() + durationMinutes * 60000);
+    const pad = (n) => String(n).padStart(2, '0');
+    const fmt = (dt) =>
+      `${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}T${pad(dt.getHours())}${pad(dt.getMinutes())}00`;
+
+    return { dtStart: fmt(start), dtEnd: fmt(end) };
+  }
+
+  function escapeIcsText_(str) {
+    return String(str || '')
+      .replace(/\\/g, '\\\\')
+      .replace(/;/g, '\\;')
+      .replace(/,/g, '\\,')
+      .replace(/\r?\n/g, '\\n');
+  }
+
+  function buildIcsContent_(matches) {
+    const clubName = getHostClubName();
+    const nowStamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const lines = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//FixtureFlow//DDLC Match Schedule//EN',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH'
+    ];
+
+    matches.forEach((m, idx) => {
+      const isHome = isHostClubHome(m);
+      const roleLabel = isHome ? 'Home' : 'Away';
+      const compLabel = m.leagueCup || 'League';
+      const summary = `${clubName} ${m.ourTeam} vs ${m.opponent} (${roleLabel} - ${compLabel})`;
+      const description = `${compLabel} Match (${roleLabel})\\nTeam: ${clubName} ${m.ourTeam}\\nOpponent: ${m.opponent}\\nVenue: ${m.venue || ''}`;
+      const { dtStart, dtEnd } = formatIcsDateTime_(m.date, m.time, 120);
+      const uid = `ff-${m.date}-${String(m.ourTeam).replace(/\s+/g, '')}-${idx}@fixtureflow`;
+
+      lines.push(
+        'BEGIN:VEVENT',
+        `UID:${uid}`,
+        `DTSTAMP:${nowStamp}`,
+        `DTSTART:${dtStart}`,
+        `DTEND:${dtEnd}`,
+        `SUMMARY:${escapeIcsText_(summary)}`,
+        `LOCATION:${escapeIcsText_(m.venue || '')}`,
+        `DESCRIPTION:${description}`,
+        'END:VEVENT'
+      );
+    });
+
+    lines.push('END:VCALENDAR');
+    return lines.join('\r\n');
+  }
+
+  function triggerIcsDownload_(icsContent, filename) {
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function downloadSingleMatchIcs(idx) {
+    const all = (appData && Array.isArray(appData.fixtures)) ? appData.fixtures : [];
+    const match = all[idx];
+    if (!match) return;
+    const ics = buildIcsContent_([match]);
+    const safeTeam = String(match.ourTeam || 'match').replace(/[^a-zA-Z0-9_-]/g, '-');
+    triggerIcsDownload_(ics, `${safeTeam}-${match.date}.ics`);
+    showScheduleToast(`Added ${match.ourTeam} vs ${match.opponent} (${match.displayDate}) to Calendar (.ics)`);
+  }
+
+  function handleBulkExport() {
+    const filtered = getFilteredFixtures(true);
+    if (filtered.length === 0) {
+      showScheduleToast('No upcoming matches to export for the current filter.');
+      return;
+    }
+    const ics = buildIcsContent_(filtered);
+    const safeTeam = selectedTeam === 'ALL' ? 'all-teams' : String(selectedTeam).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    triggerIcsDownload_(ics, `match-schedule-${safeTeam}.ics`);
+    showScheduleToast(`Exported ${filtered.length} confirmed ${filtered.length === 1 ? 'match' : 'matches'} to .ics calendar file`);
+  }
+
+  function showScheduleToast(msg) {
+    const el = document.getElementById('toast-banner');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.add('hidden'), 2800);
+  }
+
+  // --- PULL-TO-REFRESH (#ptr-indicator) & LIVE SYNC ---
+  let ptrStartY = 0;
+  let ptrPulling = false;
+
+  function initPullToRefresh_() {
+    const ptrEl = document.getElementById('ptr-indicator');
+    const ptrText = document.getElementById('ptr-text');
+    if (!ptrEl || typeof window === 'undefined') return;
+
+    window.addEventListener('touchstart', (e) => {
+      if (window.scrollY <= 0 && e.touches && e.touches.length === 1) {
+        ptrStartY = e.touches[0].clientY;
+        ptrPulling = true;
+      } else {
+        ptrPulling = false;
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!ptrPulling || !e.touches || e.touches.length !== 1) return;
+      const deltaY = e.touches[0].clientY - ptrStartY;
+      if (deltaY > 55 && window.scrollY <= 0) {
+        ptrEl.classList.add('ptr-active');
+        if (ptrText) ptrText.textContent = 'Release to refresh schedule...';
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      if (!ptrPulling) return;
+      ptrPulling = false;
+      if (ptrEl.classList.contains('ptr-active')) {
+        if (ptrText) ptrText.textContent = 'Syncing live schedule...';
+        fetchScheduleData({ isSilentRefresh: true });
+      }
+    }, { passive: true });
+  }
+
+  function showScheduleOfflineCard_() {
+    const spinner = document.getElementById('spinner-loader');
+    const statusTxt = document.getElementById('status-text');
+    const offlinePanel = document.getElementById('offline-panel');
+    const statusScreen = document.getElementById('status-screen');
+    if (spinner) spinner.style.display = 'none';
+    if (statusTxt) statusTxt.style.display = 'none';
+    if (offlinePanel) offlinePanel.style.display = 'block';
+    if (statusScreen) statusScreen.style.display = 'flex';
+  }
+
+  function renderScheduleDashboard_(dataObj) {
+    appData = dataObj;
+    window._lastScheduleFetchAt = Date.now();
+
+    if (appData && appData.clubName && typeof updateClubBrandingState === 'function') {
+      updateClubBrandingState(appData, 'Schedule');
+    }
+
+    // Validate persisted team against live team list
+    if (selectedTeam !== 'ALL' && appData && Array.isArray(appData.teams)) {
+      if (appData.teams.indexOf(selectedTeam) === -1) {
+        selectedTeam = 'ALL';
+      }
+    }
+
+    const statusScreen = document.getElementById('status-screen');
+    if (statusScreen) statusScreen.style.display = 'none';
+    const viewMain = document.getElementById('view-main');
+    if (viewMain) viewMain.classList.remove('hidden');
+    const bottomNav = document.getElementById('bottom-nav');
+    if (bottomNav) bottomNav.classList.remove('hidden');
+
+    syncScheduleUI();
+  }
+
+  function fetchScheduleData(opts = {}) {
+    if (window._scheduleFetchInFlight) return;
+    if (typeof google === 'undefined' || !google.script || !google.script.run || typeof google.script.run.getPublicMatchSchedule !== 'function') {
+      return;
+    }
+
+    window._scheduleFetchInFlight = true;
+    google.script.run
+      .withSuccessHandler((res) => {
+        window._scheduleFetchInFlight = false;
+        const ptrEl = document.getElementById('ptr-indicator');
+        if (ptrEl) ptrEl.classList.remove('ptr-active');
+
+        const payload = (res && res.data) ? res.data : res;
+        if (!payload || !Array.isArray(payload.fixtures)) {
+          handleScheduleFetchFailure_('Invalid schedule response from server.');
+          return;
+        }
+
+        if (typeof setPortalStorage === 'function') {
+          setPortalStorage('schedule_cached_data', JSON.stringify(payload));
+          setPortalStorage('shared_public_metadata', JSON.stringify({
+            clubName: payload.clubName,
+            clubLogoUrl: payload.clubLogoUrl,
+            season: payload.season,
+            seasonShort: payload.seasonShort
+          }));
+        }
+
+        renderScheduleDashboard_(payload);
+        if (opts.isSilentRefresh) {
+          showScheduleToast('Schedule synced with live club sheet');
+        }
+      })
+      .withFailureHandler((err) => {
+        window._scheduleFetchInFlight = false;
+        const ptrEl = document.getElementById('ptr-indicator');
+        if (ptrEl) ptrEl.classList.remove('ptr-active');
+        handleScheduleFetchFailure_(err && err.message ? err.message : String(err));
+      })
+      .getPublicMatchSchedule();
+  }
+
+  function handleScheduleFetchFailure_(errMsg) {
+    console.warn('[Schedule Portal] Live fetch failed, checking offline fallback cache:', errMsg);
+    // Strict Offline-Only Cache Fallback inside failure handler (Rule 7)
+    const cachedRaw = (typeof getPortalStorage === 'function') ? getPortalStorage('schedule_cached_data') : null;
+    if (cachedRaw) {
+      try {
+        const parsed = JSON.parse(cachedRaw);
+        if (parsed && Array.isArray(parsed.fixtures)) {
+          renderScheduleDashboard_(parsed);
+          showScheduleToast('Offline mode: showing last saved schedule');
+          return;
+        }
+      } catch (e) {}
+    }
+    showScheduleOfflineCard_();
+  }
+
+  if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && appData) {
+        const elapsed = Date.now() - (window._lastScheduleFetchAt || 0);
+        if (elapsed > 5000) {
+          fetchScheduleData({ isSilentRefresh: false });
+        }
+      }
+    });
+  }
+
+  // --- COLD BOOT INITIALIZATION (LIVE-FIRST SHEET SYNC) ---
+  (function initScheduleBoot_() {
+    loadSchedulePrefs();
+    initPullToRefresh_();
+
+    const cfgEl = document.getElementById('ff-config');
+    const cfgClubName = cfgEl && cfgEl.dataset && cfgEl.dataset.clubName ? cfgEl.dataset.clubName : '';
+    const cfgClubLogo = cfgEl && cfgEl.dataset && cfgEl.dataset.clubLogoUrl ? cfgEl.dataset.clubLogoUrl : '';
+    const initialClubName = cfgClubName || (typeof getPortalStorage === 'function' ? getPortalStorage('club_name') : null);
+    const cachedMeta = (typeof getPortalStorage === 'function') ? getPortalStorage('shared_public_metadata') : null;
+
+    if (cfgClubName || cfgClubLogo) {
+      hydrateClubBranding({ clubName: cfgClubName, clubLogoUrl: cfgClubLogo }, 'Schedule');
+    } else if (cachedMeta) {
+      try {
+        hydrateClubBranding(JSON.parse(cachedMeta), 'Schedule');
+      } catch (e) {}
+    } else if (initialClubName) {
+      hydrateClubBranding({ clubName: initialClubName }, 'Schedule');
+    }
+
+    const startFetch = () => fetchScheduleData({ isInitialBoot: true });
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', startFetch);
+    } else {
+      startFetch();
+    }
+  })();
+</script>
+
+
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch(err => console.error('SW register failed: ', err));
+    }
+  </script>
+</body>
+</html>
+

@@ -883,7 +883,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v145";
+  window.__FF_VERSION__ = "dev-v148";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Club Admin]%c Running version " + window.__FF_VERSION__, "background: #0f172a; color: #ffffff; border: 1px solid #334155; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -1221,7 +1221,7 @@ function resolveCourtflowHost(input) {
       payload.justification = args[2];
       payload.selectedDate = args[3];
       payload.requestorType = args[4];
-    } else if (action === "getPublicClubMetadata") {
+    } else if (action === "getPublicClubMetadata" || action === "getPublicMatchSchedule") {
       // Zero params needed
     } else {
       if (args && args.length === 1 && typeof args[0] === 'object') {
@@ -1617,10 +1617,11 @@ function resolveCourtflowHost(input) {
     if (!role) {
       if (document.title.includes('Player')) role = 'Player';
       else if (document.title.includes('Captain')) role = 'Captain';
+      else if (document.title.includes('Schedule')) role = 'Schedule';
       else if (document.title.includes('Opponent') || document.title.includes('Club')) role = 'Club Admin';
       else role = 'Portal';
     }
-    const roleTitle = (role === 'Club' || role === 'Opponent') ? 'Club Admin' : role;
+    const roleTitle = (role === 'Club' || role === 'Opponent') ? 'Club Admin' : ((role === 'Schedule' || role === 'Match Schedule') ? 'Schedule' : role);
 
     let slug = clubSlug;
     if (slug === undefined && typeof window !== 'undefined' && window.location && window.location.search) {
@@ -1678,10 +1679,11 @@ function resolveCourtflowHost(input) {
     if (!role) {
       if (document.title.includes('Player')) role = 'Player';
       else if (document.title.includes('Captain')) role = 'Captain';
+      else if (document.title.includes('Schedule')) role = 'Schedule';
       else if (document.title.includes('Opponent') || document.title.includes('Club')) role = 'Club Admin';
       else role = 'Portal';
     }
-    const roleTitle = (role === 'Club' || role === 'Opponent') ? 'Club Admin' : role;
+    const roleTitle = (role === 'Club' || role === 'Opponent') ? 'Club Admin' : ((role === 'Schedule' || role === 'Match Schedule') ? 'Schedule' : role);
     const upperRole = roleTitle.toUpperCase();
 
     let slug = clubSlug;
@@ -1739,6 +1741,7 @@ function resolveCourtflowHost(input) {
       const path = (window.location.pathname || '').toLowerCase();
       if (path.includes('player')) role = 'Player';
       else if (path.includes('captain')) role = 'Captain';
+      else if (path.includes('schedule')) role = 'Schedule';
       else if (path.includes('club')) role = 'Club Admin';
 
       updatePortalTabTitle_(initialClubName, role, slug);
@@ -3102,7 +3105,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v145">
+  <meta name="app-version" content="dev-v148">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/leagues/dev/club/">
@@ -3853,7 +3856,7 @@ function onLoginFailure(error) {
 
     
     <div id="native-app-footer" style="display:none; width: 100%; margin-top: auto;" class="brand-footer login-footer">
-      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v145</span>
+      Powered by <a href="https://fixtureflow.github.io" target="_blank" rel="noopener"><strong>FixtureFlow</strong></a><span id="ff-app-version-badge" class="app-version" style="opacity: 0.5; font-size: 0.72rem; margin-left: 4px;">· dev-v148</span>
 
     </div>
 
