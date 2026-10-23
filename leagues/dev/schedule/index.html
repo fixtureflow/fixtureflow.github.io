@@ -883,7 +883,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v153";
+  window.__FF_VERSION__ = "dev-v154";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Schedule]%c Running version " + window.__FF_VERSION__, "background: #be123c; color: #ffffff; border: 1px solid #e11d48; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -2424,7 +2424,43 @@ function resolveCourtflowHost(input) {
   }
 
   /* Season Grid Scroll Area & Month Grid (Exact from Portal_Captain_CSS.html & schedule_portal_preview.html) */
+  .calendar-legend-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cal-scroll-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--on-surface);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: opacity 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cal-scroll-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .cal-scroll-btn:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+  .cal-scroll-btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
   .season-grid-scroll-area {
+    position: relative;
     display: flex;
     overflow-x: auto;
     gap: 16px;
@@ -2624,6 +2660,12 @@ function resolveCourtflowHost(input) {
   }
 
   @media (min-width: 768px) {
+    .calendar-legend-bar {
+      justify-content: center;
+    }
+    .cal-scroll-btn {
+      display: none !important;
+    }
     .season-grid-scroll-area {
       display: grid !important;
       grid-template-columns: repeat(2, minmax(260px, 1fr)) !important;
@@ -2676,7 +2718,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v153">
+  <meta name="app-version" content="dev-v154">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/leagues/dev/schedule/">
@@ -2839,19 +2881,28 @@ function resolveCourtflowHost(input) {
   <!-- TAB 2: MULTI-MONTH SEASON CALENDAR -->
   <div id="tab-calendar" class="container hidden" style="padding-top: 12px; padding-bottom: 24px;">
     <div id="calendar-card-container" class="match-card" style="border-left: 1px solid var(--border); padding: 14px; margin-bottom: 16px;">
-      <!-- Simplified Legend: Home & Away dots only -->
-      <div style="display: flex; justify-content: center; gap: 20px; padding-bottom: 10px; margin-bottom: 8px; border-bottom: 1px solid var(--border); font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">
-        <span style="display: inline-flex; align-items: center; gap: 6px;">
-          <span style="width: 9px; height: 9px; border-radius: 50%; background: var(--badge-home-dot); display: inline-block;"></span>
-          <span>Home</span>
-        </span>
-        <span style="display: inline-flex; align-items: center; gap: 6px;">
-          <span style="width: 9px; height: 9px; border-radius: 50%; background: var(--badge-away-dot); display: inline-block;"></span>
-          <span>Away</span>
-        </span>
-      </div>
-      <div style="font-size: 0.72rem; color: var(--text-muted); text-align: center; margin-bottom: 6px;">
-        Swipe months horizontally on mobile &bull; Tap any highlighted date for match details
+      <!-- Legend + Mobile Month Scroller Controls -->
+      <div class="calendar-legend-bar">
+        <button type="button" id="cal-scroll-prev" class="cal-scroll-btn" onclick="scrollScheduleMonth(-1)" aria-label="Previous month">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 20px; font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">
+          <span style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 9px; height: 9px; border-radius: 50%; background: var(--badge-home-dot); display: inline-block;"></span>
+            <span>Home</span>
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 9px; height: 9px; border-radius: 50%; background: var(--badge-away-dot); display: inline-block;"></span>
+            <span>Away</span>
+          </span>
+        </div>
+        <button type="button" id="cal-scroll-next" class="cal-scroll-btn" onclick="scrollScheduleMonth(1)" aria-label="Next month">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
       </div>
       <div id="season-grid-container" class="season-grid-scroll-area"></div>
     </div>
@@ -3192,11 +3243,61 @@ function resolveCourtflowHost(input) {
   }
 
   // --- TAB 2: MULTI-MONTH SEASON CALENDAR RENDERER ---
-  function renderCalendarGrid() {
+  function getActiveCalendarMonthIndex_(container, monthEls) {
+    if (!monthEls.length) return 0;
+    const scrollLeft = container.scrollLeft;
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    monthEls.forEach((el, idx) => {
+      const dist = Math.abs(el.offsetLeft - scrollLeft);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = idx;
+      }
+    });
+    return bestIdx;
+  }
+
+  function updateCalendarScrollButtons_() {
+    const container = document.getElementById('season-grid-container');
+    const prevBtn = document.getElementById('cal-scroll-prev');
+    const nextBtn = document.getElementById('cal-scroll-next');
+    if (!container || !prevBtn || !nextBtn) return;
+    const monthEls = Array.from(container.querySelectorAll('.month-grid'));
+    if (monthEls.length <= 1) {
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+      return;
+    }
+    const idx = getActiveCalendarMonthIndex_(container, monthEls);
+    prevBtn.disabled = idx <= 0;
+    nextBtn.disabled = idx >= monthEls.length - 1;
+  }
+
+  function scrollScheduleMonth(delta) {
     const container = document.getElementById('season-grid-container');
     if (!container) return;
+    const monthEls = Array.from(container.querySelectorAll('.month-grid'));
+    if (!monthEls.length) return;
+    const currentIdx = getActiveCalendarMonthIndex_(container, monthEls);
+    const targetIdx = Math.max(0, Math.min(monthEls.length - 1, currentIdx + delta));
+    const targetEl = monthEls[targetIdx];
+    if (targetEl) {
+      container.scrollTo({ left: targetEl.offsetLeft, behavior: 'smooth' });
+    }
+  }
+
+  function renderCalendarGrid(opts = {}) {
+    const container = document.getElementById('season-grid-container');
+    if (!container) return;
+    const preserveScroll = Boolean(opts && opts.preserveScroll);
     const prevScrollLeft = container.scrollLeft;
     container.innerHTML = '';
+
+    if (!container._hasScrollListener) {
+      container.addEventListener('scroll', updateCalendarScrollButtons_, { passive: true });
+      container._hasScrollListener = true;
+    }
 
     const filtered = getFilteredFixtures(false);
     const byDate = {};
@@ -3225,6 +3326,7 @@ function resolveCourtflowHost(input) {
 
       const div = document.createElement('div');
       div.className = 'month-grid';
+      div.setAttribute('data-ym', ym);
 
       const header = document.createElement('div');
       header.className = 'month-header-title';
@@ -3282,7 +3384,7 @@ function resolveCourtflowHost(input) {
         cell.innerHTML = `<span style="line-height:1;">${d}</span>${indicatorHtml}`;
         cell.onclick = () => {
           selectedCalendarDate = dateStr;
-          renderCalendarGrid();
+          renderCalendarGrid({ preserveScroll: true });
           renderSelectedDayPanel();
         };
 
@@ -3293,10 +3395,17 @@ function resolveCourtflowHost(input) {
       container.appendChild(div);
     });
 
-    if (prevScrollLeft > 0) {
+    if (preserveScroll) {
       container.scrollLeft = prevScrollLeft;
+    } else if (selectedCalendarDate) {
+      const targetYm = selectedCalendarDate.slice(0, 7);
+      const targetMonthEl = container.querySelector(`.month-grid[data-ym="${targetYm}"]`);
+      if (targetMonthEl) {
+        container.scrollLeft = targetMonthEl.offsetLeft;
+      }
     }
 
+    updateCalendarScrollButtons_();
     renderSelectedDayPanel();
   }
 
