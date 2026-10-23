@@ -883,7 +883,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v150";
+  window.__FF_VERSION__ = "dev-v151";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Schedule]%c Running version " + window.__FF_VERSION__, "background: #be123c; color: #ffffff; border: 1px solid #e11d48; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -2298,7 +2298,7 @@ function resolveCourtflowHost(input) {
   .match-body {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
   }
   .match-left-col {
@@ -2348,24 +2348,19 @@ function resolveCourtflowHost(input) {
     border: 1px solid var(--border);
   }
   .match-venue {
-    margin-top: 8px;
-    font-size: 0.88rem;
+    margin-top: 10px;
+    font-size: 0.86rem;
     color: var(--text-muted);
     display: flex;
-    align-items: flex-start;
-    gap: 5px;
+    align-items: center;
+    gap: 6px;
     min-width: 0;
+    width: 100%;
   }
   .venue-text-clamp {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex: 1;
-    min-width: 0;
-  }
-  .venue-text-expanded {
-    white-space: normal;
-    word-break: break-word;
     flex: 1;
     min-width: 0;
   }
@@ -2612,39 +2607,54 @@ function resolveCourtflowHost(input) {
       grid-template-columns: repeat(2, minmax(260px, 1fr)) !important;
       overflow-y: visible !important;
       overflow-x: hidden !important;
-      gap: 16px !important;
+      gap: 20px !important;
       align-content: start;
     }
     .month-grid {
       min-width: 0 !important;
       width: 100% !important;
+      padding: 16px !important;
+    }
+    .days-grid,
+    .dow-row {
+      gap: 6px !important;
     }
     #tab-calendar:not(.hidden) {
       display: flex !important;
       flex-direction: row !important;
-      max-width: 1050px !important;
-      gap: 20px !important;
+      width: 100% !important;
+      max-width: 1220px !important;
+      gap: 24px !important;
       align-items: flex-start !important;
       margin: 0 auto !important;
       padding-left: 16px;
       padding-right: 16px;
     }
     #calendar-card-container {
-      flex: 1 1 auto !important;
+      flex: 1 1 0% !important;
       min-width: 0 !important;
       margin: 0 !important;
+      padding: 18px !important;
     }
     #roster-sidebar-container {
-      flex: 0 0 340px !important;
+      flex: 0 0 420px !important;
+      width: 420px !important;
+      max-width: 420px !important;
+      min-width: 0 !important;
       position: sticky !important;
       top: 132px !important;
       margin: 0 !important;
+    }
+    #action-panel {
+      width: 100% !important;
+      min-width: 0 !important;
+      overflow: hidden;
     }
   }
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v150">
+  <meta name="app-version" content="dev-v151">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/leagues/dev/schedule/">
@@ -3079,16 +3089,6 @@ function resolveCourtflowHost(input) {
     });
   }
 
-  function toggleVenueExpand(key) {
-    if (expandedVenues.has(key)) {
-      expandedVenues.delete(key);
-    } else {
-      expandedVenues.add(key);
-    }
-    renderMatches();
-    renderSelectedDayPanel();
-  }
-
   // --- MATCH CARD BUILDER (Exact structure from Portal_Captain_JS_Matches.html & schedule_portal_preview.html) ---
   function buildMatchCardHtml(match, idx) {
     const isHome = isHostClubHome(match);
@@ -3096,9 +3096,6 @@ function resolveCourtflowHost(input) {
     const roleLabel = isHome ? 'Home' : 'Away';
     const compLabel = match.leagueCup || 'League';
     const venueStr = String(match.venue || '');
-    const matchKey = `${match.date}_${match.ourTeam}_${match.opponent}`;
-    const isExpanded = expandedVenues.has(matchKey);
-    const isLongVenue = venueStr.length > 34;
 
     return `
       <div class="match-card">
@@ -3115,14 +3112,6 @@ function resolveCourtflowHost(input) {
               <span class="badge ${badgeClass}">${roleLabel}</span>
               <span class="badge match-type">${escapeHtml(compLabel)}</span>
             </div>
-            <div class="match-venue" onclick="${isLongVenue ? `toggleVenueExpand('${escapeHtml(matchKey)}')` : ''}" style="${isLongVenue ? 'cursor: pointer;' : ''}" title="${escapeHtml(venueStr)}">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-              <span class="${isExpanded ? 'venue-text-expanded' : 'venue-text-clamp'}">${escapeHtml(venueStr)}</span>
-              ${isLongVenue ? `<span style="font-size:0.75rem; color:var(--primary); font-weight:700; flex-shrink:0; margin-left:4px;">${isExpanded ? 'Less' : 'More'}</span>` : ''}
-            </div>
           </div>
           <div class="match-right-col">
             <button type="button" onclick="downloadSingleMatchIcs(${idx})" style="background: var(--bg); border: 1px solid var(--border); color: var(--on-surface); border-radius: 8px; padding: 8px 10px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;" title="Add match to Calendar (.ics)">
@@ -3137,6 +3126,13 @@ function resolveCourtflowHost(input) {
               <span>+Cal</span>
             </button>
           </div>
+        </div>
+        <div class="match-venue" title="${escapeHtml(venueStr)}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span class="venue-text-clamp">${escapeHtml(venueStr)}</span>
         </div>
       </div>
     `;
