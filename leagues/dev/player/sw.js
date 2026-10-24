@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ff-player-dev-cache-v156';
+const CACHE_NAME = 'ff-player-dev-cache-v157';
 const CACHE_PREFIX = 'ff-player-dev-cache-';
 const ASSETS_TO_CACHE = [
   './',
