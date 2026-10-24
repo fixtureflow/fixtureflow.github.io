@@ -883,7 +883,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v154";
+  window.__FF_VERSION__ = "dev-v155";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Schedule]%c Running version " + window.__FF_VERSION__, "background: #be123c; color: #ffffff; border: 1px solid #e11d48; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -2523,6 +2523,7 @@ function resolveCourtflowHost(input) {
     cursor: pointer;
     border: 1.5px solid transparent;
     transition: all 0.15s ease;
+    -webkit-user-select: none;
     user-select: none;
     font-weight: 500;
     position: relative;
@@ -2718,7 +2719,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v154">
+  <meta name="app-version" content="dev-v155">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/leagues/dev/schedule/">
@@ -2787,9 +2788,9 @@ function resolveCourtflowHost(input) {
   </div>
 
   <!-- 1A. DESKTOP HEADER (Matches Portal_Captain_Main.html) -->
-  <header class="portal-header-desktop" onclick="handleDeveloperTap()" style="background: var(--surface); position: sticky; top: 0; z-index: 90; box-shadow: var(--shadow-sm); border-bottom: 1px solid var(--border); user-select: none;">
+  <header class="portal-header-desktop" onclick="handleDeveloperTap()" style="background: var(--surface); position: sticky; top: 0; z-index: 90; box-shadow: var(--shadow-sm); border-bottom: 1px solid var(--border); -webkit-user-select: none; user-select: none;">
     <div class="container" style="display: flex; align-items: center; justify-content: center; gap: 16px; padding-top: 12px; padding-bottom: 8px;">
-      <img class="header-club-logo" src="" alt="Logo" style="width: 48px; height: 48px; object-fit: contain; display: ;">
+      <img id="header-club-logo" class="header-club-logo" src="" alt="Logo" style="width: 48px; height: 48px; object-fit: contain;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <span class="portal-header-club" style="font-weight: 500; color: var(--text);"></span>
         <span style="color: var(--text-muted);">&bull;</span>
@@ -2819,10 +2820,10 @@ function resolveCourtflowHost(input) {
   </header>
 
   <!-- 1B. MOBILE HEADER (Matches Portal_Captain_Main.html) -->
-  <header class="portal-header-mobile" onclick="handleDeveloperTap()" style="background: var(--surface); position: sticky; top: 0; z-index: 90; box-shadow: var(--shadow-sm); border-bottom: 1px solid var(--border); padding: 12px 0; user-select: none;">
+  <header class="portal-header-mobile" onclick="handleDeveloperTap()" style="background: var(--surface); position: sticky; top: 0; z-index: 90; box-shadow: var(--shadow-sm); border-bottom: 1px solid var(--border); padding: 12px 0; -webkit-user-select: none; user-select: none;">
     <div class="container" style="display: flex; align-items: center; justify-content: space-between; margin: 0 auto; padding: 0 16px; width: 100%;">
       <div style="display: flex; align-items: center; gap: 10px;">
-        <img class="header-club-logo" src="" alt="Logo" style="width: 32px; height: 32px; object-fit: contain; display: ;">
+        <img id="header-club-logo-mobile" class="header-club-logo" src="" alt="Logo" style="width: 32px; height: 32px; object-fit: contain;">
         <div style="display: flex; flex-direction: column; justify-content: center;">
           <span class="portal-header-club" style="font-size: 0.95rem; font-weight: 700; color: var(--on-surface); line-height: 1.1;"></span>
           <span style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.1; font-weight: 500; margin-top: 2px;">
@@ -3057,7 +3058,6 @@ function resolveCourtflowHost(input) {
   let compFilter = 'ALL';  // 'ALL' | 'LEAGUE' | 'CUP'
   let activeTab = 'matches'; // 'matches' | 'calendar'
   let selectedCalendarDate = null;
-  let expandedVenues = new Set();
   let toastTimer = null;
 
   window.activePortalRole = 'Schedule';
