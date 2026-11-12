@@ -883,7 +883,7 @@
 
   <script>
   // --- Application Version Stamp ---
-  window.__FF_VERSION__ = "dev-v157";
+  window.__FF_VERSION__ = "dev-v158";
   window.__FF_STORAGE_PREFIX__ = "leagues_dev_pwa_";
   console.log("%c[FixtureFlow · Schedule]%c Running version " + window.__FF_VERSION__, "background: #be123c; color: #ffffff; border: 1px solid #e11d48; border-radius: 3px; padding: 2px 6px; font-weight: 600; font-size: 11px;", "color: inherit; margin-left: 4px;");
 
@@ -2651,6 +2651,100 @@ function resolveCourtflowHost(input) {
     height: 44px;
   }
 
+  /* Mobile Filter Bar .ics Action & Multi-Select Team Picker */
+  .mobile-filter-ics-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 0;
+  }
+  .schedule-picker-overlay {
+    z-index: 200 !important;
+  }
+  .team-picker-row {
+    width: 100%;
+    text-align: left;
+    padding: 14px 20px;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    font-weight: 600;
+    color: var(--on-surface);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    outline: none;
+    font-size: 0.98rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .team-picker-row:hover {
+    background: var(--bg);
+  }
+  .team-picker-row.is-selected {
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    color: var(--primary);
+  }
+  .team-picker-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1.8px solid var(--border);
+    background: var(--bg);
+    color: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+  }
+  .team-picker-row.is-selected .team-picker-check {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--on-primary);
+  }
+  .team-picker-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .team-picker-clear-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--on-surface);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: opacity 0.15s ease, border-color 0.15s ease;
+  }
+  .team-picker-clear-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .team-picker-apply-btn {
+    flex: 1;
+    border-radius: 10px;
+    padding: 11px 16px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
   /* Responsive Header & Multi-Month Desktop Grid (Matches Portal_Captain_CSS.html) */
   .portal-header-mobile { display: block !important; }
   .portal-header-desktop { display: none !important; }
@@ -2658,6 +2752,7 @@ function resolveCourtflowHost(input) {
   @media (min-width: 601px) {
     .portal-header-mobile { display: none !important; }
     .portal-header-desktop { display: block !important; }
+    .mobile-filter-ics-btn { display: none !important; }
   }
 
   @media (min-width: 768px) {
@@ -2719,7 +2814,7 @@ function resolveCourtflowHost(input) {
 </style>
 
   <meta name="robots" content="noindex, nofollow">
-  <meta name="app-version" content="dev-v157">
+  <meta name="app-version" content="dev-v158">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://drive.google.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://upload.wikimedia.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://raw.githubusercontent.com;">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://fixtureflow.github.io/leagues/dev/schedule/">
@@ -2863,9 +2958,12 @@ function resolveCourtflowHost(input) {
         <button type="button" id="comp-CUP" class="btn-toggle" onclick="setCompFilter('CUP')">Cup</button>
       </div>
     </div>
-    <div id="active-filter-bar" class="hidden" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 4px 0 4px; font-size: 0.75rem; color: var(--text-muted);">
-      <span id="active-filter-text"></span>
-      <button type="button" onclick="resetScheduleFilters()" style="background: none; border: none; color: var(--primary); font-weight: 700; text-decoration: underline; cursor: pointer; font-size: 0.75rem;">Reset</button>
+    <div id="active-filter-bar" class="hidden" style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 4px 0 4px; font-size: 0.75rem; color: var(--text-muted);">
+      <span id="active-filter-text" style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+      <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+        <button type="button" class="mobile-filter-ics-btn" onclick="handleBulkExport()">Export .ics</button>
+        <button type="button" onclick="resetScheduleFilters()" style="background: none; border: none; color: var(--primary); font-weight: 700; text-decoration: underline; cursor: pointer; font-size: 0.75rem; padding: 0;">Reset</button>
+      </div>
     </div>
   </div>
 
@@ -2942,110 +3040,37 @@ function resolveCourtflowHost(input) {
   </div>
 </nav>
 
-<!-- Generic Bottom Sheet Picker Component -->
-<div id="ff-picker-overlay" class="picker-overlay hidden">
-    <div class="picker-modal">
-        <!-- Header & Search -->
-        <div class="picker-header-block">
-            <div class="picker-title-row">
-                <h3 id="ff-picker-title" class="picker-title-text">Select Item</h3>
-                <button onclick="ff_pickerClose()" class="picker-close-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" style="height: 24px; width: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            <div class="search-wrapper">
-                <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                </svg>
-                <input type="text" id="ff-picker-search-input" oninput="ff_pickerSearch()" placeholder="Type to search..." class="search-input">
-            </div>
+<!-- MULTI-SELECT TEAM PICKER MODAL -->
+<div id="schedule-team-picker-overlay" class="picker-overlay schedule-picker-overlay hidden" onclick="if (event.target === this) closeTeamPicker()">
+  <div class="picker-modal" role="dialog" aria-modal="true" aria-labelledby="schedule-picker-title">
+    <div class="picker-header-block">
+      <div class="picker-title-row">
+        <div>
+          <h3 id="schedule-picker-title" class="picker-title-text">Select Teams</h3>
+          <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">Choose one or more teams to view together</div>
         </div>
-        <!-- Scrollable List -->
-        <div id="ff-picker-list-container" class="picker-list">
-            <!-- Populated via JS -->
-        </div>
+        <button type="button" onclick="closeTeamPicker()" class="picker-close-btn" aria-label="Close team picker">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="schedule-team-search-input" oninput="renderTeamPickerList()" placeholder="Search teams (e.g. M2, L1, Mixed)..." class="search-input" autocomplete="off">
+      </div>
     </div>
+    <div id="schedule-team-list-container" class="picker-list"></div>
+    <div class="team-picker-footer">
+      <button type="button" id="team-picker-clear-btn" class="team-picker-clear-btn" onclick="clearDraftTeams()">All Teams</button>
+      <button type="button" id="team-picker-apply-btn" class="btn btn-primary team-picker-apply-btn" onclick="applyTeamPickerSelection()">Show All Teams</button>
+    </div>
+  </div>
 </div>
-
-<script>
-    /**
-     * GENERIC PICKER API
-     */
-    let ff_picker_data = [];
-    let ff_picker_onSelect = null;
-
-    /**
-     * Opens the picker modal with customized data.
-     * @param {string} title - The title of the modal (e.g. "Find your name")
-     * @param {string} placeholder - Search input placeholder
-     * @param {Array<{label: string, value: string, [key:string]: any}>} items - Array of items to list
-     * @param {function} onSelect - Callback when an item is selected. Receives the full item object.
-     */
-    function ff_openPicker(title, placeholder, items, onSelect) {
-        document.getElementById('ff-picker-title').textContent = title;
-        document.getElementById('ff-picker-search-input').placeholder = placeholder;
-        document.getElementById('ff-picker-search-input').value = '';
-        
-        ff_picker_data = items || [];
-        ff_picker_onSelect = onSelect;
-        
-        ff_pickerRenderList(ff_picker_data);
-        
-        const overlay = document.getElementById('ff-picker-overlay');
-        overlay.classList.remove('hidden');
-        overlay.style.opacity = '0';
-        requestAnimationFrame(() => {
-            overlay.style.opacity = '1';
-        });
-    }
-
-    function ff_pickerClose() {
-        const overlay = document.getElementById('ff-picker-overlay');
-        overlay.style.opacity = '0';
-        setTimeout(() => {
-            overlay.classList.add('hidden');
-        }, 300);
-    }
-
-    function ff_pickerSearch() {
-        const query = document.getElementById('ff-picker-search-input').value.toLowerCase();
-        const filtered = ff_picker_data.filter(item => 
-            String(item.label).toLowerCase().includes(query)
-        );
-        ff_pickerRenderList(filtered);
-    }
-
-    function ff_pickerRenderList(items) {
-        const listContainer = document.getElementById('ff-picker-list-container');
-        listContainer.innerHTML = '';
-        
-        if (items.length === 0) {
-            listContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted);">No matches found.</div>';
-            return;
-        }
-
-        items.forEach(item => {
-            const btn = document.createElement('button');
-            btn.className = 'picker-list-btn';
-            btn.innerHTML = `<span>${item.label}</span>`;
-            
-            // Allow passing custom subtitle or badge HTML if needed
-            if (item.badgeHtml) {
-                btn.innerHTML += `<span style="float:right;">${item.badgeHtml}</span>`;
-            }
-
-            btn.onclick = () => {
-                if (typeof ff_picker_onSelect === 'function') {
-                    ff_picker_onSelect(item);
-                }
-            };
-            listContainer.appendChild(btn);
-        });
-    }
-</script>
-
 
 
   </div>
@@ -3053,7 +3078,10 @@ function resolveCourtflowHost(input) {
   <script>
   // --- SCHEDULE PORTAL STATE ---
   let appData = null;
-  let selectedTeam = 'ALL';
+  /** @type {string[]} Empty array represents 'All Teams'. */
+  let selectedTeams = [];
+  /** @type {string[]} Working selection while the multi-team picker modal is open. */
+  let draftSelectedTeams = [];
   let venueFilter = 'ALL'; // 'ALL' | 'HOME' | 'AWAY'
   let compFilter = 'ALL';  // 'ALL' | 'LEAGUE' | 'CUP'
   let activeTab = 'matches'; // 'matches' | 'calendar'
@@ -3061,6 +3089,12 @@ function resolveCourtflowHost(input) {
   let toastTimer = null;
 
   window.activePortalRole = 'Schedule';
+
+  function sortTeamNamesNaturally_(list) {
+    return (Array.isArray(list) ? list.slice() : []).sort((a, b) =>
+      String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+    );
+  }
 
   // --- DEVELOPER 5-TAP RESET ON <HEADER> ---
   let devTapCount = 0;
@@ -3073,6 +3107,7 @@ function resolveCourtflowHost(input) {
       if (confirm(`Developer Mode${ver}: Clear cached schedule preferences and reload?`)) {
         if (typeof resetPortalClientRuntime_ === 'function') resetPortalClientRuntime_();
         if (typeof removePortalStorage === 'function') {
+          removePortalStorage('schedule_selected_teams');
           removePortalStorage('schedule_selected_team');
           removePortalStorage('schedule_venue_filter');
           removePortalStorage('schedule_comp_filter');
@@ -3090,12 +3125,30 @@ function resolveCourtflowHost(input) {
   // --- LOCAL MEMORY PERSISTENCE (SCOPED BY TENANT) ---
   function loadSchedulePrefs() {
     if (typeof getPortalStorage !== 'function') return;
-    const savedTeam = getPortalStorage('schedule_selected_team');
+    const savedTeamsJson = getPortalStorage('schedule_selected_teams');
+    const legacySavedTeam = getPortalStorage('schedule_selected_team');
     const savedVenue = getPortalStorage('schedule_venue_filter');
     const savedComp = getPortalStorage('schedule_comp_filter');
     const savedTab = getPortalStorage('schedule_active_tab');
 
-    if (savedTeam) selectedTeam = savedTeam;
+    if (savedTeamsJson) {
+      try {
+        const parsed = JSON.parse(savedTeamsJson);
+        if (Array.isArray(parsed)) {
+          selectedTeams = sortTeamNamesNaturally_(
+            parsed
+              .map(t => String(t || '').trim())
+              .filter((t, idx, arr) => t && t !== 'ALL' && arr.indexOf(t) === idx)
+          );
+        }
+      } catch (e) {
+        selectedTeams = [];
+      }
+    } else if (legacySavedTeam && legacySavedTeam !== 'ALL') {
+      // Seamless migration from v3.5.0 single-team storage key
+      selectedTeams = [String(legacySavedTeam).trim()];
+    }
+
     if (savedVenue === 'ALL' || savedVenue === 'HOME' || savedVenue === 'AWAY') venueFilter = savedVenue;
     if (savedComp === 'ALL' || savedComp === 'LEAGUE' || savedComp === 'CUP') compFilter = savedComp;
     if (savedTab === 'matches' || savedTab === 'calendar') activeTab = savedTab;
@@ -3103,32 +3156,149 @@ function resolveCourtflowHost(input) {
 
   function saveSchedulePrefs() {
     if (typeof setPortalStorage !== 'function') return;
-    setPortalStorage('schedule_selected_team', selectedTeam);
+    setPortalStorage('schedule_selected_teams', JSON.stringify(selectedTeams));
     setPortalStorage('schedule_venue_filter', venueFilter);
     setPortalStorage('schedule_comp_filter', compFilter);
     setPortalStorage('schedule_active_tab', activeTab);
   }
 
-  // --- TEAM PICKER (SHARED PARTIAL_PICKERMODAL WITH NATURAL NUMERIC SORT) ---
-  function openTeamPicker() {
-    const rawTeams = (appData && Array.isArray(appData.teams)) ? appData.teams : [];
-    const sortedTeams = rawTeams.slice().sort((a, b) =>
-      String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
-    );
-    const pickerItems = [{ label: 'All Teams', value: 'ALL' }];
-    sortedTeams.forEach(t => pickerItems.push({ label: t, value: t }));
+  // --- MULTI-SELECT TEAM PICKER MODAL ---
+  function isTeamPickerOpen_() {
+    const overlay = document.getElementById('schedule-team-picker-overlay');
+    return Boolean(overlay && !overlay.classList.contains('hidden'));
+  }
 
-    ff_openPicker(
-      'Select a team',
-      'Search teams (e.g. Mens 2, Ladies 1, Mixed)...',
-      pickerItems,
-      (selectedItem) => {
-        selectedTeam = selectedItem.value;
-        saveSchedulePrefs();
-        ff_pickerClose();
-        syncScheduleUI();
+  function buildCheckIconSvg_() {
+    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+  }
+
+  function updateTeamPickerFooter_() {
+    const clearBtn = document.getElementById('team-picker-clear-btn');
+    const applyBtn = document.getElementById('team-picker-apply-btn');
+    const count = draftSelectedTeams.length;
+    if (clearBtn) {
+      clearBtn.disabled = count === 0;
+    }
+    if (applyBtn) {
+      if (count === 0) {
+        applyBtn.textContent = 'Show All Teams';
+      } else if (count === 1) {
+        applyBtn.textContent = `Show ${draftSelectedTeams[0]}`;
+      } else {
+        applyBtn.textContent = `Show ${count} Teams`;
       }
-    );
+    }
+  }
+
+  function renderTeamPickerList() {
+    const listContainer = document.getElementById('schedule-team-list-container');
+    if (!listContainer) return;
+    const searchInput = document.getElementById('schedule-team-search-input');
+    const query = searchInput ? String(searchInput.value || '').trim().toLowerCase() : '';
+
+    const rawTeams = (appData && Array.isArray(appData.teams)) ? appData.teams : [];
+    const sortedTeams = sortTeamNamesNaturally_(rawTeams);
+    const filteredTeams = query
+      ? sortedTeams.filter(t => String(t).toLowerCase().includes(query))
+      : sortedTeams;
+
+    listContainer.innerHTML = '';
+
+    // Show "All Teams" option at top when not filtering by search query
+    if (!query) {
+      const isAllSelected = draftSelectedTeams.length === 0;
+      const allBtn = document.createElement('button');
+      allBtn.type = 'button';
+      allBtn.className = 'team-picker-row' + (isAllSelected ? ' is-selected' : '');
+      allBtn.setAttribute('aria-pressed', isAllSelected ? 'true' : 'false');
+      allBtn.innerHTML = `
+        <span>All Teams</span>
+        <span class="team-picker-check">${buildCheckIconSvg_()}</span>
+      `;
+      allBtn.onclick = () => {
+        draftSelectedTeams = [];
+        renderTeamPickerList();
+        updateTeamPickerFooter_();
+      };
+      listContainer.appendChild(allBtn);
+    }
+
+    if (filteredTeams.length === 0) {
+      const emptyEl = document.createElement('div');
+      emptyEl.style.cssText = 'padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.9rem;';
+      emptyEl.textContent = 'No teams match your search.';
+      listContainer.appendChild(emptyEl);
+      return;
+    }
+
+    filteredTeams.forEach(teamName => {
+      const isChecked = draftSelectedTeams.indexOf(teamName) !== -1;
+      const rowBtn = document.createElement('button');
+      rowBtn.type = 'button';
+      rowBtn.className = 'team-picker-row' + (isChecked ? ' is-selected' : '');
+      rowBtn.setAttribute('aria-pressed', isChecked ? 'true' : 'false');
+      rowBtn.innerHTML = `
+        <span>${escapeHtml(teamName)}</span>
+        <span class="team-picker-check">${buildCheckIconSvg_()}</span>
+      `;
+      rowBtn.onclick = () => {
+        const existingIdx = draftSelectedTeams.indexOf(teamName);
+        if (existingIdx !== -1) {
+          draftSelectedTeams.splice(existingIdx, 1);
+        } else {
+          draftSelectedTeams.push(teamName);
+          draftSelectedTeams = sortTeamNamesNaturally_(draftSelectedTeams);
+        }
+        renderTeamPickerList();
+        updateTeamPickerFooter_();
+      };
+      listContainer.appendChild(rowBtn);
+    });
+  }
+
+  function openTeamPicker() {
+    draftSelectedTeams = selectedTeams.slice();
+    const searchInput = document.getElementById('schedule-team-search-input');
+    if (searchInput) searchInput.value = '';
+
+    renderTeamPickerList();
+    updateTeamPickerFooter_();
+
+    const overlay = document.getElementById('schedule-team-picker-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('hidden');
+    overlay.style.opacity = '0';
+    requestAnimationFrame(() => {
+      overlay.style.opacity = '1';
+    });
+  }
+
+  function closeTeamPicker() {
+    const overlay = document.getElementById('schedule-team-picker-overlay');
+    if (!overlay) return;
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      overlay.classList.add('hidden');
+    }, 220);
+  }
+
+  function clearDraftTeams() {
+    draftSelectedTeams = [];
+    renderTeamPickerList();
+    updateTeamPickerFooter_();
+  }
+
+  function applyTeamPickerSelection() {
+    const allClubTeams = (appData && Array.isArray(appData.teams)) ? appData.teams : [];
+    // If every team in the club was individually checked, normalize cleanly to 'All Teams' ([])
+    if (allClubTeams.length > 0 && draftSelectedTeams.length >= allClubTeams.length) {
+      selectedTeams = [];
+    } else {
+      selectedTeams = sortTeamNamesNaturally_(draftSelectedTeams);
+    }
+    saveSchedulePrefs();
+    closeTeamPicker();
+    syncScheduleUI();
   }
 
   function setVenueFilter(val) {
@@ -3144,7 +3314,7 @@ function resolveCourtflowHost(input) {
   }
 
   function resetScheduleFilters() {
-    selectedTeam = 'ALL';
+    selectedTeams = [];
     venueFilter = 'ALL';
     compFilter = 'ALL';
     saveSchedulePrefs();
@@ -3153,7 +3323,7 @@ function resolveCourtflowHost(input) {
 
   // --- FILTERING HELPERS ---
   /**
-   * Returns confirmed fixtures matching active Team / Venue / Competition filters.
+   * Returns confirmed fixtures matching active Team(s) / Venue / Competition filters.
    * @param {boolean} [upcomingOnly=false] True for Matches tab (date >= serverToday), false for Calendar tab (all current/upcoming season months).
    */
   function getFilteredFixtures(upcomingOnly = false) {
@@ -3162,7 +3332,7 @@ function resolveCourtflowHost(input) {
 
     return all.filter(m => {
       if (upcomingOnly && todayIso && m.date < todayIso) return false;
-      if (selectedTeam !== 'ALL' && m.ourTeam !== selectedTeam) return false;
+      if (selectedTeams.length > 0 && selectedTeams.indexOf(m.ourTeam) === -1) return false;
       const isHome = isHostClubHome(m);
       if (venueFilter === 'HOME' && !isHome) return false;
       if (venueFilter === 'AWAY' && isHome) return false;
@@ -3446,11 +3616,36 @@ function resolveCourtflowHost(input) {
   }
 
   // --- UI SYNCHRONIZATION ---
+  function formatDesktopTeamsLabel_() {
+    if (selectedTeams.length === 0) return 'TEAM: ALL TEAMS';
+    if (selectedTeams.length === 1) return `TEAM: ${selectedTeams[0].toUpperCase()}`;
+    const joined = selectedTeams.map(t => t.toUpperCase()).join(', ');
+    if (selectedTeams.length <= 4 && joined.length <= 26) {
+      return `TEAMS: ${joined}`;
+    }
+    const preview = selectedTeams.slice(0, 3).map(t => t.toUpperCase()).join(', ');
+    return `TEAMS: ${preview} (+${selectedTeams.length - 3})`;
+  }
+
+  function formatMobileTeamsLabel_() {
+    if (selectedTeams.length === 0) return 'All';
+    if (selectedTeams.length === 1) return selectedTeams[0];
+    const joined = selectedTeams.join(', ');
+    if (selectedTeams.length === 2 && joined.length <= 9) return joined;
+    return `${selectedTeams.length} Teams`;
+  }
+
+  function formatFilterBarTeamsSummary_() {
+    if (selectedTeams.length === 0) return '';
+    if (selectedTeams.length <= 3) return selectedTeams.join(', ');
+    return `${selectedTeams.slice(0, 2).join(', ')} +${selectedTeams.length - 2}`;
+  }
+
   function syncScheduleUI() {
     const dText = document.getElementById('desktop-team-select-text');
     const mText = document.getElementById('mobile-team-select-text');
-    if (dText) dText.textContent = selectedTeam === 'ALL' ? 'TEAM: ALL TEAMS' : `TEAM: ${selectedTeam.toUpperCase()}`;
-    if (mText) mText.textContent = selectedTeam === 'ALL' ? 'All' : selectedTeam;
+    if (dText) dText.textContent = formatDesktopTeamsLabel_();
+    if (mText) mText.textContent = formatMobileTeamsLabel_();
 
     ['ALL', 'HOME', 'AWAY'].forEach(v => {
       const btn = document.getElementById('venue-' + v);
@@ -3465,13 +3660,13 @@ function resolveCourtflowHost(input) {
     const exportTxt = document.getElementById('desktop-export-ics-text');
     if (exportTxt) exportTxt.textContent = `Export .ics (${upcomingCount})`;
 
-    const isFiltered = selectedTeam !== 'ALL' || venueFilter !== 'ALL' || compFilter !== 'ALL';
+    const isFiltered = selectedTeams.length > 0 || venueFilter !== 'ALL' || compFilter !== 'ALL';
     const filterBar = document.getElementById('active-filter-bar');
     const filterText = document.getElementById('active-filter-text');
     if (filterBar && filterText) {
       if (isFiltered) {
         const parts = [];
-        if (selectedTeam !== 'ALL') parts.push(selectedTeam);
+        if (selectedTeams.length > 0) parts.push(formatFilterBarTeamsSummary_());
         if (venueFilter !== 'ALL') parts.push(venueFilter === 'HOME' ? 'Home' : 'Away');
         if (compFilter !== 'ALL') parts.push(compFilter === 'LEAGUE' ? 'League' : 'Cup');
         filterText.textContent = `Showing ${upcomingCount} upcoming ${upcomingCount === 1 ? 'match' : 'matches'} (${parts.join(' • ')})`;
@@ -3541,9 +3736,26 @@ function resolveCourtflowHost(input) {
       .replace(/\r?\n/g, '\\n');
   }
 
+  function buildFallbackIcsUid_(m, clubName) {
+    const slug = (v) =>
+      String(v || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'na';
+    const seasonRaw = (appData && (appData.season || appData.seasonShort)) || 'season';
+    const roleSlug = isHostClubHome(m) ? 'home' : 'away';
+    return `ff-${slug(clubName)}-${slug(seasonRaw)}-${slug(m.ourTeam)}-${roleSlug}-${slug(m.leagueCup || 'league')}-${slug(m.opponent)}-l1@fixtureflow`;
+  }
+
   function buildIcsContent_(matches) {
     const clubName = getHostClubName();
     const nowStamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    // RFC 5545 §3.8.7.4: Monotonically increasing non-negative 32-bit SEQUENCE integer
+    // ensures Apple Calendar, Outlook, and Google Calendar Import recognize re-exported
+    // .ics files after a reschedule (Date, Time, or Venue change) and move the existing
+    // event in place rather than ignoring the update or creating a duplicate.
+    const sequenceNum = Math.max(0, Math.floor(Date.now() / 1000) - 1700000000);
     const lines = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
@@ -3552,19 +3764,22 @@ function resolveCourtflowHost(input) {
       'METHOD:PUBLISH'
     ];
 
-    matches.forEach((m, idx) => {
+    matches.forEach((m) => {
       const isHome = isHostClubHome(m);
       const roleLabel = isHome ? 'Home' : 'Away';
       const compLabel = m.leagueCup || 'League';
       const summary = `${clubName} ${m.ourTeam} vs ${m.opponent} (${roleLabel} - ${compLabel})`;
       const description = `${compLabel} Match (${roleLabel})\\nTeam: ${clubName} ${m.ourTeam}\\nOpponent: ${m.opponent}\\nVenue: ${m.venue || ''}`;
       const { dtStart, dtEnd } = formatIcsDateTime_(m.date, m.time, 120);
-      const uid = `ff-${m.date}-${String(m.ourTeam).replace(/\s+/g, '')}-${idx}@fixtureflow`;
+      const uid = (m && m.icsUid) ? String(m.icsUid) : buildFallbackIcsUid_(m, clubName);
 
       lines.push(
         'BEGIN:VEVENT',
         `UID:${uid}`,
+        `SEQUENCE:${sequenceNum}`,
         `DTSTAMP:${nowStamp}`,
+        `LAST-MODIFIED:${nowStamp}`,
+        'STATUS:CONFIRMED',
         `DTSTART:${dtStart}`,
         `DTEND:${dtEnd}`,
         `SUMMARY:${escapeIcsText_(summary)}`,
@@ -3607,8 +3822,13 @@ function resolveCourtflowHost(input) {
       return;
     }
     const ics = buildIcsContent_(filtered);
-    const safeTeam = selectedTeam === 'ALL' ? 'all-teams' : String(selectedTeam).toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    triggerIcsDownload_(ics, `match-schedule-${safeTeam}.ics`);
+    let safeSlug = 'all-teams';
+    if (selectedTeams.length > 0 && selectedTeams.length <= 3) {
+      safeSlug = selectedTeams.map(t => String(t).toLowerCase().replace(/[^a-z0-9]+/g, '-')).join('-');
+    } else if (selectedTeams.length > 3) {
+      safeSlug = `${selectedTeams.length}-teams`;
+    }
+    triggerIcsDownload_(ics, `match-schedule-${safeSlug}.ics`);
     showScheduleToast(`Exported ${filtered.length} confirmed ${filtered.length === 1 ? 'match' : 'matches'} to .ics calendar file`);
   }
 
@@ -3631,7 +3851,7 @@ function resolveCourtflowHost(input) {
     if (!ptrEl || typeof window === 'undefined') return;
 
     window.addEventListener('touchstart', (e) => {
-      if (window.scrollY <= 0 && e.touches && e.touches.length === 1) {
+      if (!isTeamPickerOpen_() && window.scrollY <= 0 && e.touches && e.touches.length === 1) {
         ptrStartY = e.touches[0].clientY;
         ptrPulling = true;
       } else {
@@ -3677,11 +3897,15 @@ function resolveCourtflowHost(input) {
       updateClubBrandingState(appData, 'Schedule');
     }
 
-    // Validate persisted team against live team list
-    if (selectedTeam !== 'ALL' && appData && Array.isArray(appData.teams)) {
-      if (appData.teams.indexOf(selectedTeam) === -1) {
-        selectedTeam = 'ALL';
+    // Validate persisted team selections against live team list
+    if (selectedTeams.length > 0 && appData && Array.isArray(appData.teams)) {
+      const pruned = selectedTeams.filter(t => appData.teams.indexOf(t) !== -1);
+      if (pruned.length >= appData.teams.length && appData.teams.length > 0) {
+        selectedTeams = [];
+      } else {
+        selectedTeams = sortTeamNamesNaturally_(pruned);
       }
+      saveSchedulePrefs();
     }
 
     const statusScreen = document.getElementById('status-screen');
@@ -3755,6 +3979,12 @@ function resolveCourtflowHost(input) {
   }
 
   if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    document.addEventListener('keydown', (e) => {
+      if (e && e.key === 'Escape' && isTeamPickerOpen_()) {
+        closeTeamPicker();
+      }
+    });
+
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && appData) {
         const elapsed = Date.now() - (window._lastScheduleFetchAt || 0);
